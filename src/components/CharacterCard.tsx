@@ -1,0 +1,496 @@
+"use client";
+
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Role, PlayerStatus } from '@/lib/types';
+import { 
+  CardCornerFlourish, 
+  PhoenixCrest, 
+  DarkMarkCrest, 
+  WaxSeal, 
+  CardBackArt, 
+  BadgeIcon,
+  DeathlyHallowsSymbol,
+  ChocolateFrogLogo
+} from './ArtAssets';
+import { 
+  RotateCw, 
+  Sparkles, 
+  Eye, 
+  Shield, 
+  Skull, 
+  Activity, 
+  Flame, 
+  Wand2, 
+  CheckCircle2, 
+  AlertCircle,
+  Maximize2,
+  BookOpen
+} from 'lucide-react';
+
+interface CharacterCardProps {
+  role: Role | null;
+  playerStatus?: PlayerStatus;
+  playerName?: string;
+  isOwner?: boolean;
+  size?: 'tarot' | 'compact' | 'mini';
+  allowFlip?: boolean;
+  className?: string;
+  onInspect?: () => void;
+  showStatusBadge?: boolean;
+}
+
+export function CharacterCard({
+  role,
+  playerStatus = 'ALIVE',
+  playerName,
+  isOwner = false,
+  size = 'tarot',
+  allowFlip = true,
+  className = "",
+  onInspect,
+  showStatusBadge = true,
+}: CharacterCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0, active: false });
+  const [showAbilityPreview, setShowAbilityPreview] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  if (!role) {
+    return (
+      <div className={`relative rounded-2xl border-2 border-dashed border-amber-500/30 bg-gray-950/60 p-6 flex flex-col items-center justify-center text-center text-gray-500 ${className}`}>
+        <ChocolateFrogLogo className="w-12 h-12 text-amber-500/30 mb-3 animate-pulse" />
+        <span className="font-serif text-sm tracking-widest uppercase text-amber-400/60">Chưa Mở Hộp Ếch Nhái Socola</span>
+        <p className="text-xs text-gray-500 mt-1">Đang chờ Quản Trò phân phát thẻ bài...</p>
+      </div>
+    );
+  }
+
+  const isDeathEaters = role.faction === 'DEATH_EATERS';
+  const isDead = playerStatus === 'DEAD';
+  const isInjured = playerStatus === 'INJURED';
+
+  // 3D Parallax Tilt Handler
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (size === 'mini' || !cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setMousePos({ x, y, active: true });
+  };
+
+  const handleMouseLeave = () => {
+    setMousePos({ x: 0, y: 0, active: false });
+  };
+
+  // Color theming
+  const factionBorder = isDeathEaters
+    ? 'border-emerald-500/90 shadow-[0_0_35px_rgba(16,185,129,0.35)]'
+    : 'border-amber-400 shadow-[0_0_35px_rgba(245,158,11,0.35)]';
+
+  const rotateX = mousePos.active ? -mousePos.y * 12 : 0;
+  const rotateY = mousePos.active ? mousePos.x * 12 : 0;
+  const specularX = mousePos.active ? (mousePos.x + 0.5) * 100 : 50;
+  const specularY = mousePos.active ? (mousePos.y + 0.5) * 100 : 50;
+
+  // ================= 1. MINI VERSION (Player radar grid / lists) =================
+  if (size === 'mini') {
+    return (
+      <div 
+        className={`relative overflow-hidden rounded-xl border-2 p-2.5 transition-all select-none ${
+          isDead 
+            ? 'bg-red-950/20 border-red-900/40 opacity-70 grayscale' 
+            : isDeathEaters 
+              ? 'bg-emerald-950/40 border-emerald-500/50 hover:border-emerald-400' 
+              : 'bg-red-950/30 border-amber-500/50 hover:border-amber-400'
+        } ${className}`}
+      >
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Chocolate Frog Thumbnail */}
+            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-amber-400/60 shrink-0 shadow-md">
+              {role.image ? (
+                <img 
+                  src={role.image} 
+                  alt={role.name}
+                  className="w-full h-full object-cover object-top"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+                  <BadgeIcon badge={role.badge} className="w-5 h-5 text-amber-400" />
+                </div>
+              )}
+            </div>
+
+            <div className="truncate">
+              <span className={`block font-serif font-bold text-sm truncate ${isDead ? 'line-through text-gray-500' : 'text-gray-100'}`}>
+                {playerName || role.name}
+              </span>
+              <span className={`text-[10px] block font-mono uppercase tracking-wider ${isDeathEaters ? 'text-emerald-400' : 'text-amber-400'}`}>
+                {role.title?.split('·')[0] || role.name}
+              </span>
+            </div>
+          </div>
+
+          {showStatusBadge && (
+            <div>
+              {isDead ? (
+                <span className="flex items-center gap-1 text-[10px] font-bold text-red-400 bg-red-950/90 px-2 py-0.5 rounded border border-red-800">
+                  <Skull size={10} /> Tử trận
+                </span>
+              ) : isInjured ? (
+                <span className="flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-950/90 px-2 py-0.5 rounded border border-amber-800">
+                  <AlertCircle size={10} /> Trọng thương
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-950/90 px-2 py-0.5 rounded border border-emerald-800">
+                  <Activity size={10} /> Sống
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ================= 2. FULL CHOCOLATE FROG CARD (Tarot & Compact) =================
+  return (
+    <div 
+      className={`relative select-none ${className}`}
+      style={{ perspective: '1200px' }}
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <motion.div
+        animate={{
+          rotateY: isFlipped ? 180 : rotateY,
+          rotateX: isFlipped ? 0 : rotateX,
+        }}
+        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+        style={{ transformStyle: 'preserve-3d' }}
+        className={`relative w-full mx-auto rounded-3xl cursor-pointer aspect-[3/4] ${
+          size === 'compact' ? 'max-w-[280px] sm:max-w-[300px]' : 'max-w-[280px] sm:max-w-sm'
+        }`}
+      >
+        {/* ================= CARD FRONT: CHOCOLATE FROG MOVING PORTRAIT ================= */}
+        <div
+          style={{ 
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+          }}
+          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} bg-gray-950 p-2 sm:p-2.5 flex flex-col justify-between overflow-hidden shadow-2xl ${
+            isFlipped ? 'pointer-events-none z-0' : 'pointer-events-auto z-20'
+          }`}
+          onClick={() => {
+            if (allowFlip && !showAbilityPreview) setIsFlipped(true);
+          }}
+        >
+          {/* Main Chocolate Frog Portrait Image */}
+          <div className="relative w-full h-full rounded-2xl overflow-hidden bg-black flex flex-col justify-between">
+            {role.image ? (
+              <img
+                src={role.image}
+                alt={role.name}
+                className={`absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 hover:scale-105 ${
+                  isDead ? 'grayscale contrast-125' : ''
+                }`}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-b from-[#181124] to-[#08050e] flex items-center justify-center">
+                <BadgeIcon badge={role.badge} className="w-24 h-24 text-amber-400" />
+              </div>
+            )}
+
+            {/* Moving Portrait Lenticular Specular Sweep */}
+            <div
+              className="absolute inset-0 pointer-events-none rounded-2xl opacity-40 transition-opacity duration-300"
+              style={{
+                background: `radial-gradient(circle at ${specularX}% ${specularY}%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)`,
+              }}
+            />
+
+            {/* Top Ribbon: Chocolate Frog Brand & Faction */}
+            <div className="relative z-10 p-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-1.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-400/50 shadow-md">
+                <ChocolateFrogLogo className="w-3.5 h-3.5 text-amber-400" />
+                <span className="font-serif text-[10px] font-black tracking-widest text-amber-300 uppercase">
+                  THẺ ẾCH NHÁI SOCOLA
+                </span>
+              </div>
+
+              {/* Faction Badge */}
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif font-bold uppercase backdrop-blur-md border ${
+                isDeathEaters 
+                  ? 'bg-emerald-950/85 text-emerald-300 border-emerald-500/50' 
+                  : 'bg-red-950/85 text-amber-200 border-red-500/50'
+              }`}>
+                {isDeathEaters ? <DarkMarkCrest className="w-3.5 h-3.5" /> : <PhoenixCrest className="w-3.5 h-3.5" />}
+                <span>{isDeathEaters ? 'Tử Thần' : 'Phượng Hoàng'}</span>
+              </div>
+            </div>
+
+            {/* Fallen Status Overlay */}
+            {isDead && (
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-xs flex flex-col items-center justify-center text-red-400 font-serif font-black z-20">
+                <Skull className="w-16 h-16 mb-2 text-red-500 animate-pulse" />
+                <span className="text-xl tracking-widest uppercase text-red-400">ĐÃ TỬ TRẬN</span>
+                <span className="text-xs font-mono text-gray-400 mt-1">Trong chuyến bay Bảy Potter</span>
+              </div>
+            )}
+
+            {/* Bottom Floating Bar: Player Binding + Quick Flip & Inspect */}
+            <div className="relative z-10 p-2.5 bg-gradient-to-t from-black/85 via-black/50 to-transparent pt-8">
+              
+              {/* Bound Player Name */}
+              {playerName && (
+                <div className="text-center mb-2">
+                  <span className="text-[11px] font-serif tracking-wider text-amber-300 bg-black/80 backdrop-blur-sm px-3 py-0.5 rounded-full border border-amber-500/40 shadow-sm">
+                    Phù thủy: <strong>{playerName}</strong> {isOwner && '(Bạn)'}
+                  </span>
+                </div>
+              )}
+
+              {/* Expandable Quick Ability Drawer */}
+              <AnimatePresence>
+                {showAbilityPreview && (
+                  <motion.div 
+                    key="ability-preview-drawer"
+                    initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-3 rounded-xl bg-[#26150c]/95 border border-[#bd8436] text-[#f5eedb] text-xs font-lora leading-relaxed mb-2 shadow-2xl backdrop-blur-md"
+                  >
+                    <div className="flex items-center justify-between font-bold text-[#ffd88f] uppercase text-[10px] mb-1 font-serif">
+                      <div className="flex items-center gap-1">
+                        <Wand2 size={12} /> {role.name} · Quyền Năng:
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => setShowAbilityPreview(false)}
+                        className="text-[#ebdcb0]/60 hover:text-[#ffd88f] text-xs px-1"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <p className="line-clamp-4">{role.ability || role.description}</p>
+                    {role.tacticalTip && (
+                      <p className="text-[10px] text-[#ebdcb0]/80 italic mt-1.5 pt-1.5 border-t border-[#bd8436]/30">
+                        💡 {role.tacticalTip}
+                      </p>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Control Action Buttons HUD */}
+              <div 
+                className="flex items-center justify-between gap-1.5 bg-black/70 backdrop-blur-md p-1.5 rounded-xl border border-amber-500/30 shadow-lg"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAbilityPreview(!showAbilityPreview);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/40 text-[11px] font-serif font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <BookOpen size={12} />
+                  <span>{showAbilityPreview ? 'Đóng' : 'Năng lực'}</span>
+                </button>
+
+                <div className="flex items-center gap-1.5">
+                  {allowFlip && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsFlipped(!isFlipped);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-gray-950 font-serif font-black text-[11px] flex items-center gap-1.5 transition-all shadow-md shadow-amber-900/30 active:scale-95 cursor-pointer"
+                    >
+                      <RotateCw size={12} />
+                      <span>Lật mặt sau</span>
+                    </button>
+                  )}
+
+                  {onInspect && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onInspect();
+                      }}
+                      title="Phóng to thẻ bài"
+                      className="p-1.5 rounded-lg bg-gray-900/90 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-700 transition-colors cursor-pointer"
+                    >
+                      <Maximize2 size={13} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ================= CARD BACK: CHOCOLATE FROG BIOGRAPHY & RULES ================= */}
+        <div
+          style={{ 
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+            background: 'linear-gradient(135deg, #24150c 0%, #1a0e07 50%, #100803 100%)',
+          }}
+          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} p-4 flex flex-col justify-between overflow-hidden shadow-2xl cursor-pointer ${
+            isFlipped ? 'pointer-events-auto z-20' : 'pointer-events-none z-0'
+          }`}
+          onClick={() => setIsFlipped(false)}
+        >
+
+          {/* Corner Filigrees */}
+          <CardCornerFlourish className="absolute top-2 left-2 w-6 h-6 text-[#bd8436] pointer-events-none" />
+          <CardCornerFlourish className="absolute top-2 right-2 w-6 h-6 text-[#bd8436] -scale-x-100 pointer-events-none" />
+          <CardCornerFlourish className="absolute bottom-2 left-2 w-6 h-6 text-[#bd8436] -scale-y-100 pointer-events-none" />
+          <CardCornerFlourish className="absolute bottom-2 right-2 w-6 h-6 text-[#bd8436] -scale-x-100 -scale-y-100 pointer-events-none" />
+
+          {/* Top Header: Chocolate Frog Brand Seal */}
+          <div className="relative z-10 text-center pt-2">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <ChocolateFrogLogo className="w-4 h-4 text-[#ffd88f] animate-bounce" />
+              <span className="font-serif text-xs font-bold tracking-widest uppercase text-[#ffd88f]">
+                THẺ PHÙ THỦY NỔI TIẾNG
+              </span>
+              <ChocolateFrogLogo className="w-4 h-4 text-[#ffd88f] animate-bounce" />
+            </div>
+            <h3 className="font-title font-black text-2xl sm:text-3xl text-[#ffd88f] tracking-wide">
+              {role.name}
+            </h3>
+            <p className="text-[11px] font-lora italic text-[#ebdcb0]">
+              {role.title || 'Nhân vật huyền thoại'}
+            </p>
+          </div>
+
+          {/* Biography & Lore Box */}
+          <div className="relative z-10 my-2 px-2">
+            <p className="text-xs font-lora italic text-[#ebdcb0]/90 text-center leading-relaxed">
+              "{role.description}"
+            </p>
+          </div>
+
+          {/* Aged Parchment Ability Scroll */}
+          <div className="relative z-10 my-1">
+            <div 
+              className="relative rounded-2xl p-3.5 hpvn-parchment shadow-xl overflow-hidden font-serif"
+            >
+              {/* Wax Seal in Corner */}
+              <div className="absolute top-1.5 right-1.5 opacity-90 pointer-events-none scale-75 origin-top-right">
+                <WaxSeal variant={isDeathEaters ? 'emerald' : 'red'} letter={isDeathEaters ? 'M' : 'P'} size="sm" />
+              </div>
+
+              {/* Header */}
+              <div className="flex items-center gap-1.5 mb-1.5 pr-8">
+                <Wand2 size={14} className="text-[#8c0c0c] shrink-0" />
+                <h4 className="font-black text-xs text-[#5a1818] tracking-wide uppercase border-b border-[#8c0c0c]/30 pb-0.5 w-full font-serif">
+                  Phép Thuật & Quyền Năng
+                </h4>
+              </div>
+
+              {/* Ability text */}
+              <p className="text-xs sm:text-[13px] leading-relaxed font-semibold text-[#2c1a0e] font-lora">
+                {role.ability || role.description}
+              </p>
+
+              {/* Tactical Tip */}
+              {role.tacticalTip && (
+                <div className="mt-2 pt-1.5 border-t border-[#8c622e]/30 flex items-start gap-1 text-[11px] text-[#6d4c1b] italic font-lora">
+                  <Sparkles size={12} className="shrink-0 mt-0.5 text-amber-700" />
+                  <span><strong>Chiến thuật:</strong> {role.tacticalTip}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Footer of Back Card: Quote & Re-flip Indicator */}
+          <div className="relative z-10 pt-2 border-t border-[#7a5229]/50 flex items-center justify-between px-2 text-xs">
+            <span className="text-[10px] font-mono text-[#ffd88f]">
+              {role.cardNumber || '№ 07/21'}
+            </span>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsFlipped(false);
+              }}
+              className="text-[11px] font-serif font-bold text-[#ffd88f] hover:text-white flex items-center gap-1.5 bg-[#120803] hover:bg-[#2b170c] px-3 py-1 rounded-full border border-[#7a5229] hover:border-[#bd8436] transition-all shadow-md active:scale-95 cursor-pointer z-30"
+            >
+              <RotateCw size={12} className="text-amber-400" />
+              <span>Nhấn để lật lại ảnh</span>
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/**
+ * Fullscreen Cinematic Card Inspector Modal
+ */
+export function CardInspectorModal({
+  role,
+  isOpen,
+  onClose,
+}: {
+  role: Role | null;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !role) return null;
+
+  return (
+    <AnimatePresence>
+      <div 
+        key="card-inspector-backdrop"
+        onClick={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md cursor-pointer"
+      >
+        <motion.div
+          key="card-inspector-dialog"
+          initial={{ opacity: 0, scale: 0.85, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.85, y: 20 }}
+          onClick={(e) => e.stopPropagation()}
+          className="relative max-w-md w-full cursor-default"
+        >
+          <button
+            onClick={onClose}
+            className="absolute -top-10 right-1 sm:-top-12 sm:right-0 text-white/90 hover:text-white bg-black/85 hover:bg-gray-800 px-3.5 py-1.5 rounded-full text-xs font-mono border border-amber-500/40 shadow-lg transition-all flex items-center gap-1.5 z-40 active:scale-95 cursor-pointer"
+          >
+            ✕ Đóng chi tiết (Esc)
+          </button>
+
+          <CharacterCard
+            role={role}
+            size="tarot"
+            allowFlip={true}
+            showStatusBadge={false}
+          />
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+}

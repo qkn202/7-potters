@@ -1,26 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;600;700;800;900&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap');
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'HarryP';
+  src: url('/fonts/harrypotter.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-hpvn-wood-black: #0e0703;
+  --color-hpvn-wood-deep: #140b05;
+  --color-hpvn-wood-base: #1c0f07;
+  --color-hpvn-wood-surface: #26160c;
+  --color-hpvn-wood-mid: #3a2213;
+  --color-hpvn-wood-border: #7a5229;
+  --color-hpvn-gold-bright: #ffd88f;
+  --color-hpvn-gold: #bd8436;
+  --color-hpvn-gold-cream: #ebdcb0;
+  --color-hpvn-gold-dark: #8c622e;
+  
+  --color-phoenix-red: #8c0c0c;
+  --color-phoenix-red-bright: #dc2626;
+  --color-floo-green: #047857;
+  --color-floo-green-bright: #10b981;
+  --color-patronus-cyan: #22d3ee;
+  
+  --font-harry: 'HarryP', var(--font-playfair), 'Playfair Display', Georgia, serif;
+  --font-title: var(--font-playfair), 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  --font-serif: var(--font-playfair), 'Cinzel', 'Lora', Georgia, serif;
+  --font-lora: 'Lora', Georgia, serif;
+  --font-cormorant: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+  --font-gothic: 'Cinzel Decorative', var(--font-playfair), serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #120904;
+  --foreground: #f5eedb;
 }
 
 body {
-  background: var(--background);
+  background: 
+    radial-gradient(ellipse at 50% 0%, rgba(92, 63, 31, 0.35) 0%, transparent 60%),
+    radial-gradient(circle at 10% 30%, rgba(140, 12, 12, 0.18) 0%, transparent 40%),
+    radial-gradient(circle at 90% 40%, rgba(5, 150, 105, 0.18) 0%, transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(189, 132, 54, 0.12) 0%, transparent 50%),
+    #120904;
+  background-attachment: fixed;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Lora", Tahoma, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+  min-height: 100vh;
+}
+
+/* Typography Helpers */
+.font-title {
+  font-family: var(--font-playfair), 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.font-title-magical {
+  font-family: var(--font-playfair), 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  letter-spacing: 0.025em;
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(189, 132, 54, 0.25);
+}
+
+.font-cormorant {
+  font-family: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-harry {
+  font-family: 'HarryP', var(--font-playfair), 'Playfair Display', Georgia, serif;
+  letter-spacing: 0.05em;
+}
+
+.font-cinzel {
+  font-family: "Cinzel", var(--font-playfair), Georgia, serif;
+}
+
+.font-lora {
+  font-family: "Lora", Georgia, serif;
+}
+
+.font-cinzel-decorative {
+  font-family: "Cinzel Decorative", var(--font-playfair), Georgia, serif;
+}
+
+/* ================= HPVN & FLOO AUTHENTIC THEME CLASSES ================= */
+
+/* The signature HPVN Shoutbox / Header Bar */
+.hpvn-header-banner {
+  background: linear-gradient(180deg, #5c3f1f 0%, #2b170c 100%);
+  border-top: 1px solid #ebdcb0;
+  border-bottom: 2.5px double #bd8436;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+/* The signature HPVN Wood Carved Panel */
+.hpvn-panel {
+  background: linear-gradient(175deg, #24150c 0%, #1a0e07 60%, #120803 100%);
+  border: 1.5px solid #7a5229;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(235, 220, 176, 0.15);
+}
+
+.hpvn-panel-gold {
+  background: linear-gradient(175deg, #28180e 0%, #1c1008 60%, #140a04 100%);
+  border: 2px solid #bd8436;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(189, 132, 54, 0.2), inset 0 1px 0 rgba(235, 220, 176, 0.3);
+}
+
+.hpvn-panel-emerald {
+  background: linear-gradient(175deg, #0f261c 0%, #091711 60%, #050d0a 100%);
+  border: 2px solid #10b981;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(16, 185, 129, 0.25);
+}
+
+.hpvn-panel-crimson {
+  background: linear-gradient(175deg, #2c0e0e 0%, #1c0808 60%, #0f0404 100%);
+  border: 2px solid #dc2626;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(220, 38, 38, 0.25);
+}
+
+/* Aged Parchment */
+.hpvn-parchment {
+  background: #f7efdc;
+  color: #2c1a0e;
+  border: 1.5px solid #8c622e;
+  box-shadow: inset 0 0 30px rgba(140, 98, 46, 0.25), 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Button variants matching HPVN & Floo */
+.hpvn-btn-gold {
+  background: linear-gradient(180deg, #7a5229 0%, #462c14 100%);
+  border-top: 1px solid #ebdcb0;
+  border-bottom: 2px solid #281708;
+  border-left: 1px solid #8c622e;
+  border-right: 1px solid #8c622e;
+  color: #ffd88f;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  transition: all 0.2s ease;
+}
+
+.hpvn-btn-gold:hover {
+  background: linear-gradient(180deg, #8c622e 0%, #5c3919 100%);
+  color: #fff4d1;
+  box-shadow: 0 0 15px rgba(189, 132, 54, 0.4);
+}
+
+.hpvn-btn-floo {
+  background: linear-gradient(180deg, #059669 0%, #044e36 100%);
+  border-top: 1px solid #6ee7b7;
+  border-bottom: 2px solid #022c1e;
+  border-left: 1px solid #047857;
+  border-right: 1px solid #047857;
+  color: #d1fae5;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+  transition: all 0.2s ease;
+}
+
+.hpvn-btn-floo:hover {
+  background: linear-gradient(180deg, #10b981 0%, #057a55 100%);
+  color: #ffffff;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+}
+
+.hpvn-btn-phoenix {
+  background: linear-gradient(180deg, #8c0c0c 0%, #4a0606 100%);
+  border-top: 1px solid #fca5a5;
+  border-bottom: 2px solid #2a0303;
+  border-left: 1px solid #b91c1c;
+  border-right: 1px solid #b91c1c;
+  color: #fee2e2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.35);
+  transition: all 0.2s ease;
+}
+
+.hpvn-btn-phoenix:hover {
+  background: linear-gradient(180deg, #b91c1c 0%, #680808 100%);
+  color: #ffffff;
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.6);
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 24s linear infinite;
+}
+
+@keyframes pulse-glow-floo {
+  0%, 100% { 
+    box-shadow: 0 0 15px 0px rgba(16, 185, 129, 0.3); 
+    border-color: rgba(16, 185, 129, 0.6);
+  }
+  50% { 
+    box-shadow: 0 0 30px 6px rgba(16, 185, 129, 0.7); 
+    border-color: rgba(52, 211, 153, 1);
+  }
+}
+
+.animate-pulse-floo {
+  animation: pulse-glow-floo 2.2s infinite;
+}
+
+@keyframes pulse-glow-phoenix {
+  0%, 100% { 
+    box-shadow: 0 0 15px 0px rgba(220, 38, 38, 0.3); 
+    border-color: rgba(220, 38, 38, 0.6);
+  }
+  50% { 
+    box-shadow: 0 0 30px 6px rgba(220, 38, 38, 0.7); 
+    border-color: rgba(248, 113, 113, 1);
+  }
+}
+
+.animate-pulse-phoenix {
+  animation: pulse-glow-phoenix 2.2s infinite;
+}
+
+/* Custom Boardgame Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(18, 9, 4, 0.8);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #7a5229;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #bd8436;
+}
+
+/* Hide scrollbars for horizontal chip bars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Mobile Safe Area Padding */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
 }

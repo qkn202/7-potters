@@ -125,7 +125,8 @@ async function runMultiplayerTests() {
     hostNet.broadcastRoomState(mockState);
     await sleep(1500);
 
-    if (client1ReceivedState && client1ReceivedState.players.length === 2) {
+    const state1 = client1ReceivedState as GameState | null;
+    if (state1 && state1.players.length === 2) {
       console.log('✅ TEST 3 PASSED: Client 1 đã nhận được ROOM_STATE_SYNC từ Host chính xác!');
     } else {
       throw new Error('TEST 3 FAILED: Client 1 không nhận được ROOM_STATE_SYNC hợp lệ');

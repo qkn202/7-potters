@@ -22,8 +22,7 @@ import {
   X,
   Radio,
   Wifi,
-  WifiOff,
-  Flame
+  WifiOff
 } from 'lucide-react';
 import { 
   PhoenixCrest, 
@@ -33,7 +32,6 @@ import {
   DeathlyHallowsSymbol 
 } from './ArtAssets';
 import { CardDeckModal } from './CardDeckModal';
-import { openFlooWindow } from './FlooChatWidget';
 
 export function Lobby() {
   const { 
@@ -154,21 +152,13 @@ export function Lobby() {
           )}
         </p>
 
-        {/* Rulebook / Deck Quick Button & Floo Chat */}
-        <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-2.5">
+        {/* Rulebook / Deck Quick Button */}
+        <div className="mt-3 sm:mt-4 flex justify-center">
           <button
             onClick={() => setIsDeckOpen(true)}
             className="hpvn-btn-gold px-3.5 sm:px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-2 cursor-pointer"
           >
             <BookOpen size={15} /> Xem Sách Bí Kíp 22 Thẻ Bài & Luật Chơi
-          </button>
-
-          <button
-            type="button"
-            onClick={openFlooWindow}
-            className="hpvn-btn-floo px-3.5 sm:px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-2 cursor-pointer text-emerald-200 border border-emerald-500/70 bg-emerald-950/80 hover:bg-emerald-900 transition-colors"
-          >
-            <Flame size={15} className="text-emerald-400 animate-pulse" /> Tán Gẫu Mạng Floo (Chat)
           </button>
         </div>
       </div>

@@ -85,8 +85,8 @@ export function CharacterCard({
 
   // Color theming
   const factionBorder = isDeathEaters
-    ? 'border-emerald-500/90 shadow-[0_0_35px_rgba(16,185,129,0.35)]'
-    : 'border-amber-400 shadow-[0_0_35px_rgba(245,158,11,0.35)]';
+    ? 'border-emerald-500/90'
+    : 'border-amber-400';
 
   const rotateX = mousePos.active ? -mousePos.y * 12 : 0;
   const rotateY = mousePos.active ? mousePos.x * 12 : 0;
@@ -108,7 +108,7 @@ export function CharacterCard({
         <div className="flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-2.5 min-w-0">
             {/* Chocolate Frog Thumbnail */}
-            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-amber-400/60 shrink-0 shadow-md">
+            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-amber-400/60 shrink-0">
               {role.image ? (
                 <img 
                   src={role.image} 
@@ -180,7 +180,7 @@ export function CharacterCard({
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
           }}
-          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} bg-gray-950 p-2 sm:p-2.5 flex flex-col justify-between overflow-hidden shadow-2xl ${
+          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} bg-gray-950 p-2 sm:p-2.5 flex flex-col justify-between overflow-hidden ${
             isFlipped ? 'pointer-events-none z-0' : 'pointer-events-auto z-20'
           }`}
           onClick={() => {
@@ -213,7 +213,7 @@ export function CharacterCard({
 
             {/* Top Ribbon: Chocolate Frog Brand & Faction */}
             <div className="relative z-10 p-2.5 flex items-center justify-between">
-              <div className="flex items-center gap-1.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-400/50 shadow-md">
+              <div className="flex items-center gap-1.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-400/50">
                 <ChocolateFrogLogo className="w-3.5 h-3.5 text-amber-400" />
                 <span className="font-serif text-[10px] font-black tracking-widest text-amber-300 uppercase">
                   THẺ ẾCH NHÁI SOCOLA
@@ -246,7 +246,7 @@ export function CharacterCard({
               {/* Bound Player Name */}
               {playerName && (
                 <div className="text-center mb-2">
-                  <span className="text-[11px] font-serif tracking-wider text-amber-300 bg-black/80 backdrop-blur-sm px-3 py-0.5 rounded-full border border-amber-500/40 shadow-sm">
+                  <span className="text-[11px] font-serif tracking-wider text-amber-300 bg-black/80 backdrop-blur-sm px-3 py-0.5 rounded-full border border-amber-500/40">
                     Phù thủy: <strong>{playerName}</strong> {isOwner && '(Bạn)'}
                   </span>
                 </div>
@@ -261,7 +261,7 @@ export function CharacterCard({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 12, scale: 0.95 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="p-3 rounded-xl bg-[#26150c]/95 border border-[#bd8436] text-[#f5eedb] text-xs font-lora leading-relaxed mb-2 shadow-2xl backdrop-blur-md"
+                    className="p-3 rounded-xl bg-[#26150c]/95 border border-[#bd8436] text-[#f5eedb] text-xs font-lora leading-relaxed mb-2 backdrop-blur-md"
                   >
                     <div className="flex items-center justify-between font-bold text-[#ffd88f] uppercase text-[10px] mb-1 font-serif">
                       <div className="flex items-center gap-1">
@@ -287,7 +287,7 @@ export function CharacterCard({
 
               {/* Control Action Buttons HUD */}
               <div 
-                className="flex items-center justify-between gap-1.5 bg-black/70 backdrop-blur-md p-1.5 rounded-xl border border-amber-500/30 shadow-lg"
+                className="flex items-center justify-between gap-1.5 bg-black/70 backdrop-blur-md p-1.5 rounded-xl border border-amber-500/30"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
@@ -310,7 +310,7 @@ export function CharacterCard({
                         e.stopPropagation();
                         setIsFlipped(!isFlipped);
                       }}
-                      className="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-gray-950 font-serif font-black text-[11px] flex items-center gap-1.5 transition-all shadow-md shadow-amber-900/30 active:scale-95 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-gray-950 font-serif font-black text-[11px] flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                     >
                       <RotateCw size={12} />
                       <span>Lật mặt sau</span>
@@ -344,7 +344,7 @@ export function CharacterCard({
             transform: 'rotateY(180deg)',
             background: 'linear-gradient(135deg, #24150c 0%, #1a0e07 50%, #100803 100%)',
           }}
-          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} p-4 flex flex-col justify-between overflow-hidden shadow-2xl cursor-pointer ${
+          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} p-4 flex flex-col justify-between overflow-hidden cursor-pointer ${
             isFlipped ? 'pointer-events-auto z-20' : 'pointer-events-none z-0'
           }`}
           onClick={() => setIsFlipped(false)}
@@ -383,7 +383,7 @@ export function CharacterCard({
           {/* Aged Parchment Ability Scroll */}
           <div className="relative z-10 my-1">
             <div 
-              className="relative rounded-2xl p-3.5 hpvn-parchment shadow-xl overflow-hidden font-serif"
+              className="relative rounded-2xl p-3.5 hpvn-parchment overflow-hidden font-serif"
             >
               {/* Wax Seal in Corner */}
               <div className="absolute top-1.5 right-1.5 opacity-90 pointer-events-none scale-75 origin-top-right">
@@ -425,7 +425,7 @@ export function CharacterCard({
                 e.stopPropagation();
                 setIsFlipped(false);
               }}
-              className="text-[11px] font-serif font-bold text-[#ffd88f] hover:text-white flex items-center gap-1.5 bg-[#120803] hover:bg-[#2b170c] px-3 py-1 rounded-full border border-[#7a5229] hover:border-[#bd8436] transition-all shadow-md active:scale-95 cursor-pointer z-30"
+              className="text-[11px] font-serif font-bold text-[#ffd88f] hover:text-white flex items-center gap-1.5 bg-[#120803] hover:bg-[#2b170c] px-3 py-1 rounded-full border border-[#7a5229] hover:border-[#bd8436] transition-all active:scale-95 cursor-pointer z-30"
             >
               <RotateCw size={12} className="text-amber-400" />
               <span>Nhấn để lật lại ảnh</span>
@@ -478,7 +478,7 @@ export function CardInspectorModal({
         >
           <button
             onClick={onClose}
-            className="absolute -top-10 right-1 sm:-top-12 sm:right-0 text-white/90 hover:text-white bg-black/85 hover:bg-gray-800 px-3.5 py-1.5 rounded-full text-xs font-mono border border-amber-500/40 shadow-lg transition-all flex items-center gap-1.5 z-40 active:scale-95 cursor-pointer"
+            className="absolute -top-10 right-1 sm:-top-12 sm:right-0 text-white/90 hover:text-white bg-black/85 hover:bg-gray-800 px-3.5 py-1.5 rounded-full text-xs font-mono border border-amber-500/40 transition-all flex items-center gap-1.5 z-40 active:scale-95 cursor-pointer"
           >
             ✕ Đóng chi tiết (Esc)
           </button>

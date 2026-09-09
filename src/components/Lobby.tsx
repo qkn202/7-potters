@@ -85,16 +85,16 @@ export function Lobby() {
       {/* Lobby Header */}
       <div className="text-center mb-6 sm:mb-8 relative">
         <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2">
-          <PhoenixCrest className="w-7 h-7 sm:w-9 sm:h-9 drop-shadow-[0_0_12px_rgba(220,38,38,0.7)]" />
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-title-magical font-bold tracking-wide text-[#ffd88f] drop-shadow-[0_3px_8px_rgba(0,0,0,0.9)]">
+          <PhoenixCrest className="w-7 h-7 sm:w-9 sm:h-9" />
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-title-magical font-bold tracking-wide text-[#ffd88f]">
             Sảnh Tập Hợp Chiến Dịch
           </h2>
-          <DarkMarkCrest className="w-7 h-7 sm:w-9 sm:h-9 drop-shadow-[0_0_12px_rgba(16,185,129,0.7)]" />
+          <DarkMarkCrest className="w-7 h-7 sm:w-9 sm:h-9" />
         </div>
 
         {/* Room Code & Invite Share Bar */}
         {roomCode && (
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-[#120803] px-3.5 sm:px-5 py-2 rounded-2xl border-2 border-[#bd8436] shadow-[0_0_20px_rgba(189,132,54,0.3)] mb-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-[#120803] px-3.5 sm:px-5 py-2 rounded-2xl border-2 border-[#bd8436] mb-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-1.5 font-serif font-bold text-xs sm:text-sm text-[#ebdcb0]">
               <Radio size={14} className="text-[#ffd88f] animate-pulse" />
               <span>Mã Phòng:</span>
@@ -127,7 +127,7 @@ export function Lobby() {
               <button
                 type="button"
                 onClick={() => setIsQrOpen(true)}
-                className="px-2.5 py-1 bg-[#bd8436] hover:bg-[#ffd88f] text-[#120803] rounded-lg font-serif font-bold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-sm"
+                className="px-2.5 py-1 bg-[#bd8436] hover:bg-[#ffd88f] text-[#120803] rounded-lg font-serif font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
                 title="Quét mã QR để vào phòng trên điện thoại"
               >
                 <QrCode size={13} />
@@ -156,7 +156,7 @@ export function Lobby() {
         <div className="mt-3 sm:mt-4 flex justify-center">
           <button
             onClick={() => setIsDeckOpen(true)}
-            className="hpvn-btn-gold px-3.5 sm:px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-2 shadow-md cursor-pointer"
+            className="hpvn-btn-gold px-3.5 sm:px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-2 cursor-pointer"
           >
             <BookOpen size={15} /> Xem Sách Bí Kíp 22 Thẻ Bài & Luật Chơi
           </button>
@@ -166,7 +166,7 @@ export function Lobby() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         
         {/* Left Column: Player Attendance Scroll */}
-        <div className={`lg:col-span-2 relative rounded-2xl hpvn-panel-gold p-4 sm:p-6 shadow-2xl overflow-hidden ${
+        <div className={`lg:col-span-2 relative rounded-2xl hpvn-panel-gold p-4 sm:p-6 overflow-hidden ${
           isGM ? 'order-2 lg:order-1' : 'order-1'
         }`}>
           <CardCornerFlourish className="absolute top-2 left-2 w-6 h-6 text-[#bd8436] pointer-events-none" />
@@ -187,8 +187,8 @@ export function Lobby() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Death Eaters Secret Notification in Lobby if roles assigned */}
             {currentPlayer?.role?.faction === 'DEATH_EATERS' && (
-              <div className="col-span-1 sm:col-span-2 mb-2 p-3 rounded-xl bg-[#062419] border border-emerald-500/80 text-emerald-200 text-xs font-serif flex items-center gap-2 shadow-lg">
-                <DarkMarkCrest className="w-5 h-5 text-emerald-400 shrink-0 drop-shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
+              <div className="col-span-1 sm:col-span-2 mb-2 p-3 rounded-xl bg-[#062419] border border-emerald-500/80 text-emerald-200 text-xs font-serif flex items-center gap-2">
+                <DarkMarkCrest className="w-5 h-5 text-emerald-400 shrink-0" />
                 <span>
                   <strong>Mật Lệnh Tử Thần Thực Tử:</strong> Dấu Hiệu Hắc Ám đã thức tỉnh! Các đồng minh Tử Thần Thực Tử được hiển thị <strong className="text-emerald-300 uppercase">MÀU XANH LÁ</strong> để nhận diện nhau.
                 </span>
@@ -209,10 +209,10 @@ export function Lobby() {
                   className={`p-3 sm:p-3.5 rounded-xl border transition-all flex items-center justify-between select-none ${
                     isFellowDeathEater
                       ? isMe
-                        ? 'bg-[#072d1f] border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400'
-                        : 'bg-[#062419] border-emerald-500/90 hover:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                        ? 'bg-[#072d1f] border-emerald-400 ring-1 ring-emerald-400'
+                        : 'bg-[#062419] border-emerald-500/90 hover:border-emerald-400'
                       : isMe
-                        ? 'bg-[#3a2213] border-[#ffd88f] shadow-[0_0_15px_rgba(189,132,54,0.3)]'
+                        ? 'bg-[#3a2213] border-[#ffd88f]'
                         : 'bg-[#180e07] border-[#4e2d17] hover:border-[#7a5229]'
                   }`}
                 >
@@ -221,18 +221,18 @@ export function Lobby() {
                       p.isGM 
                         ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ebdcb0]' 
                         : isFellowDeathEater
-                          ? 'bg-emerald-950 text-emerald-300 border-emerald-500 shadow-sm'
+                          ? 'bg-emerald-950 text-emerald-300 border-emerald-500'
                           : isMe 
                             ? 'bg-[#8c0c0c] text-[#ffd88f] border-[#dc2626]/50' 
                             : 'bg-[#120803] text-[#ebdcb0] border-[#5a3a1f]'
                     }`}>
-                      {p.isGM ? <Crown size={15} /> : isFellowDeathEater ? <DarkMarkCrest className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]" /> : <UserCheck size={15} />}
+                      {p.isGM ? <Crown size={15} /> : isFellowDeathEater ? <DarkMarkCrest className="w-4 h-4 text-emerald-400" /> : <UserCheck size={15} />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className={`font-serif font-bold text-sm truncate block ${
                           isFellowDeathEater 
-                            ? 'text-emerald-300 drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]' 
+                            ? 'text-emerald-300' 
                             : isMe 
                               ? 'text-[#ffd88f]' 
                               : 'text-[#f5eedb]'
@@ -291,7 +291,7 @@ export function Lobby() {
                           kickPlayer(p.id);
                         }}
                         title={`Đuổi ${p.name} khỏi phòng`}
-                        className="px-2 py-1 rounded-lg bg-red-950/70 hover:bg-red-900 text-red-300 hover:text-white border border-red-800/80 text-xs font-serif font-bold flex items-center gap-1 transition-all shadow-sm shrink-0 cursor-pointer"
+                        className="px-2 py-1 rounded-lg bg-red-950/70 hover:bg-red-900 text-red-300 hover:text-white border border-red-800/80 text-xs font-serif font-bold flex items-center gap-1 transition-all shrink-0 cursor-pointer"
                       >
                         <UserX size={12} />
                         <span>Đuổi</span>
@@ -350,7 +350,7 @@ export function Lobby() {
         {/* Right Column: GM Controls or Player Waiting Status */}
         <div className={`lg:col-span-1 ${isGM ? 'order-1 lg:order-2' : 'order-2'}`}>
           {isGM ? (
-            <div className="relative rounded-2xl hpvn-panel-gold p-4 sm:p-6 shadow-2xl flex flex-col justify-between min-h-auto lg:min-h-[460px]">
+            <div className="relative rounded-2xl hpvn-panel-gold p-4 sm:p-6 flex flex-col justify-between min-h-auto lg:min-h-[460px]">
               <div>
                 <div className="flex items-center gap-2 border-b border-[#7a5229] pb-3 mb-4">
                   <WaxSeal variant="gold" letter="GM" size="sm" />
@@ -369,7 +369,7 @@ export function Lobby() {
                 <div className="space-y-3">
                   <button
                     onClick={addBot}
-                    className="w-full py-3 px-4 hpvn-btn-gold rounded-xl flex items-center justify-center gap-2 text-xs font-serif font-bold shadow-md cursor-pointer"
+                    className="w-full py-3 px-4 hpvn-btn-gold rounded-xl flex items-center justify-center gap-2 text-xs font-serif font-bold cursor-pointer"
                   >
                     <Bot size={16} className="text-[#ffd88f]" />
                     <span>Triệu Hồi Thần Sáng Bot (+1)</span>
@@ -378,7 +378,7 @@ export function Lobby() {
                   <button
                     onClick={assignRoles}
                     disabled={gameState.players.length < 2}
-                    className="w-full py-3.5 px-4 hpvn-btn-phoenix rounded-xl disabled:opacity-40 flex items-center justify-center gap-2 text-xs font-serif font-bold shadow-md cursor-pointer"
+                    className="w-full py-3.5 px-4 hpvn-btn-phoenix rounded-xl disabled:opacity-40 flex items-center justify-center gap-2 text-xs font-serif font-bold cursor-pointer"
                   >
                     <Wand2 size={16} className="text-[#ffd88f]" />
                     <span>Xáo Bài & Phân Phát Vai Trò</span>
@@ -391,7 +391,7 @@ export function Lobby() {
                 <button
                   onClick={startGame}
                   disabled={!hasAssignedRoles}
-                  className="w-full py-3.5 px-4 hpvn-btn-floo rounded-xl disabled:opacity-40 disabled:grayscale font-serif font-black text-base sm:text-lg tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.5)] cursor-pointer"
+                  className="w-full py-3.5 px-4 hpvn-btn-floo rounded-xl disabled:opacity-40 disabled:grayscale font-serif font-black text-base sm:text-lg tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Play size={20} />
                   <span>Khai Mạc Chiến Dịch</span>
@@ -404,7 +404,7 @@ export function Lobby() {
               </div>
             </div>
           ) : (
-            <div className="relative rounded-2xl hpvn-panel p-6 shadow-xl flex flex-col items-center justify-center text-center min-h-[460px]">
+            <div className="relative rounded-2xl hpvn-panel p-6 flex flex-col items-center justify-center text-center min-h-[460px]">
               <div className="w-16 h-16 rounded-full bg-[#120803] border border-[#bd8436] flex items-center justify-center mb-4">
                 <Wand2 className="w-8 h-8 text-[#ffd88f] animate-pulse" />
               </div>
@@ -439,7 +439,7 @@ export function Lobby() {
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="relative hpvn-panel-gold rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl border-2 border-[#bd8436] space-y-4"
+            className="relative hpvn-panel-gold rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center border-2 border-[#bd8436] space-y-4"
           >
             <button
               onClick={() => setIsQrOpen(false)}
@@ -461,7 +461,7 @@ export function Lobby() {
             </div>
 
             {/* QR Code Canvas */}
-            <div className="bg-white p-4 rounded-2xl inline-block shadow-xl border-4 border-[#7a5229]">
+            <div className="bg-white p-4 rounded-2xl inline-block border-4 border-[#7a5229]">
               <QRCodeSVG
                 value={inviteUrl}
                 size={210}
@@ -478,7 +478,7 @@ export function Lobby() {
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="w-full py-2.5 px-4 bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803] font-serif font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803] font-serif font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {copiedLink ? <Check size={14} /> : <Copy size={14} />}
                 <span>{copiedLink ? 'Đã sao chép liên kết!' : 'Sao Chép Liên Kết'}</span>

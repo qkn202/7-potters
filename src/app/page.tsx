@@ -46,19 +46,19 @@ export default function Home() {
     <div className="relative min-h-screen flex flex-col justify-between">
       
       {/* Top Magical Navigation Bar - Styled after HPVN Floo Shoutbox Header */}
-      <header className="sticky top-0 z-40 hpvn-header-banner px-2.5 sm:px-4 py-2 flex items-center justify-between shadow-2xl backdrop-blur-md">
+      <header className="sticky top-0 z-40 hpvn-header-banner px-2.5 sm:px-4 py-2 flex items-center justify-between backdrop-blur-md">
         <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <PhoenixCrest className="w-5 h-5 sm:w-7 sm:h-7 drop-shadow-[0_0_8px_rgba(220,38,38,0.6)]" />
+            <PhoenixCrest className="w-5 h-5 sm:w-7 sm:h-7" />
             <div className="flex flex-col min-w-0">
-              <span className="font-title-magical font-bold text-base sm:text-xl md:text-2xl tracking-wide text-[#ffd88f] drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] flex items-center gap-1 leading-none truncate">
+              <span className="font-title-magical font-bold text-base sm:text-xl md:text-2xl tracking-wide text-[#ffd88f] flex items-center gap-1 leading-none truncate">
                 <span>⚡</span> HPVN · BẢY POTTER <span>⚡</span>
               </span>
               <span className="text-[9px] sm:text-[10px] font-lora italic text-[#ebdcb0]/80 tracking-widest hidden md:inline">
                 MẠNG FLOO HỘI PHƯỢNG HOÀNG · TRẬN CHIẾN TRÊN KHÔNG
               </span>
             </div>
-            <DarkMarkCrest className="w-5 h-5 sm:w-7 sm:h-7 drop-shadow-[0_0_8px_rgba(16,185,129,0.6)] hidden sm:block" />
+            <DarkMarkCrest className="w-5 h-5 sm:w-7 sm:h-7 hidden sm:block" />
           </div>
         </div>
 
@@ -93,7 +93,7 @@ export default function Home() {
           <button
             onClick={() => setIsDeckOpen(true)}
             title="Xem 22 thẻ bài & luật chơi"
-            className="hpvn-btn-gold px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 shadow-md cursor-pointer"
+            className="hpvn-btn-gold px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer"
           >
             <BookOpen size={14} />
             <span className="text-[11px] sm:text-xs">Bí Kíp<span className="hidden sm:inline"> 22 Thẻ Bài</span></span>
@@ -122,7 +122,7 @@ export default function Home() {
 
       {/* 10-Minute Host Disconnection Countdown Warning Banner */}
       {disconnectCountdown !== null && (
-        <div className="bg-gradient-to-r from-red-950 via-amber-950 to-red-950 border-b border-red-700/80 text-amber-200 px-4 py-2.5 text-center text-xs sm:text-sm font-serif flex items-center justify-center gap-2 shadow-lg animate-pulse z-30">
+        <div className="bg-gradient-to-r from-red-950 via-amber-950 to-red-950 border-b border-red-700/80 text-amber-200 px-4 py-2.5 text-center text-xs sm:text-sm font-serif flex items-center justify-center gap-2 animate-pulse z-30">
           <Clock className="w-4 h-4 text-amber-400 shrink-0" />
           <span>
             <strong>Cảnh Báo:</strong> Quản trò / Chủ phòng đang tạm ngắt kết nối. Phòng chơi sẽ được bảo lưu trong:{' '}
@@ -171,7 +171,7 @@ export default function Home() {
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="hpvn-panel-gold rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl border-2 border-[#bd8436] space-y-4 animate-in fade-in zoom-in duration-200"
+            className="hpvn-panel-gold rounded-2xl p-6 max-w-sm w-full text-center border-2 border-[#bd8436] space-y-4 animate-in fade-in zoom-in duration-200"
           >
             <div className="w-12 h-12 rounded-full bg-red-950/80 border border-red-800 text-red-400 flex items-center justify-center mx-auto">
               <AlertTriangle className="w-6 h-6 animate-pulse" />
@@ -196,7 +196,7 @@ export default function Home() {
                   sessionStorage.removeItem('seven-potters-is-gm');
                   window.location.reload();
                 }}
-                className="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded-xl text-xs font-serif font-bold shadow-md transition-colors cursor-pointer"
+                className="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded-xl text-xs font-serif font-bold transition-colors cursor-pointer"
               >
                 Xác nhận Reset
               </button>

@@ -150,20 +150,17 @@ export function WaxSeal({
   };
 
   const bgGrad = {
-    red: 'from-red-600 via-rose-800 to-red-950 text-amber-200 border-red-500/50 shadow-[0_4px_20px_rgba(220,38,38,0.5)]',
-    gold: 'from-amber-400 via-yellow-600 to-amber-900 text-amber-100 border-amber-400/60 shadow-[0_4px_20px_rgba(245,158,11,0.5)]',
-    emerald: 'from-emerald-500 via-teal-700 to-emerald-950 text-emerald-100 border-emerald-400/50 shadow-[0_4px_20px_rgba(16,185,129,0.5)]',
+    red: 'from-red-600 via-rose-800 to-red-950 text-amber-200 border-red-500/50',
+    gold: 'from-amber-400 via-yellow-600 to-amber-900 text-amber-100 border-amber-400/60',
+    emerald: 'from-emerald-500 via-teal-700 to-emerald-950 text-emerald-100 border-emerald-400/50',
   }[variant];
 
   return (
     <div
       className={`relative rounded-full flex items-center justify-center font-serif font-black select-none border-2 bg-gradient-to-br ${bgGrad} ${sizeMap[size]} ${className}`}
-      style={{
-        boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -3px 6px rgba(0,0,0,0.7)',
-      }}
     >
       <div className="absolute inset-1 rounded-full border border-dashed border-white/30" />
-      <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] tracking-tighter">{letter}</span>
+      <span className="tracking-tighter">{letter}</span>
     </div>
   );
 }
@@ -180,7 +177,7 @@ export function CardBackArt({ faction = 'ORDER_OF_PHOENIX' }: { faction?: 'ORDER
     : 'bg-gradient-to-b from-red-950 via-[#230808] to-gray-950';
 
   return (
-    <div className={`relative w-full h-full rounded-2xl overflow-hidden p-3 border-2 ${borderTone} ${innerBg} shadow-2xl flex flex-col items-center justify-between select-none`}>
+    <div className={`relative w-full h-full rounded-2xl overflow-hidden p-3 border-2 ${borderTone} ${innerBg} flex flex-col items-center justify-between select-none`}>
       {/* Background celestial damask pattern */}
       <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
       
@@ -216,9 +213,9 @@ export function CardBackArt({ faction = 'ORDER_OF_PHOENIX' }: { faction?: 'ORDER
           <div className="absolute inset-4 rounded-full border border-dashed border-amber-400/30" />
           
           {isDeathEaters ? (
-            <DarkMarkCrest className="w-24 h-24 drop-shadow-[0_0_20px_rgba(16,185,129,0.7)]" />
+            <DarkMarkCrest className="w-24 h-24" />
           ) : (
-            <PhoenixCrest className="w-24 h-24 drop-shadow-[0_0_20px_rgba(239,68,68,0.7)]" />
+            <PhoenixCrest className="w-24 h-24" />
           )}
         </div>
         <div className="mt-2 text-center">

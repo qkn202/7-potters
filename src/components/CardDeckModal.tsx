@@ -56,14 +56,14 @@ export function CardDeckModal({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-6xl max-h-[90vh] hpvn-panel-gold rounded-2xl shadow-[0_0_60px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden cursor-default"
+          className="relative w-full max-w-6xl max-h-[90vh] hpvn-panel-gold rounded-2xl flex flex-col overflow-hidden cursor-default"
         >
 
           {/* Header styled after HPVN Floo banner */}
           <div className="hpvn-header-banner p-3.5 sm:p-5 flex flex-col gap-3 border-b border-[#7a5229]/60">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                <div className="p-1.5 sm:p-2 rounded-xl bg-[#3a2213] text-[#ffd88f] border border-[#ebdcb0]/50 shadow-md shrink-0">
+                <div className="p-1.5 sm:p-2 rounded-xl bg-[#3a2213] text-[#ffd88f] border border-[#ebdcb0]/50 shrink-0">
                   <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div className="min-w-0">
@@ -79,7 +79,7 @@ export function CardDeckModal({
               {/* Close Button always pinned top right */}
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl bg-[#1c0f07] hover:bg-[#2b170c] text-[#ffd88f] border border-[#7a5229] transition-colors shrink-0 cursor-pointer shadow-sm active:scale-95"
+                className="p-2 rounded-xl bg-[#1c0f07] hover:bg-[#2b170c] text-[#ffd88f] border border-[#7a5229] transition-colors shrink-0 cursor-pointer active:scale-95"
                 title="Đóng bí kíp thẻ bài"
               >
                 <X size={18} />
@@ -104,7 +104,7 @@ export function CardDeckModal({
                 <button
                   onClick={() => setSelectedFaction('ALL')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-serif whitespace-nowrap transition-colors ${
-                    selectedFaction === 'ALL' ? 'hpvn-btn-gold font-bold shadow-sm' : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
+                    selectedFaction === 'ALL' ? 'hpvn-btn-gold font-bold' : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
                   }`}
                 >
                   Tất cả ({allRoles.length})
@@ -112,7 +112,7 @@ export function CardDeckModal({
                 <button
                   onClick={() => setSelectedFaction('ORDER_OF_PHOENIX')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-serif whitespace-nowrap flex items-center gap-1 transition-colors ${
-                    selectedFaction === 'ORDER_OF_PHOENIX' ? 'hpvn-btn-phoenix font-bold shadow-sm' : 'text-[#ebdcb0]/70 hover:text-red-400'
+                    selectedFaction === 'ORDER_OF_PHOENIX' ? 'hpvn-btn-phoenix font-bold' : 'text-[#ebdcb0]/70 hover:text-red-400'
                   }`}
                 >
                   <PhoenixCrest className="w-3.5 h-3.5 shrink-0" /> Phượng Hoàng
@@ -120,7 +120,7 @@ export function CardDeckModal({
                 <button
                   onClick={() => setSelectedFaction('DEATH_EATERS')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-serif whitespace-nowrap flex items-center gap-1 transition-colors ${
-                    selectedFaction === 'DEATH_EATERS' ? 'hpvn-btn-floo font-bold shadow-sm' : 'text-[#ebdcb0]/70 hover:text-emerald-400'
+                    selectedFaction === 'DEATH_EATERS' ? 'hpvn-btn-floo font-bold' : 'text-[#ebdcb0]/70 hover:text-emerald-400'
                   }`}
                 >
                   <DarkMarkCrest className="w-3.5 h-3.5 shrink-0" /> Tử Thần

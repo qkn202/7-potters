@@ -84,7 +84,7 @@ export function JoinForm() {
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="relative w-full max-w-lg rounded-3xl p-4 sm:p-8 md:p-10 hpvn-panel-gold shadow-[0_0_60px_rgba(0,0,0,0.95)] overflow-hidden"
+        className="relative w-full max-w-lg rounded-3xl p-4 sm:p-8 md:p-10 hpvn-panel-gold overflow-hidden"
       >
         {/* Corner Antique Flourishes */}
         <CardCornerFlourish className="absolute top-2.5 left-2.5 w-6 h-6 sm:w-8 sm:h-8 text-[#bd8436] pointer-events-none" />
@@ -95,15 +95,15 @@ export function JoinForm() {
         {/* Top Header Badge */}
         <div className="text-center relative z-10 mb-5 sm:mb-6">
           <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2.5">
-            <PhoenixCrest className="w-8 h-8 sm:w-10 sm:h-10 drop-shadow-[0_0_12px_rgba(220,38,38,0.7)]" />
+            <PhoenixCrest className="w-8 h-8 sm:w-10 sm:h-10" />
             <DeathlyHallowsSymbol className="w-5 h-5 sm:w-6 sm:h-6 text-[#bd8436]" />
-            <DarkMarkCrest className="w-8 h-8 sm:w-10 sm:h-10 drop-shadow-[0_0_12px_rgba(16,185,129,0.7)]" />
+            <DarkMarkCrest className="w-8 h-8 sm:w-10 sm:h-10" />
           </div>
 
           <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.25em] sm:tracking-[0.3em] uppercase text-[#ffd88f] block mb-1">
             HỘI PHƯỢNG HOÀNG · MẠNG FLOO THỜI GIAN THỰC
           </span>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-title-magical font-bold tracking-wide text-[#ffd88f] drop-shadow-[0_3px_8px_rgba(0,0,0,0.9)]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-title-magical font-bold tracking-wide text-[#ffd88f]">
             Chiến Dịch 7 Potter
           </h1>
           <p className="text-xs sm:text-sm text-[#ebdcb0] font-lora italic mt-1 px-2 sm:px-4">
@@ -118,7 +118,7 @@ export function JoinForm() {
             onClick={() => { setMode('create'); setLocalError(null); }}
             className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               mode === 'create'
-                ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803] shadow-md'
+                ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'
                 : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
             }`}
           >
@@ -131,7 +131,7 @@ export function JoinForm() {
             onClick={() => { setMode('join'); setLocalError(null); }}
             className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               mode === 'join'
-                ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803] shadow-md'
+                ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'
                 : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
             }`}
           >
@@ -144,7 +144,7 @@ export function JoinForm() {
             onClick={() => { setMode('mock'); setLocalError(null); }}
             className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               mode === 'mock'
-                ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803] shadow-md'
+                ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'
                 : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
             }`}
           >
@@ -175,7 +175,7 @@ export function JoinForm() {
                   maxLength={6}
                   value={roomCodeInput}
                   onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-3 bg-[#120803] border-2 border-[#bd8436] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-2 focus:ring-[#bd8436]/50 text-[#ffd88f] placeholder-[#8c622e] font-mono text-center tracking-[0.3em] uppercase text-lg transition-all shadow-inner"
+                  className="w-full px-4 py-3 bg-[#120803] border-2 border-[#bd8436] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-2 focus:ring-[#bd8436]/50 text-[#ffd88f] placeholder-[#8c622e] font-mono text-center tracking-[0.3em] uppercase text-lg transition-all"
                   placeholder="VÍ DỤ: POT7"
                   required
                 />
@@ -196,7 +196,7 @@ export function JoinForm() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 bg-[#120803] border-2 border-[#7a5229] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-2 focus:ring-[#bd8436]/40 text-[#f5eedb] placeholder-[#8c622e] font-lora transition-all shadow-inner"
+                className="w-full px-4 py-3 bg-[#120803] border-2 border-[#7a5229] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-2 focus:ring-[#bd8436]/40 text-[#f5eedb] placeholder-[#8c622e] font-lora transition-all"
                 placeholder="Ví dụ: Harry, Moody Mắt Điên, Albus..."
                 required
               />
@@ -211,14 +211,14 @@ export function JoinForm() {
             onClick={() => setIsGM(!isGM)}
             className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between select-none ${
               isGM 
-                ? 'bg-[#3a2213] border-[#ffd88f] shadow-[0_0_20px_rgba(189,132,54,0.3)]' 
+                ? 'bg-[#3a2213] border-[#ffd88f]' 
                 : 'bg-[#180e07] border-[#5a3a1f] hover:border-[#7a5229]'
             }`}
           >
             <div className="flex items-center gap-3">
               <div className={`p-2 rounded-xl border ${
                 isGM 
-                  ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ebdcb0] shadow-md' 
+                  ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ebdcb0]' 
                   : 'bg-[#120803] text-[#ebdcb0] border-[#5a3a1f]'
               }`}>
                 <Crown size={18} />
@@ -249,7 +249,7 @@ export function JoinForm() {
             className="w-full relative group overflow-hidden rounded-xl p-[2px] transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
           >
             <span className="absolute inset-0 bg-gradient-to-r from-[#8c0c0c] via-[#bd8436] to-[#047857] rounded-xl opacity-80 group-hover:opacity-100 transition-opacity animate-pulse" />
-            <div className="relative flex items-center justify-center gap-3 bg-gradient-to-r from-[#24150c] via-[#1a0e07] to-[#24150c] px-6 sm:px-8 py-3.5 rounded-xl transition-all group-hover:bg-opacity-90 font-serif font-bold text-base sm:text-lg text-[#ffd88f] tracking-wider uppercase border border-[#bd8436]/60 shadow-lg">
+            <div className="relative flex items-center justify-center gap-3 bg-gradient-to-r from-[#24150c] via-[#1a0e07] to-[#24150c] px-6 sm:px-8 py-3.5 rounded-xl transition-all group-hover:bg-opacity-90 font-serif font-bold text-base sm:text-lg text-[#ffd88f] tracking-wider uppercase border border-[#bd8436]/60">
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-5 h-5 text-[#ffd88f] animate-spin" />

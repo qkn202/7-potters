@@ -63,7 +63,6 @@ body {
   font-family: var(--font-playfair), 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
   letter-spacing: 0.025em;
   font-feature-settings: "kern" 1, "liga" 1;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(189, 132, 54, 0.25);
 }
 
 .font-cormorant {
@@ -94,32 +93,27 @@ body {
   background: linear-gradient(180deg, #5c3f1f 0%, #2b170c 100%);
   border-top: 1px solid #ebdcb0;
   border-bottom: 2.5px double #bd8436;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
 }
 
 /* The signature HPVN Wood Carved Panel */
 .hpvn-panel {
   background: linear-gradient(175deg, #24150c 0%, #1a0e07 60%, #120803 100%);
   border: 1.5px solid #7a5229;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(235, 220, 176, 0.15);
 }
 
 .hpvn-panel-gold {
   background: linear-gradient(175deg, #28180e 0%, #1c1008 60%, #140a04 100%);
   border: 2px solid #bd8436;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(189, 132, 54, 0.2), inset 0 1px 0 rgba(235, 220, 176, 0.3);
 }
 
 .hpvn-panel-emerald {
   background: linear-gradient(175deg, #0f261c 0%, #091711 60%, #050d0a 100%);
   border: 2px solid #10b981;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(16, 185, 129, 0.25);
 }
 
 .hpvn-panel-crimson {
   background: linear-gradient(175deg, #2c0e0e 0%, #1c0808 60%, #0f0404 100%);
   border: 2px solid #dc2626;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(220, 38, 38, 0.25);
 }
 
 /* Aged Parchment */
@@ -127,7 +121,6 @@ body {
   background: #f7efdc;
   color: #2c1a0e;
   border: 1.5px solid #8c622e;
-  box-shadow: inset 0 0 30px rgba(140, 98, 46, 0.25), 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 /* Button variants matching HPVN & Floo */
@@ -138,14 +131,12 @@ body {
   border-left: 1px solid #8c622e;
   border-right: 1px solid #8c622e;
   color: #ffd88f;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
   transition: all 0.2s ease;
 }
 
 .hpvn-btn-gold:hover {
   background: linear-gradient(180deg, #8c622e 0%, #5c3919 100%);
   color: #fff4d1;
-  box-shadow: 0 0 15px rgba(189, 132, 54, 0.4);
 }
 
 .hpvn-btn-floo {
@@ -155,15 +146,12 @@ body {
   border-left: 1px solid #047857;
   border-right: 1px solid #047857;
   color: #d1fae5;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
   transition: all 0.2s ease;
 }
 
 .hpvn-btn-floo:hover {
   background: linear-gradient(180deg, #10b981 0%, #057a55 100%);
   color: #ffffff;
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
 }
 
 .hpvn-btn-phoenix {
@@ -173,15 +161,12 @@ body {
   border-left: 1px solid #b91c1c;
   border-right: 1px solid #b91c1c;
   color: #fee2e2;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-  box-shadow: 0 0 20px rgba(220, 38, 38, 0.35);
   transition: all 0.2s ease;
 }
 
 .hpvn-btn-phoenix:hover {
   background: linear-gradient(180deg, #b91c1c 0%, #680808 100%);
   color: #ffffff;
-  box-shadow: 0 0 30px rgba(220, 38, 38, 0.6);
 }
 
 /* Animations */
@@ -206,11 +191,9 @@ body {
 
 @keyframes pulse-glow-floo {
   0%, 100% { 
-    box-shadow: 0 0 15px 0px rgba(16, 185, 129, 0.3); 
     border-color: rgba(16, 185, 129, 0.6);
   }
   50% { 
-    box-shadow: 0 0 30px 6px rgba(16, 185, 129, 0.7); 
     border-color: rgba(52, 211, 153, 1);
   }
 }
@@ -221,17 +204,28 @@ body {
 
 @keyframes pulse-glow-phoenix {
   0%, 100% { 
-    box-shadow: 0 0 15px 0px rgba(220, 38, 38, 0.3); 
     border-color: rgba(220, 38, 38, 0.6);
   }
   50% { 
-    box-shadow: 0 0 30px 6px rgba(220, 38, 38, 0.7); 
     border-color: rgba(248, 113, 113, 1);
   }
 }
 
 .animate-pulse-phoenix {
   animation: pulse-glow-phoenix 2.2s infinite;
+}
+
+/* ================= ZERO SHADOW SYSTEM ================= */
+/* User requirement: Remove all shadow effects in design UI/UX */
+*, *::before, *::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  --tw-shadow: 0 0 #0000 !important;
+  --tw-shadow-colored: 0 0 #0000 !important;
+}
+
+[class*="drop-shadow"] {
+  filter: none !important;
 }
 
 /* Custom Boardgame Scrollbar */

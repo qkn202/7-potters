@@ -75,7 +75,7 @@ export function GMDashboard() {
     <div className="max-w-7xl mx-auto py-6 px-4 space-y-6">
       
       {/* Top Header: GM Command Station */}
-      <div className="relative rounded-2xl hpvn-panel-gold p-6 shadow-2xl overflow-hidden">
+      <div className="relative rounded-2xl hpvn-panel-gold p-6 overflow-hidden">
         <CardCornerFlourish className="absolute top-2 left-2 w-7 h-7 text-[#bd8436] pointer-events-none" />
         <CardCornerFlourish className="absolute top-2 right-2 w-7 h-7 text-[#bd8436] -scale-x-100 pointer-events-none" />
 
@@ -104,7 +104,7 @@ export function GMDashboard() {
           <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
             <button
               onClick={() => setIsDeckOpen(true)}
-              className="flex-1 md:flex-initial hpvn-btn-gold px-3.5 py-2.5 rounded-xl text-xs font-serif font-bold flex items-center justify-center gap-1.5 shadow-sm"
+              className="flex-1 md:flex-initial hpvn-btn-gold px-3.5 py-2.5 rounded-xl text-xs font-serif font-bold flex items-center justify-center gap-1.5"
             >
               <BookOpen size={15} /> Sách Thẻ Bài
             </button>
@@ -115,7 +115,7 @@ export function GMDashboard() {
               className={`flex-1 md:flex-initial px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-2 font-serif font-bold text-xs sm:text-sm transition-all border ${
                 isDay 
                   ? 'bg-[#120803] text-[#7a5229] border-[#3a2213] cursor-not-allowed' 
-                  : 'hpvn-btn-gold shadow-md'
+                  : 'hpvn-btn-gold'
               }`}
             >
               <Sun size={16} /> Sang Ngày
@@ -127,7 +127,7 @@ export function GMDashboard() {
               className={`flex-1 md:flex-initial px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-2 font-serif font-bold text-xs sm:text-sm transition-all border ${
                 isNight 
                   ? 'bg-[#120803] text-[#7a5229] border-[#3a2213] cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-indigo-950 to-purple-950 hover:from-indigo-900 hover:to-purple-900 text-cyan-200 border-indigo-500/60 shadow-md'
+                  : 'bg-gradient-to-r from-indigo-950 to-purple-950 hover:from-indigo-900 hover:to-purple-900 text-cyan-200 border-indigo-500/60'
               }`}
             >
               <Moon size={16} /> Sang Đêm
@@ -137,12 +137,12 @@ export function GMDashboard() {
       </div>
 
       {/* Mobile & Tablet GM Navigation Tabs (screens < xl) */}
-      <div className="xl:hidden flex items-center bg-[#120803] p-1 rounded-xl border border-[#7a5229] shadow-md">
+      <div className="xl:hidden flex items-center bg-[#120803] p-1 rounded-xl border border-[#7a5229]">
         <button
           onClick={() => setGmTab('resolution')}
           className={`flex-1 py-2 rounded-lg text-xs font-serif font-bold flex items-center justify-center gap-1.5 transition-all ${
             gmTab === 'resolution'
-              ? 'hpvn-btn-gold shadow-md'
+              ? 'hpvn-btn-gold'
               : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
           }`}
         >
@@ -152,7 +152,7 @@ export function GMDashboard() {
           onClick={() => setGmTab('players')}
           className={`flex-1 py-2 rounded-lg text-xs font-serif font-bold flex items-center justify-center gap-1.5 transition-all ${
             gmTab === 'players'
-              ? 'hpvn-btn-gold shadow-md'
+              ? 'hpvn-btn-gold'
               : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
           }`}
         >
@@ -162,7 +162,7 @@ export function GMDashboard() {
           onClick={() => setGmTab('logs')}
           className={`flex-1 py-2 rounded-lg text-xs font-serif font-bold flex items-center justify-center gap-1.5 transition-all ${
             gmTab === 'logs'
-              ? 'hpvn-btn-gold shadow-md'
+              ? 'hpvn-btn-gold'
               : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
           }`}
         >
@@ -179,7 +179,7 @@ export function GMDashboard() {
           {/* Resolution Engine Console */}
           <div className={`${gmTab === 'resolution' ? 'block' : 'hidden xl:block'}`}>
             {gameState.phase !== 'END' ? (
-              <div className="relative rounded-2xl hpvn-panel p-4 sm:p-5 shadow-xl overflow-hidden">
+              <div className="relative rounded-2xl hpvn-panel p-4 sm:p-5 overflow-hidden">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#7a5229] pb-3 mb-4 gap-3">
                 <div className="flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-[#3a2213] text-[#ffd88f] border border-[#7a5229]">
@@ -209,7 +209,7 @@ export function GMDashboard() {
                   {aliveBots.length > 0 && (
                     <button
                       onClick={simulateBotActions}
-                      className="px-3 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-1.5 border border-[#7a5229] bg-[#2a170a] hover:bg-[#3a2213] text-[#ebdcb0] transition-colors shadow-sm"
+                      className="px-3 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-1.5 border border-[#7a5229] bg-[#2a170a] hover:bg-[#3a2213] text-[#ebdcb0] transition-colors"
                       title="Cho tất cả các bot tự động bỏ phiếu ngẫu nhiên theo luật"
                     >
                       <span>🎲 Bot Bỏ Phiếu ({aliveBots.length})</span>
@@ -218,7 +218,7 @@ export function GMDashboard() {
 
                   <button
                     onClick={calculateResolution}
-                    className="hpvn-btn-gold px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-1.5 shadow-md"
+                    className="hpvn-btn-gold px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-1.5"
                   >
                     <Wand2 size={14} />
                     <span>Thu Thập & Phân Giải</span>
@@ -231,10 +231,7 @@ export function GMDashboard() {
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="rounded-xl border border-amber-500/40 p-4 space-y-3 bg-[#f7efdc] text-[#2c1d11] shadow-lg font-serif"
-                  style={{
-                    boxShadow: 'inset 0 0 20px rgba(180, 83, 9, 0.15)'
-                  }}
+                  className="rounded-xl border border-amber-500/40 p-4 space-y-3 bg-[#f7efdc] text-[#2c1d11] font-serif"
                 >
                   <div className="flex items-center justify-between border-b border-[#b45309]/30 pb-2">
                     <h4 className="font-bold text-sm text-[#7f1d1d] uppercase flex items-center gap-1.5">
@@ -280,7 +277,7 @@ export function GMDashboard() {
                               resolveInterrupt(pick.id);
                             }
                           }}
-                          className="px-3 py-1.5 hpvn-btn-gold rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shadow"
+                          className="px-3 py-1.5 hpvn-btn-gold rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer"
                         >
                           <span>🎲 Chọn ngẫu nhiên giúp người chơi</span>
                         </button>
@@ -292,7 +289,7 @@ export function GMDashboard() {
                     <div className="pt-2 border-t border-[#b45309]/30 flex justify-end">
                       <button
                         onClick={applyResolution}
-                        className="px-5 py-2 hpvn-btn-floo rounded-xl text-xs font-serif font-black flex items-center gap-1.5 shadow-md"
+                        className="px-5 py-2 hpvn-btn-floo rounded-xl text-xs font-serif font-black flex items-center gap-1.5"
                       >
                         <CheckCircle size={15} />
                         <span>Duyệt & Công Bố Lên Bảng Vàng</span>
@@ -325,7 +322,7 @@ export function GMDashboard() {
         </div>
 
           {/* Player Secret Dossiers Grid */}
-          <div className={`relative rounded-2xl hpvn-panel-gold p-4 sm:p-5 shadow-xl ${gmTab === 'players' ? 'block' : 'hidden xl:block'}`}>
+          <div className={`relative rounded-2xl hpvn-panel-gold p-4 sm:p-5 ${gmTab === 'players' ? 'block' : 'hidden xl:block'}`}>
             <div className="flex items-center justify-between border-b border-[#7a5229] pb-3 mb-4">
               <div>
                 <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] flex items-center gap-2 tracking-wide">
@@ -353,7 +350,7 @@ export function GMDashboard() {
                       isDead 
                         ? 'bg-[#1a0e07]/40 border-[#3a2213] opacity-60 grayscale' 
                         : isSelected 
-                          ? 'bg-[#3a2213] border-[#ffd88f] shadow-[0_0_20px_rgba(189,132,54,0.35)] ring-1 ring-[#ffd88f]' 
+                          ? 'bg-[#3a2213] border-[#ffd88f] ring-1 ring-[#ffd88f]' 
                           : isDeathEater
                             ? 'bg-[#0b1c14] border-[#0e4832] hover:border-[#10b981]'
                             : 'bg-[#220d0d] border-[#5e1919] hover:border-[#bd8436]'
@@ -362,9 +359,9 @@ export function GMDashboard() {
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2">
                         {isDeathEater ? (
-                          <DarkMarkCrest className="w-5 h-5 drop-shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
+                          <DarkMarkCrest className="w-5 h-5" />
                         ) : (
-                          <PhoenixCrest className="w-5 h-5 drop-shadow-[0_0_6px_rgba(220,38,38,0.5)]" />
+                          <PhoenixCrest className="w-5 h-5" />
                         )}
                         <span className={`font-serif font-bold text-sm ${isDead ? 'text-red-500 line-through' : 'text-[#f5eedb]'}`}>
                           {p.name}
@@ -532,7 +529,7 @@ export function GMDashboard() {
 
         {/* Right Column: Action Log & Reset Game (col-span-4) */}
         <div className={`xl:col-span-4 space-y-6 ${gmTab === 'logs' ? 'block' : 'hidden xl:block'}`}>
-          <div className="relative rounded-2xl hpvn-panel p-5 shadow-xl flex flex-col h-full max-h-[640px]">
+          <div className="relative rounded-2xl hpvn-panel p-5 flex flex-col h-full max-h-[640px]">
             <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] mb-3 flex items-center gap-2 border-b border-[#7a5229] pb-2 tracking-wide">
               <ScrollText size={18} className="text-[#bd8436]" />
               Biên Niên Sử Hành Động

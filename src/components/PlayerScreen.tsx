@@ -53,7 +53,7 @@ export function PlayerScreen() {
         <motion.div 
           initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="relative bg-gradient-to-b from-red-950 via-gray-950 to-black border-2 border-red-500 rounded-3xl p-6 sm:p-10 max-w-2xl w-full text-center shadow-[0_0_60px_rgba(239,68,68,0.6)] overflow-hidden"
+          className="relative bg-gradient-to-b from-red-950 via-gray-950 to-black border-2 border-red-500 rounded-3xl p-6 sm:p-10 max-w-2xl w-full text-center overflow-hidden"
         >
           <CardCornerFlourish className="absolute top-3 left-3 w-8 h-8 text-red-500 pointer-events-none" />
           <CardCornerFlourish className="absolute top-3 right-3 w-8 h-8 text-red-500 -scale-x-100 pointer-events-none" />
@@ -82,7 +82,7 @@ export function PlayerScreen() {
                   onClick={() => setSelectedTarget(p.id)}
                   className={`p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
                     isSelected 
-                      ? 'bg-red-900/60 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]' 
+                      ? 'bg-red-900/60 border-red-500' 
                       : 'bg-gray-900/80 border-gray-800 hover:border-gray-700'
                   }`}
                 >
@@ -102,7 +102,7 @@ export function PlayerScreen() {
               }
             }}
             disabled={!selectedTarget}
-            className="px-8 py-3.5 bg-red-600 hover:bg-red-500 disabled:bg-gray-800 disabled:text-gray-500 text-white font-serif font-black rounded-xl text-base tracking-wider transition-all shadow-lg shadow-red-950/50 uppercase"
+            className="px-8 py-3.5 bg-red-600 hover:bg-red-500 disabled:bg-gray-800 disabled:text-gray-500 text-white font-serif font-black rounded-xl text-base tracking-wider transition-all uppercase"
           >
             XÁC NHẬN CHỌN MỤC TIÊU
           </button>
@@ -121,22 +121,22 @@ export function PlayerScreen() {
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className={`relative max-w-2xl w-full p-8 sm:p-12 rounded-3xl border-3 shadow-2xl overflow-hidden ${
+          className={`relative max-w-2xl w-full p-8 sm:p-12 rounded-3xl border-3 overflow-hidden ${
             isDeathEatersWon ? 'hpvn-panel-emerald' : 'hpvn-panel-crimson'
           }`}
         >
           <div className="flex justify-center mb-6">
             {isDeathEatersWon ? (
-              <DarkMarkCrest className="w-24 h-24 drop-shadow-[0_0_35px_rgba(16,185,129,0.9)] animate-pulse" />
+              <DarkMarkCrest className="w-24 h-24 animate-pulse" />
             ) : (
-              <PhoenixCrest className="w-24 h-24 drop-shadow-[0_0_35px_rgba(220,38,38,0.9)] animate-pulse" />
+              <PhoenixCrest className="w-24 h-24 animate-pulse" />
             )}
           </div>
 
           <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#ffd88f] block mb-2">
             KẾT THÚC CHIẾN DỊCH BẢY POTTER
           </span>
-          <h2 className={`text-3xl sm:text-4xl md:text-5xl font-title-magical font-black mb-4 drop-shadow-lg tracking-wide ${
+          <h2 className={`text-3xl sm:text-4xl md:text-5xl font-title-magical font-black mb-4 tracking-wide ${
             isDeathEatersWon 
               ? 'text-emerald-300' 
               : gameState.winner === 'NEUTRAL'
@@ -191,7 +191,7 @@ export function PlayerScreen() {
     <div className="max-w-7xl mx-auto py-6 px-4">
       
       {/* Top Banner: Atmospheric Day/Night Tracker & Global Actions */}
-      <div className="relative rounded-2xl border-2 border-[#bd8436] p-4 sm:p-5 mb-8 shadow-xl overflow-hidden"
+      <div className="relative rounded-2xl border-2 border-[#bd8436] p-4 sm:p-5 mb-8 overflow-hidden"
         style={{
           background: isDay 
             ? 'linear-gradient(90deg, #3d2412 0%, #26160c 50%, #170c06 100%)' 
@@ -200,10 +200,10 @@ export function PlayerScreen() {
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className={`p-3 rounded-2xl border shadow-lg ${
+            <div className={`p-3 rounded-2xl border ${
               isDay 
-                ? 'bg-[#5c3f1f] text-[#ffd88f] border-[#ebdcb0]/60 shadow-amber-900/30' 
-                : 'bg-[#2f143d] text-cyan-300 border-indigo-500/50 shadow-indigo-950/40'
+                ? 'bg-[#5c3f1f] text-[#ffd88f] border-[#ebdcb0]/60' 
+                : 'bg-[#2f143d] text-cyan-300 border-indigo-500/50'
             }`}>
               {isDay ? <Sun size={26} className="animate-spin-slow text-[#ffd88f]" /> : <Moon size={26} />}
             </div>
@@ -233,7 +233,7 @@ export function PlayerScreen() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsDeckOpen(true)}
-              className="hpvn-btn-gold px-3.5 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-1.5 shadow-sm"
+              className="hpvn-btn-gold px-3.5 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-1.5"
             >
               <BookOpen size={14} /> Bí Kíp Thẻ Bài
             </button>
@@ -242,12 +242,12 @@ export function PlayerScreen() {
       </div>
 
       {/* Mobile Navigation Tab Bar (hidden on lg screens) */}
-      <div className="lg:hidden flex items-center bg-[#120803] p-1 rounded-xl border border-[#7a5229] mb-4 shadow-md">
+      <div className="lg:hidden flex items-center bg-[#120803] p-1 rounded-xl border border-[#7a5229] mb-4">
         <button
           onClick={() => setMobileTab('battle')}
           className={`flex-1 py-2 rounded-lg text-xs font-serif font-bold flex items-center justify-center gap-1.5 transition-all ${
             mobileTab === 'battle'
-              ? 'hpvn-btn-gold shadow-md'
+              ? 'hpvn-btn-gold'
               : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
           }`}
         >
@@ -257,7 +257,7 @@ export function PlayerScreen() {
           onClick={() => setMobileTab('card')}
           className={`flex-1 py-2 rounded-lg text-xs font-serif font-bold flex items-center justify-center gap-1.5 transition-all ${
             mobileTab === 'card'
-              ? 'hpvn-btn-gold shadow-md'
+              ? 'hpvn-btn-gold'
               : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
           }`}
         >
@@ -267,7 +267,7 @@ export function PlayerScreen() {
           onClick={() => setMobileTab('log')}
           className={`flex-1 py-2 rounded-lg text-xs font-serif font-bold flex items-center justify-center gap-1.5 transition-all ${
             mobileTab === 'log'
-              ? 'hpvn-btn-gold shadow-md'
+              ? 'hpvn-btn-gold'
               : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
           }`}
         >
@@ -314,9 +314,9 @@ export function PlayerScreen() {
 
           {/* Death Eaters Secret Allied Roster (Voldemort / TTTT Biết Mặt Nhau) */}
           {me.role?.faction === 'DEATH_EATERS' && (
-            <div className="rounded-xl border border-emerald-600/60 bg-[#081a12] p-3.5 shadow-lg">
+            <div className="rounded-xl border border-emerald-600/60 bg-[#081a12] p-3.5">
               <div className="flex items-center gap-2 text-emerald-300 font-title font-bold text-sm mb-2 border-b border-emerald-900/60 pb-1.5">
-                <DarkMarkCrest className="w-4 h-4 drop-shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
+                <DarkMarkCrest className="w-4 h-4" />
                 <span>Hội Kín Tử Thần Thực Tử (Đồng Minh)</span>
               </div>
               <div className="space-y-1.5">
@@ -348,13 +348,13 @@ export function PlayerScreen() {
           
           {/* Death Eater Secret Alliance Awakening Banner */}
           {me.role?.faction === 'DEATH_EATERS' && (
-            <div className="relative rounded-2xl border-2 border-emerald-500/80 p-4 sm:p-5 shadow-2xl overflow-hidden bg-gradient-to-r from-[#031d13] via-[#062c1d] to-[#031d13]">
+            <div className="relative rounded-2xl border-2 border-emerald-500/80 p-4 sm:p-5 overflow-hidden bg-gradient-to-r from-[#031d13] via-[#062c1d] to-[#031d13]">
               <CardCornerFlourish className="absolute top-2 left-2 w-5 h-5 text-emerald-500 pointer-events-none" />
               <CardCornerFlourish className="absolute top-2 right-2 w-5 h-5 text-emerald-500 -scale-x-100 pointer-events-none" />
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-800/80 pb-3 mb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2.5 rounded-xl bg-emerald-950/90 border border-emerald-400 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]">
+                  <div className="p-2.5 rounded-xl bg-emerald-950/90 border border-emerald-400 text-emerald-400">
                     <DarkMarkCrest className="w-6 h-6" />
                   </div>
                   <div>
@@ -372,7 +372,7 @@ export function PlayerScreen() {
                   </div>
                 </div>
 
-                <div className="text-xs font-mono text-emerald-300 bg-emerald-950/90 px-3 py-1.5 rounded-xl border border-emerald-600 self-start sm:self-auto flex items-center gap-2 shadow-sm">
+                <div className="text-xs font-mono text-emerald-300 bg-emerald-950/90 px-3 py-1.5 rounded-xl border border-emerald-600 self-start sm:self-auto flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Bảng tên đồng minh sáng <strong className="text-emerald-200">MÀU XANH LÁ</strong></span>
                 </div>
@@ -396,7 +396,7 @@ export function PlayerScreen() {
                         key={de.id ? `de-roster-card-${de.id}` : `de-roster-card-${idx}`}
                         className={`p-2.5 rounded-xl border transition-all flex items-center justify-between ${
                           isMe
-                            ? 'bg-[#0a3825] border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] ring-1 ring-emerald-400'
+                            ? 'bg-[#0a3825] border-emerald-400 ring-1 ring-emerald-400'
                             : 'bg-[#052418] border-emerald-600/80 hover:border-emerald-400'
                         }`}
                       >
@@ -450,7 +450,7 @@ export function PlayerScreen() {
           )}
 
           {/* 1. Skies of Privet Drive: Target Selection Grid */}
-          <div className="relative rounded-2xl hpvn-panel-gold p-5 shadow-xl overflow-hidden">
+          <div className="relative rounded-2xl hpvn-panel-gold p-5 overflow-hidden">
             <CardCornerFlourish className="absolute top-2 left-2 w-5 h-5 text-[#bd8436] pointer-events-none" />
             <CardCornerFlourish className="absolute top-2 right-2 w-5 h-5 text-[#bd8436] -scale-x-100 pointer-events-none" />
 
@@ -467,7 +467,7 @@ export function PlayerScreen() {
 
               <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
                 {myAction && (
-                  <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/90 px-3 py-1 rounded-full border border-emerald-500/80 flex items-center gap-1.5 shadow-sm">
+                  <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/90 px-3 py-1 rounded-full border border-emerald-500/80 flex items-center gap-1.5">
                     <CheckCircle size={13} className="text-emerald-400" />
                     Đã lưu: {myVotedTarget?.name || 'Mục tiêu'}
                   </span>
@@ -505,13 +505,13 @@ export function PlayerScreen() {
                           ? 'bg-[#041c12]/50 border-emerald-950/60 opacity-40 cursor-not-allowed grayscale-[40%]'
                           : 'bg-[#120803]/50 border-[#3a2213] opacity-40 cursor-not-allowed grayscale' 
                         : isMyVote
-                          ? 'bg-[#1b3d2b] border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400'
+                          ? 'bg-[#1b3d2b] border-emerald-400 ring-1 ring-emerald-400'
                           : isSelected 
                             ? isFellowDeathEater
-                              ? 'bg-[#0a3825] border-emerald-300 shadow-[0_0_25px_rgba(16,185,129,0.6)] ring-2 ring-emerald-400'
-                              : 'bg-[#462c14] border-[#ffd88f] shadow-[0_0_20px_rgba(189,132,54,0.4)] ring-1 ring-[#ffd88f]' 
+                              ? 'bg-[#0a3825] border-emerald-300 ring-2 ring-emerald-400'
+                              : 'bg-[#462c14] border-[#ffd88f] ring-1 ring-[#ffd88f]' 
                             : isFellowDeathEater
-                              ? 'bg-gradient-to-r from-[#052418] via-[#083623] to-[#052418] border-emerald-500/90 hover:border-emerald-400 hover:bg-[#0c442c] shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                              ? 'bg-gradient-to-r from-[#052418] via-[#083623] to-[#052418] border-emerald-500/90 hover:border-emerald-400 hover:bg-[#0c442c]'
                               : 'bg-[#1a0e07] border-[#5a3a1f] hover:border-[#7a5229] hover:bg-[#26150c]'
                     }`}
                   >
@@ -521,12 +521,12 @@ export function PlayerScreen() {
                           ? 'bg-emerald-900 text-emerald-300 border-emerald-500'
                           : isSelected 
                             ? isFellowDeathEater
-                              ? 'bg-emerald-800 text-emerald-200 border-emerald-300 shadow-md'
+                              ? 'bg-emerald-800 text-emerald-200 border-emerald-300'
                               : 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ebdcb0]' 
                             : isPDead 
                               ? 'bg-[#2a0303] text-red-400 border-red-900' 
                               : isFellowDeathEater
-                                ? 'bg-emerald-950 text-emerald-400 border-emerald-600 shadow-sm'
+                                ? 'bg-emerald-950 text-emerald-400 border-emerald-600'
                                 : isPInjured
                                   ? 'bg-[#3d2406] text-amber-300 border-amber-600'
                                   : 'bg-[#120803] text-[#ebdcb0] border-[#5a3a1f]'
@@ -534,7 +534,7 @@ export function PlayerScreen() {
                         {isMyVote ? (
                           <CheckCircle size={14} />
                         ) : isFellowDeathEater ? (
-                          <DarkMarkCrest className="w-3.5 h-3.5 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.7)]" />
+                          <DarkMarkCrest className="w-3.5 h-3.5 text-emerald-400" />
                         ) : isPDead ? (
                           <Skull size={14} />
                         ) : (
@@ -547,7 +547,7 @@ export function PlayerScreen() {
                             isPDead 
                               ? 'line-through text-[#7a5229]' 
                               : isFellowDeathEater
-                                ? 'text-emerald-300 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+                                ? 'text-emerald-300'
                                 : 'text-[#f5eedb]'
                           }`}>
                             {p.name}
@@ -558,7 +558,7 @@ export function PlayerScreen() {
                             </span>
                           )}
                           {isFellowDeathEater && (
-                            <span className="text-[9px] font-mono font-black text-emerald-200 bg-emerald-950/95 px-2 py-0.5 rounded border border-emerald-400 flex items-center gap-1 shadow-sm uppercase tracking-wider">
+                            <span className="text-[9px] font-mono font-black text-emerald-200 bg-emerald-950/95 px-2 py-0.5 rounded border border-emerald-400 flex items-center gap-1 uppercase tracking-wider">
                               <DarkMarkCrest className="w-2.5 h-2.5 text-emerald-300" />
                               Đồng Minh: {p.role?.name} {p.role?.id === 'VOLDEMORT' ? '👑' : ''}
                             </span>
@@ -607,7 +607,7 @@ export function PlayerScreen() {
                       ) : isSelected ? (
                         <Crosshair size={18} className={isFellowDeathEater ? "text-emerald-300 animate-spin-slow" : "text-[#ffd88f] animate-spin-slow"} />
                       ) : isFellowDeathEater ? (
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)] block" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 block" />
                       ) : (
                         <span className="w-2 h-2 rounded-full bg-[#5a3a1f] block" />
                       )}
@@ -619,7 +619,7 @@ export function PlayerScreen() {
 
             {/* Caution banner when a fellow Death Eater is selected */}
             {effectiveTargetPlayer?.role?.faction === 'DEATH_EATERS' && me.role?.faction === 'DEATH_EATERS' && (
-              <div className="mt-3.5 p-3 rounded-xl bg-[#09261a] border-2 border-emerald-500/90 text-xs text-emerald-200 font-serif flex items-start gap-2.5 shadow-lg">
+              <div className="mt-3.5 p-3 rounded-xl bg-[#09261a] border-2 border-emerald-500/90 text-xs text-emerald-200 font-serif flex items-start gap-2.5">
                 <div className="p-1 rounded-lg bg-emerald-950 border border-emerald-400 text-emerald-300 shrink-0 mt-0.5">
                   <DarkMarkCrest className="w-4 h-4 text-emerald-400" />
                 </div>
@@ -636,7 +636,7 @@ export function PlayerScreen() {
           </div>
 
           {/* 2. Spell Arsenal: Action Console */}
-          <div className="relative rounded-2xl hpvn-panel p-5 shadow-xl">
+          <div className="relative rounded-2xl hpvn-panel p-5">
             <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] mb-3 flex items-center gap-2 tracking-wide">
               <Wand2 size={18} className="text-[#bd8436]" />
               Bàn Thi Triển Ma Pháp & Biểu Quyết
@@ -644,10 +644,10 @@ export function PlayerScreen() {
 
             {/* Persistent Confirmed Vote Box */}
             {myAction && (
-              <div className="p-4 rounded-xl border-2 border-emerald-500/70 bg-gradient-to-r from-[#0c2a1a] to-[#121c16] mb-4 shadow-lg">
+              <div className="p-4 rounded-xl border-2 border-emerald-500/70 bg-gradient-to-r from-[#0c2a1a] to-[#121c16] mb-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-emerald-900/80 border border-emerald-400 text-emerald-300 shadow-sm">
+                    <div className="p-2 rounded-xl bg-emerald-900/80 border border-emerald-400 text-emerald-300">
                       <CheckCircle size={22} />
                     </div>
                     <div>
@@ -716,7 +716,7 @@ export function PlayerScreen() {
                         }
                       }}
                       disabled={!effectiveTargetId || isDead}
-                      className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-phoenix font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40 shadow-lg"
+                      className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-phoenix font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40"
                     >
                       <Crosshair size={18} />
                       <span>
@@ -743,14 +743,14 @@ export function PlayerScreen() {
                     return (
                       <div className="space-y-3">
                         {me.role?.faction === 'DEATH_EATERS' && isSilenced && (
-                          <div className="p-3 bg-red-950/90 border border-red-700 rounded-xl text-xs text-red-200 font-serif flex items-center gap-2 shadow-md">
+                          <div className="p-3 bg-red-950/90 border border-red-700 rounded-xl text-xs text-red-200 font-serif flex items-center gap-2">
                             <AlertTriangle size={16} className="text-red-400 shrink-0" />
                             <span><strong>Lời Nguyền Lucius Malfoy:</strong> Đòn ám sát của Tử Thần Thực Tử bị phong ấn ma pháp hôm nay!</span>
                           </div>
                         )}
 
                         {me.role?.faction === 'DEATH_EATERS' && isDoubleKill && (
-                          <div className="p-3 bg-emerald-950/90 border border-emerald-600 rounded-xl text-xs text-emerald-200 font-serif flex items-center gap-2 shadow-md">
+                          <div className="p-3 bg-emerald-950/90 border border-emerald-600 rounded-xl text-xs text-emerald-200 font-serif flex items-center gap-2">
                             <Flame size={16} className="text-emerald-400 shrink-0" />
                             <span><strong>Cơn Thịnh Nộ Bellatrix:</strong> Tử Thần Thực Tử được quyền ám sát tới 2 mục tiêu hôm nay! Hãy phối hợp bỏ phiếu các mục tiêu khác nhau.</span>
                           </div>
@@ -786,7 +786,7 @@ export function PlayerScreen() {
                                 }
                               }}
                               disabled={!effectiveTargetId || isDead || isSilenced}
-                              className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-floo font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40 shadow-lg"
+                              className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-floo font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40"
                             >
                               <Skull size={18} />
                               <span>
@@ -819,7 +819,7 @@ export function PlayerScreen() {
                                 }
                               }}
                               disabled={!effectiveTargetId || isDead}
-                              className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-gold font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40 shadow-lg"
+                              className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-gold font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40"
                             >
                               <Shield size={18} />
                               <span>
@@ -840,7 +840,7 @@ export function PlayerScreen() {
                                 setTimeout(() => setToastMessage(null), 3500);
                               }}
                               disabled={isDead}
-                              className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-gold font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40 shadow-lg"
+                              className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-gold font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40"
                             >
                               <Shield size={18} />
                               <span>
@@ -863,7 +863,7 @@ export function PlayerScreen() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
-                    className="p-3.5 bg-gradient-to-r from-[#044e36] via-[#057a55] to-[#044e36] border border-emerald-400 rounded-xl text-emerald-100 text-center font-lora text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2"
+                    className="p-3.5 bg-gradient-to-r from-[#044e36] via-[#057a55] to-[#044e36] border border-emerald-400 rounded-xl text-emerald-100 text-center font-lora text-xs sm:text-sm font-bold flex items-center justify-center gap-2"
                   >
                     <CheckCircle size={16} className="text-emerald-300" />
                     <span>{toastMessage}</span>
@@ -876,7 +876,7 @@ export function PlayerScreen() {
 
         {/* Mobile Log View (shown when mobileTab === 'log' on screens < lg) */}
         <div className={`space-y-4 lg:hidden ${mobileTab === 'log' ? 'block' : 'hidden'}`}>
-          <div className="relative rounded-2xl hpvn-panel p-5 shadow-xl">
+          <div className="relative rounded-2xl hpvn-panel p-5">
             <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] mb-3 flex items-center gap-2 border-b border-[#7a5229] pb-2 tracking-wide">
               <ScrollText size={18} className="text-[#bd8436]" />
               Biên Niên Sử Chiến Trường
@@ -903,7 +903,7 @@ export function PlayerScreen() {
 
       {/* Mobile Sticky Action Bar at Bottom of Viewport */}
       {mobileTab === 'battle' && effectiveTargetPlayer && !isDead && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-3 pb-safe bg-gradient-to-t from-black via-[#140b05]/95 to-[#140b05]/80 border-t border-[#bd8436]/50 backdrop-blur-md shadow-[0_-5px_25px_rgba(0,0,0,0.85)]">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-3 pb-safe bg-gradient-to-t from-black via-[#140b05]/95 to-[#140b05]/80 border-t border-[#bd8436]/50 backdrop-blur-md">
           <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
             <div className="min-w-0 flex-1">
               <span className={`text-[10px] font-mono uppercase tracking-wider block ${
@@ -937,7 +937,7 @@ export function PlayerScreen() {
                   setToastMessage(`✓ Đã lưu phiếu biểu quyết Treo Cổ cho: ${effectiveTargetPlayer.name}!`);
                   setTimeout(() => setToastMessage(null), 3500);
                 }}
-                className="px-4 py-2.5 rounded-xl hpvn-btn-phoenix font-serif font-bold text-xs flex items-center gap-1.5 shadow-lg flex-shrink-0 active:scale-95"
+                className="px-4 py-2.5 rounded-xl hpvn-btn-phoenix font-serif font-bold text-xs flex items-center gap-1.5 flex-shrink-0 active:scale-95"
               >
                 <Crosshair size={14} />
                 <span>
@@ -952,7 +952,7 @@ export function PlayerScreen() {
                   setToastMessage(`✓ Đã lưu mục tiêu Ám Sát: ${effectiveTargetPlayer.name}!`);
                   setTimeout(() => setToastMessage(null), 3500);
                 }}
-                className="px-4 py-2.5 rounded-xl hpvn-btn-floo font-serif font-bold text-xs flex items-center gap-1.5 shadow-lg flex-shrink-0 active:scale-95"
+                className="px-4 py-2.5 rounded-xl hpvn-btn-floo font-serif font-bold text-xs flex items-center gap-1.5 flex-shrink-0 active:scale-95"
               >
                 <Skull size={14} />
                 <span>
@@ -967,7 +967,7 @@ export function PlayerScreen() {
                   setToastMessage(`✓ Đã lưu khiên Bảo Vệ cho: ${effectiveTargetPlayer.name}!`);
                   setTimeout(() => setToastMessage(null), 3500);
                 }}
-                className="px-4 py-2.5 rounded-xl hpvn-btn-gold font-serif font-bold text-xs flex items-center gap-1.5 shadow-lg flex-shrink-0 active:scale-95"
+                className="px-4 py-2.5 rounded-xl hpvn-btn-gold font-serif font-bold text-xs flex items-center gap-1.5 flex-shrink-0 active:scale-95"
               >
                 <Shield size={14} />
                 <span>Bảo Vệ</span>

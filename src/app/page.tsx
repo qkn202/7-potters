@@ -12,6 +12,7 @@ import {
   DarkMarkCrest, 
   DeathlyHallowsSymbol 
 } from '@/components/ArtAssets';
+import { FlooHeaderButton, FlooFloatingWidget } from '@/components/FlooChatWidget';
 import { BookOpen, User, RotateCcw, AlertTriangle, Wifi, WifiOff, Clock } from 'lucide-react';
 
 export default function Home() {
@@ -88,6 +89,9 @@ export default function Home() {
               </>
             )}
           </div>
+
+          {/* Floo Shoutbox Header Button */}
+          <FlooHeaderButton />
 
           {/* Rulebook / Codex Deck Button */}
           <button
@@ -210,6 +214,8 @@ export default function Home() {
           </div>
         </div>
       )}
+      {/* Floating Magic Floo Network Shoutbox Widget (PA2) */}
+      <FlooFloatingWidget />
     </div>
   );
 }

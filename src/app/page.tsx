@@ -12,6 +12,7 @@ import {
   DarkMarkCrest, 
   DeathlyHallowsSymbol 
 } from '@/components/ArtAssets';
+import { FlooChatDrawer, FlooHeaderTrigger, FlooFloatingTrigger } from '@/components/FlooChatDrawer';
 import { BookOpen, User, RotateCcw, AlertTriangle, Wifi, WifiOff, Clock } from 'lucide-react';
 
 export default function Home() {
@@ -26,6 +27,7 @@ export default function Home() {
   } = useGame();
 
   const [isDeckOpen, setIsDeckOpen] = useState(false);
+  const [isFlooOpen, setIsFlooOpen] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
@@ -88,6 +90,9 @@ export default function Home() {
               </>
             )}
           </div>
+
+          {/* Floo Shoutbox Header Button (In-App Drawer) */}
+          <FlooHeaderTrigger onClick={() => setIsFlooOpen(true)} />
 
           {/* Rulebook / Codex Deck Button */}
           <button
@@ -210,6 +215,16 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Floating Magic Trigger for In-App Floo Chat */}
+      <FlooFloatingTrigger onClick={() => setIsFlooOpen(true)} />
+
+      {/* In-App Floo Chat Drawer */}
+      <FlooChatDrawer 
+        isOpen={isFlooOpen} 
+        onClose={() => setIsFlooOpen(false)} 
+        onOpen={() => setIsFlooOpen(true)} 
+      />
     </div>
   );
 }

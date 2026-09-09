@@ -16,9 +16,9 @@ export interface GameContextType {
   hostDisconnectedAt: number | null;
   disconnectCountdown: number | null;
 
-  createRoom: (name: string, isGM: boolean) => Promise<string>;
-  joinRoom: (roomCode: string, name: string, isGM: boolean) => Promise<boolean>;
-  joinGame: (name: string, isGM: boolean) => void;
+  createRoom: (name: string, isGM: boolean, extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }) => Promise<string>;
+  joinRoom: (roomCode: string, name: string, isGM: boolean, extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }) => Promise<boolean>;
+  joinGame: (name: string, isGM: boolean, extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }) => void;
   leaveGame: () => void;
   startGame: () => void;
   setPhase: (phase: GamePhase) => void;
@@ -400,6 +400,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
                 ...nextPlayers[existingIdx],
                 id: reqPlayer.id,
                 name: reqPlayer.name,
+                house: reqPlayer.house || nextPlayers[existingIdx].house,
+                userTag: reqPlayer.userTag || nextPlayers[existingIdx].userTag,
+                hpvnUid: reqPlayer.hpvnUid || nextPlayers[existingIdx].hpvnUid,
               };
               logMsg = `Hệ thống: ${reqPlayer.name} đã kết nối lại vào phòng.`;
             } else {
@@ -620,6 +623,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const savedIsHost = sessionStorage.getItem('seven-potters-is-host') === 'true';
     const savedName = sessionStorage.getItem('seven-potters-player-name');
     const savedIsGM = sessionStorage.getItem('seven-potters-is-gm') === 'true';
+    const savedHouse = sessionStorage.getItem('seven-potters-house') || undefined;
+    const savedUserTag = sessionStorage.getItem('seven-potters-user-tag') || undefined;
+    const savedHpvnUid = sessionStorage.getItem('seven-potters-hpvn-uid') || undefined;
 
     if (sessionId) {
       setCurrentPlayerId(sessionId);
@@ -636,6 +642,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         role: null,
         status: 'ALIVE',
         isGM: savedIsGM,
+        house: savedHouse,
+        userTag: savedUserTag,
+        hpvnUid: savedHpvnUid,
       };
 
       const net = new SevenPottersNetwork();
@@ -684,7 +693,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   /**
    * Multiplayer: Host creates a new room
    */
-  const createRoom = async (name: string, isGM: boolean): Promise<string> => {
+  const createRoom = async (
+    name: string, 
+    isGM: boolean, 
+    extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }
+  ): Promise<string> => {
     // Generate a 4-letter uppercase code e.g. "POT7"
     const code = Math.random().toString(36).substring(2, 6).toUpperCase();
     const hostId = 'player_' + Math.random().toString(36).substring(2, 9);
@@ -695,6 +708,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       role: null,
       status: 'ALIVE',
       isGM,
+      house: extra?.house,
+      userTag: extra?.userTag,
+      hpvnUid: extra?.hpvnUid,
     };
 
     if (netRef.current) {
@@ -721,6 +737,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       sessionStorage.setItem('seven-potters-is-host', 'true');
       sessionStorage.setItem('seven-potters-player-name', name);
       sessionStorage.setItem('seven-potters-is-gm', isGM ? 'true' : 'false');
+      if (extra?.house) sessionStorage.setItem('seven-potters-house', extra.house);
+      else sessionStorage.removeItem('seven-potters-house');
+      if (extra?.userTag) sessionStorage.setItem('seven-potters-user-tag', extra.userTag);
+      else sessionStorage.removeItem('seven-potters-user-tag');
+      if (extra?.hpvnUid) sessionStorage.setItem('seven-potters-hpvn-uid', extra.hpvnUid);
+      else sessionStorage.removeItem('seven-potters-hpvn-uid');
 
       const initialHostState: GameState = {
         ...DEFAULT_STATE,
@@ -740,7 +762,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   /**
    * Multiplayer: Client joins an existing room by code
    */
-  const joinRoom = async (inputRoomCode: string, name: string, isGM: boolean): Promise<boolean> => {
+  const joinRoom = async (
+    inputRoomCode: string, 
+    name: string, 
+    isGM: boolean,
+    extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }
+  ): Promise<boolean> => {
     const code = inputRoomCode.trim().toUpperCase();
     if (!code) throw new Error('Mã phòng không được để trống.');
 
@@ -751,6 +778,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       role: null,
       status: 'ALIVE',
       isGM,
+      house: extra?.house,
+      userTag: extra?.userTag,
+      hpvnUid: extra?.hpvnUid,
     };
 
     if (netRef.current) {
@@ -776,6 +806,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       sessionStorage.setItem('seven-potters-is-host', 'false');
       sessionStorage.setItem('seven-potters-player-name', name);
       sessionStorage.setItem('seven-potters-is-gm', isGM ? 'true' : 'false');
+      if (extra?.house) sessionStorage.setItem('seven-potters-house', extra.house);
+      else sessionStorage.removeItem('seven-potters-house');
+      if (extra?.userTag) sessionStorage.setItem('seven-potters-user-tag', extra.userTag);
+      else sessionStorage.removeItem('seven-potters-user-tag');
+      if (extra?.hpvnUid) sessionStorage.setItem('seven-potters-hpvn-uid', extra.hpvnUid);
+      else sessionStorage.removeItem('seven-potters-hpvn-uid');
 
       return true;
     } catch (err: any) {
@@ -788,7 +824,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   /**
    * Single-device / Mock join without networking
    */
-  const joinGame = (name: string, isGM: boolean) => {
+  const joinGame = (
+    name: string, 
+    isGM: boolean,
+    extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }
+  ) => {
     const existingPlayer = gameState.players.find(p => p.name === name && p.isGM === isGM);
     
     if (existingPlayer) {
@@ -809,10 +849,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       role: null,
       status: 'ALIVE',
       isGM,
+      house: extra?.house,
+      userTag: extra?.userTag,
+      hpvnUid: extra?.hpvnUid,
     };
     
     setCurrentPlayerId(newPlayerId);
     sessionStorage.setItem('seven-potters-session-id', newPlayerId);
+    if (extra?.house) sessionStorage.setItem('seven-potters-house', extra.house);
+    if (extra?.userTag) sessionStorage.setItem('seven-potters-user-tag', extra.userTag);
+    if (extra?.hpvnUid) sessionStorage.setItem('seven-potters-hpvn-uid', extra.hpvnUid);
     
     updateState(prev => ({
       ...prev,
@@ -876,6 +922,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.removeItem('seven-potters-is-host');
     sessionStorage.removeItem('seven-potters-player-name');
     sessionStorage.removeItem('seven-potters-is-gm');
+    sessionStorage.removeItem('seven-potters-house');
+    sessionStorage.removeItem('seven-potters-user-tag');
+    sessionStorage.removeItem('seven-potters-hpvn-uid');
   };
 
   const assignRoles = () => {

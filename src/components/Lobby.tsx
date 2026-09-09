@@ -34,6 +34,7 @@ import {
 } from './ArtAssets';
 import { CardDeckModal } from './CardDeckModal';
 import { openFlooDrawer } from './FlooChatDrawer';
+import { getHouseStyle } from '@/lib/flooFirebase';
 
 export function Lobby() {
   const { 
@@ -249,6 +250,20 @@ export function Lobby() {
                         }`}>
                           {p.name}
                         </span>
+                        {p.house && p.house !== 'NONE' && (
+                          <span 
+                            className={`text-[10px] px-1.5 py-0.5 rounded font-mono shrink-0 flex items-center gap-1 ${getHouseStyle(p.house).pillColor}`}
+                            title={`Nhà ${getHouseStyle(p.house).name}`}
+                          >
+                            <span>{getHouseStyle(p.house).badge}</span>
+                            <span>{getHouseStyle(p.house).name}</span>
+                          </span>
+                        )}
+                        {p.userTag && (
+                          <span className="text-[9px] text-[#ffd88f]/80 font-mono italic shrink-0">
+                            [{p.userTag}]
+                          </span>
+                        )}
                         {isMe && (
                           <span className={`text-[10px] px-1.5 py-0.2 rounded border font-mono shrink-0 ${
                             isFellowDeathEater

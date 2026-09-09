@@ -28,6 +28,9 @@ export interface Player {
   status: PlayerStatus;
   isGM: boolean;
   avatarUrl?: string;
+  house?: string;
+  userTag?: string;
+  hpvnUid?: string;
 }
 
 export type GamePhase = 'LOBBY' | 'DAY' | 'NIGHT' | 'END';

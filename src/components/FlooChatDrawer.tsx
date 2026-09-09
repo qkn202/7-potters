@@ -1,36 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Flame, 
   X, 
-  Send, 
-  LogIn, 
-  LogOut, 
-  User as UserIcon, 
-  Lock, 
   Sparkles, 
-  MessageSquare,
-  AlertCircle,
-  Loader2
+  Loader2,
+  ExternalLink,
+  RotateCw
 } from 'lucide-react';
 import { 
-  getFlooFirebase, 
-  signInHPVN, 
-  signOutHPVN, 
-  fetchFlooUserProfile, 
-  subscribeToFlooShouts, 
-  sendFlooShout, 
-  getHouseStyle, 
-  FlooShout, 
-  FlooUserProfile 
-} from '@/lib/flooFirebase';
-import { 
-  CardCornerFlourish, 
-  PhoenixCrest, 
-  DeathlyHallowsSymbol 
+  CardCornerFlourish
 } from './ArtAssets';
-import { onAuthStateChanged, User } from 'firebase/auth';
 
 interface FlooChatDrawerProps {
   isOpen: boolean;
@@ -48,24 +29,8 @@ export function openFlooDrawer() {
 }
 
 export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<FlooUserProfile | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
-  
-  // Auth Form state
-  const [account, setAccount] = useState('');
-  const [password, setPassword] = useState('');
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-
-  // Chat state
-  const [shouts, setShouts] = useState<FlooShout[]>([]);
-  const [messageText, setMessageText] = useState('');
-  const [isSending, setIsSending] = useState(false);
-  const [chatError, setChatError] = useState<string | null>(null);
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const listContainerRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [iframeKey, setIframeKey] = useState(0);
 
   // Listen for global open event
   useEffect(() => {
@@ -85,118 +50,13 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Auth State Listener
-  useEffect(() => {
-    const { auth } = getFlooFirebase();
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const userProfile = await fetchFlooUserProfile(currentUser.uid);
-        setProfile(userProfile);
-      } else {
-        setProfile(null);
-      }
-      setIsAuthLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Realtime Shouts Subscription (when user is logged in)
-  useEffect(() => {
-    if (!user || !isOpen) return;
-
-    const unsubscribe = subscribeToFlooShouts(
-      (newShouts) => {
-        setShouts(newShouts);
-        setChatError(null);
-      },
-      () => {
-        setChatError('Không thể đồng bộ tin nhắn từ Mạng Floo. Vui lòng thử lại sau.');
-      },
-      40
-    );
-
-    return () => unsubscribe();
-  }, [user, isOpen]);
-
-  // Scroll to bottom on new shouts
-  useEffect(() => {
-    if (isOpen && shouts.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [shouts, isOpen]);
-
-  // Handle Login
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!account.trim() || !password) {
-      setAuthError('Vui lòng nhập đầy đủ tài khoản và mật khẩu HPVN.');
-      return;
-    }
-
-    setIsLoggingIn(true);
-    setAuthError(null);
-
-    try {
-      await signInHPVN(account.trim(), password);
-      setAccount('');
-      setPassword('');
-    } catch (err: any) {
-      console.error('HPVN Login error:', err);
-      let msg = 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.';
-      if (err.message && err.message.includes('401')) {
-        msg = 'Sai tài khoản hoặc mật khẩu HPVN.';
-      } else if (err.message && err.message.includes('user-not-found')) {
-        msg = 'Tài khoản HPVN không tồn tại.';
-      } else if (err.message && err.message.includes('wrong-password')) {
-        msg = 'Mật khẩu không chính xác.';
-      } else if (typeof err.message === 'string') {
-        msg = err.message;
-      }
-      setAuthError(msg);
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
-  // Handle Logout
-  const handleLogout = async () => {
-    try {
-      await signOutHPVN();
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
-  };
-
-  // Handle Send Shout
-  const handleSend = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const text = messageText.trim();
-    if (!text || isSending) return;
-
-    setIsSending(true);
-    setChatError(null);
-
-    try {
-      await sendFlooShout(text);
-      setMessageText('');
-    } catch (err: any) {
-      console.error('Send shout error:', err);
-      setChatError('Gửi tin thất bại. Vui lòng kiểm tra kết nối mạng và thử lại.');
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  // Quick Spell Chips
-  const addQuickText = (spell: string) => {
-    setMessageText((prev) => (prev ? `${prev} ${spell}` : spell));
+  // Reload iframe function
+  const handleReload = () => {
+    setIsLoading(true);
+    setIframeKey((prev) => prev + 1);
   };
 
   if (!isOpen) return null;
-
-  const currentHouseStyle = getHouseStyle(profile?.house);
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-200">
@@ -207,18 +67,18 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
         aria-hidden="true"
       />
 
-      {/* Drawer Panel - Styled in 7 Potters Mahogany & Antique Gold */}
+      {/* Drawer Panel - 7 Potters Mahogany & Antique Gold Framing Full Floo App */}
       <aside 
-        className="relative w-full sm:w-[460px] max-w-full h-full bg-gradient-to-b from-[#1c0f07] via-[#140a04] to-[#0e0703] border-l-2 border-[#bd8436] text-[#ebdcb0] flex flex-col z-50 select-text animate-in slide-in-from-right duration-250 ease-out"
+        className="relative w-full sm:w-[500px] md:w-[540px] max-w-full h-full bg-gradient-to-b from-[#1c0f07] via-[#140a04] to-[#0e0703] border-l-2 border-[#bd8436] text-[#ebdcb0] flex flex-col z-50 select-text animate-in slide-in-from-right duration-250 ease-out overflow-hidden"
         role="dialog"
         aria-label="Mạng Floo HPVN Chat"
       >
         {/* Ornate Corner Flourishes */}
-        <CardCornerFlourish className="absolute top-2 right-12 w-5 h-5 text-[#bd8436] pointer-events-none -scale-x-100 opacity-60" />
-        <CardCornerFlourish className="absolute bottom-2 left-2 w-5 h-5 text-[#bd8436] pointer-events-none -scale-y-100 opacity-60" />
+        <CardCornerFlourish className="absolute top-2 right-14 w-5 h-5 text-[#bd8436] pointer-events-none -scale-x-100 opacity-60 z-20" />
+        <CardCornerFlourish className="absolute bottom-2 left-2 w-5 h-5 text-[#bd8436] pointer-events-none -scale-y-100 opacity-60 z-20" />
 
         {/* 7 Potters Header Banner */}
-        <div className="hpvn-header-banner px-4 py-3.5 flex items-center justify-between gap-3 shrink-0 border-b border-[#7a5229]/80">
+        <div className="hpvn-header-banner px-4 py-3.5 flex items-center justify-between gap-3 shrink-0 border-b border-[#7a5229]/80 z-20">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-2 rounded-xl bg-[#3a2213] text-[#ffd88f] border border-[#ebdcb0]/50 shrink-0">
               <Flame size={18} className="text-[#ffd88f] animate-pulse" />
@@ -234,288 +94,80 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
                 </span>
               </div>
               <p className="text-[11px] text-[#ebdcb0]/80 font-lora truncate">
-                Shoutbox Phù Thủy Thời Gian Thực
+                Đầy đủ tính năng gốc: Emoji, Hình ảnh, Thư Sấm, Cảm xúc
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0 z-10">
-            {user && (
-              <button
-                type="button"
-                onClick={handleLogout}
-                title="Đăng xuất khỏi Mạng Floo"
-                className="p-2 rounded-xl bg-[#1c0f07] hover:bg-red-950/60 text-[#ffd88f] hover:text-red-300 border border-[#7a5229] hover:border-red-700 transition-colors cursor-pointer"
-              >
-                <LogOut size={15} />
-              </button>
-            )}
+          <div className="flex items-center gap-1.5 shrink-0 z-20">
+            <button
+              type="button"
+              onClick={handleReload}
+              title="Tải lại Mạng Floo"
+              className="p-2 rounded-xl bg-[#1c0f07] hover:bg-[#2b170c] text-[#ffd88f] border border-[#7a5229] transition-colors shrink-0 cursor-pointer active:scale-95"
+            >
+              <RotateCw size={15} />
+            </button>
             <button
               type="button"
               onClick={onClose}
               title="Đóng Mạng Floo (Phím Esc)"
-              className="p-2 rounded-xl bg-[#1c0f07] hover:bg-[#2b170c] text-[#ffd88f] border border-[#7a5229] transition-colors cursor-pointer active:scale-95"
+              className="p-2 rounded-xl bg-[#1c0f07] hover:bg-[#2b170c] text-[#ffd88f] border border-[#7a5229] transition-colors shrink-0 cursor-pointer active:scale-95"
             >
               <X size={16} />
             </button>
           </div>
         </div>
 
-        {/* User Identity Sub-bar (if logged in) */}
-        {user && (
-          <div className="px-4 py-2 bg-[#24150c] border-b border-[#7a5229]/80 flex items-center justify-between text-xs shrink-0">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-sm">{currentHouseStyle.badge}</span>
-              <span className="font-title font-bold text-[#ffd88f] truncate text-xs">
-                {profile?.username || user.displayName || user.email || 'Phù thủy'}
-              </span>
-              <span className={`px-2 py-0.5 rounded text-[10px] font-serif font-bold ${currentHouseStyle.pillColor}`}>
-                {currentHouseStyle.name}
-              </span>
+        {/* Main Body: Full Original Floo Network Embedded In-App */}
+        <div className="relative flex-1 w-full h-full min-h-0 bg-[#050d0a]">
+          {isLoading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-[#ebdcb0]/80 gap-3 bg-[#140a04] z-10">
+              <Loader2 size={32} className="animate-spin text-[#bd8436]" />
+              <p className="font-title-magical text-sm sm:text-base text-[#ffd88f] tracking-wide">
+                Đang thắp lửa Mạng Floo...
+              </p>
+              <p className="font-lora text-xs text-[#ebdcb0]/70 text-center max-w-xs leading-relaxed">
+                Đang nạp toàn bộ chức năng gốc: bộ emoji Yahoo, gửi ảnh, thư sấm, thả cảm xúc bùa chú và ghim tin.
+              </p>
             </div>
-            {profile?.userTag && (
-              <span className="px-1.5 py-0.5 rounded bg-[#3a2213] border border-[#bd8436] text-[#ffd88f] text-[10px] font-mono shrink-0">
-                {profile.userTag}
-              </span>
-            )}
-          </div>
-        )}
+          )}
 
-        {/* Main Content Body */}
-        {isAuthLoading ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 text-[#ebdcb0]/80 gap-3">
-            <Loader2 size={26} className="animate-spin text-[#bd8436]" />
-            <p className="font-lora text-xs tracking-wide">Đang kết nối Bột Floo HPVN...</p>
-          </div>
-        ) : !user ? (
-          /* Unauthenticated State: 7 Potters Themed Login Form */
-          <div className="flex-1 flex flex-col justify-center px-5 py-6 overflow-y-auto">
-            <div className="hpvn-panel-gold p-6 rounded-2xl flex flex-col gap-4 relative overflow-hidden">
-              <CardCornerFlourish className="absolute top-2 left-2 w-5 h-5 text-[#bd8436] pointer-events-none opacity-60" />
-              <CardCornerFlourish className="absolute top-2 right-2 w-5 h-5 text-[#bd8436] pointer-events-none -scale-x-100 opacity-60" />
+          <iframe
+            key={iframeKey}
+            src="/api/floo-embed"
+            title="Mạng Floo HPVN Full Feature App"
+            className="w-full h-full border-none"
+            allow="clipboard-write; autoplay; fullscreen"
+            onLoad={() => setIsLoading(false)}
+          />
+        </div>
 
-              <div className="text-center pt-1">
-                <PhoenixCrest className="w-14 h-14 mx-auto mb-2 opacity-90" />
-                <h3 className="font-title-magical font-bold text-lg text-[#ffd88f] tracking-wide uppercase">
-                  Đăng Nhập Mạng Floo
-                </h3>
-                <p className="text-xs text-[#ebdcb0]/90 font-lora mt-1 leading-relaxed">
-                  Đăng nhập tài khoản HPVN của bạn để trò chuyện và phối hợp chiến thuật cùng các phù thủy trong ván cờ.
-                </p>
-              </div>
+        {/* 7 Potters Themed Bottom Status Strip */}
+        <div className="px-3.5 py-2 bg-[#140b05] border-t border-[#7a5229]/80 flex items-center justify-between text-[11px] text-[#bd8436] font-lora shrink-0 z-20">
+          <span className="flex items-center gap-1.5 text-[#ffd88f]">
+            <Sparkles size={12} className="text-[#ffd88f]" />
+            Mạng Floo HPVN · Full tính năng
+          </span>
 
-              {authError && (
-                <div className="p-3 rounded-xl bg-red-950/80 border border-red-700/80 text-red-200 text-xs flex items-start gap-2 animate-in fade-in">
-                  <AlertCircle size={15} className="text-red-400 shrink-0 mt-0.5" />
-                  <span className="leading-snug font-lora">{authError}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleLogin} className="flex flex-col gap-3.5">
-                <div>
-                  <label className="block text-[11px] font-serif font-bold text-[#ffd88f] uppercase tracking-wider mb-1">
-                    Tên tài khoản HPVN (hoặc Email)
-                  </label>
-                  <div className="relative">
-                    <UserIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bd8436]" />
-                    <input
-                      type="text"
-                      value={account}
-                      onChange={(e) => setAccount(e.target.value)}
-                      placeholder="Ví dụ: HarryPotter hoặc email@hpvn..."
-                      disabled={isLoggingIn}
-                      className="w-full pl-8 pr-3 py-2.5 rounded-xl bg-[#140b05] border border-[#7a5229] text-[#f5eedb] placeholder-[#8c622e] font-lora text-xs focus:outline-none focus:border-[#ffd88f] disabled:opacity-50"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-serif font-bold text-[#ffd88f] uppercase tracking-wider mb-1">
-                    Mật khẩu
-                  </label>
-                  <div className="relative">
-                    <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bd8436]" />
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Nhập mật khẩu..."
-                      disabled={isLoggingIn}
-                      className="w-full pl-8 pr-3 py-2.5 rounded-xl bg-[#140b05] border border-[#7a5229] text-[#f5eedb] placeholder-[#8c622e] font-lora text-xs focus:outline-none focus:border-[#ffd88f] disabled:opacity-50"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoggingIn}
-                  className="hpvn-btn-gold w-full mt-1 py-3 px-4 rounded-xl font-serif font-bold text-xs tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98"
-                >
-                  {isLoggingIn ? (
-                    <>
-                      <Loader2 size={15} className="animate-spin text-[#ffd88f]" />
-                      <span>Đang ném Bột Floo...</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogIn size={15} />
-                      <span>Bước Vào Mạng Floo</span>
-                    </>
-                  )}
-                </button>
-              </form>
-
-              <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#bd8436] font-lora text-center pt-1 border-t border-[#7a5229]/40">
-                <DeathlyHallowsSymbol className="w-3.5 h-3.5 text-[#bd8436]" />
-                <span>Phiên đăng nhập được ghi nhớ an toàn trên thiết bị này.</span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Authenticated State: Realtime Feed + Composer in 7 Potters Theme */
-          <div className="flex-1 flex flex-col min-h-0">
-            {/* Shouts Feed */}
-            <div 
-              ref={listContainerRef} 
-              className="flex-1 overflow-y-auto p-3.5 space-y-2.5 overscroll-contain"
-            >
-              {chatError && (
-                <div className="p-2.5 rounded-xl bg-red-950/80 border border-red-700 text-red-200 text-xs flex items-center gap-2 font-lora">
-                  <AlertCircle size={14} className="text-red-400 shrink-0" />
-                  <span>{chatError}</span>
-                </div>
-              )}
-
-              {shouts.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-6 text-[#bd8436]">
-                  <MessageSquare size={32} className="mb-2 opacity-50" />
-                  <p className="font-title text-sm text-[#ffd88f]">Mạng Floo đang tĩnh lặng</p>
-                  <p className="text-xs text-[#ebdcb0]/70 font-lora mt-0.5">Hãy là người đầu tiên gửi tin nhắn lửa vào lò sưởi!</p>
-                </div>
-              ) : (
-                shouts.map((shout) => {
-                  const houseStyle = getHouseStyle(shout.house);
-                  const isSelf = shout.uid === user.uid;
-
-                  return (
-                    <div 
-                      key={shout.id}
-                      className={`p-3 rounded-xl border text-xs flex flex-col gap-1.5 transition-colors ${
-                        isSelf 
-                          ? 'bg-[#24140b] border-[#bd8436] ml-2' 
-                          : 'bg-[#160c06] border-[#7a5229]/70 mr-2'
-                      }`}
-                    >
-                      {/* Message Header */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="text-xs">{houseStyle.badge}</span>
-                          <span className={`font-serif font-bold text-[12px] truncate ${houseStyle.textColor}`}>
-                            {shout.name}
-                          </span>
-                          <span className={`px-1.5 py-0.2 rounded text-[9px] font-serif font-bold ${houseStyle.pillColor}`}>
-                            {houseStyle.name}
-                          </span>
-                          {shout.userTag && (
-                            <span className="px-1 py-0.2 rounded bg-[#3a2213] border border-[#bd8436]/60 text-[#ffd88f] text-[9px] font-mono">
-                              {shout.userTag}
-                            </span>
-                          )}
-                        </div>
-
-                        {shout.createdAt && (
-                          <span className="text-[10px] font-mono text-[#bd8436] shrink-0">
-                            {shout.createdAt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Message Body */}
-                      <p className="text-[#ebdcb0] font-lora text-xs leading-relaxed break-words whitespace-pre-wrap">
-                        {shout.message}
-                      </p>
-
-                      {/* Attached Image if any */}
-                      {(shout.imageUrl || shout.imageReplyUrl) && (
-                        <div className="mt-1 rounded-lg overflow-hidden border border-[#7a5229]/70 max-h-48 bg-black/40">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img 
-                            src={shout.imageUrl || shout.imageReplyUrl || ''} 
-                            alt="Hình ảnh Mạng Floo" 
-                            className="w-full h-full object-contain"
-                            loading="lazy"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Quick Spell Buttons for 7 Potters Theme */}
-            <div className="px-3 py-2 bg-[#1a0e07] border-t border-[#7a5229]/70 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-              <span className="text-[10px] font-serif text-[#bd8436] font-bold shrink-0 flex items-center gap-1">
-                <Sparkles size={11} className="text-[#ffd88f]" /> Câu niệm:
-              </span>
-              {[
-                '⚡ Bảo vệ Harry!',
-                '🪄 Expelliarmus!',
-                '💀 Ai là Tử Thần Thực Tử?',
-                '🦉 Hội Phượng Hoàng tiến lên!',
-                '🛡️ Bọc lót tôi!'
-              ].map((spell) => (
-                <button
-                  key={spell}
-                  type="button"
-                  onClick={() => addQuickText(spell)}
-                  className="px-2.5 py-1 rounded-lg bg-[#28180e] hover:bg-[#3a2213] border border-[#7a5229] text-[11px] font-lora text-[#ffd88f] shrink-0 transition-colors cursor-pointer active:scale-95"
-                >
-                  {spell}
-                </button>
-              ))}
-            </div>
-
-            {/* Composer Box in 7 Potters Theme */}
-            <form 
-              onSubmit={handleSend}
-              className="p-3 bg-[#140b05] border-t-2 border-[#7a5229] flex items-center gap-2 shrink-0"
-            >
-              <input
-                type="text"
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder="Gửi tin nhắn vào Mạng Floo… (Enter)"
-                maxLength={500}
-                disabled={isSending}
-                className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#1c0f07] border border-[#7a5229] text-[#f5eedb] placeholder-[#8c622e] text-xs font-lora focus:outline-none focus:border-[#ffd88f] disabled:opacity-50"
-              />
-
-              <button
-                type="submit"
-                disabled={!messageText.trim() || isSending}
-                className="hpvn-btn-gold px-4 py-2.5 rounded-xl font-serif font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:pointer-events-none transition-all shrink-0 active:scale-95"
-              >
-                {isSending ? (
-                  <Loader2 size={15} className="animate-spin text-[#ffd88f]" />
-                ) : (
-                  <>
-                    <Send size={14} className="text-[#ffd88f]" />
-                    <span className="hidden sm:inline">Gửi</span>
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        )}
+          <a
+            href="https://www.hpvn-archive.net/floo?hpvn_update=ea7cfe4"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[#ffd88f] flex items-center gap-1 text-[10px] text-[#bd8436] transition-colors"
+            title="Mở toàn màn hình trong tab mới nếu cần"
+          >
+            <span>Mở ngoài</span>
+            <ExternalLink size={10} />
+          </a>
+        </div>
       </aside>
     </div>
   );
 }
 
 /**
- * Top Header Quick Button for Mạng Floo Drawer (Harmonized with 7 Potters Theme)
+ * Top Header Quick Button for Mạng Floo Drawer (7 Potters Theme)
  */
 export function FlooHeaderTrigger({ onClick, className = "" }: { onClick: () => void; className?: string }) {
   return (
@@ -535,7 +187,7 @@ export function FlooHeaderTrigger({ onClick, className = "" }: { onClick: () => 
 }
 
 /**
- * Floating Magic Handle Widget on bottom/right edge (Harmonized with 7 Potters Theme)
+ * Floating Magic Handle Widget on bottom/right edge (7 Potters Theme)
  */
 export function FlooFloatingTrigger({ onClick }: { onClick: () => void }) {
   return (

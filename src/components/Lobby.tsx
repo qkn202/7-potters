@@ -166,9 +166,9 @@ export function Lobby() {
           <button
             type="button"
             onClick={openFlooDrawer}
-            className="hpvn-btn-floo px-3.5 sm:px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-2 cursor-pointer text-emerald-200 border border-emerald-500/80 bg-emerald-950/90 hover:bg-emerald-900 transition-colors"
+            className="hpvn-btn-gold px-3.5 sm:px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-2 cursor-pointer text-[#ffd88f]"
           >
-            <Flame size={15} className="text-emerald-400 animate-pulse" /> Mạng Floo (Chat HPVN)
+            <Flame size={15} className="text-[#ffd88f] animate-pulse" /> Mạng Floo (Chat HPVN)
           </button>
         </div>
       </div>

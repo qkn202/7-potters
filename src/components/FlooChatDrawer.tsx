@@ -10,11 +10,9 @@ import {
   User as UserIcon, 
   Lock, 
   Sparkles, 
-  Radio, 
   MessageSquare,
   AlertCircle,
-  Loader2,
-  ChevronDown
+  Loader2
 } from 'lucide-react';
 import { 
   getFlooFirebase, 
@@ -27,6 +25,11 @@ import {
   FlooShout, 
   FlooUserProfile 
 } from '@/lib/flooFirebase';
+import { 
+  CardCornerFlourish, 
+  PhoenixCrest, 
+  DeathlyHallowsSymbol 
+} from './ArtAssets';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
 interface FlooChatDrawerProps {
@@ -48,12 +51,6 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<FlooUserProfile | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-
-  useEffect(() => {
-    const handleOpen = () => onOpen?.();
-    window.addEventListener('open-floo-drawer', handleOpen);
-    return () => window.removeEventListener('open-floo-drawer', handleOpen);
-  }, [onOpen]);
   
   // Auth Form state
   const [account, setAccount] = useState('');
@@ -69,6 +66,13 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
+
+  // Listen for global open event
+  useEffect(() => {
+    const handleOpen = () => onOpen?.();
+    window.addEventListener('open-floo-drawer', handleOpen);
+    return () => window.removeEventListener('open-floo-drawer', handleOpen);
+  }, [onOpen]);
 
   // Close on Escape key
   useEffect(() => {
@@ -107,10 +111,10 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
         setShouts(newShouts);
         setChatError(null);
       },
-      (err) => {
+      () => {
         setChatError('Không thể đồng bộ tin nhắn từ Mạng Floo. Vui lòng thử lại sau.');
       },
-      35
+      40
     );
 
     return () => unsubscribe();
@@ -196,48 +200,52 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-200">
-      {/* Backdrop */}
+      {/* Dark Ambient Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity" 
+        className="fixed inset-0 bg-black/85 backdrop-blur-xs transition-opacity" 
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Drawer Panel */}
+      {/* Drawer Panel - Styled in 7 Potters Mahogany & Antique Gold */}
       <aside 
-        className="relative w-full sm:w-[460px] max-w-full h-full bg-[#081b13] border-l-2 border-emerald-600/90 text-gray-200 flex flex-col z-50 select-text animate-in slide-in-from-right duration-250 ease-out"
+        className="relative w-full sm:w-[460px] max-w-full h-full bg-gradient-to-b from-[#1c0f07] via-[#140a04] to-[#0e0703] border-l-2 border-[#bd8436] text-[#ebdcb0] flex flex-col z-50 select-text animate-in slide-in-from-right duration-250 ease-out"
         role="dialog"
         aria-label="Mạng Floo HPVN Chat"
       >
-        {/* Drawer Header */}
-        <div className="px-4 py-3 bg-[#05140e] border-b-2 border-emerald-700/60 flex items-center justify-between gap-3 shrink-0">
+        {/* Ornate Corner Flourishes */}
+        <CardCornerFlourish className="absolute top-2 right-12 w-5 h-5 text-[#bd8436] pointer-events-none -scale-x-100 opacity-60" />
+        <CardCornerFlourish className="absolute bottom-2 left-2 w-5 h-5 text-[#bd8436] pointer-events-none -scale-y-100 opacity-60" />
+
+        {/* 7 Potters Header Banner */}
+        <div className="hpvn-header-banner px-4 py-3.5 flex items-center justify-between gap-3 shrink-0 border-b border-[#7a5229]/80">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-emerald-950 border border-emerald-500/70 flex items-center justify-center shrink-0">
-              <Flame size={18} className="text-emerald-400 animate-pulse" />
+            <div className="p-2 rounded-xl bg-[#3a2213] text-[#ffd88f] border border-[#ebdcb0]/50 shrink-0">
+              <Flame size={18} className="text-[#ffd88f] animate-pulse" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="font-serif font-bold text-sm tracking-wider text-emerald-300 uppercase truncate">
-                  Mạng Floo · HPVN
+                <h2 className="font-title-magical font-bold text-sm sm:text-base tracking-wide text-[#ffd88f] truncate">
+                  Mạng Floo · Seven Potters
                 </h2>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-950/90 border border-emerald-600/70 text-[10px] font-mono text-emerald-400 shrink-0">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#2b170c] border border-[#7a5229] text-[10px] font-mono text-[#ffd88f] shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                   Live
                 </span>
               </div>
-              <p className="text-[11px] text-emerald-300/70 font-serif truncate">
-                Shoutbox Cộng Đồng Phù Thủy Thời Gian Thực
+              <p className="text-[11px] text-[#ebdcb0]/80 font-lora truncate">
+                Shoutbox Phù Thủy Thời Gian Thực
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0 z-10">
             {user && (
               <button
                 type="button"
                 onClick={handleLogout}
                 title="Đăng xuất khỏi Mạng Floo"
-                className="p-1.5 rounded-lg text-emerald-400/80 hover:text-red-400 bg-emerald-950/60 hover:bg-red-950/50 border border-emerald-700/50 hover:border-red-700/60 transition-colors cursor-pointer"
+                className="p-2 rounded-xl bg-[#1c0f07] hover:bg-red-950/60 text-[#ffd88f] hover:text-red-300 border border-[#7a5229] hover:border-red-700 transition-colors cursor-pointer"
               >
                 <LogOut size={15} />
               </button>
@@ -245,20 +253,20 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
             <button
               type="button"
               onClick={onClose}
-              title="Đóng ngăn kéo Mạng Floo (Phím Esc)"
-              className="p-1.5 rounded-lg text-emerald-300/80 hover:text-emerald-100 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-700/50 hover:border-emerald-500/70 transition-colors cursor-pointer"
+              title="Đóng Mạng Floo (Phím Esc)"
+              className="p-2 rounded-xl bg-[#1c0f07] hover:bg-[#2b170c] text-[#ffd88f] border border-[#7a5229] transition-colors cursor-pointer active:scale-95"
             >
-              <X size={17} />
+              <X size={16} />
             </button>
           </div>
         </div>
 
         {/* User Identity Sub-bar (if logged in) */}
         {user && (
-          <div className="px-4 py-2 bg-[#0a2319] border-b border-emerald-800/60 flex items-center justify-between text-xs shrink-0">
+          <div className="px-4 py-2 bg-[#24150c] border-b border-[#7a5229]/80 flex items-center justify-between text-xs shrink-0">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-base">{currentHouseStyle.badge}</span>
-              <span className="font-serif font-bold text-emerald-200 truncate">
+              <span className="text-sm">{currentHouseStyle.badge}</span>
+              <span className="font-title font-bold text-[#ffd88f] truncate text-xs">
                 {profile?.username || user.displayName || user.email || 'Phù thủy'}
               </span>
               <span className={`px-2 py-0.5 rounded text-[10px] font-serif font-bold ${currentHouseStyle.pillColor}`}>
@@ -266,7 +274,7 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
               </span>
             </div>
             {profile?.userTag && (
-              <span className="px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-600/60 text-amber-300 text-[10px] font-mono shrink-0">
+              <span className="px-1.5 py-0.5 rounded bg-[#3a2213] border border-[#bd8436] text-[#ffd88f] text-[10px] font-mono shrink-0">
                 {profile.userTag}
               </span>
             )}
@@ -275,64 +283,65 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
 
         {/* Main Content Body */}
         {isAuthLoading ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 text-emerald-300/80 gap-3">
-            <Loader2 size={26} className="animate-spin text-emerald-400" />
-            <p className="font-serif text-xs tracking-wide">Đang kết nối Mạng Floo HPVN...</p>
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-[#ebdcb0]/80 gap-3">
+            <Loader2 size={26} className="animate-spin text-[#bd8436]" />
+            <p className="font-lora text-xs tracking-wide">Đang kết nối Bột Floo HPVN...</p>
           </div>
         ) : !user ? (
-          /* Unauthenticated State: HPVN Login Form */
-          <div className="flex-1 flex flex-col justify-center px-6 py-8 overflow-y-auto">
-            <div className="p-5 rounded-2xl bg-[#0a2319] border-2 border-emerald-600/70 flex flex-col gap-4">
-              <div className="text-center">
-                <div className="w-12 h-12 rounded-xl bg-emerald-950 border border-emerald-500/80 mx-auto flex items-center justify-center mb-2.5">
-                  <Flame size={24} className="text-emerald-400 animate-pulse" />
-                </div>
-                <h3 className="font-serif font-bold text-base text-emerald-200 uppercase tracking-wider">
+          /* Unauthenticated State: 7 Potters Themed Login Form */
+          <div className="flex-1 flex flex-col justify-center px-5 py-6 overflow-y-auto">
+            <div className="hpvn-panel-gold p-6 rounded-2xl flex flex-col gap-4 relative overflow-hidden">
+              <CardCornerFlourish className="absolute top-2 left-2 w-5 h-5 text-[#bd8436] pointer-events-none opacity-60" />
+              <CardCornerFlourish className="absolute top-2 right-2 w-5 h-5 text-[#bd8436] pointer-events-none -scale-x-100 opacity-60" />
+
+              <div className="text-center pt-1">
+                <PhoenixCrest className="w-14 h-14 mx-auto mb-2 opacity-90" />
+                <h3 className="font-title-magical font-bold text-lg text-[#ffd88f] tracking-wide uppercase">
                   Đăng Nhập Mạng Floo
                 </h3>
-                <p className="text-xs text-emerald-300/70 font-serif mt-1 leading-relaxed">
-                  Nhập tài khoản HPVN của bạn để mở khóa toàn bộ tin nhắn và trò chuyện cùng các phù thủy trong ván đấu.
+                <p className="text-xs text-[#ebdcb0]/90 font-lora mt-1 leading-relaxed">
+                  Đăng nhập tài khoản HPVN của bạn để trò chuyện và phối hợp chiến thuật cùng các phù thủy trong ván cờ.
                 </p>
               </div>
 
               {authError && (
-                <div className="p-3 rounded-xl bg-red-950/80 border border-red-600/80 text-red-200 text-xs flex items-start gap-2 animate-in fade-in">
+                <div className="p-3 rounded-xl bg-red-950/80 border border-red-700/80 text-red-200 text-xs flex items-start gap-2 animate-in fade-in">
                   <AlertCircle size={15} className="text-red-400 shrink-0 mt-0.5" />
-                  <span className="leading-snug">{authError}</span>
+                  <span className="leading-snug font-lora">{authError}</span>
                 </div>
               )}
 
               <form onSubmit={handleLogin} className="flex flex-col gap-3.5">
                 <div>
-                  <label className="block text-[11px] font-serif font-bold text-emerald-300 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-serif font-bold text-[#ffd88f] uppercase tracking-wider mb-1">
                     Tên tài khoản HPVN (hoặc Email)
                   </label>
                   <div className="relative">
-                    <UserIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400/60" />
+                    <UserIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bd8436]" />
                     <input
                       type="text"
                       value={account}
                       onChange={(e) => setAccount(e.target.value)}
-                      placeholder="Ví dụ: HarryPotter hoặc mail@hpvn..."
+                      placeholder="Ví dụ: HarryPotter hoặc email@hpvn..."
                       disabled={isLoggingIn}
-                      className="w-full pl-8 pr-3 py-2.5 rounded-xl bg-[#05140e] border border-emerald-600/70 text-emerald-100 text-xs placeholder:text-emerald-600/50 focus:outline-hidden focus:border-emerald-400 font-serif disabled:opacity-50"
+                      className="w-full pl-8 pr-3 py-2.5 rounded-xl bg-[#140b05] border border-[#7a5229] text-[#f5eedb] placeholder-[#8c622e] font-lora text-xs focus:outline-none focus:border-[#ffd88f] disabled:opacity-50"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-serif font-bold text-emerald-300 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-serif font-bold text-[#ffd88f] uppercase tracking-wider mb-1">
                     Mật khẩu
                   </label>
                   <div className="relative">
-                    <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400/60" />
+                    <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bd8436]" />
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Nhập mật khẩu..."
                       disabled={isLoggingIn}
-                      className="w-full pl-8 pr-3 py-2.5 rounded-xl bg-[#05140e] border border-emerald-600/70 text-emerald-100 text-xs placeholder:text-emerald-600/50 focus:outline-hidden focus:border-emerald-400 font-serif disabled:opacity-50"
+                      className="w-full pl-8 pr-3 py-2.5 rounded-xl bg-[#140b05] border border-[#7a5229] text-[#f5eedb] placeholder-[#8c622e] font-lora text-xs focus:outline-none focus:border-[#ffd88f] disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -340,47 +349,48 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
                 <button
                   type="submit"
                   disabled={isLoggingIn}
-                  className="w-full mt-1 py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-600 border border-emerald-400/80 text-emerald-50 font-serif font-bold text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50 active:scale-98"
+                  className="hpvn-btn-gold w-full mt-1 py-3 px-4 rounded-xl font-serif font-bold text-xs tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98"
                 >
                   {isLoggingIn ? (
                     <>
-                      <Loader2 size={15} className="animate-spin" />
-                      Đang xác thực qua Bột Floo...
+                      <Loader2 size={15} className="animate-spin text-[#ffd88f]" />
+                      <span>Đang ném Bột Floo...</span>
                     </>
                   ) : (
                     <>
                       <LogIn size={15} />
-                      Bước Vào Mạng Floo
+                      <span>Bước Vào Mạng Floo</span>
                     </>
                   )}
                 </button>
               </form>
 
-              <p className="text-[10px] text-emerald-400/60 text-center font-mono">
-                Phiên đăng nhập được ghi nhớ an toàn trên trình duyệt này.
-              </p>
+              <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#bd8436] font-lora text-center pt-1 border-t border-[#7a5229]/40">
+                <DeathlyHallowsSymbol className="w-3.5 h-3.5 text-[#bd8436]" />
+                <span>Phiên đăng nhập được ghi nhớ an toàn trên thiết bị này.</span>
+              </div>
             </div>
           </div>
         ) : (
-          /* Authenticated State: Realtime Feed + Composer */
+          /* Authenticated State: Realtime Feed + Composer in 7 Potters Theme */
           <div className="flex-1 flex flex-col min-h-0">
             {/* Shouts Feed */}
             <div 
               ref={listContainerRef} 
-              className="flex-1 overflow-y-auto p-4 space-y-3 overscroll-contain"
+              className="flex-1 overflow-y-auto p-3.5 space-y-2.5 overscroll-contain"
             >
               {chatError && (
-                <div className="p-2.5 rounded-xl bg-red-950/80 border border-red-700 text-red-200 text-xs flex items-center gap-2">
+                <div className="p-2.5 rounded-xl bg-red-950/80 border border-red-700 text-red-200 text-xs flex items-center gap-2 font-lora">
                   <AlertCircle size={14} className="text-red-400 shrink-0" />
                   <span>{chatError}</span>
                 </div>
               )}
 
               {shouts.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-6 text-emerald-400/70">
+                <div className="h-full flex flex-col items-center justify-center text-center p-6 text-[#bd8436]">
                   <MessageSquare size={32} className="mb-2 opacity-50" />
-                  <p className="font-serif text-xs">Mạng Floo đang tĩnh lặng.</p>
-                  <p className="text-[11px] text-emerald-500/60 mt-0.5">Hãy là người đầu tiên gửi tin nhắn lửa!</p>
+                  <p className="font-title text-sm text-[#ffd88f]">Mạng Floo đang tĩnh lặng</p>
+                  <p className="text-xs text-[#ebdcb0]/70 font-lora mt-0.5">Hãy là người đầu tiên gửi tin nhắn lửa vào lò sưởi!</p>
                 </div>
               ) : (
                 shouts.map((shout) => {
@@ -392,8 +402,8 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
                       key={shout.id}
                       className={`p-3 rounded-xl border text-xs flex flex-col gap-1.5 transition-colors ${
                         isSelf 
-                          ? 'bg-[#0e2c20] border-emerald-500/70 ml-2' 
-                          : 'bg-[#071911] border-emerald-800/60 mr-2'
+                          ? 'bg-[#24140b] border-[#bd8436] ml-2' 
+                          : 'bg-[#160c06] border-[#7a5229]/70 mr-2'
                       }`}
                     >
                       {/* Message Header */}
@@ -407,27 +417,27 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
                             {houseStyle.name}
                           </span>
                           {shout.userTag && (
-                            <span className="px-1 py-0.2 rounded bg-amber-950/70 border border-amber-700/50 text-amber-300 text-[9px] font-mono">
+                            <span className="px-1 py-0.2 rounded bg-[#3a2213] border border-[#bd8436]/60 text-[#ffd88f] text-[9px] font-mono">
                               {shout.userTag}
                             </span>
                           )}
                         </div>
 
                         {shout.createdAt && (
-                          <span className="text-[10px] font-mono text-emerald-400/60 shrink-0">
+                          <span className="text-[10px] font-mono text-[#bd8436] shrink-0">
                             {shout.createdAt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         )}
                       </div>
 
                       {/* Message Body */}
-                      <p className="text-emerald-100 font-sans text-xs leading-relaxed break-words whitespace-pre-wrap">
+                      <p className="text-[#ebdcb0] font-lora text-xs leading-relaxed break-words whitespace-pre-wrap">
                         {shout.message}
                       </p>
 
                       {/* Attached Image if any */}
                       {(shout.imageUrl || shout.imageReplyUrl) && (
-                        <div className="mt-1 rounded-lg overflow-hidden border border-emerald-700/50 max-h-48 bg-black/40">
+                        <div className="mt-1 rounded-lg overflow-hidden border border-[#7a5229]/70 max-h-48 bg-black/40">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img 
                             src={shout.imageUrl || shout.imageReplyUrl || ''} 
@@ -444,10 +454,10 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Spell Buttons for 7 Potters */}
-            <div className="px-3 py-1.5 bg-[#061710] border-t border-emerald-800/60 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-              <span className="text-[10px] font-serif text-emerald-400/80 font-bold shrink-0 flex items-center gap-1">
-                <Sparkles size={11} /> Câu niệm:
+            {/* Quick Spell Buttons for 7 Potters Theme */}
+            <div className="px-3 py-2 bg-[#1a0e07] border-t border-[#7a5229]/70 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+              <span className="text-[10px] font-serif text-[#bd8436] font-bold shrink-0 flex items-center gap-1">
+                <Sparkles size={11} className="text-[#ffd88f]" /> Câu niệm:
               </span>
               {[
                 '⚡ Bảo vệ Harry!',
@@ -460,17 +470,17 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
                   key={spell}
                   type="button"
                   onClick={() => addQuickText(spell)}
-                  className="px-2 py-1 rounded-lg bg-emerald-950/80 hover:bg-emerald-900/90 border border-emerald-700/60 text-[11px] font-serif text-emerald-200 shrink-0 transition-colors cursor-pointer active:scale-95"
+                  className="px-2.5 py-1 rounded-lg bg-[#28180e] hover:bg-[#3a2213] border border-[#7a5229] text-[11px] font-lora text-[#ffd88f] shrink-0 transition-colors cursor-pointer active:scale-95"
                 >
                   {spell}
                 </button>
               ))}
             </div>
 
-            {/* Composer Box */}
+            {/* Composer Box in 7 Potters Theme */}
             <form 
               onSubmit={handleSend}
-              className="p-3 bg-[#05140e] border-t-2 border-emerald-700/70 flex items-center gap-2 shrink-0"
+              className="p-3 bg-[#140b05] border-t-2 border-[#7a5229] flex items-center gap-2 shrink-0"
             >
               <input
                 type="text"
@@ -479,19 +489,19 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
                 placeholder="Gửi tin nhắn vào Mạng Floo… (Enter)"
                 maxLength={500}
                 disabled={isSending}
-                className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#0a2319] border border-emerald-600/70 text-emerald-100 text-xs placeholder:text-emerald-500/50 focus:outline-hidden focus:border-emerald-400 font-sans disabled:opacity-50"
+                className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#1c0f07] border border-[#7a5229] text-[#f5eedb] placeholder-[#8c622e] text-xs font-lora focus:outline-none focus:border-[#ffd88f] disabled:opacity-50"
               />
 
               <button
                 type="submit"
                 disabled={!messageText.trim() || isSending}
-                className="px-3.5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 border border-emerald-400 text-emerald-100 font-serif font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:pointer-events-none transition-all shrink-0 active:scale-95"
+                className="hpvn-btn-gold px-4 py-2.5 rounded-xl font-serif font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:pointer-events-none transition-all shrink-0 active:scale-95"
               >
                 {isSending ? (
-                  <Loader2 size={15} className="animate-spin" />
+                  <Loader2 size={15} className="animate-spin text-[#ffd88f]" />
                 ) : (
                   <>
-                    <Send size={14} />
+                    <Send size={14} className="text-[#ffd88f]" />
                     <span className="hidden sm:inline">Gửi</span>
                   </>
                 )}
@@ -505,17 +515,17 @@ export function FlooChatDrawer({ isOpen, onClose, onOpen }: FlooChatDrawerProps)
 }
 
 /**
- * Top Header Quick Button for Mạng Floo Drawer
+ * Top Header Quick Button for Mạng Floo Drawer (Harmonized with 7 Potters Theme)
  */
 export function FlooHeaderTrigger({ onClick, className = "" }: { onClick: () => void; className?: string }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      title="Mở Mạng Floo HPVN (Chat In-App thời gian thực)"
-      className={`hpvn-btn-floo px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1.5 cursor-pointer text-emerald-200 border border-emerald-500/80 hover:border-emerald-400 bg-emerald-950/90 hover:bg-emerald-900 transition-colors ${className}`}
+      title="Mở Mạng Floo (Chat In-App Seven Potters)"
+      className={`hpvn-btn-gold px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1.5 cursor-pointer text-[#ffd88f] border border-[#7a5229] transition-colors ${className}`}
     >
-      <Flame size={14} className="text-emerald-400 animate-pulse shrink-0" />
+      <Flame size={14} className="text-[#ffd88f] animate-pulse shrink-0" />
       <span className="text-[11px] sm:text-xs tracking-wide">
         Mạng Floo <span className="hidden md:inline">(Chat)</span>
       </span>
@@ -525,7 +535,7 @@ export function FlooHeaderTrigger({ onClick, className = "" }: { onClick: () => 
 }
 
 /**
- * Floating Magic Handle Widget on bottom/right edge
+ * Floating Magic Handle Widget on bottom/right edge (Harmonized with 7 Potters Theme)
  */
 export function FlooFloatingTrigger({ onClick }: { onClick: () => void }) {
   return (
@@ -533,19 +543,19 @@ export function FlooFloatingTrigger({ onClick }: { onClick: () => void }) {
       <button
         type="button"
         onClick={onClick}
-        className="group px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-[#062419] hover:bg-[#0a3826] border-2 border-emerald-500/90 hover:border-emerald-400 text-emerald-200 font-serif font-bold text-xs flex items-center gap-2 transition-all cursor-pointer active:scale-95 select-none"
+        className="group px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-[#1c0f07] hover:bg-[#28180e] border-2 border-[#bd8436] text-[#ffd88f] font-serif font-bold text-xs flex items-center gap-2 transition-all cursor-pointer active:scale-95 select-none"
         title="Mở Mạng Floo HPVN (Chat In-App)"
       >
         <div className="relative flex items-center justify-center">
-          <Flame size={17} className="text-emerald-400 group-hover:scale-110 transition-transform" />
+          <Flame size={17} className="text-[#ffd88f] group-hover:scale-110 transition-transform" />
           <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
         </div>
         <div className="flex flex-col text-left leading-tight">
-          <span className="text-[11px] font-black tracking-wider uppercase text-emerald-300">
+          <span className="text-[11px] font-black tracking-wider uppercase text-[#ffd88f]">
             Mạng Floo
           </span>
-          <span className="text-[9px] font-mono text-emerald-400/80 hidden sm:inline">
-            HPVN Chat In-App 💬
+          <span className="text-[9px] font-lora text-[#bd8436] hidden sm:inline">
+            Chat In-App 💬
           </span>
         </div>
       </button>

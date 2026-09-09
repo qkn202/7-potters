@@ -199,7 +199,7 @@ export async function sendFlooShout(message: string, replyToId?: string | null):
 }
 
 /**
- * Helper formatting House styling & badges.
+ * Helper formatting House styling & badges harmonized with 7 Potters theme.
  */
 export function getHouseStyle(houseRaw?: string) {
   const house = (houseRaw || "").toUpperCase();
@@ -208,46 +208,46 @@ export function getHouseStyle(houseRaw?: string) {
       return {
         name: "Gryffindor",
         badge: "🦁",
-        textColor: "text-amber-300",
-        borderColor: "border-red-600/70",
+        textColor: "text-[#ffd88f]",
+        borderColor: "border-red-700/80",
         bgColor: "bg-red-950/70",
-        pillColor: "bg-red-900/80 text-amber-200 border border-red-700/60",
+        pillColor: "bg-[#330e0e] text-[#ffd88f] border border-red-700/70",
       };
     case "SLYTHERIN":
       return {
         name: "Slytherin",
         badge: "🐍",
         textColor: "text-emerald-300",
-        borderColor: "border-emerald-600/70",
+        borderColor: "border-emerald-700/80",
         bgColor: "bg-emerald-950/70",
-        pillColor: "bg-emerald-900/80 text-emerald-200 border border-emerald-700/60",
+        pillColor: "bg-[#0c2419] text-emerald-300 border border-emerald-700/70",
       };
     case "RAVENCLAW":
       return {
         name: "Ravenclaw",
         badge: "🦅",
         textColor: "text-sky-300",
-        borderColor: "border-sky-600/70",
+        borderColor: "border-sky-700/80",
         bgColor: "bg-sky-950/70",
-        pillColor: "bg-sky-900/80 text-sky-200 border border-sky-700/60",
+        pillColor: "bg-[#0c1f2d] text-sky-300 border border-sky-700/70",
       };
     case "HUFFLEPUFF":
       return {
         name: "Hufflepuff",
         badge: "🦡",
-        textColor: "text-yellow-300",
-        borderColor: "border-amber-600/70",
+        textColor: "text-amber-300",
+        borderColor: "border-amber-700/80",
         bgColor: "bg-amber-950/70",
-        pillColor: "bg-amber-900/80 text-amber-200 border border-amber-700/60",
+        pillColor: "bg-[#2a200c] text-amber-300 border border-amber-700/70",
       };
     default:
       return {
         name: "Phù thủy",
         badge: "🧙",
         textColor: "text-[#ebdcb0]",
-        borderColor: "border-[#7a5229]/60",
-        bgColor: "bg-[#181109]/80",
-        pillColor: "bg-[#2a1a0c] text-[#ebdcb0] border border-[#7a5229]/60",
+        borderColor: "border-[#7a5229]/70",
+        bgColor: "bg-[#181008]/80",
+        pillColor: "bg-[#26160c] text-[#ebdcb0] border border-[#7a5229]/70",
       };
   }
 }

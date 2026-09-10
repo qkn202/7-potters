@@ -38,15 +38,15 @@ interface CharacterCardProps {
 }
 
 /**
- * PHÍA SAU THẺ BÀI: PHE HỘI PHƯỢNG HOÀNG (ORDER OF THE PHOENIX)
- * Đôi Cánh Lửa Phượng Hoàng Hoàng Gia & Quầng Hào Quang Thái Dương Sải Rộng 2 Bên (Cân Xứng Tuyệt Đối)
+ * PHÍA SAU THẺ BÀI: PHE HỘI PHƯỢNG HOÀNG (HPH)
+ * Hình Đôi Cánh Chim Phượng Hoàng Lửa (Fire Phoenix Wings) Rực Sáng Hai Bên Thẻ Bài
  */
 function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
   if (isDead) return null;
 
   return (
-    <div className="absolute -inset-x-12 -inset-y-6 sm:-inset-x-16 sm:-inset-y-8 pointer-events-none -z-10 flex items-center justify-center overflow-visible">
-      {/* 1. Ambient Solar Flame Glow (Quầng sáng lửa ấm tỏa rộng ra ngoài 2 bên thẻ bài) */}
+    <div className="absolute -inset-x-14 -inset-y-8 sm:-inset-x-20 sm:-inset-y-10 pointer-events-none z-0 flex items-center justify-center overflow-visible">
+      {/* 1. Ambient Solar Fire Glow (Quầng sáng lửa thái dương tỏa rộng) */}
       <motion.div
         animate={{
           scale: [0.96, 1.05, 0.96],
@@ -60,7 +60,7 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
         className="absolute inset-0 rounded-[3rem] blur-2xl bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.65)_15%,rgba(234,88,12,0.45)_50%,rgba(220,38,38,0.25)_75%,transparent_95%)]"
       />
 
-      {/* 2. Symmetrical Blazing Phoenix Fire Wings SVG (Đôi Cánh Lửa Phượng Hoàng Sải Rộng Tuyệt Đối) */}
+      {/* 2. Symmetrical Fire Phoenix Wings SVG (Hình Đôi Cánh Chim Phượng Hoàng Lửa Sải Rộng) */}
       <motion.svg
         viewBox="0 0 500 400"
         animate={{
@@ -78,65 +78,69 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
           {/* Phoenix Fire Gradient */}
           <linearGradient id="phoenixWingFire" x1="1" y1="0.5" x2="0" y2="0.5">
             <stop offset="0%" stopColor="#fef08a" stopOpacity="0.95" />
-            <stop offset="35%" stopColor="#fbbf24" stopOpacity="0.85" />
-            <stop offset="70%" stopColor="#f59e0b" stopOpacity="0.65" />
+            <stop offset="35%" stopColor="#fbbf24" stopOpacity="0.88" />
+            <stop offset="70%" stopColor="#f59e0b" stopOpacity="0.7" />
             <stop offset="100%" stopColor="#dc2626" stopOpacity="0.15" />
           </linearGradient>
 
-          {/* Soft Glow Filter for natural feathered flame wings */}
+          <linearGradient id="phoenixGoldInner" x1="1" y1="0.5" x2="0" y2="0.5">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+            <stop offset="50%" stopColor="#fef08a" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.3" />
+          </linearGradient>
+
+          {/* Soft Feather Glow Filter */}
           <filter id="phWingGlow" x="-30%" y="-30%" width="160%" height="160%">
             <feGaussianBlur stdDeviation="3.5" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
 
-          {/* Left Wing Path (Vươn rộng từ X=180 ra X=30) */}
-          <path
-            id="phLeftWing"
-            d="M 180 200
-               C 140 180, 80 130, 40 80
-               C 25 105, 55 140, 85 165
-               C 50 175, 20 200, 30 220
-               C 55 225, 95 225, 135 220
-               C 90 240, 45 270, 50 295
-               C 75 300, 120 285, 155 265
-               C 115 295, 85 335, 95 355
-               C 125 350, 160 310, 185 270 Z"
-            fill="url(#phoenixWingFire)"
-            filter="url(#phWingGlow)"
-          />
+          {/* Cánh Chim Phượng Hoàng Bên Trái (Left Phoenix Bird Wing) */}
+          <g id="leftPhoenixBirdWing" filter="url(#phWingGlow)">
+            {/* Outer Flight Feathers (Lớp lông vũ chính vươn dài thành sải cánh chim phượng hoàng) */}
+            <path
+              d="M 195 210
+                 C 160 160, 110 90, 25 35
+                 C 18 65, 55 105, 80 135
+                 C 45 130, 10 135, 12 170
+                 C 38 180, 75 185, 105 195
+                 C 65 205, 18 220, 24 255
+                 C 50 260, 90 250, 125 245
+                 C 80 270, 35 300, 50 335
+                 C 78 335, 120 305, 150 285
+                 C 115 325, 75 375, 100 395
+                 C 130 385, 170 325, 200 270 Z"
+              fill="url(#phoenixWingFire)"
+            />
 
-          {/* Left Inner Flame Layer */}
-          <path
-            id="phLeftInner"
-            d="M 175 190
-               C 145 170, 100 135, 65 110
-               C 60 125, 85 150, 110 170
-               C 80 180, 55 198, 62 215
-               C 82 218, 115 218, 145 210
-               C 115 225, 80 248, 85 265
-               C 105 270, 135 255, 160 238 Z"
-            fill="#fef08a"
-            opacity="0.6"
-            filter="url(#phWingGlow)"
-          />
+            {/* Inner Golden Layer (Lớp lông vũ hoàng kim bên trong) */}
+            <path
+              d="M 190 200
+                 C 160 155, 120 105, 55 60
+                 C 52 82, 80 115, 105 140
+                 C 75 142, 40 148, 42 172
+                 C 68 180, 98 182, 122 190
+                 C 95 205, 55 220, 62 245
+                 C 88 250, 122 235, 145 225 Z"
+              fill="url(#phoenixGoldInner)"
+              opacity="0.85"
+            />
+          </g>
         </defs>
 
         {/* --- CÁNH TRÁI (LEFT WING) --- */}
-        <use href="#phLeftWing" />
-        <use href="#phLeftInner" />
+        <use href="#leftPhoenixBirdWing" />
 
         {/* --- CÁNH PHẢI (RIGHT WING: PHẢN CHIẾU 100% ĐỐI XỨNG QUA TRỤC X=250) --- */}
-        <use href="#phLeftWing" transform="translate(500, 0) scale(-1, 1)" />
-        <use href="#phLeftInner" transform="translate(500, 0) scale(-1, 1)" />
+        <use href="#leftPhoenixBirdWing" transform="translate(500, 0) scale(-1, 1)" />
       </motion.svg>
 
-      {/* 3. Rising Golden Sparks & Embers (Bụi than hồng bay bổng trong khoảng trống 2 bên cánh) */}
+      {/* 3. Rising Golden Sparks & Embers (Bụi than hồng bay bổng ngoài sải cánh) */}
       <div className="absolute inset-0 overflow-visible pointer-events-none">
-        {/* Cột bụi phép rực sáng bên trái (Hiển thị rõ ràng ngoài viền thẻ) */}
         {[
-          { left: '8px', delay: 0, duration: 2.8, size: 4 },
-          { left: '22px', delay: 1.1, duration: 3.6, size: 3.5 },
-          { left: '38px', delay: 1.9, duration: 3.2, size: 5 },
+          { left: '12px', delay: 0, duration: 2.8, size: 4.5 },
+          { left: '26px', delay: 1.1, duration: 3.6, size: 3.5 },
+          { left: '42px', delay: 1.9, duration: 3.2, size: 5 },
         ].map((spark, idx) => (
           <motion.div
             key={`ph-spark-l-${idx}`}
@@ -158,11 +162,10 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
           />
         ))}
 
-        {/* Cột bụi phép rực sáng bên phải (Cân xứng tuyệt đối bằng right) */}
         {[
-          { right: '8px', delay: 0.5, duration: 3.0, size: 4 },
-          { right: '22px', delay: 1.6, duration: 3.9, size: 3.5 },
-          { right: '38px', delay: 2.3, duration: 3.4, size: 5 },
+          { right: '12px', delay: 0.5, duration: 3.0, size: 4.5 },
+          { right: '26px', delay: 1.6, duration: 3.9, size: 3.5 },
+          { right: '42px', delay: 2.3, duration: 3.4, size: 5 },
         ].map((spark, idx) => (
           <motion.div
             key={`ph-spark-r-${idx}`}
@@ -189,108 +192,176 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
 }
 
 /**
- * PHÍA SAU THẺ BÀI: PHE TỬ THẦN THỰC TỬ (DEATH EATERS)
- * Cánh Khói Mãng Xà Nagini Hắc Ám & Quầng Hào Quang Lục Bảo Sải Rộng 2 Bên (Cân Xứng Tuyệt Đối)
+ * PHÍA SAU THẺ BÀI: PHE TỬ THẦN THỰC TỬ (4T)
+ * Hình Con Rắn Ngọc Bích (Emerald Jade Serpent) Đơn Độc Uy Nghi Uốn Lượn Quanh Thẻ Bài
  */
 function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
   if (isDead) return null;
 
   return (
-    <div className="absolute -inset-x-12 -inset-y-6 sm:-inset-x-16 sm:-inset-y-8 pointer-events-none -z-10 flex items-center justify-center overflow-visible">
-      {/* 1. Ambient Emerald Curse Nebula (Hào quang xanh lục hắc ám tỏa rộng 2 bên thẻ bài) */}
+    <div className="absolute -inset-x-14 -inset-y-8 sm:-inset-x-20 sm:-inset-y-10 pointer-events-none z-0 flex items-center justify-center overflow-visible">
+      {/* 1. Ambient Jade Emerald Nebula (Hào quang ngọc bích hắc ám) */}
       <motion.div
         animate={{
           scale: [0.96, 1.04, 0.96],
-          opacity: [0.75, 1, 0.75],
+          opacity: [0.7, 0.95, 0.7],
         }}
         transition={{
           duration: 3.6,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute inset-0 rounded-[3rem] blur-2xl bg-[radial-gradient(ellipse_at_center,rgba(52,211,153,0.7)_15%,rgba(16,185,129,0.45)_50%,rgba(6,78,59,0.25)_75%,transparent_95%)]"
+        className="absolute inset-0 rounded-[3rem] blur-2xl bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.65)_15%,rgba(5,150,105,0.4)_50%,rgba(6,78,59,0.25)_75%,transparent_95%)]"
       />
 
-      {/* 2. Symmetrical Dark Magic Serpent Smoke Wings SVG (Cánh Khói Mãng Xà Sải Rộng Tuyệt Đối) */}
+      {/* 2. Single Coiling Emerald Jade Serpent SVG (Một Con Rắn Ngọc Bích Uốn Lượn Quanh Thẻ) */}
       <motion.svg
-        viewBox="0 0 500 400"
+        viewBox="0 0 500 500"
         animate={{
-          scale: [0.98, 1.03, 0.98],
-          opacity: [0.85, 1, 0.85],
+          scale: [0.98, 1.02, 0.98],
+          opacity: [0.88, 1, 0.88],
         }}
         transition={{
-          duration: 3.4,
+          duration: 3.5,
           repeat: Infinity,
           ease: "easeInOut",
         }}
         className="w-full h-full overflow-visible drop-shadow-[0_0_22px_rgba(16,185,129,0.75)]"
       >
         <defs>
-          {/* Death Eater Emerald Gradient */}
-          <linearGradient id="deWingSmoke" x1="1" y1="0.5" x2="0" y2="0.5">
+          {/* Jade Scale Gradient */}
+          <linearGradient id="jadeSerpentBodySingle" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#ecfdf5" stopOpacity="0.95" />
-            <stop offset="35%" stopColor="#6ee7b7" stopOpacity="0.85" />
-            <stop offset="70%" stopColor="#10b981" stopOpacity="0.65" />
-            <stop offset="100%" stopColor="#064e3b" stopOpacity="0.15" />
+            <stop offset="25%" stopColor="#6ee7b7" stopOpacity="0.9" />
+            <stop offset="55%" stopColor="#10b981" stopOpacity="0.85" />
+            <stop offset="85%" stopColor="#047857" stopOpacity="0.75" />
+            <stop offset="100%" stopColor="#064e3b" stopOpacity="0.3" />
           </linearGradient>
 
-          {/* Soft Glow Filter for natural feathered serpent smoke */}
-          <filter id="deWingGlow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="3.5" result="blur" />
+          {/* Jade Hood & Head Gradient */}
+          <linearGradient id="jadeHeadSingle" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#a7f3d0" />
+            <stop offset="50%" stopColor="#10b981" />
+            <stop offset="100%" stopColor="#047857" />
+          </linearGradient>
+
+          <filter id="jadeGlowFilterSingle" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
-
-          {/* Left Serpent Wing Path */}
-          <path
-            id="deLeftWing"
-            d="M 180 200
-               C 140 170, 75 120, 35 75
-               C 25 100, 60 135, 90 160
-               C 45 170, 15 195, 25 220
-               C 55 230, 100 225, 140 215
-               C 85 240, 40 270, 45 295
-               C 70 305, 120 290, 160 265
-               C 110 295, 80 340, 95 360
-               C 130 350, 165 305, 185 265 Z"
-            fill="url(#deWingSmoke)"
-            filter="url(#deWingGlow)"
-          />
-
-          {/* Left Inner Serpent Smoke */}
-          <path
-            id="deLeftInner"
-            d="M 175 190
-               C 145 165, 95 128, 60 98
-               C 55 115, 80 142, 105 165
-               C 75 175, 48 195, 56 212
-               C 78 220, 115 218, 145 208
-               C 112 225, 75 250, 82 268
-               C 102 275, 135 258, 160 238 Z"
-            fill="#a7f3d0"
-            opacity="0.6"
-            filter="url(#deWingGlow)"
-          />
         </defs>
 
-        {/* --- CÁNH TRÁI (LEFT WING) --- */}
-        <use href="#deLeftWing" />
-        <use href="#deLeftInner" />
+        <g filter="url(#jadeGlowFilterSingle)">
+          {/* Sinuous Serpent Coils Wrapping from Bottom to Top */}
+          {/* Lower Coils & Tail (Vùng cuộn phía dưới và đuôi rắn) */}
+          <path
+            d="M 250 480
+               C 320 490, 420 460, 430 400
+               C 440 330, 360 300, 360 250
+               C 360 190, 430 140, 410 80
+               C 390 30, 300 30, 240 45
+               C 160 65, 80 110, 60 180
+               C 40 250, 100 300, 110 360
+               C 120 420, 190 460, 250 480 Z"
+            fill="none"
+            stroke="url(#jadeSerpentBodySingle)"
+            strokeWidth="38"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
 
-        {/* --- CÁNH PHẢI (RIGHT WING: PHẢN CHIẾU 100% ĐỐI XỨNG QUA TRỤC X=250) --- */}
-        <use href="#deLeftWing" transform="translate(500, 0) scale(-1, 1)" />
-        <use href="#deLeftInner" transform="translate(500, 0) scale(-1, 1)" />
+          {/* Inner Belly Scale Tone */}
+          <path
+            d="M 250 480
+               C 320 490, 420 460, 430 400
+               C 440 330, 360 300, 360 250
+               C 360 190, 430 140, 410 80
+               C 390 30, 300 30, 240 45
+               C 160 65, 80 110, 60 180
+               C 40 250, 100 300, 110 360
+               C 120 420, 190 460, 250 480 Z"
+            fill="none"
+            stroke="#a7f3d0"
+            strokeWidth="12"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.7"
+          />
+
+          {/* Shimmering Jade Dorsal Ridge Highlights */}
+          <path
+            d="M 250 480
+               C 320 490, 420 460, 430 400
+               C 440 330, 360 300, 360 250
+               C 360 190, 430 140, 410 80
+               C 390 30, 300 30, 240 45
+               C 160 65, 80 110, 60 180
+               C 40 250, 100 300, 110 360
+               C 120 420, 190 460, 250 480 Z"
+            fill="none"
+            stroke="#ffffff"
+            strokeWidth="3.5"
+            strokeDasharray="16 12"
+            opacity="0.85"
+          />
+
+          {/* Tapered Tail Tip at Bottom */}
+          <path
+            d="M 250 480 C 240 485, 230 490, 220 492 C 210 495, 205 488, 215 482 Z"
+            fill="#34d399"
+          />
+
+          {/* Hooded Viper Head & Jaws at Top Right */}
+          {/* Cobra Hood */}
+          <path
+            d="M 370 75
+               C 390 45, 445 40, 455 75
+               C 460 105, 430 130, 395 125 Z"
+            fill="url(#jadeHeadSingle)"
+          />
+
+          {/* Viper Head & Snout */}
+          <path
+            d="M 405 60
+               C 435 55, 465 75, 450 100
+               C 435 115, 390 110, 380 95
+               C 370 80, 390 65, 405 60 Z"
+            fill="#065f46"
+            stroke="#a7f3d0"
+            strokeWidth="2"
+          />
+
+          {/* Piercing Glowing Emerald Eye */}
+          <circle cx="430" cy="78" r="5" fill="#ecfdf5" />
+          <circle cx="430" cy="78" r="2.8" fill="#10b981" />
+          <line x1="430" y1="74" x2="430" y2="82" stroke="#064e3b" strokeWidth="1.6" />
+
+          {/* Fangs & Forked Red Tongue */}
+          <polygon points="418,98 422,98 420,107" fill="#ffffff" />
+          <path
+            d="M 412 102 Q 395 115, 380 125 M 380 125 L 368 122 M 380 125 L 372 135"
+            stroke="#ef4444"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+
+          {/* Jade Scale Diamond Insets along Left & Right Body Flanks */}
+          <polygon points="62,180 70,170 78,180 70,190" fill="#a7f3d0" opacity="0.9" />
+          <polygon points="85,130 92,122 99,130 92,138" fill="#a7f3d0" opacity="0.85" />
+          <polygon points="420,380 428,370 436,380 428,390" fill="#a7f3d0" opacity="0.9" />
+          <polygon points="380,270 388,260 396,270 388,280" fill="#a7f3d0" opacity="0.85" />
+        </g>
       </motion.svg>
 
-      {/* 3. Rising Poisonous Emerald Wisps (Lân tinh xanh biếc bay bổng 2 bên cánh) */}
+      {/* 3. Rising Emerald Poison Wisps (Khói lân tinh ngọc bích bay bổng) */}
       <div className="absolute inset-0 overflow-visible pointer-events-none">
-        {/* Cột lân tinh rực sáng bên trái */}
         {[
-          { left: '8px', delay: 0.2, duration: 3.0, size: 4 },
-          { left: '22px', delay: 1.3, duration: 3.8, size: 3.5 },
-          { left: '38px', delay: 2.1, duration: 3.4, size: 5 },
+          { left: '12px', delay: 0.2, duration: 3.2, size: 4.5 },
+          { left: '26px', delay: 1.4, duration: 3.8, size: 3.5 },
+          { left: '42px', delay: 2.2, duration: 3.5, size: 5 },
         ].map((spark, idx) => (
           <motion.div
-            key={`de-spark-l-${idx}`}
+            key={`jade-wisp-l-${idx}`}
             initial={{ y: '100%', opacity: 0, scale: 0.5 }}
             animate={{
               y: ['100%', '30%', '-15%'],
@@ -305,18 +376,17 @@ function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
               ease: "easeOut",
             }}
             style={{ left: spark.left, width: spark.size, height: spark.size }}
-            className="absolute bottom-4 rounded-full bg-emerald-300 shadow-[0_0_8px_#6ee7b7] blur-[0.4px]"
+            className="absolute bottom-4 rounded-full bg-emerald-300 shadow-[0_0_10px_#6ee7b7] blur-[0.4px]"
           />
         ))}
 
-        {/* Cột lân tinh rực sáng bên phải (Cân xứng tuyệt đối bằng right) */}
         {[
-          { right: '8px', delay: 0.7, duration: 3.2, size: 4 },
-          { right: '22px', delay: 1.8, duration: 4.0, size: 3.5 },
-          { right: '38px', delay: 2.5, duration: 3.6, size: 5 },
+          { right: '12px', delay: 0.7, duration: 3.4, size: 4.5 },
+          { right: '26px', delay: 1.8, duration: 4.0, size: 3.5 },
+          { right: '42px', delay: 2.6, duration: 3.6, size: 5 },
         ].map((spark, idx) => (
           <motion.div
-            key={`de-spark-r-${idx}`}
+            key={`jade-wisp-r-${idx}`}
             initial={{ y: '100%', opacity: 0, scale: 0.5 }}
             animate={{
               y: ['100%', '30%', '-15%'],
@@ -331,7 +401,7 @@ function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
               ease: "easeOut",
             }}
             style={{ right: spark.right, width: spark.size, height: spark.size }}
-            className="absolute bottom-4 rounded-full bg-emerald-300 shadow-[0_0_8px_#6ee7b7] blur-[0.4px]"
+            className="absolute bottom-4 rounded-full bg-emerald-300 shadow-[0_0_10px_#6ee7b7] blur-[0.4px]"
           />
         ))}
       </div>
@@ -346,7 +416,7 @@ function NeutralFactionBackground({ isDead }: { isDead: boolean }) {
   if (isDead) return null;
 
   return (
-    <div className="absolute -inset-x-12 -inset-y-6 sm:-inset-x-16 sm:-inset-y-8 pointer-events-none -z-10 overflow-visible">
+    <div className="absolute -inset-x-14 -inset-y-8 sm:-inset-x-20 sm:-inset-y-10 pointer-events-none z-0 overflow-visible">
       <motion.div
         animate={{
           scale: [0.98, 1.04, 0.98],
@@ -359,182 +429,6 @@ function NeutralFactionBackground({ isDead }: { isDead: boolean }) {
         }}
         className="absolute inset-0 rounded-[3rem] blur-2xl bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.5)_15%,rgba(14,116,144,0.35)_45%,transparent_85%)]"
       />
-    </div>
-  );
-}
-
-/**
- * HOA VĂN CỔ NGỮ HOÀNG GIA 4 GÓC TRONG THẺ BÀI (HOGWARTS ENCHANTED CORNERS)
- */
-function EnchantedCornerOrnament({
-  isDeathEaters,
-  position,
-}: {
-  isDeathEaters: boolean;
-  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-}) {
-  const transform = {
-    'top-left': '',
-    'top-right': 'scale(-1, 1)',
-    'bottom-left': 'scale(1, -1)',
-    'bottom-right': 'scale(-1, -1)',
-  }[position];
-
-  return (
-    <div
-      style={{ transform }}
-      className={`w-6 h-6 shrink-0 opacity-85 transition-opacity ${
-        isDeathEaters ? 'drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]' : 'drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]'
-      }`}
-    >
-      <svg viewBox="0 0 28 28" fill="none" className="w-full h-full">
-        {/* Ornate Corner Bracket */}
-        <path
-          d="M 2 18 C 2 8, 8 2, 18 2 L 24 2 C 16 4, 4 16, 2 24 Z"
-          fill={isDeathEaters ? 'rgba(6,78,59,0.85)' : 'rgba(120,53,15,0.85)'}
-          stroke={isDeathEaters ? '#34d399' : '#fbbf24'}
-          strokeWidth="1.2"
-        />
-        {/* Runic Filigree Knot */}
-        <path
-          d="M 5 5 L 14 5 C 9 7, 7 9, 5 14 Z"
-          fill={isDeathEaters ? '#10b981' : '#f59e0b'}
-          opacity="0.9"
-        />
-        {/* Glowing Corner Magic Gem */}
-        <circle
-          cx="6.5"
-          cy="6.5"
-          r="2"
-          fill={isDeathEaters ? '#6ee7b7' : '#fef08a'}
-          className="animate-pulse"
-        />
-      </svg>
-    </div>
-  );
-}
-
-/**
- * HIỆU ỨNG MA THUẬT TRONG LÁ BÀI (IN-CARD LIVING MAGIC OVERLAY)
- * - Ánh nhũ cầu vồng/vàng holographic lướt qua tranh
- * - Bụi phép / tàn lửa / lân tinh bay bổng trực tiếp trên chân dung
- * - Khung viền ma thuật cổ kính & ngọc phát sáng 4 góc
- */
-function InCardMagicOverlay({
-  isDeathEaters,
-  isDead,
-  specularX,
-  specularY,
-}: {
-  isDeathEaters: boolean;
-  isDead: boolean;
-  specularX: number;
-  specularY: number;
-}) {
-  if (isDead) return null;
-
-  return (
-    <div className="absolute inset-0 pointer-events-none z-[8] overflow-hidden rounded-2xl">
-      {/* 1. Ambient Faction Core Spell Pulse (Hào quang ma thuật trung tâm chân dung) */}
-      <motion.div
-        animate={{
-          scale: [0.94, 1.08, 0.94],
-          opacity: [0.3, 0.55, 0.3],
-        }}
-        transition={{
-          duration: 3.2,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className={`absolute inset-0 pointer-events-none z-[9] ${
-          isDeathEaters
-            ? 'bg-[radial-gradient(circle_at_50%_60%,rgba(16,185,129,0.55)_0%,rgba(6,78,59,0.25)_45%,transparent_70%)]'
-            : 'bg-[radial-gradient(circle_at_50%_60%,rgba(251,191,36,0.6)_0%,rgba(217,119,6,0.25)_45%,transparent_70%)]'
-        }`}
-      />
-
-      {/* 2. Living Magical Particles Field (Bụi Phép & Đốm Lửa Bay Thẳng Từ Dưới Lên Trên) */}
-      {[
-        { x: '16%', delay: 0, dur: 3.6, size: 5 },
-        { x: '30%', delay: 1.1, dur: 4.2, size: 4 },
-        { x: '48%', delay: 2.2, dur: 3.4, size: 6 },
-        { x: '64%', delay: 0.6, dur: 3.9, size: 4.5 },
-        { x: '80%', delay: 1.8, dur: 3.2, size: 5.5 },
-        { x: '24%', delay: 2.7, dur: 4.4, size: 4 },
-        { x: '72%', delay: 1.4, dur: 3.7, size: 5 },
-      ].map((p, idx) => (
-        <motion.div
-          key={`in-card-particle-${idx}`}
-          initial={{ top: '102%', opacity: 0 }}
-          animate={{
-            top: ['102%', '45%', '-8%'],
-            opacity: [0, 1, 0],
-            scale: [0.5, 1.3, 0.3],
-            x: [0, idx % 2 === 0 ? 12 : -12, 0],
-          }}
-          transition={{
-            duration: p.dur,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-          style={{ left: p.x, width: p.size, height: p.size }}
-          className={`absolute rounded-full pointer-events-none z-[12] ${
-            isDeathEaters
-              ? 'bg-emerald-300 shadow-[0_0_10px_#34d399,0_0_4px_#ecfdf5]'
-              : 'bg-amber-200 shadow-[0_0_10px_#fde047,0_0_4px_#fffbeb]'
-          }`}
-        />
-      ))}
-
-      {/* 3. Shimmering Holographic Prismatic Foil Sweep (Dải Phản Quang Ánh Kim Quét Ngang Tranh) */}
-      <motion.div
-        animate={{
-          x: ['-150%', '250%'],
-        }}
-        transition={{
-          duration: 3.4,
-          repeat: Infinity,
-          repeatDelay: 1.2,
-          ease: [0.25, 1, 0.5, 1],
-        }}
-        className={`absolute -inset-y-16 w-3/5 -skew-x-25 pointer-events-none z-[11] opacity-55 ${
-          isDeathEaters
-            ? 'bg-gradient-to-r from-transparent via-emerald-300/60 via-teal-100/90 via-emerald-400/40 to-transparent'
-            : 'bg-gradient-to-r from-transparent via-amber-200/60 via-yellow-100/90 via-amber-400/40 to-transparent'
-        } blur-[1px]`}
-      />
-
-      {/* 4. Interactive 3D Cursor Foil Sheen (Quầng phản quang theo tọa độ con trỏ) */}
-      <div
-        className="absolute inset-0 pointer-events-none z-[11] opacity-45 transition-opacity duration-300"
-        style={{
-          background: isDeathEaters
-            ? `radial-gradient(circle 260px at ${specularX}% ${specularY}%, rgba(110,231,183,0.75) 0%, rgba(16,185,129,0.3) 50%, transparent 80%)`
-            : `radial-gradient(circle 260px at ${specularX}% ${specularY}%, rgba(254,240,138,0.8) 0%, rgba(245,158,11,0.35) 50%, transparent 80%)`,
-        }}
-      />
-
-      {/* 5. Pulsing Inner Spell Border (Viền Phép Thuật Huyền Bí) */}
-      <div
-        className={`absolute inset-1.5 pointer-events-none z-[10] rounded-xl border transition-all duration-700 ${
-          isDeathEaters
-            ? 'border-emerald-400/60 shadow-[inset_0_0_14px_rgba(16,185,129,0.45)]'
-            : 'border-amber-400/60 shadow-[inset_0_0_14px_rgba(251,191,36,0.45)]'
-        }`}
-      />
-
-      {/* 6. 4 Ornate Enchanted Hogwarts Corner Runes */}
-      <div className="absolute inset-0 pointer-events-none z-[13] p-1.5 flex flex-col justify-between">
-        <div className="flex justify-between items-center">
-          <EnchantedCornerOrnament isDeathEaters={isDeathEaters} position="top-left" />
-          <EnchantedCornerOrnament isDeathEaters={isDeathEaters} position="top-right" />
-        </div>
-        <div className="flex justify-between items-center">
-          <EnchantedCornerOrnament isDeathEaters={isDeathEaters} position="bottom-left" />
-          <EnchantedCornerOrnament isDeathEaters={isDeathEaters} position="bottom-right" />
-        </div>
-      </div>
     </div>
   );
 }
@@ -667,7 +561,7 @@ export function CharacterCard({
   // ================= 2. FULL CHOCOLATE FROG CARD (Tarot & Compact) =================
   return (
     <div 
-      className={`relative select-none group w-full mx-auto ${
+      className={`relative isolate select-none group w-full mx-auto ${
         size === 'compact' ? 'max-w-[280px] sm:max-w-[300px]' : 'max-w-[280px] sm:max-w-sm'
       } ${className}`}
       style={{ perspective: '1200px' }}
@@ -686,7 +580,7 @@ export function CharacterCard({
         }}
         transition={{ type: 'spring', stiffness: 240, damping: 22 }}
         style={{ transformStyle: 'preserve-3d' }}
-        className="relative w-full rounded-3xl cursor-pointer aspect-[3/4]"
+        className="relative z-10 w-full rounded-3xl cursor-pointer aspect-[3/4]"
       >
         {/* ================= CARD FRONT: CHOCOLATE FROG MOVING PORTRAIT ================= */}
         <div
@@ -717,13 +611,6 @@ export function CharacterCard({
               </div>
             )}
 
-            {/* In-Card Magic Overlay: Holographic Prismatic Foil, Living Magic Particles, 3D Glare, 4 Corner Runes, Inner Spell Border */}
-            <InCardMagicOverlay
-              isDeathEaters={isDeathEaters}
-              isDead={isDead}
-              specularX={specularX}
-              specularY={specularY}
-            />
 
             {/* Top Ribbon: Chocolate Frog Brand & Faction Badge */}
             <div className="relative z-10 p-2 sm:p-2.5 flex items-center justify-between">

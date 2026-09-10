@@ -130,7 +130,7 @@ export function CardDeckModal({
           </div>
 
           {/* Body Content */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto px-5 py-7 sm:px-8 sm:py-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 sm:gap-10 custom-scrollbar">
             {filteredRoles.map((role, idx) => (
               <div
                 key={`deck-role-${role.id || idx}`}

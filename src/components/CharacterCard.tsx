@@ -49,8 +49,8 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
       {/* 1. Ambient Solar Flame Glow (Quầng sáng lửa ấm tỏa rộng ra ngoài 2 bên thẻ bài) */}
       <motion.div
         animate={{
-          scale: [0.96, 1.04, 0.96],
-          opacity: [0.7, 0.95, 0.7],
+          scale: [0.96, 1.05, 0.96],
+          opacity: [0.75, 1, 0.75],
         }}
         transition={{
           duration: 3.4,
@@ -72,7 +72,7 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="w-full h-full overflow-visible drop-shadow-[0_0_18px_rgba(251,191,36,0.7)]"
+        className="w-full h-full overflow-visible drop-shadow-[0_0_22px_rgba(251,191,36,0.75)]"
       >
         <defs>
           {/* Phoenix Fire Gradient */}
@@ -80,8 +80,14 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
             <stop offset="0%" stopColor="#fef08a" stopOpacity="0.95" />
             <stop offset="35%" stopColor="#fbbf24" stopOpacity="0.85" />
             <stop offset="70%" stopColor="#f59e0b" stopOpacity="0.65" />
-            <stop offset="100%" stopColor="#dc2626" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#dc2626" stopOpacity="0.15" />
           </linearGradient>
+
+          {/* Soft Glow Filter for natural feathered flame wings */}
+          <filter id="phWingGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
 
           {/* Left Wing Path (Vươn rộng từ X=180 ra X=30) */}
           <path
@@ -96,6 +102,7 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
                C 115 295, 85 335, 95 355
                C 125 350, 160 310, 185 270 Z"
             fill="url(#phoenixWingFire)"
+            filter="url(#phWingGlow)"
           />
 
           {/* Left Inner Flame Layer */}
@@ -110,6 +117,7 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
                C 105 270, 135 255, 160 238 Z"
             fill="#fef08a"
             opacity="0.6"
+            filter="url(#phWingGlow)"
           />
         </defs>
 
@@ -215,7 +223,7 @@ function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="w-full h-full overflow-visible drop-shadow-[0_0_18px_rgba(16,185,129,0.7)]"
+        className="w-full h-full overflow-visible drop-shadow-[0_0_22px_rgba(16,185,129,0.75)]"
       >
         <defs>
           {/* Death Eater Emerald Gradient */}
@@ -223,8 +231,14 @@ function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
             <stop offset="0%" stopColor="#ecfdf5" stopOpacity="0.95" />
             <stop offset="35%" stopColor="#6ee7b7" stopOpacity="0.85" />
             <stop offset="70%" stopColor="#10b981" stopOpacity="0.65" />
-            <stop offset="100%" stopColor="#064e3b" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#064e3b" stopOpacity="0.15" />
           </linearGradient>
+
+          {/* Soft Glow Filter for natural feathered serpent smoke */}
+          <filter id="deWingGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
 
           {/* Left Serpent Wing Path */}
           <path
@@ -239,6 +253,7 @@ function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
                C 110 295, 80 340, 95 360
                C 130 350, 165 305, 185 265 Z"
             fill="url(#deWingSmoke)"
+            filter="url(#deWingGlow)"
           />
 
           {/* Left Inner Serpent Smoke */}
@@ -253,6 +268,7 @@ function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
                C 102 275, 135 258, 160 238 Z"
             fill="#a7f3d0"
             opacity="0.6"
+            filter="url(#deWingGlow)"
           />
         </defs>
 
@@ -343,6 +359,182 @@ function NeutralFactionBackground({ isDead }: { isDead: boolean }) {
         }}
         className="absolute inset-0 rounded-[3rem] blur-2xl bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.5)_15%,rgba(14,116,144,0.35)_45%,transparent_85%)]"
       />
+    </div>
+  );
+}
+
+/**
+ * HOA VĂN CỔ NGỮ HOÀNG GIA 4 GÓC TRONG THẺ BÀI (HOGWARTS ENCHANTED CORNERS)
+ */
+function EnchantedCornerOrnament({
+  isDeathEaters,
+  position,
+}: {
+  isDeathEaters: boolean;
+  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+}) {
+  const transform = {
+    'top-left': '',
+    'top-right': 'scale(-1, 1)',
+    'bottom-left': 'scale(1, -1)',
+    'bottom-right': 'scale(-1, -1)',
+  }[position];
+
+  return (
+    <div
+      style={{ transform }}
+      className={`w-6 h-6 shrink-0 opacity-85 transition-opacity ${
+        isDeathEaters ? 'drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]' : 'drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]'
+      }`}
+    >
+      <svg viewBox="0 0 28 28" fill="none" className="w-full h-full">
+        {/* Ornate Corner Bracket */}
+        <path
+          d="M 2 18 C 2 8, 8 2, 18 2 L 24 2 C 16 4, 4 16, 2 24 Z"
+          fill={isDeathEaters ? 'rgba(6,78,59,0.85)' : 'rgba(120,53,15,0.85)'}
+          stroke={isDeathEaters ? '#34d399' : '#fbbf24'}
+          strokeWidth="1.2"
+        />
+        {/* Runic Filigree Knot */}
+        <path
+          d="M 5 5 L 14 5 C 9 7, 7 9, 5 14 Z"
+          fill={isDeathEaters ? '#10b981' : '#f59e0b'}
+          opacity="0.9"
+        />
+        {/* Glowing Corner Magic Gem */}
+        <circle
+          cx="6.5"
+          cy="6.5"
+          r="2"
+          fill={isDeathEaters ? '#6ee7b7' : '#fef08a'}
+          className="animate-pulse"
+        />
+      </svg>
+    </div>
+  );
+}
+
+/**
+ * HIỆU ỨNG MA THUẬT TRONG LÁ BÀI (IN-CARD LIVING MAGIC OVERLAY)
+ * - Ánh nhũ cầu vồng/vàng holographic lướt qua tranh
+ * - Bụi phép / tàn lửa / lân tinh bay bổng trực tiếp trên chân dung
+ * - Khung viền ma thuật cổ kính & ngọc phát sáng 4 góc
+ */
+function InCardMagicOverlay({
+  isDeathEaters,
+  isDead,
+  specularX,
+  specularY,
+}: {
+  isDeathEaters: boolean;
+  isDead: boolean;
+  specularX: number;
+  specularY: number;
+}) {
+  if (isDead) return null;
+
+  return (
+    <div className="absolute inset-0 pointer-events-none z-[8] overflow-hidden rounded-2xl">
+      {/* 1. Ambient Faction Core Spell Pulse (Hào quang ma thuật trung tâm chân dung) */}
+      <motion.div
+        animate={{
+          scale: [0.94, 1.08, 0.94],
+          opacity: [0.3, 0.55, 0.3],
+        }}
+        transition={{
+          duration: 3.2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className={`absolute inset-0 pointer-events-none z-[9] ${
+          isDeathEaters
+            ? 'bg-[radial-gradient(circle_at_50%_60%,rgba(16,185,129,0.55)_0%,rgba(6,78,59,0.25)_45%,transparent_70%)]'
+            : 'bg-[radial-gradient(circle_at_50%_60%,rgba(251,191,36,0.6)_0%,rgba(217,119,6,0.25)_45%,transparent_70%)]'
+        }`}
+      />
+
+      {/* 2. Living Magical Particles Field (Bụi Phép & Đốm Lửa Bay Thẳng Từ Dưới Lên Trên) */}
+      {[
+        { x: '16%', delay: 0, dur: 3.6, size: 5 },
+        { x: '30%', delay: 1.1, dur: 4.2, size: 4 },
+        { x: '48%', delay: 2.2, dur: 3.4, size: 6 },
+        { x: '64%', delay: 0.6, dur: 3.9, size: 4.5 },
+        { x: '80%', delay: 1.8, dur: 3.2, size: 5.5 },
+        { x: '24%', delay: 2.7, dur: 4.4, size: 4 },
+        { x: '72%', delay: 1.4, dur: 3.7, size: 5 },
+      ].map((p, idx) => (
+        <motion.div
+          key={`in-card-particle-${idx}`}
+          initial={{ top: '102%', opacity: 0 }}
+          animate={{
+            top: ['102%', '45%', '-8%'],
+            opacity: [0, 1, 0],
+            scale: [0.5, 1.3, 0.3],
+            x: [0, idx % 2 === 0 ? 12 : -12, 0],
+          }}
+          transition={{
+            duration: p.dur,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          style={{ left: p.x, width: p.size, height: p.size }}
+          className={`absolute rounded-full pointer-events-none z-[12] ${
+            isDeathEaters
+              ? 'bg-emerald-300 shadow-[0_0_10px_#34d399,0_0_4px_#ecfdf5]'
+              : 'bg-amber-200 shadow-[0_0_10px_#fde047,0_0_4px_#fffbeb]'
+          }`}
+        />
+      ))}
+
+      {/* 3. Shimmering Holographic Prismatic Foil Sweep (Dải Phản Quang Ánh Kim Quét Ngang Tranh) */}
+      <motion.div
+        animate={{
+          x: ['-150%', '250%'],
+        }}
+        transition={{
+          duration: 3.4,
+          repeat: Infinity,
+          repeatDelay: 1.2,
+          ease: [0.25, 1, 0.5, 1],
+        }}
+        className={`absolute -inset-y-16 w-3/5 -skew-x-25 pointer-events-none z-[11] opacity-55 ${
+          isDeathEaters
+            ? 'bg-gradient-to-r from-transparent via-emerald-300/60 via-teal-100/90 via-emerald-400/40 to-transparent'
+            : 'bg-gradient-to-r from-transparent via-amber-200/60 via-yellow-100/90 via-amber-400/40 to-transparent'
+        } blur-[1px]`}
+      />
+
+      {/* 4. Interactive 3D Cursor Foil Sheen (Quầng phản quang theo tọa độ con trỏ) */}
+      <div
+        className="absolute inset-0 pointer-events-none z-[11] opacity-45 transition-opacity duration-300"
+        style={{
+          background: isDeathEaters
+            ? `radial-gradient(circle 260px at ${specularX}% ${specularY}%, rgba(110,231,183,0.75) 0%, rgba(16,185,129,0.3) 50%, transparent 80%)`
+            : `radial-gradient(circle 260px at ${specularX}% ${specularY}%, rgba(254,240,138,0.8) 0%, rgba(245,158,11,0.35) 50%, transparent 80%)`,
+        }}
+      />
+
+      {/* 5. Pulsing Inner Spell Border (Viền Phép Thuật Huyền Bí) */}
+      <div
+        className={`absolute inset-1.5 pointer-events-none z-[10] rounded-xl border transition-all duration-700 ${
+          isDeathEaters
+            ? 'border-emerald-400/60 shadow-[inset_0_0_14px_rgba(16,185,129,0.45)]'
+            : 'border-amber-400/60 shadow-[inset_0_0_14px_rgba(251,191,36,0.45)]'
+        }`}
+      />
+
+      {/* 6. 4 Ornate Enchanted Hogwarts Corner Runes */}
+      <div className="absolute inset-0 pointer-events-none z-[13] p-1.5 flex flex-col justify-between">
+        <div className="flex justify-between items-center">
+          <EnchantedCornerOrnament isDeathEaters={isDeathEaters} position="top-left" />
+          <EnchantedCornerOrnament isDeathEaters={isDeathEaters} position="top-right" />
+        </div>
+        <div className="flex justify-between items-center">
+          <EnchantedCornerOrnament isDeathEaters={isDeathEaters} position="bottom-left" />
+          <EnchantedCornerOrnament isDeathEaters={isDeathEaters} position="bottom-right" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -525,26 +717,12 @@ export function CharacterCard({
               </div>
             )}
 
-            {/* In-Card Moving Holographic Foil Sheen (Ánh Nhũ Vàng Phản Quang Ma Thuật) */}
-            <motion.div
-              animate={{
-                x: ['-140%', '280%'],
-              }}
-              transition={{
-                duration: 4.2,
-                repeat: Infinity,
-                repeatDelay: 2.2,
-                ease: 'easeInOut',
-              }}
-              className="absolute inset-0 pointer-events-none z-10 w-2/5 h-full -skew-x-25 bg-gradient-to-r from-transparent via-white/30 to-transparent blur-[1px]"
-            />
-
-            {/* Subtle Specular Radial Spotlight */}
-            <div
-              className="absolute inset-0 pointer-events-none rounded-2xl opacity-40 transition-opacity duration-300"
-              style={{
-                background: `radial-gradient(circle at ${specularX}% ${specularY}%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 60%)`,
-              }}
+            {/* In-Card Magic Overlay: Holographic Prismatic Foil, Living Magic Particles, 3D Glare, 4 Corner Runes, Inner Spell Border */}
+            <InCardMagicOverlay
+              isDeathEaters={isDeathEaters}
+              isDead={isDead}
+              specularX={specularX}
+              specularY={specularY}
             />
 
             {/* Top Ribbon: Chocolate Frog Brand & Faction Badge */}

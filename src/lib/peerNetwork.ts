@@ -8,7 +8,7 @@ export class SevenPottersNetwork {
   private supabase: SupabaseClient;
   private channel: RealtimeChannel | null = null;
   private roomCode: string = '';
-  private myPlayerId: string = '';
+  public myPlayerId: string = '';
   private hostPresent: boolean = true;
   private hostDisconnectedAt: number | null = null;
   private hostDisconnectTimer: any = null;
@@ -98,10 +98,12 @@ export class SevenPottersNetwork {
       const timeout = setTimeout(() => {
         if (!isSettled) {
           isSettled = true;
-          this.onConnectionStatusChange?.('ERROR', 'Không thể kết nối máy chủ Supabase. Vui lòng kiểm tra lại mạng!');
+          if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+            this.onConnectionStatusChange?.('ERROR', 'Không thể kết nối máy chủ Supabase. Vui lòng kiểm tra lại mạng!');
+          }
           reject(new Error('Host init timeout'));
         }
-      }, 10000);
+      }, 25000);
 
       try {
         if (this.channel) {
@@ -197,13 +199,15 @@ export class SevenPottersNetwork {
       const timeout = setTimeout(() => {
         if (!isSettled) {
           isSettled = true;
-          this.onConnectionStatusChange?.(
-            'ERROR',
-            `Không thể kết nối tới phòng "${this.roomCode}". Vui lòng kiểm tra lại mã phòng!`
-          );
+          if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+            this.onConnectionStatusChange?.(
+              'ERROR',
+              `Không thể kết nối tới phòng "${this.roomCode}". Vui lòng kiểm tra lại mã phòng hoặc kết nối mạng!`
+            );
+          }
           reject(new Error(`Timeout connecting to room ${this.roomCode}`));
         }
-      }, 10000);
+      }, 25000);
 
       try {
         if (this.channel) {
@@ -241,16 +245,16 @@ export class SevenPottersNetwork {
             }
           } else {
             if (this.hostPresent && !this.hostDisconnectTimer) {
-              console.log('[7-Potters Client] Host presence not found in sync, starting 6s grace timer...');
+              console.log('[7-Potters Client] Host presence not found in sync, starting 30s mobile grace timer...');
               this.hostDisconnectTimer = setTimeout(() => {
                 this.hostDisconnectTimer = null;
                 if (!this.checkIsHostInPresence()) {
-                  console.log('[7-Potters Client] Host presence confirmed lost after 6s grace period.');
+                  console.log('[7-Potters Client] Host presence confirmed lost after 30s grace period.');
                   this.hostPresent = false;
                   this.hostDisconnectedAt = Date.now();
                   this.onHostDisconnected?.(this.hostDisconnectedAt);
                 }
-              }, 6000);
+              }, 30000);
             }
           }
         });
@@ -260,16 +264,16 @@ export class SevenPottersNetwork {
           const hostLeft = Array.isArray(leftPresences) && leftPresences.some((p: any) => p?.isHost || p?.isGM);
           if (hostLeft) {
             if (this.hostPresent && !this.hostDisconnectTimer) {
-              console.log('[7-Potters Client] Host leave event received, starting 6s grace timer...');
+              console.log('[7-Potters Client] Host leave event received, starting 30s mobile grace timer...');
               this.hostDisconnectTimer = setTimeout(() => {
                 this.hostDisconnectTimer = null;
                 if (!this.checkIsHostInPresence()) {
-                  console.log('[7-Potters Client] Host confirmed left after grace period.');
+                  console.log('[7-Potters Client] Host confirmed left after 30s grace period.');
                   this.hostPresent = false;
                   this.hostDisconnectedAt = Date.now();
                   this.onHostDisconnected?.(this.hostDisconnectedAt);
                 }
-              }, 6000);
+              }, 30000);
             }
           }
         });
@@ -325,6 +329,10 @@ export class SevenPottersNetwork {
   }
 
   public async reconnectHostIfNeeded(hostPlayer?: Player): Promise<void> {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+      return;
+    }
+
     if (!this.channel || this.channel.state !== 'joined' || !this.isSocketHealthy()) {
       console.log('[7-Potters Host] Channel dead or disconnected. Re-subscribing...');
       if (this.roomCode && hostPlayer) {
@@ -355,12 +363,16 @@ export class SevenPottersNetwork {
   }
 
   public async reconnectClient(roomCode: string, player: Player): Promise<boolean> {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+      return false;
+    }
+
     this.roomCode = roomCode.toUpperCase();
     this.myPlayerId = player.id;
 
     console.log('[7-Potters Client] Reconnecting client to room:', this.roomCode);
 
-    if (this.channel && this.channel.state === 'joined') {
+    if (this.channel && this.channel.state === 'joined' && this.isSocketHealthy()) {
       this.channel.track({
         id: this.myPlayerId,
         name: player.name,
@@ -439,6 +451,14 @@ export class SevenPottersNetwork {
     });
   }
 
+  public sendWeasleyItem(itemId: string, targetId?: string): void {
+    this.sendToHost({
+      type: 'USE_WEASLEY_ITEM',
+      senderId: this.myPlayerId,
+      payload: { itemId, targetId },
+    });
+  }
+
   public broadcast(msg: NetworkMessage): void {
     if (!this.channel) return;
     this.channel.send({
@@ -449,6 +469,19 @@ export class SevenPottersNetwork {
   }
 
   private handleIncomingMessage(msg: NetworkMessage) {
+    if (msg?.type === 'PING') {
+      if (this.hostDisconnectTimer) {
+        clearTimeout(this.hostDisconnectTimer);
+        this.hostDisconnectTimer = null;
+      }
+      if (!this.hostPresent) {
+        this.hostPresent = true;
+        this.hostDisconnectedAt = null;
+        this.onHostReconnected?.();
+      }
+      return;
+    }
+
     if (this.onMessageReceived) {
       this.onMessageReceived(msg);
     }

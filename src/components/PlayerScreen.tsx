@@ -22,7 +22,7 @@ import {
   Maximize2,
   ScrollText
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CharacterCard, CardInspectorModal } from './CharacterCard';
 import { 
   PhoenixCrest, 
@@ -32,14 +32,39 @@ import {
   CardCornerFlourish 
 } from './ArtAssets';
 import { CardDeckModal } from './CardDeckModal';
+import { SkyEventBanner } from './SkyEventBanner';
 
 export function PlayerScreen() {
-  const { gameState, currentPlayerId, playerAction, executeInstantSkill, resolveInterrupt } = useGame();
+  const { gameState, currentPlayerId, playerAction, executeInstantSkill, resolveInterrupt, skillToast, clearSkillToast, useWeasleyItem } = useGame();
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [inspectSelf, setInspectSelf] = useState(false);
   const [mobileTab, setMobileTab] = useState<'battle' | 'card' | 'log'>('battle');
+
+  useEffect(() => {
+    if (skillToast) {
+      setToastMessage(skillToast);
+      const timer = setTimeout(() => {
+        setToastMessage(null);
+        clearSkillToast();
+      }, 7000);
+      return () => clearTimeout(timer);
+    }
+  }, [skillToast, clearSkillToast]);
+
+  const playerLogsEndRef = useRef<HTMLDivElement>(null);
+  const playerLogsContainerRef = useRef<HTMLDivElement>(null);
+
+  // Tự động cuộn đến log mới nhất trên màn hình người chơi
+  useEffect(() => {
+    if (playerLogsContainerRef.current) {
+      playerLogsContainerRef.current.scrollTop = playerLogsContainerRef.current.scrollHeight;
+    }
+    if (playerLogsEndRef.current) {
+      playerLogsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [gameState.logs, mobileTab]);
 
   const me = gameState.players.find(p => p.id === currentPlayerId);
   if (!me) return null;
@@ -180,7 +205,7 @@ export function PlayerScreen() {
   const voteCountsByTarget: Record<string, number> = {};
   const killCountsByTarget: Record<string, number> = {};
   Object.values(gameState.pendingActions).forEach(action => {
-    if (action.actionName === 'Bỏ phiếu Treo Cổ') {
+    if (action.actionName === 'Bỏ phiếu Treo Cổ' || action.actionName === 'Biểu quyết Tước Đũa') {
       voteCountsByTarget[action.targetId] = (voteCountsByTarget[action.targetId] || 0) + 1;
     } else if (action.actionName === 'Giết') {
       killCountsByTarget[action.targetId] = (killCountsByTarget[action.targetId] || 0) + 1;
@@ -216,7 +241,7 @@ export function PlayerScreen() {
                 <span className={`text-xs font-mono font-bold uppercase px-2 py-0.5 rounded border ${
                   isDay ? 'bg-[#180e07] text-[#ffd88f] border-[#7a5229]' : 'bg-[#120617] text-cyan-300 border-indigo-800'
                 }`}>
-                  {isDay ? 'Ban Ngày · Ám Sát & Soi Thân Phận' : 'Ban Đêm · Diễn Đàn & Bỏ Phiếu Treo Cổ'}
+                  {isDay ? 'Ban Ngày · Ám Sát & Soi Thân Phận' : 'Ban Đêm · Diễn Đàn & Biểu Quyết Tước Đũa'}
                 </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-title-magical font-bold text-[#ffd88f] mt-0.5 tracking-wide">
@@ -225,7 +250,7 @@ export function PlayerScreen() {
               <p className="text-xs text-[#ebdcb0] font-lora mt-0.5">
                 {isDay 
                   ? 'Tử Thần Thực Tử đang săn đuổi. Các thành viên có kỹ năng ban ngày có thể thi triển bùa phép.' 
-                  : 'Toàn bộ các phù thủy thức dậy. Tranh luận, vạch trần kẻ ác và bỏ phiếu Treo Cổ!'}
+                  : 'Toàn bộ các phù thủy thức dậy. Tranh luận, vạch trần kẻ ác và biểu quyết Bùa Tước Khí Giới (Expelliarmus)!'}
               </p>
             </div>
           </div>
@@ -239,6 +264,11 @@ export function PlayerScreen() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Dynamic In-Flight Sky Event Banner */}
+      <div className="mb-6">
+        <SkyEventBanner event={gameState.currentSkyEvent} phase={gameState.phase} />
       </div>
 
       {/* Mobile Navigation Tab Bar (hidden on lg screens) */}
@@ -461,7 +491,7 @@ export function PlayerScreen() {
                   Mục Tiêu Trên Bầu Trời (Chọn 1 người)
                 </h3>
                 <p className="text-xs text-[#ebdcb0] font-lora">
-                  {isDay ? 'Chọn mục tiêu để áp dụng kỹ năng ban ngày / ám sát' : 'Chọn đối tượng để bỏ phiếu Treo Cổ'}
+                  {isDay ? 'Chọn mục tiêu để áp dụng kỹ năng ban ngày / ám sát' : 'Chọn đối tượng để biểu quyết Tước Đũa (Expelliarmus)'}
                 </p>
               </div>
 
@@ -568,6 +598,19 @@ export function PlayerScreen() {
                               Bị thương
                             </span>
                           )}
+                          {(() => {
+                            const escorts = Object.entries(gameState.pendingActions)
+                              .filter(([actorId, act]) => act.actionName === 'Bay Hộ Tống' && act.targetId === p.id)
+                              .map(([actorId]) => gameState.players.find(pl => pl.id === actorId)?.name)
+                              .filter(Boolean);
+                            if (escorts.length === 0) return null;
+                            return (
+                              <span className="text-[9px] font-mono font-bold text-amber-200 bg-amber-950/90 px-1.5 py-0.5 rounded border border-amber-500/80 flex items-center gap-1">
+                                <Shield size={10} className="text-amber-400" />
+                                Hộ tống: {escorts.join(', ')}
+                              </span>
+                            );
+                          })()}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className={`text-[10px] font-mono ${
@@ -628,7 +671,7 @@ export function PlayerScreen() {
                     ⚠️ CHÚ Ý: ĐANG CHỌN ĐỒNG MINH TỬ THẦN THỰC TỬ!
                   </span>
                   <span>
-                    Mục tiêu bạn vừa nhấp chọn là <strong>{effectiveTargetPlayer.name} ({effectiveTargetPlayer.role?.name})</strong>. Đây là đồng minh cùng hội kín của bạn. Hãy cân nhắc kỹ trước khi bấm Ám Sát hoặc Bỏ Phiếu Treo Cổ!
+                    Mục tiêu bạn vừa nhấp chọn là <strong>{effectiveTargetPlayer.name} ({effectiveTargetPlayer.role?.name})</strong>. Đây là đồng minh cùng hội kín của bạn. Hãy cân nhắc kỹ trước khi bấm Ám Sát hoặc Biểu Quyết Tước Đũa!
                   </span>
                 </div>
               </div>
@@ -655,7 +698,7 @@ export function PlayerScreen() {
                         PHIẾU BẦU ĐÃ ĐƯỢC LƯU VÀO MÁY CHỦ
                       </span>
                       <p className="font-serif text-sm sm:text-base text-[#f5eedb] font-bold">
-                        {myAction.actionName === 'Bỏ phiếu Treo Cổ' ? 'Bỏ phiếu Treo Cổ' : `Hành động: ${myAction.actionName}`}:{' '}
+                        {(myAction.actionName === 'Bỏ phiếu Treo Cổ' || myAction.actionName === 'Biểu quyết Tước Đũa') ? 'Biểu quyết Tước Đũa' : `Hành động: ${myAction.actionName}`}:{' '}
                         <span className="text-[#ffd88f] underline decoration-[#bd8436] font-extrabold text-base">
                           {myVotedTarget?.name || 'Mục tiêu'}
                         </span>
@@ -685,7 +728,7 @@ export function PlayerScreen() {
             ) : (
               <div className="space-y-4">
                 
-                {/* Night Phase Actions: Vote Treo Cổ & Moody Avada */}
+                {/* Night Phase Actions: Vote Tước Đũa & Moody Avada */}
                 {isNight ? (
                   <div className="flex flex-wrap gap-3">
                     {me.role?.id === 'ALASTOR_MOODY' && (
@@ -708,10 +751,10 @@ export function PlayerScreen() {
                     <button
                       onClick={() => {
                         if (effectiveTargetId) {
-                          playerAction('Bỏ phiếu Treo Cổ', effectiveTargetId);
+                          playerAction('Biểu quyết Tước Đũa', effectiveTargetId);
                           setSelectedTarget(effectiveTargetId);
                           const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
-                          setToastMessage(`✓ Đã lưu phiếu biểu quyết Treo Cổ cho: ${tName}!`);
+                          setToastMessage(`✓ Đã lưu phiếu biểu quyết Tước Đũa cho: ${tName}!`);
                           setTimeout(() => setToastMessage(null), 3500);
                         }
                       }}
@@ -721,10 +764,10 @@ export function PlayerScreen() {
                       <Crosshair size={18} />
                       <span>
                         {myAction?.targetId === effectiveTargetId
-                          ? `✓ Đã Lưu Phiếu Treo Cổ (${effectiveTargetPlayer?.name})`
+                          ? `✓ Đã Lưu Phiếu Tước Đũa (${effectiveTargetPlayer?.name})`
                           : myAction
                             ? `🔄 Đổi Phiếu Sang: ${effectiveTargetPlayer?.name}`
-                            : `Bỏ Phiếu Treo Cổ ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
+                            : `Biểu Quyết Tước Đũa ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
                       </span>
                     </button>
                   </div>
@@ -850,6 +893,77 @@ export function PlayerScreen() {
                               </span>
                             </button>
                           )}
+
+                          {/* Universal Daytime Action: Bay Hộ Tống (Chắn Gió) for ALL Players */}
+                          <button
+                            onClick={() => {
+                              if (effectiveTargetId) {
+                                if (effectiveTargetId === me.id) {
+                                  setToastMessage('⚠️ Bạn không thể tự bay hộ tống chính mình! Hãy chọn đồng đội.');
+                                  setTimeout(() => setToastMessage(null), 3500);
+                                  return;
+                                }
+                                playerAction('Bay Hộ Tống', effectiveTargetId);
+                                setSelectedTarget(effectiveTargetId);
+                                const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
+                                setToastMessage(`✓ Đã xác nhận Bay Hộ Tống sát cánh cùng: ${tName}!`);
+                                setTimeout(() => setToastMessage(null), 3500);
+                              }
+                            }}
+                            disabled={!effectiveTargetId || isDead || effectiveTargetId === me.id}
+                            className="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-700/90 via-amber-800 to-amber-950 hover:from-amber-600 hover:to-amber-800 border-2 border-amber-400/90 font-serif font-black text-xs sm:text-sm text-[#ffd88f] flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
+                          >
+                            <Shield size={18} className="text-amber-300" />
+                            <span>
+                              {myAction?.targetId === effectiveTargetId && myAction?.actionName === 'Bay Hộ Tống'
+                                ? `✓ Đang Bay Hộ Tống (${effectiveTargetPlayer?.name})`
+                                : myAction?.actionName === 'Bay Hộ Tống'
+                                  ? `🔄 Đổi Hộ Tống Sang: ${effectiveTargetPlayer?.name}`
+                                  : `Bay Hộ Tống ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
+                            </span>
+                          </button>
+                        </div>
+
+                        {/* Weasleys' Joke Shop In-Hand Arsenal (Instant Daytime Use) */}
+                        <div className="pt-3 mt-3 border-t border-[#7a5229]/50">
+                          <span className="text-[10px] font-mono font-bold text-[#ffd88f] uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+                            <Sparkles size={12} className="text-amber-400" />
+                            Bảo Bối Tiệm Phù Thủy Weasley (Dùng Tức Thì):
+                          </span>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            {(gameState.weasleyItems || []).map(item => (
+                              <button
+                                key={item.id}
+                                onClick={() => {
+                                  if (item.count <= 0) {
+                                    setToastMessage(`⚠️ [${item.name}] đã hết lượt sử dụng!`);
+                                    setTimeout(() => setToastMessage(null), 3000);
+                                    return;
+                                  }
+                                  if (item.id === 'FAINTING_FANCIES' && !effectiveTargetId) {
+                                    setToastMessage(`⚠️ Vui lòng chọn 1 mục tiêu trên bầu trời để cho ăn Kẹo Ngất Xỉu!`);
+                                    setTimeout(() => setToastMessage(null), 3500);
+                                    return;
+                                  }
+                                  const res = useWeasleyItem(item.id, effectiveTargetId || undefined);
+                                  setToastMessage(res || `✓ Đã kích hoạt [${item.name}] thành công!`);
+                                  setTimeout(() => setToastMessage(null), 4000);
+                                }}
+                                disabled={isDead || item.count <= 0}
+                                className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all ${
+                                  item.count > 0 
+                                    ? 'bg-[#211107]/90 hover:bg-[#331a0b] border-[#bd8436] text-[#ffd88f] active:scale-95 cursor-pointer shadow-md' 
+                                    : 'bg-black/40 border-gray-800 text-gray-500 cursor-not-allowed opacity-40'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-serif font-bold truncate">{item.name}</span>
+                                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/60 border border-[#7a5229]/60 font-bold">{item.count}/{item.maxCount}</span>
+                                </div>
+                                <span className="text-[10px] text-[#ebdcb0]/70 font-lora line-clamp-1 mt-1">{item.description}</span>
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     );
@@ -863,9 +977,17 @@ export function PlayerScreen() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
-                    className="p-3.5 bg-gradient-to-r from-[#044e36] via-[#057a55] to-[#044e36] border border-emerald-400 rounded-xl text-emerald-100 text-center font-lora text-xs sm:text-sm font-bold flex items-center justify-center gap-2"
+                    className={`p-3.5 border rounded-xl text-center font-lora text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-lg ${
+                      toastMessage.startsWith('⚠️')
+                        ? 'bg-gradient-to-r from-[#3d1800] via-[#522200] to-[#3d1800] border-amber-500/80 text-amber-200'
+                        : 'bg-gradient-to-r from-[#044e36] via-[#057a55] to-[#044e36] border-emerald-400 text-emerald-100'
+                    }`}
                   >
-                    <CheckCircle size={16} className="text-emerald-300" />
+                    {toastMessage.startsWith('⚠️') ? (
+                      <AlertTriangle size={16} className="text-amber-400 shrink-0" />
+                    ) : (
+                      <CheckCircle size={16} className="text-emerald-300 shrink-0" />
+                    )}
                     <span>{toastMessage}</span>
                   </motion.div>
                 )}
@@ -881,7 +1003,10 @@ export function PlayerScreen() {
               <ScrollText size={18} className="text-[#bd8436]" />
               Biên Niên Sử Chiến Trường
             </h3>
-            <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar">
+            <div 
+              ref={playerLogsContainerRef}
+              className="space-y-2 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar scroll-smooth"
+            >
               {gameState.logs.length === 0 ? (
                 <p className="text-xs text-[#ebdcb0]/50 font-lora italic py-6 text-center">
                   Chưa có hành động nào được ghi nhận trên bầu trời.
@@ -896,6 +1021,7 @@ export function PlayerScreen() {
                   </div>
                 ))
               )}
+              <div ref={playerLogsEndRef} />
             </div>
           </div>
         </div>
@@ -932,47 +1058,64 @@ export function PlayerScreen() {
             {isNight ? (
               <button
                 onClick={() => {
-                  playerAction('Bỏ phiếu Treo Cổ', effectiveTargetId!);
+                  playerAction('Biểu quyết Tước Đũa', effectiveTargetId!);
                   setSelectedTarget(effectiveTargetId);
-                  setToastMessage(`✓ Đã lưu phiếu biểu quyết Treo Cổ cho: ${effectiveTargetPlayer.name}!`);
+                  setToastMessage(`✓ Đã lưu phiếu biểu quyết Tước Đũa cho: ${effectiveTargetPlayer.name}!`);
                   setTimeout(() => setToastMessage(null), 3500);
                 }}
                 className="px-4 py-2.5 rounded-xl hpvn-btn-phoenix font-serif font-bold text-xs flex items-center gap-1.5 flex-shrink-0 active:scale-95"
               >
                 <Crosshair size={14} />
                 <span>
-                  {myAction?.targetId === effectiveTargetId ? '✓ Đã Lưu' : 'Bỏ Phiếu Treo Cổ'}
+                  {myAction?.targetId === effectiveTargetId ? '✓ Đã Lưu' : 'Tước Đũa'}
                 </span>
               </button>
-            ) : me.role?.faction === 'DEATH_EATERS' ? (
-              <button
-                onClick={() => {
-                  playerAction('Giết', effectiveTargetId!);
-                  setSelectedTarget(effectiveTargetId);
-                  setToastMessage(`✓ Đã lưu mục tiêu Ám Sát: ${effectiveTargetPlayer.name}!`);
-                  setTimeout(() => setToastMessage(null), 3500);
-                }}
-                className="px-4 py-2.5 rounded-xl hpvn-btn-floo font-serif font-bold text-xs flex items-center gap-1.5 flex-shrink-0 active:scale-95"
-              >
-                <Skull size={14} />
-                <span>
-                  {myAction?.targetId === effectiveTargetId ? '✓ Đã Lưu' : 'Ám Sát'}
-                </span>
-              </button>
-            ) : me.role?.id === 'ALBUS_DUMBLEDORE' ? (
-              <button
-                onClick={() => {
-                  playerAction('Bảo vệ', effectiveTargetId!);
-                  setSelectedTarget(effectiveTargetId);
-                  setToastMessage(`✓ Đã lưu khiên Bảo Vệ cho: ${effectiveTargetPlayer.name}!`);
-                  setTimeout(() => setToastMessage(null), 3500);
-                }}
-                className="px-4 py-2.5 rounded-xl hpvn-btn-gold font-serif font-bold text-xs flex items-center gap-1.5 flex-shrink-0 active:scale-95"
-              >
-                <Shield size={14} />
-                <span>Bảo Vệ</span>
-              </button>
-            ) : null}
+            ) : (
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                {me.role?.faction === 'DEATH_EATERS' && (
+                  <button
+                    onClick={() => {
+                      playerAction('Giết', effectiveTargetId!);
+                      setSelectedTarget(effectiveTargetId);
+                      setToastMessage(`✓ Đã lưu mục tiêu Ám Sát: ${effectiveTargetPlayer.name}!`);
+                      setTimeout(() => setToastMessage(null), 3500);
+                    }}
+                    className="px-3 py-2 rounded-xl hpvn-btn-floo font-serif font-bold text-xs flex items-center gap-1 active:scale-95"
+                  >
+                    <Skull size={13} />
+                    <span>Ám Sát</span>
+                  </button>
+                )}
+                {me.role?.id === 'ALBUS_DUMBLEDORE' && (
+                  <button
+                    onClick={() => {
+                      playerAction('Bảo vệ', effectiveTargetId!);
+                      setSelectedTarget(effectiveTargetId);
+                      setToastMessage(`✓ Đã lưu khiên Bảo Vệ cho: ${effectiveTargetPlayer.name}!`);
+                      setTimeout(() => setToastMessage(null), 3500);
+                    }}
+                    className="px-3 py-2 rounded-xl hpvn-btn-gold font-serif font-bold text-xs flex items-center gap-1.5 active:scale-95"
+                  >
+                    <Shield size={13} />
+                    <span>Bảo Vệ</span>
+                  </button>
+                )}
+                {effectiveTargetId !== me.id && (
+                  <button
+                    onClick={() => {
+                      playerAction('Bay Hộ Tống', effectiveTargetId!);
+                      setSelectedTarget(effectiveTargetId);
+                      setToastMessage(`✓ Đã lưu mục tiêu Bay Hộ Tống: ${effectiveTargetPlayer.name}!`);
+                      setTimeout(() => setToastMessage(null), 3500);
+                    }}
+                    className="px-3 py-2 rounded-xl bg-amber-800 hover:bg-amber-700 text-[#ffd88f] border border-amber-500 font-serif font-bold text-xs flex items-center gap-1 active:scale-95"
+                  >
+                    <Shield size={13} />
+                    <span>{myAction?.targetId === effectiveTargetId && myAction?.actionName === 'Bay Hộ Tống' ? '✓ Đang Hộ Tống' : 'Hộ Tống'}</span>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

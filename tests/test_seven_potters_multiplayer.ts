@@ -46,6 +46,7 @@ async function runMultiplayerTests() {
   let client2ReceivedState: GameState | null = null;
   let hostReceivedActions: any[] = [];
   let hostReceivedInstantSkills: any[] = [];
+  let hostReceivedWeasleyItems: any[] = [];
 
   // Setup Host Listeners
   hostNet.onMessageReceived = (msg: NetworkMessage) => {
@@ -56,6 +57,8 @@ async function runMultiplayerTests() {
       hostReceivedActions.push({ senderId: msg.senderId, payload: msg.payload });
     } else if (msg.type === 'INSTANT_SKILL_SUBMIT') {
       hostReceivedInstantSkills.push({ senderId: msg.senderId, payload: msg.payload });
+    } else if (msg.type === 'USE_WEASLEY_ITEM') {
+      hostReceivedWeasleyItems.push({ senderId: msg.senderId, payload: msg.payload });
     }
   };
 
@@ -107,13 +110,26 @@ async function runMultiplayerTests() {
     }
 
     // -------------------------------------------------------------
-    // TEST 3: State Sync Broadcast from Host to Clients
+    // TEST 3: State Sync Broadcast from Host to Clients (Including FlightStage & Weasley Items)
     // -------------------------------------------------------------
-    console.log('\n--- [TEST 3] ĐỒNG BỘ TRẠNG THÁI GAME (ROOM_STATE_SYNC) ---');
+    console.log('\n--- [TEST 3] ĐỒNG BỘ TRẠNG THÁI GAME (ROOM_STATE_SYNC & FLIGHT STAGE) ---');
     const mockState: GameState = {
       players: [hostPlayer, client1Player],
       phase: 'LOBBY',
       round: 1,
+      flightStage: 2,
+      goldenFlameUsed: false,
+      weasleyItems: [
+        {
+          id: 'DARKNESS_POWDER',
+          name: 'Bột Khói Mù Peru',
+          usesLeft: 1,
+          description: 'Mù hướng ám sát',
+          flavor: 'Weasleys Wizard Wheezes',
+          icon: 'CloudFog',
+          phaseAllowed: 'NIGHT',
+        }
+      ],
       logs: ['Phòng đã sẵn sàng!'],
       winner: null,
       pendingActions: {},
@@ -126,8 +142,8 @@ async function runMultiplayerTests() {
     await sleep(1500);
 
     const state1 = client1ReceivedState as GameState | null;
-    if (state1 && state1.players.length === 2) {
-      console.log('✅ TEST 3 PASSED: Client 1 đã nhận được ROOM_STATE_SYNC từ Host chính xác!');
+    if (state1 && state1.players.length === 2 && state1.flightStage === 2 && state1.weasleyItems?.length === 1) {
+      console.log('✅ TEST 3 PASSED: Client 1 đã nhận được ROOM_STATE_SYNC với Chặng bay (Stage 2) & Kho Bảo Bối Weasley!');
     } else {
       throw new Error('TEST 3 FAILED: Client 1 không nhận được ROOM_STATE_SYNC hợp lệ');
     }
@@ -170,31 +186,48 @@ async function runMultiplayerTests() {
     }
 
     // -------------------------------------------------------------
-    // TEST 6: Client Reconnection & Mobile Resume Resilience
+    // TEST 6: Client Uses Weasley Joke Shop Item (USE_WEASLEY_ITEM)
     // -------------------------------------------------------------
-    console.log('\n--- [TEST 6] KIỂM THỬ KHẢ NĂNG PHỤC HỒI KHI CHUYỂN TAB MOBILE (RECONNECT) ---');
+    console.log('\n--- [TEST 6] CLIENT KÍCH HOẠT BẢO BỐI TIỆM PHÙ THỦY WEASLEY (USE_WEASLEY_ITEM) ---');
+    client1Net.sendWeasleyItem('DARKNESS_POWDER');
+    await sleep(1500);
+
+    const itemReceived = hostReceivedWeasleyItems.find(
+      (w) => w.senderId === client1Player.id && w.payload.itemId === 'DARKNESS_POWDER'
+    );
+
+    if (itemReceived) {
+      console.log('✅ TEST 6 PASSED: Host nhận và xác nhận kích hoạt Bột Khói Mù Peru (USE_WEASLEY_ITEM) thành công!');
+    } else {
+      throw new Error('TEST 6 FAILED: Host không nhận được USE_WEASLEY_ITEM');
+    }
+
+    // -------------------------------------------------------------
+    // TEST 7: Client Reconnection & Mobile Resume Resilience
+    // -------------------------------------------------------------
+    console.log('\n--- [TEST 7] KIỂM THỬ KHẢ NĂNG PHỤC HỒI KHI CHUYỂN TAB MOBILE (RECONNECT) ---');
     const reconnectOk = await client1Net.reconnectClient(testRoomCode, client1Player);
     await sleep(1500);
 
     if (reconnectOk && client1Net.isSocketHealthy()) {
-      console.log('✅ TEST 6 PASSED: Reconnection thành công, socket vẫn duy trì trạng thái kết nối!');
+      console.log('✅ TEST 7 PASSED: Reconnection thành công, socket vẫn duy trì trạng thái kết nối!');
     } else {
-      throw new Error('TEST 6 FAILED: Client reconnect không thành công');
+      throw new Error('TEST 7 FAILED: Client reconnect không thành công');
     }
 
     // -------------------------------------------------------------
-    // TEST 7: Graceful Teardown
+    // TEST 8: Graceful Teardown
     // -------------------------------------------------------------
-    console.log('\n--- [TEST 7] GIẢI PHÓNG KÊNH PHÒNG AN TOÀN (CLEAN TEARDOWN) ---');
+    console.log('\n--- [TEST 8] GIẢI PHÓNG KÊNH PHÒNG AN TOÀN (CLEAN TEARDOWN) ---');
     client1Net.destroy();
     client2Net.destroy();
     hostNet.destroy();
     await sleep(1000);
 
-    console.log('✅ TEST 7 PASSED: Mọi channel đã được giải phóng và đóng sạch sẽ!');
+    console.log('✅ TEST 8 PASSED: Mọi channel đã được giải phóng và đóng sạch sẽ!');
 
     console.log('\n====================================================');
-    console.log('🎉 TẤT CẢ 7/7 BÀI KIỂM THỬ MULTIPLAYER ĐỀU THÀNH CÔNG RỰC RỠ!');
+    console.log('🎉 TẤT CẢ 8/8 BÀI KIỂM THỬ MULTIPLAYER ĐỀU THÀNH CÔNG RỰC RỠ!');
     console.log('====================================================\n');
   } catch (err) {
     console.error('\n❌ KIỂM THỬ THẤT BẠI:', err);

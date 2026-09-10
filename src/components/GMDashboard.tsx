@@ -20,7 +20,7 @@ import {
   Eye,
   Wand2
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CharacterCard, CardInspectorModal } from './CharacterCard';
 import { 
   PhoenixCrest, 
@@ -29,6 +29,7 @@ import {
   CardCornerFlourish,
   DeathlyHallowsSymbol 
 } from './ArtAssets';
+import { SkyEventBanner } from './SkyEventBanner';
 import { CardDeckModal } from './CardDeckModal';
 import { Role } from '@/lib/types';
 
@@ -52,19 +53,35 @@ export function GMDashboard() {
   const [inspectedRole, setInspectedRole] = useState<Role | null>(null);
   const [gmTab, setGmTab] = useState<'resolution' | 'players' | 'logs'>('resolution');
 
+  const logsEndRef = useRef<HTMLDivElement>(null);
+  const logsContainerRef = useRef<HTMLDivElement>(null);
+
+  // Luôn luôn tự động cuộn đến log mới nhất khi có nhật ký mới hoặc khi chuyển tab Nhật Ký
+  useEffect(() => {
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+    }
+    if (logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [gameState.logs, gmTab]);
+
   const alivePlayers = gameState.players.filter(p => !p.isGM && p.status !== 'DEAD');
   const totalAlive = alivePlayers.length;
   const votedCount = Object.keys(gameState.pendingActions).length;
-  const aliveBots = alivePlayers.filter(p => p.name.includes('(Bot)'));
+  const aliveBots = alivePlayers.filter(p => p.isBot || p.name.includes('(Bot)') || p.id.startsWith('bot_'));
 
   // Tally votes received by each player
   const votesReceived: Record<string, number> = {};
   const killReceived: Record<string, number> = {};
+  const escortsReceived: Record<string, number> = {};
   Object.values(gameState.pendingActions).forEach(act => {
-    if (act.actionName === 'Bỏ phiếu Treo Cổ') {
+    if (act.actionName === 'Bỏ phiếu Treo Cổ' || act.actionName === 'Biểu quyết Tước Đũa') {
       votesReceived[act.targetId] = (votesReceived[act.targetId] || 0) + 1;
     } else if (act.actionName === 'Giết') {
       killReceived[act.targetId] = (killReceived[act.targetId] || 0) + 1;
+    } else if (act.actionName === 'Bay Hộ Tống') {
+      escortsReceived[act.targetId] = (escortsReceived[act.targetId] || 0) + 1;
     }
   });
 
@@ -74,6 +91,9 @@ export function GMDashboard() {
   return (
     <div className="max-w-7xl mx-auto py-6 px-4 space-y-6">
       
+      {/* Dynamic In-Flight Sky Event Banner for GM */}
+      <SkyEventBanner event={gameState.currentSkyEvent} phase={gameState.phase} />
+
       {/* Top Header: GM Command Station */}
       <div className="relative rounded-2xl hpvn-panel-gold p-6 overflow-hidden">
         <CardCornerFlourish className="absolute top-2 left-2 w-7 h-7 text-[#bd8436] pointer-events-none" />
@@ -91,8 +111,13 @@ export function GMDashboard() {
                 </span>
                 <span className="text-[#7a5229]">•</span>
                 <span className="text-xs font-mono text-[#ebdcb0]">
-                  Lượt: <strong className="text-[#ffd88f]">{gameState.round}</strong> | Giai đoạn: <strong className="text-[#ffd88f]">{gameState.phase}</strong>
+                  Lượt: <strong className="text-[#ffd88f]">{gameState.round}</strong> | Giai đoạn: <strong className="text-[#ffd88f]">{gameState.phase}</strong> | Chặng: <strong className="text-amber-400">{gameState.flightStage || 1}/{gameState.maxStages || 4}</strong>
                 </span>
+                {gameState.players.filter(p => !p.isGM).length >= 14 && (gameState.flightStage || 1) >= 3 && (
+                  <span className="text-[10px] font-serif font-bold text-red-300 bg-red-950/90 px-2 py-0.5 rounded border border-red-700 animate-pulse">
+                    💀 Voldemort Phục Kích (Ám Sát Kép)
+                  </span>
+                )}
               </div>
               <h1 className="text-2xl sm:text-3xl font-title-magical font-bold text-[#ffd88f] tracking-wide mt-0.5 leading-tight">
                 Bàn Cờ Chiến Lược & Phân Giải Ma Pháp
@@ -195,7 +220,7 @@ export function GMDashboard() {
                           ? 'bg-emerald-950 text-emerald-300 border-emerald-600'
                           : 'bg-[#2a170a] text-[#ffd88f] border-[#7a5229]'
                       }`}>
-                        {isNight ? '🗳️ Bỏ phiếu Treo Cổ: ' : '⚡ Hành động: '}
+                        {isNight ? '🗳️ Biểu quyết Tước Đũa: ' : '⚡ Hành động: '}
                         {votedCount}/{totalAlive} người sống
                       </span>
                       <span className="text-[11px] text-[#ebdcb0]/70 font-mono hidden sm:inline">
@@ -415,6 +440,7 @@ export function GMDashboard() {
                         : gameState.players.find(x => x.id === pAction?.targetId)?.name;
                       const pVotes = isNight ? (votesReceived[p.id] || 0) : 0;
                       const pKills = isDay ? (killReceived[p.id] || 0) : 0;
+                      const pEscorts = isDay ? (escortsReceived[p.id] || 0) : 0;
 
                       return (
                         <div className="mt-2.5 pt-2 border-t border-[#7a5229]/40 flex items-center justify-between gap-1 text-[11px] font-mono">
@@ -426,7 +452,7 @@ export function GMDashboard() {
                             <span className="text-emerald-300 font-bold flex items-center gap-1 truncate" title={`${pAction.actionName} ➔ ${targetName}`}>
                               <CheckCircle size={12} className="text-emerald-400 flex-shrink-0" />
                               <span className="truncate">
-                                {pAction.actionName === 'Bỏ phiếu Treo Cổ' ? 'Vote' : pAction.actionName}: {targetName}
+                                {pAction.actionName === 'Bay Hộ Tống' ? `🛡️ Hộ tống: ${targetName}` : (pAction.actionName === 'Bỏ phiếu Treo Cổ' || pAction.actionName === 'Biểu quyết Tước Đũa') ? `Tước Đũa: ${targetName}` : `${pAction.actionName}: ${targetName}`}
                               </span>
                             </span>
                           ) : (
@@ -444,6 +470,11 @@ export function GMDashboard() {
                             {pKills > 0 && (
                               <span className="text-red-300 bg-red-950 px-1.5 py-0.5 rounded border border-red-800 font-bold">
                                 🗡️ {pKills} phiếu
+                              </span>
+                            )}
+                            {pEscorts > 0 && (
+                              <span className="text-amber-300 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-600 font-bold">
+                                🛡️ {pEscorts} hộ tống
                               </span>
                             )}
                           </div>
@@ -535,7 +566,10 @@ export function GMDashboard() {
               Biên Niên Sử Hành Động
             </h3>
 
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+            <div 
+              ref={logsContainerRef}
+              className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar scroll-smooth"
+            >
               {gameState.logs.map((log, idx) => (
                 <motion.div 
                   key={`gm-log-item-${idx}`}
@@ -546,6 +580,7 @@ export function GMDashboard() {
                   {log}
                 </motion.div>
               ))}
+              <div ref={logsEndRef} />
             </div>
 
             {/* Reset Game Section */}

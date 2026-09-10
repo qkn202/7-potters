@@ -13,13 +13,18 @@ import {
   DeathlyHallowsSymbol 
 } from '@/components/ArtAssets';
 import { FlooChatDrawer, FlooHeaderTrigger, FlooFloatingTrigger } from '@/components/FlooChatDrawer';
-import { BookOpen, User, RotateCcw, AlertTriangle, Wifi, WifiOff, Clock } from 'lucide-react';
+import { BookOpen, User, RotateCcw, AlertTriangle, Wifi, WifiOff, Clock, Package, Bot } from 'lucide-react';
+import { FlightTrack } from '@/components/FlightTrack';
+import { WeasleyCrateModal } from '@/components/WeasleyCrateModal';
+import { CinematicFXOverlay } from '@/components/CinematicFXOverlay';
 
 export default function Home() {
   const { 
     gameState, 
     currentPlayerId, 
     impersonatePlayer,
+    useWeasleyItem,
+    clearVisualFX,
     roomCode,
     isHost,
     connStatus,
@@ -28,9 +33,14 @@ export default function Home() {
 
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [isFlooOpen, setIsFlooOpen] = useState(false);
+  const [isWeasleyCrateOpen, setIsWeasleyCrateOpen] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+
+  // Chế độ chơi với AI/Bot hoặc Thử nghiệm cục bộ: Mở hoàn toàn góc nhìn để tiện kiểm thử
+  const hasBots = gameState.players.some(p => p.isBot || p.name.includes('(Bot)') || p.id.startsWith('bot_'));
+  const isTestOrBotMode = !roomCode || hasBots;
 
   // Screen routing based on state
   let content;
@@ -94,6 +104,21 @@ export default function Home() {
           {/* Floo Shoutbox Header Button (In-App Drawer) */}
           <FlooHeaderTrigger onClick={() => setIsFlooOpen(true)} />
 
+          {/* Weasleys' Wizard Wheezes Supply Crate Button */}
+          {gameState.phase !== 'LOBBY' && (
+            <button
+              onClick={() => setIsWeasleyCrateOpen(true)}
+              title="Hòm Đồ Tiệm Phù Thủy Weasley"
+              className="hpvn-btn-gold px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer relative"
+            >
+              <Package size={14} className="text-amber-300" />
+              <span className="text-[11px] sm:text-xs">Bảo Bối Weasley</span>
+              {(gameState.weasleyItems || []).some(i => i.count > 0) && (
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping absolute -top-0.5 -right-0.5" />
+              )}
+            </button>
+          )}
+
           {/* Rulebook / Codex Deck Button */}
           <button
             onClick={() => setIsDeckOpen(true)}
@@ -104,26 +129,54 @@ export default function Home() {
             <span className="text-[11px] sm:text-xs">Bí Kíp<span className="hidden sm:inline"> 22 Thẻ Bài</span></span>
           </button>
 
-          {/* Quick Perspective Impersonator (Helpful for GM or testing) */}
+          {/* Perspective Indicator / Impersonator: Mở hoàn toàn duy nhất ở chế độ chơi với AI/Bot hoặc thử nghiệm */}
           {gameState.players.length > 0 && (
-            <div className="flex items-center gap-1 bg-[#1a0e07] px-2 py-1 rounded border border-[#7a5229] text-xs">
-              <User size={12} className="text-[#ffd88f] shrink-0" />
-              <span className="hidden md:inline text-[11px] text-[#ebdcb0]/70 font-mono">Góc nhìn:</span>
-              <select
-                value={currentPlayerId || ''}
-                onChange={(e) => impersonatePlayer(e.target.value)}
-                className="bg-transparent text-[11px] sm:text-xs text-[#ffd88f] font-serif font-bold focus:outline-none cursor-pointer max-w-[105px] sm:max-w-[160px] truncate"
-              >
-                {gameState.players.map((p, idx) => (
-                  <option key={`perspective-${p.id || idx}`} value={p.id} className="bg-[#1a0e07] text-[#ffd88f]">
-                    {p.name} {p.isGM ? '👑 (GM)' : p.role ? `· ${p.role.name}` : ''}
-                  </option>
-                ))}
-              </select>
+            <div className={`flex items-center gap-1.5 bg-[#1a0e07] px-2 py-1 rounded border text-xs transition-all ${
+              isTestOrBotMode ? 'border-[#bd8436] shadow-[0_0_8px_rgba(189,132,54,0.25)]' : 'border-[#7a5229]'
+            }`}>
+              {hasBots ? (
+                <Bot size={13} className="text-amber-400 shrink-0" />
+              ) : (
+                <User size={12} className="text-[#ffd88f] shrink-0" />
+              )}
+              {isTestOrBotMode ? (
+                <>
+                  <span className="hidden md:inline text-[11px] text-amber-200/90 font-mono font-semibold">
+                    Góc nhìn:
+                  </span>
+                  <select
+                    value={currentPlayerId || ''}
+                    onChange={(e) => impersonatePlayer(e.target.value)}
+                    className="bg-transparent text-[11px] sm:text-xs text-[#ffd88f] font-serif font-bold focus:outline-none cursor-pointer max-w-[110px] sm:max-w-[170px] truncate"
+                    title="Chế độ chơi cùng Bot/AI: Mở toàn bộ góc nhìn để tự do kiểm thử mọi nhân vật"
+                  >
+                    {gameState.players.map((p, idx) => (
+                      <option key={`perspective-${p.id || idx}`} value={p.id} className="bg-[#1a0e07] text-[#ffd88f]">
+                        {p.name} {p.isGM ? '👑 (GM)' : (p.isBot || p.name.includes('(Bot)') || p.id.startsWith('bot_')) ? '🤖' : ''} {p.role ? `· ${p.role.name}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <span className="text-[11px] sm:text-xs text-[#ffd88f] font-serif font-bold truncate max-w-[110px] sm:max-w-[160px]">
+                  {currentPlayer?.name || 'Phù thủy'} {currentPlayer?.isGM ? '👑 (GM)' : ''}
+                </span>
+              )}
             </div>
           )}
         </div>
       </header>
+
+      {/* 4-Stage Flight Progress Track (Active during gameplay) */}
+      {gameState.phase !== 'LOBBY' && gameState.phase !== 'END' && (
+        <FlightTrack 
+          flightStage={gameState.flightStage || 1}
+          maxStages={gameState.maxStages || 4}
+          goldenFlameUsed={gameState.goldenFlameUsed || false}
+          round={gameState.round}
+          phase={gameState.phase}
+        />
+      )}
 
       {/* 10-Minute Host Disconnection Countdown Warning Banner */}
       {disconnectCountdown !== null && (
@@ -193,12 +246,24 @@ export default function Home() {
             <div className="flex justify-center gap-3 pt-2">
               <button
                 onClick={() => {
-                  localStorage.removeItem('seven-potters-mock-state');
-                  sessionStorage.removeItem('seven-potters-session-id');
-                  sessionStorage.removeItem('seven-potters-room-code');
-                  sessionStorage.removeItem('seven-potters-is-host');
-                  sessionStorage.removeItem('seven-potters-player-name');
-                  sessionStorage.removeItem('seven-potters-is-gm');
+                  const keys = [
+                    'seven-potters-mock-state',
+                    'seven-potters-session-id',
+                    'seven-potters-room-code',
+                    'seven-potters-is-host',
+                    'seven-potters-player-name',
+                    'seven-potters-is-gm',
+                    'seven-potters-house',
+                    'seven-potters-user-tag',
+                    'seven-potters-hpvn-uid',
+                    'seven-potters-session-timestamp',
+                  ];
+                  keys.forEach(k => {
+                    try {
+                      sessionStorage.removeItem(k);
+                      localStorage.removeItem(k);
+                    } catch {}
+                  });
                   window.location.reload();
                 }}
                 className="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded-xl text-xs font-serif font-bold transition-colors cursor-pointer"
@@ -216,6 +281,19 @@ export default function Home() {
         </div>
       )}
 
+      {/* Weasleys' Wizard Wheezes Supply Crate Modal */}
+      <WeasleyCrateModal 
+        isOpen={isWeasleyCrateOpen}
+        onClose={() => setIsWeasleyCrateOpen(false)}
+        items={gameState.weasleyItems || []}
+        players={gameState.players}
+        currentPlayerId={currentPlayerId}
+        currentPhase={gameState.phase}
+        onUseItem={(itemId, targetId) => {
+          return useWeasleyItem(itemId, targetId);
+        }}
+      />
+
       {/* Floating Magic Trigger for In-App Floo Chat */}
       <FlooFloatingTrigger onClick={() => setIsFlooOpen(true)} />
 
@@ -224,6 +302,12 @@ export default function Home() {
         isOpen={isFlooOpen} 
         onClose={() => setIsFlooOpen(false)} 
         onOpen={() => setIsFlooOpen(true)} 
+      />
+
+      {/* Cinematic Visual FX Overlay for High-Stakes Events */}
+      <CinematicFXOverlay 
+        activeFX={gameState.activeFX} 
+        onDismiss={clearVisualFX} 
       />
     </div>
   );

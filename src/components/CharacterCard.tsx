@@ -8,9 +8,7 @@ import {
   PhoenixCrest, 
   DarkMarkCrest, 
   WaxSeal, 
-  CardBackArt, 
   BadgeIcon,
-  DeathlyHallowsSymbol,
   ChocolateFrogLogo
 } from './ArtAssets';
 import { 
@@ -22,7 +20,6 @@ import {
   Activity, 
   Flame, 
   Wand2, 
-  CheckCircle2, 
   AlertCircle,
   Maximize2,
   BookOpen
@@ -38,6 +35,246 @@ interface CharacterCardProps {
   className?: string;
   onInspect?: () => void;
   showStatusBadge?: boolean;
+}
+
+/**
+ * PHÍA SAU THẺ BÀI: PHE HỘI PHƯỢNG HOÀNG (ORDER OF THE PHOENIX)
+ * Hào Quang Lửa Bất Tử & Biểu Tượng Phượng Hoàng Hoàng Gia (Cân Xứng Tuyệt Đối)
+ */
+function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
+  if (isDead) return null;
+
+  return (
+    <div className="absolute inset-0 pointer-events-none -z-10 overflow-visible">
+      {/* 1. Ambient Breathing Flame Aura (Tỏa đều 4 hướng mềm mại, ấm áp) */}
+      <motion.div
+        animate={{
+          scale: [0.99, 1.03, 0.99],
+          opacity: [0.55, 0.85, 0.55],
+        }}
+        transition={{
+          duration: 3.8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute -inset-3 sm:-inset-4 rounded-[2rem] blur-xl bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.42)_15%,rgba(234,88,12,0.25)_45%,rgba(185,28,28,0.1)_70%,transparent_90%)]"
+      />
+
+      {/* 2. Swirling Conic Flame Ring (Dòng xoáy ngọn lửa sống động ôm sát thân thẻ) */}
+      <div className="absolute -inset-2 rounded-[1.8rem] overflow-hidden opacity-30 group-hover:opacity-55 transition-opacity">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] blur-md bg-[conic-gradient(from_0deg,transparent_0deg,rgba(251,191,36,0.45)_60deg,transparent_120deg,rgba(239,68,68,0.3)_180deg,transparent_240deg,rgba(245,158,11,0.4)_300deg,transparent_360deg)]"
+        />
+      </div>
+
+      {/* 3. Phoenix Crest Watermark (Biểu tượng Phượng Hoàng trang nghiêm đứng thẳng, thở nhịp nhàng) */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [0.96, 1.03, 0.96],
+            opacity: [0.18, 0.32, 0.18],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="w-36 h-36 sm:w-44 sm:h-44 text-amber-400/40 group-hover:text-amber-400/60 transition-colors flex items-center justify-center drop-shadow-[0_0_12px_rgba(251,191,36,0.3)]"
+        >
+          <PhoenixCrest className="w-full h-full" />
+        </motion.div>
+      </div>
+
+      {/* 4. Rising Golden Sparks & Embers (Bụi lửa tinh tú bay bổng đều 2 bên mép thẻ) */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Cột bụi phép bên trái */}
+        {[
+          { left: '4%', delay: 0, duration: 3.2, size: 3 },
+          { left: '12%', delay: 1.2, duration: 4.0, size: 3.5 },
+          { left: '22%', delay: 2.0, duration: 3.6, size: 2.5 },
+        ].map((spark, idx) => (
+          <motion.div
+            key={`ph-spark-left-${idx}`}
+            initial={{ y: '100%', opacity: 0, scale: 0.5 }}
+            animate={{
+              y: ['100%', '35%', '-10%'],
+              opacity: [0, 0.85, 0],
+              scale: [0.5, 1.2, 0.2],
+              x: [0, idx % 2 === 0 ? 5 : -5, 0],
+            }}
+            transition={{
+              duration: spark.duration,
+              delay: spark.delay,
+              repeat: Infinity,
+              ease: "easeOut",
+            }}
+            style={{ left: spark.left, width: spark.size, height: spark.size }}
+            className="absolute bottom-1 rounded-full bg-amber-300 blur-[0.5px]"
+          />
+        ))}
+
+        {/* Cột bụi phép bên phải (Cân xứng tuyệt đối bằng right) */}
+        {[
+          { right: '4%', delay: 0.6, duration: 3.4, size: 3 },
+          { right: '12%', delay: 1.8, duration: 4.2, size: 3.5 },
+          { right: '22%', delay: 2.5, duration: 3.8, size: 2.5 },
+        ].map((spark, idx) => (
+          <motion.div
+            key={`ph-spark-right-${idx}`}
+            initial={{ y: '100%', opacity: 0, scale: 0.5 }}
+            animate={{
+              y: ['100%', '35%', '-10%'],
+              opacity: [0, 0.85, 0],
+              scale: [0.5, 1.2, 0.2],
+              x: [0, idx % 2 === 0 ? -5 : 5, 0],
+            }}
+            transition={{
+              duration: spark.duration,
+              delay: spark.delay,
+              repeat: Infinity,
+              ease: "easeOut",
+            }}
+            style={{ right: spark.right, width: spark.size, height: spark.size }}
+            className="absolute bottom-1 rounded-full bg-amber-300 blur-[0.5px]"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PHÍA SAU THẺ BÀI: PHE TỬ THẦN THỰC TỬ (DEATH EATERS)
+ * Làn Khói Độc Hắc Ám & Dấu Ấn Hắc Ám Cổ Xưa (Cân Xứng Tuyệt Đối)
+ */
+function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
+  if (isDead) return null;
+
+  return (
+    <div className="absolute inset-0 pointer-events-none -z-10 overflow-visible">
+      {/* 1. Ambient Breathing Dark Nebula (Hào quang xanh lục hắc ám tỏa đều 4 hướng) */}
+      <motion.div
+        animate={{
+          scale: [0.99, 1.03, 0.99],
+          opacity: [0.6, 0.9, 0.6],
+        }}
+        transition={{
+          duration: 3.8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute -inset-3 sm:-inset-4 rounded-[2rem] blur-xl bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.45)_15%,rgba(5,150,105,0.25)_45%,rgba(6,78,59,0.12)_70%,transparent_90%)]"
+      />
+
+      {/* 2. Swirling Spectral Shadow Smoke (Làn khói đen tử thần biến ảo) */}
+      <div className="absolute -inset-2 rounded-[1.8rem] overflow-hidden opacity-35 group-hover:opacity-60 transition-opacity">
+        <motion.div
+          animate={{ rotate: -360 }}
+          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] blur-md bg-[conic-gradient(from_0deg,transparent_0deg,rgba(52,211,153,0.45)_60deg,transparent_120deg,rgba(16,185,129,0.3)_180deg,transparent_240deg,rgba(5,150,105,0.4)_300deg,transparent_360deg)]"
+        />
+      </div>
+
+      {/* 3. Dark Mark Sigil Watermark (Dấu ấn Hắc Ám đứng thẳng, thở nhịp nhàng) */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [0.96, 1.03, 0.96],
+            opacity: [0.22, 0.38, 0.22],
+          }}
+          transition={{
+            duration: 4.2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="w-36 h-36 sm:w-44 sm:h-44 text-emerald-400/40 group-hover:text-emerald-400/60 transition-colors flex items-center justify-center drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+        >
+          <DarkMarkCrest className="w-full h-full" />
+        </motion.div>
+      </div>
+
+      {/* 4. Rising Poisonous Emerald Wisps (Lân tinh xanh biếc bay đều 2 bên mép thẻ) */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Cột lân tinh bên trái */}
+        {[
+          { left: '4%', delay: 0.2, duration: 3.4, size: 3 },
+          { left: '12%', delay: 1.4, duration: 4.2, size: 3.5 },
+          { left: '22%', delay: 2.2, duration: 3.6, size: 2.5 },
+        ].map((spark, idx) => (
+          <motion.div
+            key={`de-spark-left-${idx}`}
+            initial={{ y: '100%', opacity: 0, scale: 0.5 }}
+            animate={{
+              y: ['100%', '35%', '-10%'],
+              opacity: [0, 0.9, 0],
+              scale: [0.5, 1.2, 0.2],
+              x: [0, idx % 2 === 0 ? 5 : -5, 0],
+            }}
+            transition={{
+              duration: spark.duration,
+              delay: spark.delay,
+              repeat: Infinity,
+              ease: "easeOut",
+            }}
+            style={{ left: spark.left, width: spark.size, height: spark.size }}
+            className="absolute bottom-1 rounded-full bg-emerald-400 blur-[0.5px]"
+          />
+        ))}
+
+        {/* Cột lân tinh bên phải (Cân xứng tuyệt đối bằng right) */}
+        {[
+          { right: '4%', delay: 0.8, duration: 3.6, size: 3 },
+          { right: '12%', delay: 1.9, duration: 4.4, size: 3.5 },
+          { right: '22%', delay: 2.6, duration: 3.7, size: 2.5 },
+        ].map((spark, idx) => (
+          <motion.div
+            key={`de-spark-right-${idx}`}
+            initial={{ y: '100%', opacity: 0, scale: 0.5 }}
+            animate={{
+              y: ['100%', '35%', '-10%'],
+              opacity: [0, 0.9, 0],
+              scale: [0.5, 1.2, 0.2],
+              x: [0, idx % 2 === 0 ? -5 : 5, 0],
+            }}
+            transition={{
+              duration: spark.duration,
+              delay: spark.delay,
+              repeat: Infinity,
+              ease: "easeOut",
+            }}
+            style={{ right: spark.right, width: spark.size, height: spark.size }}
+            className="absolute bottom-1 rounded-full bg-emerald-400 blur-[0.5px]"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PHÍA SAU THẺ BÀI: PHE TRUNG LẬP
+ */
+function NeutralFactionBackground({ isDead }: { isDead: boolean }) {
+  if (isDead) return null;
+
+  return (
+    <div className="absolute inset-0 pointer-events-none -z-10 overflow-visible">
+      <motion.div
+        animate={{
+          scale: [0.98, 1.04, 0.98],
+          opacity: [0.5, 0.75, 0.5],
+        }}
+        transition={{
+          duration: 3.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute -inset-4 sm:-inset-6 rounded-[2.5rem] blur-xl bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.4)_15%,rgba(14,116,144,0.25)_45%,transparent_85%)]"
+      />
+    </div>
+  );
 }
 
 export function CharacterCard({
@@ -83,7 +320,7 @@ export function CharacterCard({
     setMousePos({ x: 0, y: 0, active: false });
   };
 
-  // Color theming
+  // Border theming
   const factionBorder = isDeathEaters
     ? 'border-emerald-500/90'
     : 'border-amber-400';
@@ -93,11 +330,22 @@ export function CharacterCard({
   const specularX = mousePos.active ? (mousePos.x + 0.5) * 100 : 50;
   const specularY = mousePos.active ? (mousePos.y + 0.5) * 100 : 50;
 
+  // Render distinctive faction background
+  const renderFactionBackground = () => {
+    if (isDeathEaters) {
+      return <DeathEaterFactionBackground isDead={isDead} />;
+    }
+    if (role.faction === 'ORDER_OF_PHOENIX') {
+      return <PhoenixFactionBackground isDead={isDead} />;
+    }
+    return <NeutralFactionBackground isDead={isDead} />;
+  };
+
   // ================= 1. MINI VERSION (Player radar grid / lists) =================
   if (size === 'mini') {
     return (
       <div 
-        className={`relative overflow-hidden rounded-xl border-2 p-2.5 transition-all select-none ${
+        className={`relative overflow-hidden rounded-xl border-2 p-2.5 transition-all select-none group ${
           isDead 
             ? 'bg-red-950/20 border-red-900/40 opacity-70 grayscale' 
             : isDeathEaters 
@@ -105,15 +353,15 @@ export function CharacterCard({
               : 'bg-red-950/30 border-amber-500/50 hover:border-amber-400'
         } ${className}`}
       >
-        <div className="flex items-center justify-between gap-2.5">
+        <div className="flex items-center justify-between gap-2.5 relative z-10">
           <div className="flex items-center gap-2.5 min-w-0">
             {/* Chocolate Frog Thumbnail */}
-            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-amber-400/60 shrink-0">
+            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-amber-400/60 shrink-0 bg-black">
               {role.image ? (
                 <img 
                   src={role.image} 
                   alt={role.name}
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover object-top transition-transform group-hover:scale-105 duration-300"
                 />
               ) : (
                 <div className="w-full h-full bg-gray-900 flex items-center justify-center">
@@ -157,22 +405,26 @@ export function CharacterCard({
   // ================= 2. FULL CHOCOLATE FROG CARD (Tarot & Compact) =================
   return (
     <div 
-      className={`relative select-none ${className}`}
+      className={`relative select-none group w-full mx-auto ${
+        size === 'compact' ? 'max-w-[280px] sm:max-w-[300px]' : 'max-w-[280px] sm:max-w-sm'
+      } ${className}`}
       style={{ perspective: '1200px' }}
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
+      {/* ================= DISTINCTIVE FACTION BACKGROUND FX (PHÍA SAU THẺ BÀI) ================= */}
+      {renderFactionBackground()}
+
+      {/* The 3D Interactive Card Itself */}
       <motion.div
         animate={{
           rotateY: isFlipped ? 180 : rotateY,
           rotateX: isFlipped ? 0 : rotateX,
         }}
-        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+        transition={{ type: 'spring', stiffness: 240, damping: 22 }}
         style={{ transformStyle: 'preserve-3d' }}
-        className={`relative w-full mx-auto rounded-3xl cursor-pointer aspect-[3/4] ${
-          size === 'compact' ? 'max-w-[280px] sm:max-w-[300px]' : 'max-w-[280px] sm:max-w-sm'
-        }`}
+        className="relative w-full rounded-3xl cursor-pointer aspect-[3/4]"
       >
         {/* ================= CARD FRONT: CHOCOLATE FROG MOVING PORTRAIT ================= */}
         <div
@@ -180,14 +432,14 @@ export function CharacterCard({
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
           }}
-          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} bg-gray-950 p-2 sm:p-2.5 flex flex-col justify-between overflow-hidden ${
+          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} bg-gray-950 p-2 sm:p-2.5 flex flex-col justify-between overflow-hidden transition-colors ${
             isFlipped ? 'pointer-events-none z-0' : 'pointer-events-auto z-20'
           }`}
           onClick={() => {
             if (allowFlip && !showAbilityPreview) setIsFlipped(true);
           }}
         >
-          {/* Main Chocolate Frog Portrait Image */}
+          {/* Main Chocolate Frog Portrait Image Container */}
           <div className="relative w-full h-full rounded-2xl overflow-hidden bg-black flex flex-col justify-between">
             {role.image ? (
               <img
@@ -203,17 +455,17 @@ export function CharacterCard({
               </div>
             )}
 
-            {/* Moving Portrait Lenticular Specular Sweep */}
+            {/* Subtle Specular Radial Spotlight */}
             <div
               className="absolute inset-0 pointer-events-none rounded-2xl opacity-40 transition-opacity duration-300"
               style={{
-                background: `radial-gradient(circle at ${specularX}% ${specularY}%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)`,
+                background: `radial-gradient(circle at ${specularX}% ${specularY}%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 60%)`,
               }}
             />
 
-            {/* Top Ribbon: Chocolate Frog Brand & Faction */}
-            <div className="relative z-10 p-2.5 flex items-center justify-between">
-              <div className="flex items-center gap-1.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-400/50">
+            {/* Top Ribbon: Chocolate Frog Brand & Faction Badge */}
+            <div className="relative z-10 p-2 sm:p-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-400/60">
                 <ChocolateFrogLogo className="w-3.5 h-3.5 text-amber-400" />
                 <span className="font-serif text-[10px] font-black tracking-widest text-amber-300 uppercase">
                   THẺ ẾCH NHÁI SOCOLA
@@ -221,10 +473,10 @@ export function CharacterCard({
               </div>
 
               {/* Faction Badge */}
-              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif font-bold uppercase backdrop-blur-md border ${
+              <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-serif font-bold uppercase backdrop-blur-md border ${
                 isDeathEaters 
-                  ? 'bg-emerald-950/85 text-emerald-300 border-emerald-500/50' 
-                  : 'bg-red-950/85 text-amber-200 border-red-500/50'
+                  ? 'bg-emerald-950/90 text-emerald-300 border-emerald-400/80' 
+                  : 'bg-red-950/90 text-amber-200 border-amber-500/80'
               }`}>
                 {isDeathEaters ? <DarkMarkCrest className="w-3.5 h-3.5" /> : <PhoenixCrest className="w-3.5 h-3.5" />}
                 <span>{isDeathEaters ? 'Tử Thần' : 'Phượng Hoàng'}</span>
@@ -233,7 +485,7 @@ export function CharacterCard({
 
             {/* Fallen Status Overlay */}
             {isDead && (
-              <div className="absolute inset-0 bg-black/70 backdrop-blur-xs flex flex-col items-center justify-center text-red-400 font-serif font-black z-20">
+              <div className="absolute inset-0 bg-black/75 backdrop-blur-xs flex flex-col items-center justify-center text-red-400 font-serif font-black z-30">
                 <Skull className="w-16 h-16 mb-2 text-red-500 animate-pulse" />
                 <span className="text-xl tracking-widest uppercase text-red-400">ĐÃ TỬ TRẬN</span>
                 <span className="text-xs font-mono text-gray-400 mt-1">Trong chuyến bay Bảy Potter</span>
@@ -241,12 +493,12 @@ export function CharacterCard({
             )}
 
             {/* Bottom Floating Bar: Player Binding + Quick Flip & Inspect */}
-            <div className="relative z-10 p-2.5 bg-gradient-to-t from-black/85 via-black/50 to-transparent pt-8">
+            <div className="relative z-10 p-2 sm:p-2.5 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-8">
               
               {/* Bound Player Name */}
               {playerName && (
                 <div className="text-center mb-2">
-                  <span className="text-[11px] font-serif tracking-wider text-amber-300 bg-black/80 backdrop-blur-sm px-3 py-0.5 rounded-full border border-amber-500/40">
+                  <span className="text-[11px] font-serif tracking-wider text-amber-300 bg-black/85 backdrop-blur-sm px-3 py-0.5 rounded-full border border-amber-500/50">
                     Phù thủy: <strong>{playerName}</strong> {isOwner && '(Bạn)'}
                   </span>
                 </div>
@@ -287,7 +539,7 @@ export function CharacterCard({
 
               {/* Control Action Buttons HUD */}
               <div 
-                className="flex items-center justify-between gap-1.5 bg-black/70 backdrop-blur-md p-1.5 rounded-xl border border-amber-500/30"
+                className="flex items-center justify-between gap-1.5 bg-black/75 backdrop-blur-md p-1.5 rounded-xl border border-amber-500/40"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
@@ -344,12 +596,11 @@ export function CharacterCard({
             transform: 'rotateY(180deg)',
             background: 'linear-gradient(135deg, #24150c 0%, #1a0e07 50%, #100803 100%)',
           }}
-          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} p-4 flex flex-col justify-between overflow-hidden cursor-pointer ${
+          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} p-3 sm:p-4 flex flex-col justify-between overflow-hidden cursor-pointer ${
             isFlipped ? 'pointer-events-auto z-20' : 'pointer-events-none z-0'
           }`}
           onClick={() => setIsFlipped(false)}
         >
-
           {/* Corner Filigrees */}
           <CardCornerFlourish className="absolute top-2 left-2 w-6 h-6 text-[#bd8436] pointer-events-none" />
           <CardCornerFlourish className="absolute top-2 right-2 w-6 h-6 text-[#bd8436] -scale-x-100 pointer-events-none" />
@@ -374,13 +625,13 @@ export function CharacterCard({
           </div>
 
           {/* Biography & Lore Box */}
-          <div className="relative z-10 my-2 px-2">
+          <div className="relative z-10 my-1 px-2">
             <p className="text-xs font-lora italic text-[#ebdcb0]/90 text-center leading-relaxed">
               "{role.description}"
             </p>
           </div>
 
-          {/* Aged Parchment Ability Scroll */}
+          {/* Aged Parchment Ability Scroll with Wax Seal */}
           <div className="relative z-10 my-1">
             <div 
               className="relative rounded-2xl p-3.5 hpvn-parchment overflow-hidden font-serif"

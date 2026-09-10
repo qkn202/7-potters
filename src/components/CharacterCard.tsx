@@ -39,70 +39,105 @@ interface CharacterCardProps {
 
 /**
  * PHÍA SAU THẺ BÀI: PHE HỘI PHƯỢNG HOÀNG (ORDER OF THE PHOENIX)
- * Hào Quang Lửa Bất Tử & Biểu Tượng Phượng Hoàng Hoàng Gia (Cân Xứng Tuyệt Đối)
+ * Đôi Cánh Lửa Phượng Hoàng Hoàng Gia & Quầng Hào Quang Thái Dương Sải Rộng 2 Bên (Cân Xứng Tuyệt Đối)
  */
 function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
   if (isDead) return null;
 
   return (
-    <div className="absolute inset-0 pointer-events-none -z-10 overflow-visible">
-      {/* 1. Ambient Breathing Flame Aura (Tỏa đều 4 hướng mềm mại, ấm áp) */}
+    <div className="absolute -inset-x-12 -inset-y-6 sm:-inset-x-16 sm:-inset-y-8 pointer-events-none -z-10 flex items-center justify-center overflow-visible">
+      {/* 1. Ambient Solar Flame Glow (Quầng sáng lửa ấm tỏa rộng ra ngoài 2 bên thẻ bài) */}
       <motion.div
         animate={{
-          scale: [0.99, 1.03, 0.99],
-          opacity: [0.55, 0.85, 0.55],
+          scale: [0.96, 1.04, 0.96],
+          opacity: [0.7, 0.95, 0.7],
         }}
         transition={{
-          duration: 3.8,
+          duration: 3.4,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute -inset-3 sm:-inset-4 rounded-[2rem] blur-xl bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.42)_15%,rgba(234,88,12,0.25)_45%,rgba(185,28,28,0.1)_70%,transparent_90%)]"
+        className="absolute inset-0 rounded-[3rem] blur-2xl bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.65)_15%,rgba(234,88,12,0.45)_50%,rgba(220,38,38,0.25)_75%,transparent_95%)]"
       />
 
-      {/* 2. Swirling Conic Flame Ring (Dòng xoáy ngọn lửa sống động ôm sát thân thẻ) */}
-      <div className="absolute -inset-2 rounded-[1.8rem] overflow-hidden opacity-30 group-hover:opacity-55 transition-opacity">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] blur-md bg-[conic-gradient(from_0deg,transparent_0deg,rgba(251,191,36,0.45)_60deg,transparent_120deg,rgba(239,68,68,0.3)_180deg,transparent_240deg,rgba(245,158,11,0.4)_300deg,transparent_360deg)]"
-        />
-      </div>
+      {/* 2. Symmetrical Blazing Phoenix Fire Wings SVG (Đôi Cánh Lửa Phượng Hoàng Sải Rộng Tuyệt Đối) */}
+      <motion.svg
+        viewBox="0 0 500 400"
+        animate={{
+          scale: [0.98, 1.03, 0.98],
+          opacity: [0.85, 1, 0.85],
+        }}
+        transition={{
+          duration: 3.2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="w-full h-full overflow-visible drop-shadow-[0_0_18px_rgba(251,191,36,0.7)]"
+      >
+        <defs>
+          {/* Phoenix Fire Gradient */}
+          <linearGradient id="phoenixWingFire" x1="1" y1="0.5" x2="0" y2="0.5">
+            <stop offset="0%" stopColor="#fef08a" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#fbbf24" stopOpacity="0.85" />
+            <stop offset="70%" stopColor="#f59e0b" stopOpacity="0.65" />
+            <stop offset="100%" stopColor="#dc2626" stopOpacity="0.2" />
+          </linearGradient>
 
-      {/* 3. Phoenix Crest Watermark (Biểu tượng Phượng Hoàng trang nghiêm đứng thẳng, thở nhịp nhàng) */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <motion.div
-          animate={{
-            scale: [0.96, 1.03, 0.96],
-            opacity: [0.18, 0.32, 0.18],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="w-36 h-36 sm:w-44 sm:h-44 text-amber-400/40 group-hover:text-amber-400/60 transition-colors flex items-center justify-center drop-shadow-[0_0_12px_rgba(251,191,36,0.3)]"
-        >
-          <PhoenixCrest className="w-full h-full" />
-        </motion.div>
-      </div>
+          {/* Left Wing Path (Vươn rộng từ X=180 ra X=30) */}
+          <path
+            id="phLeftWing"
+            d="M 180 200
+               C 140 180, 80 130, 40 80
+               C 25 105, 55 140, 85 165
+               C 50 175, 20 200, 30 220
+               C 55 225, 95 225, 135 220
+               C 90 240, 45 270, 50 295
+               C 75 300, 120 285, 155 265
+               C 115 295, 85 335, 95 355
+               C 125 350, 160 310, 185 270 Z"
+            fill="url(#phoenixWingFire)"
+          />
 
-      {/* 4. Rising Golden Sparks & Embers (Bụi lửa tinh tú bay bổng đều 2 bên mép thẻ) */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Cột bụi phép bên trái */}
+          {/* Left Inner Flame Layer */}
+          <path
+            id="phLeftInner"
+            d="M 175 190
+               C 145 170, 100 135, 65 110
+               C 60 125, 85 150, 110 170
+               C 80 180, 55 198, 62 215
+               C 82 218, 115 218, 145 210
+               C 115 225, 80 248, 85 265
+               C 105 270, 135 255, 160 238 Z"
+            fill="#fef08a"
+            opacity="0.6"
+          />
+        </defs>
+
+        {/* --- CÁNH TRÁI (LEFT WING) --- */}
+        <use href="#phLeftWing" />
+        <use href="#phLeftInner" />
+
+        {/* --- CÁNH PHẢI (RIGHT WING: PHẢN CHIẾU 100% ĐỐI XỨNG QUA TRỤC X=250) --- */}
+        <use href="#phLeftWing" transform="translate(500, 0) scale(-1, 1)" />
+        <use href="#phLeftInner" transform="translate(500, 0) scale(-1, 1)" />
+      </motion.svg>
+
+      {/* 3. Rising Golden Sparks & Embers (Bụi than hồng bay bổng trong khoảng trống 2 bên cánh) */}
+      <div className="absolute inset-0 overflow-visible pointer-events-none">
+        {/* Cột bụi phép rực sáng bên trái (Hiển thị rõ ràng ngoài viền thẻ) */}
         {[
-          { left: '4%', delay: 0, duration: 3.2, size: 3 },
-          { left: '12%', delay: 1.2, duration: 4.0, size: 3.5 },
-          { left: '22%', delay: 2.0, duration: 3.6, size: 2.5 },
+          { left: '8px', delay: 0, duration: 2.8, size: 4 },
+          { left: '22px', delay: 1.1, duration: 3.6, size: 3.5 },
+          { left: '38px', delay: 1.9, duration: 3.2, size: 5 },
         ].map((spark, idx) => (
           <motion.div
-            key={`ph-spark-left-${idx}`}
+            key={`ph-spark-l-${idx}`}
             initial={{ y: '100%', opacity: 0, scale: 0.5 }}
             animate={{
-              y: ['100%', '35%', '-10%'],
-              opacity: [0, 0.85, 0],
-              scale: [0.5, 1.2, 0.2],
-              x: [0, idx % 2 === 0 ? 5 : -5, 0],
+              y: ['100%', '30%', '-15%'],
+              opacity: [0, 0.95, 0],
+              scale: [0.5, 1.3, 0.2],
+              x: [0, idx % 2 === 0 ? 6 : -6, 0],
             }}
             transition={{
               duration: spark.duration,
@@ -111,24 +146,24 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
               ease: "easeOut",
             }}
             style={{ left: spark.left, width: spark.size, height: spark.size }}
-            className="absolute bottom-1 rounded-full bg-amber-300 blur-[0.5px]"
+            className="absolute bottom-4 rounded-full bg-amber-200 shadow-[0_0_8px_#fef08a] blur-[0.4px]"
           />
         ))}
 
-        {/* Cột bụi phép bên phải (Cân xứng tuyệt đối bằng right) */}
+        {/* Cột bụi phép rực sáng bên phải (Cân xứng tuyệt đối bằng right) */}
         {[
-          { right: '4%', delay: 0.6, duration: 3.4, size: 3 },
-          { right: '12%', delay: 1.8, duration: 4.2, size: 3.5 },
-          { right: '22%', delay: 2.5, duration: 3.8, size: 2.5 },
+          { right: '8px', delay: 0.5, duration: 3.0, size: 4 },
+          { right: '22px', delay: 1.6, duration: 3.9, size: 3.5 },
+          { right: '38px', delay: 2.3, duration: 3.4, size: 5 },
         ].map((spark, idx) => (
           <motion.div
-            key={`ph-spark-right-${idx}`}
+            key={`ph-spark-r-${idx}`}
             initial={{ y: '100%', opacity: 0, scale: 0.5 }}
             animate={{
-              y: ['100%', '35%', '-10%'],
-              opacity: [0, 0.85, 0],
-              scale: [0.5, 1.2, 0.2],
-              x: [0, idx % 2 === 0 ? -5 : 5, 0],
+              y: ['100%', '30%', '-15%'],
+              opacity: [0, 0.95, 0],
+              scale: [0.5, 1.3, 0.2],
+              x: [0, idx % 2 === 0 ? -6 : 6, 0],
             }}
             transition={{
               duration: spark.duration,
@@ -137,7 +172,7 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
               ease: "easeOut",
             }}
             style={{ right: spark.right, width: spark.size, height: spark.size }}
-            className="absolute bottom-1 rounded-full bg-amber-300 blur-[0.5px]"
+            className="absolute bottom-4 rounded-full bg-amber-200 shadow-[0_0_8px_#fef08a] blur-[0.4px]"
           />
         ))}
       </div>
@@ -147,70 +182,105 @@ function PhoenixFactionBackground({ isDead }: { isDead: boolean }) {
 
 /**
  * PHÍA SAU THẺ BÀI: PHE TỬ THẦN THỰC TỬ (DEATH EATERS)
- * Làn Khói Độc Hắc Ám & Dấu Ấn Hắc Ám Cổ Xưa (Cân Xứng Tuyệt Đối)
+ * Cánh Khói Mãng Xà Nagini Hắc Ám & Quầng Hào Quang Lục Bảo Sải Rộng 2 Bên (Cân Xứng Tuyệt Đối)
  */
 function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
   if (isDead) return null;
 
   return (
-    <div className="absolute inset-0 pointer-events-none -z-10 overflow-visible">
-      {/* 1. Ambient Breathing Dark Nebula (Hào quang xanh lục hắc ám tỏa đều 4 hướng) */}
+    <div className="absolute -inset-x-12 -inset-y-6 sm:-inset-x-16 sm:-inset-y-8 pointer-events-none -z-10 flex items-center justify-center overflow-visible">
+      {/* 1. Ambient Emerald Curse Nebula (Hào quang xanh lục hắc ám tỏa rộng 2 bên thẻ bài) */}
       <motion.div
         animate={{
-          scale: [0.99, 1.03, 0.99],
-          opacity: [0.6, 0.9, 0.6],
+          scale: [0.96, 1.04, 0.96],
+          opacity: [0.75, 1, 0.75],
         }}
         transition={{
-          duration: 3.8,
+          duration: 3.6,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute -inset-3 sm:-inset-4 rounded-[2rem] blur-xl bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.45)_15%,rgba(5,150,105,0.25)_45%,rgba(6,78,59,0.12)_70%,transparent_90%)]"
+        className="absolute inset-0 rounded-[3rem] blur-2xl bg-[radial-gradient(ellipse_at_center,rgba(52,211,153,0.7)_15%,rgba(16,185,129,0.45)_50%,rgba(6,78,59,0.25)_75%,transparent_95%)]"
       />
 
-      {/* 2. Swirling Spectral Shadow Smoke (Làn khói đen tử thần biến ảo) */}
-      <div className="absolute -inset-2 rounded-[1.8rem] overflow-hidden opacity-35 group-hover:opacity-60 transition-opacity">
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] blur-md bg-[conic-gradient(from_0deg,transparent_0deg,rgba(52,211,153,0.45)_60deg,transparent_120deg,rgba(16,185,129,0.3)_180deg,transparent_240deg,rgba(5,150,105,0.4)_300deg,transparent_360deg)]"
-        />
-      </div>
+      {/* 2. Symmetrical Dark Magic Serpent Smoke Wings SVG (Cánh Khói Mãng Xà Sải Rộng Tuyệt Đối) */}
+      <motion.svg
+        viewBox="0 0 500 400"
+        animate={{
+          scale: [0.98, 1.03, 0.98],
+          opacity: [0.85, 1, 0.85],
+        }}
+        transition={{
+          duration: 3.4,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="w-full h-full overflow-visible drop-shadow-[0_0_18px_rgba(16,185,129,0.7)]"
+      >
+        <defs>
+          {/* Death Eater Emerald Gradient */}
+          <linearGradient id="deWingSmoke" x1="1" y1="0.5" x2="0" y2="0.5">
+            <stop offset="0%" stopColor="#ecfdf5" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#6ee7b7" stopOpacity="0.85" />
+            <stop offset="70%" stopColor="#10b981" stopOpacity="0.65" />
+            <stop offset="100%" stopColor="#064e3b" stopOpacity="0.2" />
+          </linearGradient>
 
-      {/* 3. Dark Mark Sigil Watermark (Dấu ấn Hắc Ám đứng thẳng, thở nhịp nhàng) */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <motion.div
-          animate={{
-            scale: [0.96, 1.03, 0.96],
-            opacity: [0.22, 0.38, 0.22],
-          }}
-          transition={{
-            duration: 4.2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="w-36 h-36 sm:w-44 sm:h-44 text-emerald-400/40 group-hover:text-emerald-400/60 transition-colors flex items-center justify-center drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]"
-        >
-          <DarkMarkCrest className="w-full h-full" />
-        </motion.div>
-      </div>
+          {/* Left Serpent Wing Path */}
+          <path
+            id="deLeftWing"
+            d="M 180 200
+               C 140 170, 75 120, 35 75
+               C 25 100, 60 135, 90 160
+               C 45 170, 15 195, 25 220
+               C 55 230, 100 225, 140 215
+               C 85 240, 40 270, 45 295
+               C 70 305, 120 290, 160 265
+               C 110 295, 80 340, 95 360
+               C 130 350, 165 305, 185 265 Z"
+            fill="url(#deWingSmoke)"
+          />
 
-      {/* 4. Rising Poisonous Emerald Wisps (Lân tinh xanh biếc bay đều 2 bên mép thẻ) */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Cột lân tinh bên trái */}
+          {/* Left Inner Serpent Smoke */}
+          <path
+            id="deLeftInner"
+            d="M 175 190
+               C 145 165, 95 128, 60 98
+               C 55 115, 80 142, 105 165
+               C 75 175, 48 195, 56 212
+               C 78 220, 115 218, 145 208
+               C 112 225, 75 250, 82 268
+               C 102 275, 135 258, 160 238 Z"
+            fill="#a7f3d0"
+            opacity="0.6"
+          />
+        </defs>
+
+        {/* --- CÁNH TRÁI (LEFT WING) --- */}
+        <use href="#deLeftWing" />
+        <use href="#deLeftInner" />
+
+        {/* --- CÁNH PHẢI (RIGHT WING: PHẢN CHIẾU 100% ĐỐI XỨNG QUA TRỤC X=250) --- */}
+        <use href="#deLeftWing" transform="translate(500, 0) scale(-1, 1)" />
+        <use href="#deLeftInner" transform="translate(500, 0) scale(-1, 1)" />
+      </motion.svg>
+
+      {/* 3. Rising Poisonous Emerald Wisps (Lân tinh xanh biếc bay bổng 2 bên cánh) */}
+      <div className="absolute inset-0 overflow-visible pointer-events-none">
+        {/* Cột lân tinh rực sáng bên trái */}
         {[
-          { left: '4%', delay: 0.2, duration: 3.4, size: 3 },
-          { left: '12%', delay: 1.4, duration: 4.2, size: 3.5 },
-          { left: '22%', delay: 2.2, duration: 3.6, size: 2.5 },
+          { left: '8px', delay: 0.2, duration: 3.0, size: 4 },
+          { left: '22px', delay: 1.3, duration: 3.8, size: 3.5 },
+          { left: '38px', delay: 2.1, duration: 3.4, size: 5 },
         ].map((spark, idx) => (
           <motion.div
-            key={`de-spark-left-${idx}`}
+            key={`de-spark-l-${idx}`}
             initial={{ y: '100%', opacity: 0, scale: 0.5 }}
             animate={{
-              y: ['100%', '35%', '-10%'],
-              opacity: [0, 0.9, 0],
-              scale: [0.5, 1.2, 0.2],
-              x: [0, idx % 2 === 0 ? 5 : -5, 0],
+              y: ['100%', '30%', '-15%'],
+              opacity: [0, 0.95, 0],
+              scale: [0.5, 1.3, 0.2],
+              x: [0, idx % 2 === 0 ? 6 : -6, 0],
             }}
             transition={{
               duration: spark.duration,
@@ -219,24 +289,24 @@ function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
               ease: "easeOut",
             }}
             style={{ left: spark.left, width: spark.size, height: spark.size }}
-            className="absolute bottom-1 rounded-full bg-emerald-400 blur-[0.5px]"
+            className="absolute bottom-4 rounded-full bg-emerald-300 shadow-[0_0_8px_#6ee7b7] blur-[0.4px]"
           />
         ))}
 
-        {/* Cột lân tinh bên phải (Cân xứng tuyệt đối bằng right) */}
+        {/* Cột lân tinh rực sáng bên phải (Cân xứng tuyệt đối bằng right) */}
         {[
-          { right: '4%', delay: 0.8, duration: 3.6, size: 3 },
-          { right: '12%', delay: 1.9, duration: 4.4, size: 3.5 },
-          { right: '22%', delay: 2.6, duration: 3.7, size: 2.5 },
+          { right: '8px', delay: 0.7, duration: 3.2, size: 4 },
+          { right: '22px', delay: 1.8, duration: 4.0, size: 3.5 },
+          { right: '38px', delay: 2.5, duration: 3.6, size: 5 },
         ].map((spark, idx) => (
           <motion.div
-            key={`de-spark-right-${idx}`}
+            key={`de-spark-r-${idx}`}
             initial={{ y: '100%', opacity: 0, scale: 0.5 }}
             animate={{
-              y: ['100%', '35%', '-10%'],
-              opacity: [0, 0.9, 0],
-              scale: [0.5, 1.2, 0.2],
-              x: [0, idx % 2 === 0 ? -5 : 5, 0],
+              y: ['100%', '30%', '-15%'],
+              opacity: [0, 0.95, 0],
+              scale: [0.5, 1.3, 0.2],
+              x: [0, idx % 2 === 0 ? -6 : 6, 0],
             }}
             transition={{
               duration: spark.duration,
@@ -245,7 +315,7 @@ function DeathEaterFactionBackground({ isDead }: { isDead: boolean }) {
               ease: "easeOut",
             }}
             style={{ right: spark.right, width: spark.size, height: spark.size }}
-            className="absolute bottom-1 rounded-full bg-emerald-400 blur-[0.5px]"
+            className="absolute bottom-4 rounded-full bg-emerald-300 shadow-[0_0_8px_#6ee7b7] blur-[0.4px]"
           />
         ))}
       </div>
@@ -260,18 +330,18 @@ function NeutralFactionBackground({ isDead }: { isDead: boolean }) {
   if (isDead) return null;
 
   return (
-    <div className="absolute inset-0 pointer-events-none -z-10 overflow-visible">
+    <div className="absolute -inset-x-12 -inset-y-6 sm:-inset-x-16 sm:-inset-y-8 pointer-events-none -z-10 overflow-visible">
       <motion.div
         animate={{
           scale: [0.98, 1.04, 0.98],
-          opacity: [0.5, 0.75, 0.5],
+          opacity: [0.6, 0.85, 0.6],
         }}
         transition={{
           duration: 3.5,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute -inset-4 sm:-inset-6 rounded-[2.5rem] blur-xl bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.4)_15%,rgba(14,116,144,0.25)_45%,transparent_85%)]"
+        className="absolute inset-0 rounded-[3rem] blur-2xl bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.5)_15%,rgba(14,116,144,0.35)_45%,transparent_85%)]"
       />
     </div>
   );
@@ -320,10 +390,10 @@ export function CharacterCard({
     setMousePos({ x: 0, y: 0, active: false });
   };
 
-  // Border theming
+  // Border theming & In-card glow
   const factionBorder = isDeathEaters
-    ? 'border-emerald-500/90'
-    : 'border-amber-400';
+    ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.45)]'
+    : 'border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.45)]';
 
   const rotateX = mousePos.active ? -mousePos.y * 12 : 0;
   const rotateY = mousePos.active ? mousePos.x * 12 : 0;
@@ -349,8 +419,8 @@ export function CharacterCard({
           isDead 
             ? 'bg-red-950/20 border-red-900/40 opacity-70 grayscale' 
             : isDeathEaters 
-              ? 'bg-emerald-950/40 border-emerald-500/50 hover:border-emerald-400' 
-              : 'bg-red-950/30 border-amber-500/50 hover:border-amber-400'
+              ? 'bg-emerald-950/40 border-emerald-500/50 hover:border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.25)]' 
+              : 'bg-red-950/30 border-amber-500/50 hover:border-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.25)]'
         } ${className}`}
       >
         <div className="flex items-center justify-between gap-2.5 relative z-10">
@@ -432,7 +502,7 @@ export function CharacterCard({
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
           }}
-          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} bg-gray-950 p-2 sm:p-2.5 flex flex-col justify-between overflow-hidden transition-colors ${
+          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} bg-gray-950 p-2 sm:p-2.5 flex flex-col justify-between overflow-hidden transition-all duration-300 ${
             isFlipped ? 'pointer-events-none z-0' : 'pointer-events-auto z-20'
           }`}
           onClick={() => {
@@ -455,6 +525,20 @@ export function CharacterCard({
               </div>
             )}
 
+            {/* In-Card Moving Holographic Foil Sheen (Ánh Nhũ Vàng Phản Quang Ma Thuật) */}
+            <motion.div
+              animate={{
+                x: ['-140%', '280%'],
+              }}
+              transition={{
+                duration: 4.2,
+                repeat: Infinity,
+                repeatDelay: 2.2,
+                ease: 'easeInOut',
+              }}
+              className="absolute inset-0 pointer-events-none z-10 w-2/5 h-full -skew-x-25 bg-gradient-to-r from-transparent via-white/30 to-transparent blur-[1px]"
+            />
+
             {/* Subtle Specular Radial Spotlight */}
             <div
               className="absolute inset-0 pointer-events-none rounded-2xl opacity-40 transition-opacity duration-300"
@@ -465,8 +549,8 @@ export function CharacterCard({
 
             {/* Top Ribbon: Chocolate Frog Brand & Faction Badge */}
             <div className="relative z-10 p-2 sm:p-2.5 flex items-center justify-between">
-              <div className="flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-400/60">
-                <ChocolateFrogLogo className="w-3.5 h-3.5 text-amber-400" />
+              <div className="flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-400/60 shadow-[0_0_8px_rgba(251,191,36,0.3)]">
+                <ChocolateFrogLogo className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
                 <span className="font-serif text-[10px] font-black tracking-widest text-amber-300 uppercase">
                   THẺ ẾCH NHÁI SOCOLA
                 </span>
@@ -475,10 +559,10 @@ export function CharacterCard({
               {/* Faction Badge */}
               <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-serif font-bold uppercase backdrop-blur-md border ${
                 isDeathEaters 
-                  ? 'bg-emerald-950/90 text-emerald-300 border-emerald-400/80' 
-                  : 'bg-red-950/90 text-amber-200 border-amber-500/80'
+                  ? 'bg-emerald-950/90 text-emerald-300 border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.5)]' 
+                  : 'bg-red-950/90 text-amber-200 border-amber-500/80 shadow-[0_0_10px_rgba(251,191,36,0.5)]'
               }`}>
-                {isDeathEaters ? <DarkMarkCrest className="w-3.5 h-3.5" /> : <PhoenixCrest className="w-3.5 h-3.5" />}
+                {isDeathEaters ? <DarkMarkCrest className="w-3.5 h-3.5 animate-pulse" /> : <PhoenixCrest className="w-3.5 h-3.5 animate-pulse" />}
                 <span>{isDeathEaters ? 'Tử Thần' : 'Phượng Hoàng'}</span>
               </div>
             </div>

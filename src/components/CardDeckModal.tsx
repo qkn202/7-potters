@@ -17,207 +17,95 @@ import { BookOpen, X, Search, Shield, Skull, Sparkles } from 'lucide-react';
 function DeckModalFactionBackground({ faction }: { faction: Faction | 'ALL' }) {
   return (
     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
-      {/* 1. Ambient Dynamic Glow */}
+      {/* 1. Ambient Dynamic Color Gradient Atmosphere */}
       <motion.div
         animate={{
-          opacity: faction === 'DEATH_EATERS' ? [0.3, 0.5, 0.3] : [0.35, 0.58, 0.35],
+          opacity: faction === 'DEATH_EATERS' ? [0.35, 0.55, 0.35] : [0.4, 0.65, 0.4],
           scale: [0.98, 1.02, 0.98],
         }}
         transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
         className={`absolute inset-0 transition-colors duration-700 ${
           faction === 'ORDER_OF_PHOENIX'
-            ? 'bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.25)_0%,rgba(220,38,38,0.15)_50%,transparent_85%)]'
+            ? 'bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.25)_0%,rgba(220,38,38,0.18)_50%,transparent_85%)]'
             : faction === 'DEATH_EATERS'
-            ? 'bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.28)_0%,rgba(6,78,59,0.2)_50%,transparent_85%)]'
-            : 'bg-[radial-gradient(ellipse_at_30%_50%,rgba(251,191,36,0.2)_0%,transparent_60%),radial-gradient(ellipse_at_70%_50%,rgba(16,185,129,0.2)_0%,transparent_60%)]'
+            ? 'bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.3)_0%,rgba(6,78,59,0.22)_50%,transparent_85%)]'
+            : 'bg-[radial-gradient(ellipse_at_25%_50%,rgba(251,191,36,0.22)_0%,transparent_60%),radial-gradient(ellipse_at_75%_50%,rgba(16,185,129,0.22)_0%,transparent_60%)]'
         }`}
       />
 
-      {/* 2. Watermark SVGs */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {/* PHOENIX WINGS WATERMARK */}
-        {(faction === 'ORDER_OF_PHOENIX' || faction === 'ALL') && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ 
-              opacity: faction === 'ORDER_OF_PHOENIX' ? 0.35 : 0.22,
-              scale: [0.98, 1.02, 0.98],
-              x: faction === 'ALL' ? '-24%' : '0%',
-            }}
-            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-            className={`absolute w-[800px] h-[580px] max-w-full ${faction === 'ALL' ? 'left-1/4' : ''}`}
-          >
-            <svg viewBox="0 0 800 500" className="w-full h-full drop-shadow-[0_0_35px_rgba(251,191,36,0.5)]">
-              <defs>
-                <linearGradient id="deckPhoenixFireGrad" x1="1" y1="0.5" x2="0" y2="0.5">
-                  <stop offset="0%" stopColor="#fef08a" stopOpacity="0.9" />
-                  <stop offset="35%" stopColor="#fbbf24" stopOpacity="0.8" />
-                  <stop offset="70%" stopColor="#ea580c" stopOpacity="0.6" />
-                  <stop offset="100%" stopColor="#dc2626" stopOpacity="0.15" />
-                </linearGradient>
-                <g id="deckBigWing">
-                  <path
-                    d="M 380 260
-                       C 320 200, 240 120, 60 50
-                       C 50 90, 100 140, 140 180
-                       C 90 170, 30 180, 40 225
-                       C 80 240, 130 245, 175 260
-                       C 115 275, 45 295, 60 340
-                       C 100 350, 155 335, 205 330
-                       C 145 360, 75 400, 100 445
-                       C 140 445, 200 405, 240 380
-                       C 190 435, 140 500, 175 525
-                       C 215 510, 275 435, 315 360
-                       C 350 400, 380 430, 400 440 Z"
-                    fill="url(#deckPhoenixFireGrad)"
-                  />
-                  {/* Inner Golden Plumes */}
-                  <path
-                    d="M 380 250
-                       C 330 190, 260 130, 120 85
-                       C 115 115, 155 155, 195 190
-                       C 150 192, 100 200, 105 235
-                       C 140 245, 185 248, 220 260
-                       C 180 280, 125 300, 135 335
-                       C 170 342, 220 322, 255 310 Z"
-                    fill="#fef08a"
-                    opacity="0.75"
-                  />
-                </g>
-              </defs>
-              {/* Left Wing */}
-              <use href="#deckBigWing" />
-              {/* Right Wing (Mirrored) */}
-              <use href="#deckBigWing" transform="translate(800, 0) scale(-1, 1)" />
-              {/* Phoenix Crown & Flame Crest */}
-              <path
-                d="M 400 130
-                   C 385 100, 370 70, 400 40
-                   C 430 70, 415 100, 400 130 Z"
-                fill="#fde047"
-              />
-              <path
-                d="M 390 140 C 375 120, 350 100, 365 80 C 385 95, 395 115, 395 140 Z"
-                fill="#ea580c"
-              />
-              <path
-                d="M 410 140 C 425 120, 450 100, 435 80 C 415 95, 405 115, 405 140 Z"
-                fill="#ea580c"
-              />
-            </svg>
-          </motion.div>
-        )}
+      {/* 2. Full-Backdrop Epic Concept Art Wallpapers */}
+      {faction === 'ORDER_OF_PHOENIX' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 0.32, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-0 overflow-hidden"
+        >
+          <img
+            src="/images/phoenix_deck_banner.jpg"
+            alt="Đại Cánh Phượng Hoàng Lửa"
+            className="w-full h-full object-cover object-center filter contrast-125 brightness-110"
+          />
+          {/* Edge blend gradient to match panel */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.85)_90%)]" />
+        </motion.div>
+      )}
 
-        {/* SINGLE GREAT EMERALD JADE SERPENT WATERMARK */}
-        {(faction === 'DEATH_EATERS' || faction === 'ALL') && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ 
-              opacity: faction === 'DEATH_EATERS' ? 0.38 : 0.22,
-              scale: [0.98, 1.02, 0.98],
-              x: faction === 'ALL' ? '24%' : '0%',
-            }}
-            transition={{ duration: 5.2, repeat: Infinity, ease: 'easeInOut' }}
-            className={`absolute w-[800px] h-[580px] max-w-full ${faction === 'ALL' ? 'right-1/4' : ''}`}
-          >
-            <svg viewBox="0 0 800 600" className="w-full h-full drop-shadow-[0_0_35px_rgba(16,185,129,0.55)]">
-              <defs>
-                <linearGradient id="deckGreatJadeSerpent" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#ecfdf5" stopOpacity="0.95" />
-                  <stop offset="30%" stopColor="#6ee7b7" stopOpacity="0.85" />
-                  <stop offset="60%" stopColor="#10b981" stopOpacity="0.75" />
-                  <stop offset="85%" stopColor="#047857" stopOpacity="0.6" />
-                  <stop offset="100%" stopColor="#064e3b" stopOpacity="0.2" />
-                </linearGradient>
-              </defs>
+      {faction === 'DEATH_EATERS' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 0.36, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-0 overflow-hidden"
+        >
+          <img
+            src="/images/serpent_deck_banner.jpg"
+            alt="Đại Mãng Xà Ngọc Bích"
+            className="w-full h-full object-cover object-center filter contrast-125 brightness-110"
+          />
+          {/* Edge blend gradient to match panel */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.85)_90%)]" />
+        </motion.div>
+      )}
 
-              {/* Massive Sinuous Serpent Coils Across Entire Backdrop */}
-              <path
-                d="M 400 130
-                   C 330 140, 240 180, 160 250
-                   C 70 330, 80 430, 170 490
-                   C 260 550, 420 560, 520 500
-                   C 630 430, 680 320, 620 220
-                   C 560 120, 440 90, 410 70"
-                fill="none"
-                stroke="url(#deckGreatJadeSerpent)"
-                strokeWidth="52"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Shimmering Inner Jade Highlights */}
-              <path
-                d="M 400 130
-                   C 330 140, 240 180, 160 250
-                   C 70 330, 80 430, 170 490
-                   C 260 550, 420 560, 520 500
-                   C 630 430, 680 320, 620 220
-                   C 560 120, 440 90, 410 70"
-                fill="none"
-                stroke="#a7f3d0"
-                strokeWidth="16"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity="0.8"
-              />
-
-              {/* Pale Diamond Scale Spine */}
-              <path
-                d="M 400 130
-                   C 330 140, 240 180, 160 250
-                   C 70 330, 80 430, 170 490
-                   C 260 550, 420 560, 520 500
-                   C 630 430, 680 320, 620 220
-                   C 560 120, 440 90, 410 70"
-                fill="none"
-                stroke="#ffffff"
-                strokeWidth="4"
-                strokeDasharray="20 16"
-                opacity="0.85"
-              />
-
-              {/* Giant Cobra Hood at Top Center */}
-              <path
-                d="M 410 70
-                   C 360 40, 310 70, 330 115
-                   C 350 150, 420 160, 460 140
-                   C 490 120, 480 70, 430 55 Z"
-                fill="#10b981"
-                opacity="0.9"
-              />
-
-              {/* Sleek Viper Head & Snout */}
-              <path
-                d="M 410 50
-                   C 380 45, 345 65, 350 95
-                   C 355 125, 410 125, 425 105
-                   C 435 85, 425 55, 410 50 Z"
-                fill="#064e3b"
-                stroke="#6ee7b7"
-                strokeWidth="3"
-              />
-
-              {/* Glowing Emerald Eyes */}
-              <circle cx="375" cy="75" r="7" fill="#ecfdf5" />
-              <circle cx="375" cy="75" r="4" fill="#10b981" />
-              <line x1="375" y1="70" x2="375" y2="80" stroke="#064e3b" strokeWidth="2.5" />
-
-              <circle cx="410" cy="75" r="7" fill="#ecfdf5" />
-              <circle cx="410" cy="75" r="4" fill="#10b981" />
-              <line x1="410" y1="70" x2="410" y2="80" stroke="#064e3b" strokeWidth="2.5" />
-
-              {/* Forked Red Tongue */}
-              <path
-                d="M 380 110 Q 375 140, 370 165 M 370 165 L 355 180 M 370 165 L 382 180"
-                stroke="#ef4444"
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-            </svg>
-          </motion.div>
-        )}
-      </div>
+      {faction === 'ALL' && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-0 flex items-center overflow-hidden"
+        >
+          {/* Left: Phoenix Wings */}
+          <div className="relative w-1/2 h-full overflow-hidden opacity-28">
+            <img
+              src="/images/phoenix_deck_banner.jpg"
+              alt="Hội Phượng Hoàng"
+              className="w-[200%] h-full max-w-none object-cover object-left filter contrast-125 brightness-110"
+              style={{
+                maskImage: 'linear-gradient(to right, black 50%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, black 50%, transparent 100%)',
+              }}
+            />
+          </div>
+          {/* Right: Jade Serpent */}
+          <div className="relative w-1/2 h-full overflow-hidden opacity-30">
+            <img
+              src="/images/serpent_deck_banner.jpg"
+              alt="Tử Thần Thực Tử"
+              className="w-[200%] h-full max-w-none object-cover -translate-x-1/2 filter contrast-125 brightness-110"
+              style={{
+                maskImage: 'linear-gradient(to left, black 50%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to left, black 50%, transparent 100%)',
+              }}
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/70" />
+        </motion.div>
+      )}
     </div>
   );
 }

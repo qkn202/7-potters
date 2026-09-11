@@ -20,24 +20,24 @@ function DeckModalFactionBackground({ faction }: { faction: Faction | 'ALL' }) {
       {/* 1. Ambient Dynamic Color Gradient Atmosphere */}
       <motion.div
         animate={{
-          opacity: faction === 'DEATH_EATERS' ? [0.35, 0.55, 0.35] : [0.4, 0.65, 0.4],
+          opacity: [0.25, 0.4, 0.25],
           scale: [0.98, 1.02, 0.98],
         }}
-        transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
         className={`absolute inset-0 transition-colors duration-700 ${
           faction === 'ORDER_OF_PHOENIX'
-            ? 'bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.25)_0%,rgba(220,38,38,0.18)_50%,transparent_85%)]'
+            ? 'bg-[radial-gradient(ellipse_at_top,rgba(217,119,6,0.14)_0%,rgba(180,83,9,0.06)_45%,transparent_80%)]'
             : faction === 'DEATH_EATERS'
-            ? 'bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.3)_0%,rgba(6,78,59,0.22)_50%,transparent_85%)]'
-            : 'bg-[radial-gradient(ellipse_at_25%_50%,rgba(251,191,36,0.22)_0%,transparent_60%),radial-gradient(ellipse_at_75%_50%,rgba(16,185,129,0.22)_0%,transparent_60%)]'
+            ? 'bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.14)_0%,rgba(6,78,59,0.06)_45%,transparent_80%)]'
+            : 'bg-[radial-gradient(ellipse_at_25%_25%,rgba(217,119,6,0.1)_0%,transparent_55%),radial-gradient(ellipse_at_75%_25%,rgba(16,185,129,0.1)_0%,transparent_55%)]'
         }`}
       />
 
-      {/* 2. Full-Backdrop Epic Concept Art Wallpapers */}
+      {/* 2. Full-Backdrop Epic Concept Art Wallpapers with Deep Vintage Vignette */}
       {faction === 'ORDER_OF_PHOENIX' && (
         <motion.div
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 0.32, scale: 1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.12 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
           className="absolute inset-0 overflow-hidden"
@@ -45,18 +45,18 @@ function DeckModalFactionBackground({ faction }: { faction: Faction | 'ALL' }) {
           <img
             src="/images/phoenix_deck_banner.jpg"
             alt="Đại Cánh Phượng Hoàng Lửa"
-            className="w-full h-full object-cover object-center filter contrast-125 brightness-110"
+            className="w-full h-full object-cover object-center filter contrast-110 brightness-95"
           />
-          {/* Edge blend gradient to match panel */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.85)_90%)]" />
+          {/* Edge blend gradient to match wood mahogany panel */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0e0703] via-[#140b05]/85 to-[#0e0703]/95" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(14,7,3,0.92)_85%)]" />
         </motion.div>
       )}
 
       {faction === 'DEATH_EATERS' && (
         <motion.div
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 0.36, scale: 1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.13 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
           className="absolute inset-0 overflow-hidden"
@@ -64,11 +64,11 @@ function DeckModalFactionBackground({ faction }: { faction: Faction | 'ALL' }) {
           <img
             src="/images/serpent_deck_banner.jpg"
             alt="Đại Mãng Xà Ngọc Bích"
-            className="w-full h-full object-cover object-center filter contrast-125 brightness-110"
+            className="w-full h-full object-cover object-center filter contrast-110 brightness-95"
           />
           {/* Edge blend gradient to match panel */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.85)_90%)]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#05110c] via-[#091711]/85 to-[#05110c]/95" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(5,17,12,0.92)_85%)]" />
         </motion.div>
       )}
 
@@ -80,11 +80,11 @@ function DeckModalFactionBackground({ faction }: { faction: Faction | 'ALL' }) {
           className="absolute inset-0 flex items-center overflow-hidden"
         >
           {/* Left: Phoenix Wings */}
-          <div className="relative w-1/2 h-full overflow-hidden opacity-28">
+          <div className="relative w-1/2 h-full overflow-hidden opacity-10">
             <img
               src="/images/phoenix_deck_banner.jpg"
               alt="Hội Phượng Hoàng"
-              className="w-[200%] h-full max-w-none object-cover object-left filter contrast-125 brightness-110"
+              className="w-[200%] h-full max-w-none object-cover object-left filter contrast-110 brightness-95"
               style={{
                 maskImage: 'linear-gradient(to right, black 50%, transparent 100%)',
                 WebkitMaskImage: 'linear-gradient(to right, black 50%, transparent 100%)',
@@ -92,18 +92,18 @@ function DeckModalFactionBackground({ faction }: { faction: Faction | 'ALL' }) {
             />
           </div>
           {/* Right: Jade Serpent */}
-          <div className="relative w-1/2 h-full overflow-hidden opacity-30">
+          <div className="relative w-1/2 h-full overflow-hidden opacity-11">
             <img
               src="/images/serpent_deck_banner.jpg"
               alt="Tử Thần Thực Tử"
-              className="w-[200%] h-full max-w-none object-cover -translate-x-1/2 filter contrast-125 brightness-110"
+              className="w-[200%] h-full max-w-none object-cover -translate-x-1/2 filter contrast-110 brightness-95"
               style={{
                 maskImage: 'linear-gradient(to left, black 50%, transparent 100%)',
                 WebkitMaskImage: 'linear-gradient(to left, black 50%, transparent 100%)',
               }}
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/70" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0e0703] via-[#140b05]/80 to-[#0e0703]/95" />
         </motion.div>
       )}
     </div>

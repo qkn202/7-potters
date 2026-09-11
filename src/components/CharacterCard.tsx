@@ -38,65 +38,166 @@ interface CharacterCardProps {
 }
 
 /**
+ * Arcane Astrological Runic Ring (Vòng tròn pháp trận chiêm tinh cổ ngữ quay chậm phía sau mỗi thẻ)
+ */
+function ArcaneCardHalo({ faction }: { faction: 'ORDER_OF_PHOENIX' | 'DEATH_EATERS' | 'NEUTRAL' }) {
+  const isDeathEaters = faction === 'DEATH_EATERS';
+  const strokeColor = isDeathEaters ? '#10b981' : '#d4af37';
+  const strokeLight = isDeathEaters ? '#6ee7b7' : '#ffd88f';
+
+  return (
+    <motion.svg
+      viewBox="0 0 320 320"
+      animate={{ rotate: isDeathEaters ? -360 : 360 }}
+      transition={{ duration: 80, repeat: Infinity, ease: 'linear' }}
+      className="absolute w-[128%] sm:w-[138%] h-auto pointer-events-none opacity-40 group-hover:opacity-70 transition-opacity duration-500 overflow-visible select-none"
+    >
+      {/* Outer celestial dashed rings */}
+      <circle cx="160" cy="160" r="150" fill="none" stroke={strokeColor} strokeWidth="1" strokeDasharray="3 7" opacity="0.5" />
+      <circle cx="160" cy="160" r="142" fill="none" stroke={strokeColor} strokeWidth="0.75" opacity="0.3" />
+
+      {/* 12 Astrological tick marks */}
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+        <line
+          key={`tick-${deg}`}
+          x1="160"
+          y1="12"
+          x2="160"
+          y2={deg % 90 === 0 ? "24" : "18"}
+          stroke={deg % 90 === 0 ? strokeLight : strokeColor}
+          strokeWidth={deg % 90 === 0 ? "1.5" : "0.75"}
+          transform={`rotate(${deg} 160 160)`}
+          opacity="0.65"
+        />
+      ))}
+
+      {/* Mid decorative arcane rings */}
+      <circle cx="160" cy="160" r="122" fill="none" stroke={strokeColor} strokeWidth="1.2" strokeDasharray="8 4 2 4" opacity="0.45" />
+      <circle cx="160" cy="160" r="102" fill="none" stroke={strokeColor} strokeWidth="0.6" strokeDasharray="1 5" opacity="0.3" />
+
+      {/* Cardinal diamond glyphs */}
+      {[0, 90, 180, 270].map((deg) => (
+        <polygon
+          key={`diamond-${deg}`}
+          points="160,25 163.5,31 160,37 156.5,31"
+          fill={strokeLight}
+          transform={`rotate(${deg} 160 160)`}
+          opacity="0.8"
+        />
+      ))}
+    </motion.svg>
+  );
+}
+
+/**
  * PHÍA SAU THẺ BÀI: PHE HỘI PHƯỢNG HOÀNG (HPH)
- * Hào quang Lửa Phượng Hoàng hoàng gia bao bọc thẻ bài
+ * Hào quang vàng hoàng gia dịu êm, vòng cổ ngữ ma pháp và đôi cánh phượng hoàng vector siêu nét
  */
 function PhoenixFactionBackground({ isDead, size }: { isDead: boolean; size?: 'tarot' | 'compact' | 'mini' }) {
   if (isDead) return null;
 
   return (
-    <div className="absolute -inset-4 sm:-inset-6 pointer-events-none z-0 flex items-center justify-center overflow-visible select-none">
-      {/* 1. Ambient Solar Fire Glow */}
+    <div className="absolute -inset-2 pointer-events-none -z-10 flex items-center justify-center overflow-visible select-none">
+      {/* 1. Subtle, Soft Diffused Ambient Rim Glow (Dịu êm, không bị chói đục như neon cũ) */}
       <motion.div
         animate={{
-          scale: [0.96, 1.05, 0.96],
-          opacity: [0.65, 0.9, 0.65],
+          scale: [0.98, 1.02, 0.98],
+          opacity: [0.65, 0.85, 0.65],
         }}
         transition={{
-          duration: 3.2,
+          duration: 4.2,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute inset-0 rounded-[2.5rem] blur-xl bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.55)_15%,rgba(234,88,12,0.35)_50%,rgba(220,38,38,0.15)_75%,transparent_95%)]"
+        className="absolute inset-0 rounded-[2.5rem] blur-lg bg-[radial-gradient(ellipse_at_center,rgba(217,119,6,0.18)_20%,rgba(180,83,9,0.08)_55%,transparent_80%)]"
       />
 
-      {/* 2. Hiển thị Cánh Chim Phượng Hoàng sắc nét khi xem chi tiết (tarot mode) */}
+      {/* 2. Arcane Astrological Ring Halo (Vòng tròn chiêm tinh xoay nhẹ huyền bí) */}
+      <ArcaneCardHalo faction="ORDER_OF_PHOENIX" />
+
+      {/* 3. Symmetrical Blazing Phoenix Fire Wings SVG (Chế độ Tarot / Phóng to: Vector sắc nét tuyệt đối) */}
       {size === 'tarot' && (
-        <motion.img
-          src="/images/phoenix_fire_wings.jpg"
-          alt="Cánh Chim Phượng Hoàng Lửa"
+        <motion.svg
+          viewBox="0 0 500 400"
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{
-            scale: [0.98, 1.03, 0.98],
-            opacity: [0.85, 1, 0.85],
+            scale: [0.99, 1.02, 0.99],
+            opacity: [0.85, 0.98, 0.85],
           }}
           transition={{
-            duration: 3.4,
+            duration: 3.6,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute -inset-16 w-[150%] h-[150%] max-w-none object-contain mix-blend-screen drop-shadow-[0_0_26px_rgba(251,191,36,0.85)] filter contrast-125 brightness-110"
-          style={{
-            maskImage: 'radial-gradient(ellipse at center, black 55%, transparent 80%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at center, black 55%, transparent 80%)',
-          }}
-        />
+          className="absolute w-[165%] sm:w-[180%] h-auto max-w-none overflow-visible pointer-events-none"
+        >
+          <defs>
+            <linearGradient id="phoenixWingGrad" x1="1" y1="0.5" x2="0" y2="0.5">
+              <stop offset="0%" stopColor="#fffbeb" stopOpacity="0.95" />
+              <stop offset="25%" stopColor="#fde047" stopOpacity="0.9" />
+              <stop offset="55%" stopColor="#f59e0b" stopOpacity="0.75" />
+              <stop offset="85%" stopColor="#dc2626" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#7f1d1d" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="phoenixInnerGrad" x1="1" y1="0.5" x2="0" y2="0.5">
+              <stop offset="0%" stopColor="#fef08a" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#ea580c" stopOpacity="0.25" />
+            </linearGradient>
+
+            {/* Left Wing Path */}
+            <path
+              id="phLeftWing"
+              d="M 180 200
+                 C 140 180, 80 130, 40 80
+                 C 25 105, 55 140, 85 165
+                 C 50 175, 20 200, 30 220
+                 C 55 225, 95 225, 135 220
+                 C 90 240, 45 270, 50 295
+                 C 75 300, 120 285, 155 265
+                 C 115 295, 85 335, 95 355
+                 C 125 350, 160 310, 185 270 Z"
+              fill="url(#phoenixWingGrad)"
+            />
+
+            {/* Left Inner Flame Layer */}
+            <path
+              id="phLeftInner"
+              d="M 175 190
+                 C 145 170, 100 135, 65 110
+                 C 60 125, 85 150, 110 170
+                 C 80 180, 55 198, 62 215
+                 C 82 218, 115 218, 145 210
+                 C 115 225, 80 248, 85 265
+                 C 105 270, 135 255, 160 238 Z"
+              fill="url(#phoenixInnerGrad)"
+            />
+          </defs>
+
+          {/* Left Wing */}
+          <use href="#phLeftWing" />
+          <use href="#phLeftInner" />
+
+          {/* Right Wing (Perfect 100% Mirror reflection across center) */}
+          <use href="#phLeftWing" transform="translate(500, 0) scale(-1, 1)" />
+          <use href="#phLeftInner" transform="translate(500, 0) scale(-1, 1)" />
+        </motion.svg>
       )}
 
-      {/* 3. Rising Golden Sparks & Embers */}
+      {/* 4. Delicate Rising Golden Micro-Embers */}
       <div className="absolute inset-0 overflow-visible pointer-events-none">
         {[
-          { left: '10px', delay: 0, duration: 2.8, size: 4 },
-          { left: '26px', delay: 1.1, duration: 3.6, size: 3 },
-          { left: '42px', delay: 1.9, duration: 3.2, size: 4.5 },
+          { left: '4px', delay: 0, duration: 3.2, size: 2.5 },
+          { left: '18px', delay: 1.2, duration: 4.0, size: 2 },
+          { left: '32px', delay: 2.1, duration: 3.5, size: 3 },
         ].map((spark, idx) => (
           <motion.div
-            key={`ph-spark-l-${idx}`}
-            initial={{ y: '100%', opacity: 0, scale: 0.5 }}
+            key={`ph-micro-spark-l-${idx}`}
+            initial={{ y: '90%', opacity: 0, scale: 0.5 }}
             animate={{
-              y: ['100%', '30%', '-15%'],
-              opacity: [0, 0.95, 0],
-              scale: [0.5, 1.3, 0.2],
-              x: [0, idx % 2 === 0 ? 6 : -6, 0],
+              y: ['90%', '25%', '-20%'],
+              opacity: [0, 0.85, 0],
+              scale: [0.5, 1.2, 0.2],
+              x: [0, idx % 2 === 0 ? 5 : -5, 0],
             }}
             transition={{
               duration: spark.duration,
@@ -105,23 +206,23 @@ function PhoenixFactionBackground({ isDead, size }: { isDead: boolean; size?: 't
               ease: "easeOut",
             }}
             style={{ left: spark.left, width: spark.size, height: spark.size }}
-            className="absolute bottom-4 rounded-full bg-amber-200 shadow-[0_0_8px_#fef08a] blur-[0.4px]"
+            className="absolute bottom-6 rounded-full bg-amber-200 blur-[0.2px]"
           />
         ))}
 
         {[
-          { right: '10px', delay: 0.5, duration: 3.0, size: 4 },
-          { right: '26px', delay: 1.6, duration: 3.9, size: 3 },
-          { right: '42px', delay: 2.3, duration: 3.4, size: 4.5 },
+          { right: '4px', delay: 0.6, duration: 3.4, size: 2.5 },
+          { right: '18px', delay: 1.8, duration: 4.2, size: 2 },
+          { right: '32px', delay: 2.5, duration: 3.6, size: 3 },
         ].map((spark, idx) => (
           <motion.div
-            key={`ph-spark-r-${idx}`}
-            initial={{ y: '100%', opacity: 0, scale: 0.5 }}
+            key={`ph-micro-spark-r-${idx}`}
+            initial={{ y: '90%', opacity: 0, scale: 0.5 }}
             animate={{
-              y: ['100%', '30%', '-15%'],
-              opacity: [0, 0.95, 0],
-              scale: [0.5, 1.3, 0.2],
-              x: [0, idx % 2 === 0 ? -6 : 6, 0],
+              y: ['90%', '25%', '-20%'],
+              opacity: [0, 0.85, 0],
+              scale: [0.5, 1.2, 0.2],
+              x: [0, idx % 2 === 0 ? -5 : 5, 0],
             }}
             transition={{
               duration: spark.duration,
@@ -130,7 +231,7 @@ function PhoenixFactionBackground({ isDead, size }: { isDead: boolean; size?: 't
               ease: "easeOut",
             }}
             style={{ right: spark.right, width: spark.size, height: spark.size }}
-            className="absolute bottom-4 rounded-full bg-amber-200 shadow-[0_0_8px_#fef08a] blur-[0.4px]"
+            className="absolute bottom-6 rounded-full bg-amber-200 blur-[0.2px]"
           />
         ))}
       </div>
@@ -140,64 +241,113 @@ function PhoenixFactionBackground({ isDead, size }: { isDead: boolean; size?: 't
 
 /**
  * PHÍA SAU THẺ BÀI: PHE TỬ THẦN THỰC TỬ (4T)
- * Hào quang Mãng Xà Ngọc Bích hắc ám bao bọc thẻ bài
+ * Hào quang Lục Bảo Slytherin trầm mặc, vòng cổ ngữ hắc ám và cánh khói mãng xà vector siêu nét
  */
 function DeathEaterFactionBackground({ isDead, size }: { isDead: boolean; size?: 'tarot' | 'compact' | 'mini' }) {
   if (isDead) return null;
 
   return (
-    <div className="absolute -inset-4 sm:-inset-6 pointer-events-none z-0 flex items-center justify-center overflow-visible select-none">
-      {/* 1. Ambient Jade Emerald Nebula */}
+    <div className="absolute -inset-2 pointer-events-none -z-10 flex items-center justify-center overflow-visible select-none">
+      {/* 1. Subtle, Soft Diffused Emerald Rim Glow */}
       <motion.div
         animate={{
-          scale: [0.96, 1.04, 0.96],
-          opacity: [0.65, 0.9, 0.65],
+          scale: [0.98, 1.02, 0.98],
+          opacity: [0.65, 0.85, 0.65],
         }}
         transition={{
-          duration: 3.6,
+          duration: 4.4,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute inset-0 rounded-[2.5rem] blur-xl bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.55)_15%,rgba(5,150,105,0.35)_50%,rgba(6,78,59,0.18)_75%,transparent_95%)]"
+        className="absolute inset-0 rounded-[2.5rem] blur-lg bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.16)_20%,rgba(5,150,105,0.08)_55%,transparent_80%)]"
       />
 
-      {/* 2. Hiển thị Con Rắn Ngọc Bích sắc nét khi xem chi tiết (tarot mode) */}
+      {/* 2. Arcane Astrological Ring Halo (Vòng tròn chiêm tinh xoay ngược) */}
+      <ArcaneCardHalo faction="DEATH_EATERS" />
+
+      {/* 3. Symmetrical Dark Magic Serpent Smoke Wings SVG (Chế độ Tarot: Vector sắc nét) */}
       {size === 'tarot' && (
-        <motion.img
-          src="/images/emerald_jade_serpent.jpg"
-          alt="Con Rắn Ngọc Bích"
+        <motion.svg
+          viewBox="0 0 500 400"
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{
-            scale: [0.98, 1.03, 0.98],
-            opacity: [0.85, 1, 0.85],
+            scale: [0.99, 1.02, 0.99],
+            opacity: [0.85, 0.98, 0.85],
           }}
           transition={{
-            duration: 3.5,
+            duration: 3.8,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute -inset-16 w-[150%] h-[150%] max-w-none object-contain mix-blend-screen drop-shadow-[0_0_26px_rgba(16,185,129,0.85)] filter contrast-125 brightness-110"
-          style={{
-            maskImage: 'radial-gradient(ellipse at center, black 55%, transparent 80%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at center, black 55%, transparent 80%)',
-          }}
-        />
+          className="absolute w-[165%] sm:w-[180%] h-auto max-w-none overflow-visible pointer-events-none"
+        >
+          <defs>
+            <linearGradient id="deWingGrad" x1="1" y1="0.5" x2="0" y2="0.5">
+              <stop offset="0%" stopColor="#ecfdf5" stopOpacity="0.95" />
+              <stop offset="25%" stopColor="#6ee7b7" stopOpacity="0.9" />
+              <stop offset="55%" stopColor="#10b981" stopOpacity="0.75" />
+              <stop offset="85%" stopColor="#047857" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#022c22" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="deInnerGrad" x1="1" y1="0.5" x2="0" y2="0.5">
+              <stop offset="0%" stopColor="#a7f3d0" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#065f46" stopOpacity="0.25" />
+            </linearGradient>
+
+            {/* Left Serpent Wing Path */}
+            <path
+              id="deLeftWing"
+              d="M 180 200
+                 C 140 170, 75 120, 35 75
+                 C 25 100, 60 135, 90 160
+                 C 45 170, 15 195, 25 220
+                 C 55 230, 100 225, 140 215
+                 C 85 240, 40 270, 45 295
+                 C 70 305, 120 290, 160 265
+                 C 110 295, 80 340, 95 360
+                 C 130 350, 165 305, 185 265 Z"
+              fill="url(#deWingGrad)"
+            />
+
+            {/* Left Inner Serpent Smoke */}
+            <path
+              id="deLeftInner"
+              d="M 175 190
+                 C 145 165, 95 128, 60 98
+                 C 55 115, 80 142, 105 165
+                 C 75 175, 48 195, 56 212
+                 C 78 220, 115 218, 145 208
+                 C 112 225, 75 250, 82 268
+                 C 102 275, 135 258, 160 238 Z"
+              fill="url(#deInnerGrad)"
+            />
+          </defs>
+
+          {/* Left Wing */}
+          <use href="#deLeftWing" />
+          <use href="#deLeftInner" />
+
+          {/* Right Wing (Perfect 100% Mirror reflection across center) */}
+          <use href="#deLeftWing" transform="translate(500, 0) scale(-1, 1)" />
+          <use href="#deLeftInner" transform="translate(500, 0) scale(-1, 1)" />
+        </motion.svg>
       )}
 
-      {/* 3. Rising Emerald Poison Wisps */}
+      {/* 4. Ghostly Emerald Poison Wisps */}
       <div className="absolute inset-0 overflow-visible pointer-events-none">
         {[
-          { left: '10px', delay: 0.2, duration: 3.2, size: 4 },
-          { left: '26px', delay: 1.4, duration: 3.8, size: 3 },
-          { left: '42px', delay: 2.2, duration: 3.5, size: 4.5 },
+          { left: '4px', delay: 0.2, duration: 3.5, size: 2.5 },
+          { left: '18px', delay: 1.4, duration: 4.2, size: 2 },
+          { left: '32px', delay: 2.3, duration: 3.7, size: 3 },
         ].map((spark, idx) => (
           <motion.div
-            key={`jade-wisp-l-${idx}`}
-            initial={{ y: '100%', opacity: 0, scale: 0.5 }}
+            key={`jade-micro-wisp-l-${idx}`}
+            initial={{ y: '90%', opacity: 0, scale: 0.5 }}
             animate={{
-              y: ['100%', '30%', '-15%'],
-              opacity: [0, 0.95, 0],
-              scale: [0.5, 1.3, 0.2],
-              x: [0, idx % 2 === 0 ? 6 : -6, 0],
+              y: ['90%', '25%', '-20%'],
+              opacity: [0, 0.85, 0],
+              scale: [0.5, 1.2, 0.2],
+              x: [0, idx % 2 === 0 ? 5 : -5, 0],
             }}
             transition={{
               duration: spark.duration,
@@ -206,23 +356,23 @@ function DeathEaterFactionBackground({ isDead, size }: { isDead: boolean; size?:
               ease: "easeOut",
             }}
             style={{ left: spark.left, width: spark.size, height: spark.size }}
-            className="absolute bottom-4 rounded-full bg-emerald-300 shadow-[0_0_10px_#6ee7b7] blur-[0.4px]"
+            className="absolute bottom-6 rounded-full bg-emerald-300 blur-[0.2px]"
           />
         ))}
 
         {[
-          { right: '10px', delay: 0.7, duration: 3.4, size: 4 },
-          { right: '26px', delay: 1.8, duration: 4.0, size: 3 },
-          { right: '42px', delay: 2.6, duration: 3.6, size: 4.5 },
+          { right: '4px', delay: 0.8, duration: 3.6, size: 2.5 },
+          { right: '18px', delay: 1.9, duration: 4.3, size: 2 },
+          { right: '32px', delay: 2.7, duration: 3.8, size: 3 },
         ].map((spark, idx) => (
           <motion.div
-            key={`jade-wisp-r-${idx}`}
-            initial={{ y: '100%', opacity: 0, scale: 0.5 }}
+            key={`jade-micro-wisp-r-${idx}`}
+            initial={{ y: '90%', opacity: 0, scale: 0.5 }}
             animate={{
-              y: ['100%', '30%', '-15%'],
-              opacity: [0, 0.95, 0],
-              scale: [0.5, 1.3, 0.2],
-              x: [0, idx % 2 === 0 ? -6 : 6, 0],
+              y: ['90%', '25%', '-20%'],
+              opacity: [0, 0.85, 0],
+              scale: [0.5, 1.2, 0.2],
+              x: [0, idx % 2 === 0 ? -5 : 5, 0],
             }}
             transition={{
               duration: spark.duration,
@@ -231,7 +381,7 @@ function DeathEaterFactionBackground({ isDead, size }: { isDead: boolean; size?:
               ease: "easeOut",
             }}
             style={{ right: spark.right, width: spark.size, height: spark.size }}
-            className="absolute bottom-4 rounded-full bg-emerald-300 shadow-[0_0_10px_#6ee7b7] blur-[0.4px]"
+            className="absolute bottom-6 rounded-full bg-emerald-300 blur-[0.2px]"
           />
         ))}
       </div>
@@ -246,19 +396,20 @@ function NeutralFactionBackground({ isDead }: { isDead: boolean }) {
   if (isDead) return null;
 
   return (
-    <div className="absolute -inset-x-14 -inset-y-8 sm:-inset-x-20 sm:-inset-y-10 pointer-events-none z-0 overflow-visible">
+    <div className="absolute -inset-2 pointer-events-none -z-10 flex items-center justify-center overflow-visible select-none">
       <motion.div
         animate={{
-          scale: [0.98, 1.04, 0.98],
-          opacity: [0.6, 0.85, 0.6],
+          scale: [0.98, 1.02, 0.98],
+          opacity: [0.5, 0.75, 0.5],
         }}
         transition={{
-          duration: 3.5,
+          duration: 4.2,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute inset-0 rounded-[3rem] blur-2xl bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.5)_15%,rgba(14,116,144,0.35)_45%,transparent_85%)]"
+        className="absolute inset-0 rounded-[2.5rem] blur-lg bg-[radial-gradient(ellipse_at_center,rgba(147,51,234,0.15)_20%,rgba(14,116,144,0.08)_55%,transparent_80%)]"
       />
+      <ArcaneCardHalo faction="NEUTRAL" />
     </div>
   );
 }
@@ -306,10 +457,10 @@ export function CharacterCard({
     setMousePos({ x: 0, y: 0, active: false });
   };
 
-  // Border theming & In-card glow
+  // Border theming & In-card metallic glow
   const factionBorder = isDeathEaters
-    ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.45)]'
-    : 'border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.45)]';
+    ? 'border-[#10b981]/70 hover:border-[#34d399] transition-colors'
+    : 'border-[#bd8436] hover:border-[#ffd88f] transition-colors';
 
   const rotateX = mousePos.active ? -mousePos.y * 12 : 0;
   const rotateY = mousePos.active ? mousePos.x * 12 : 0;
@@ -418,7 +569,7 @@ export function CharacterCard({
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
           }}
-          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} bg-gray-950 p-2 sm:p-2.5 flex flex-col justify-between overflow-hidden transition-all duration-300 ${
+          className={`absolute inset-0 rounded-3xl border-2 ${factionBorder} bg-[#140b05] p-2 sm:p-2.5 flex flex-col justify-between overflow-hidden transition-all duration-300 ${
             isFlipped ? 'pointer-events-none z-0' : 'pointer-events-auto z-20'
           }`}
           onClick={() => {
@@ -427,6 +578,9 @@ export function CharacterCard({
         >
           {/* Main Chocolate Frog Portrait Image Container */}
           <div className="relative w-full h-full rounded-2xl overflow-hidden bg-black flex flex-col justify-between">
+            {/* Subtle gilded inner hairline border for collector card feel */}
+            <div className={`pointer-events-none absolute inset-1 rounded-xl border ${isDeathEaters ? 'border-emerald-400/25' : 'border-[#ffd88f]/25'} z-20`} />
+
             {role.image ? (
               <img
                 src={role.image}
@@ -575,7 +729,7 @@ export function CharacterCard({
             transform: 'rotateY(180deg)',
             background: 'linear-gradient(135deg, #24150c 0%, #1a0e07 50%, #100803 100%)',
           }}
-          className={`absolute inset-0 rounded-3xl border-3 ${factionBorder} p-3 sm:p-4 flex flex-col justify-between overflow-hidden cursor-pointer ${
+          className={`absolute inset-0 rounded-3xl border-2 ${factionBorder} p-3 sm:p-4 flex flex-col justify-between overflow-hidden cursor-pointer ${
             isFlipped ? 'pointer-events-auto z-20' : 'pointer-events-none z-0'
           }`}
           onClick={() => setIsFlipped(false)}

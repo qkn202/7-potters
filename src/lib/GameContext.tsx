@@ -37,7 +37,7 @@ export interface GameContextType {
   simulateBotActions: () => void;
   skillToast: string | null;
   clearSkillToast: () => void;
-  useWeasleyItem: (itemId: WeasleyItemId, targetId?: string) => string | void;
+  consumeWeasleyItem: (itemId: WeasleyItemId, targetId?: string) => string | void;
   triggerVisualFX: (fx: ActiveVisualFX) => void;
   clearVisualFX: () => void;
 }
@@ -378,7 +378,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const executePlayerActionCore = useCallback((actorId: string, actionName: string, targetId: string) => {
     updateState(prev => {
       const me = prev.players.find(p => p.id === actorId);
-      if (!me) return prev;
+      if (!me || me.status === 'DEAD' || me.isGM) return prev;
       const target = targetId === 'ALL' ? null : prev.players.find(p => p.id === targetId);
       if (targetId !== 'ALL' && !target) return prev;
       
@@ -413,6 +413,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const me = curState.players.find(p => p.id === actorId);
     const target = curState.players.find(p => p.id === targetId);
     if (!me || !target) return;
+    if (me.status === 'DEAD') return 'Bạn đã tử trận, không thể sử dụng kỹ năng!';
 
     if (actionName === 'Soi Danh Tính' && me.role?.id === 'HERMIONE_GRANGER') {
       if (target.role?.id === 'HARRY_POTTER' || target.role?.id === 'VOLDEMORT') {
@@ -657,7 +658,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         } else if (msg.type === 'USE_WEASLEY_ITEM') {
           const { itemId, targetId } = msg.payload || {};
           if (itemId) {
-            const itemResult = useWeasleyItemCore(msg.senderId, itemId, targetId);
+            const itemResult = executeWeasleyItemCore(msg.senderId, itemId, targetId);
             if (itemResult && netRef.current) {
               netRef.current.broadcast({
                 type: 'INSTANT_SKILL_RESULT',
@@ -714,7 +715,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             setConnStatus('connected');
             setErrorMsg(null);
             try {
-              localStorage.setItem('seven-potters-mock-state', JSON.stringify(syncedState));
+              if (roomCodeRef.current) {
+                localStorage.setItem(`seven-potters-room-${roomCodeRef.current}-state`, JSON.stringify(syncedState));
+              } else {
+                localStorage.setItem('seven-potters-mock-state', JSON.stringify(syncedState));
+              }
             } catch (e) {}
           }
         } else if (msg.type === 'INSTANT_SKILL_RESULT') {
@@ -1533,7 +1538,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     resolveInterruptCore(choiceId, currentPlayerId || undefined);
   };
 
-  const useWeasleyItemCore = (actorId: string, itemId: WeasleyItemId, targetId?: string): string => {
+  const executeWeasleyItemCore = (actorId: string, itemId: WeasleyItemId, targetId?: string): string => {
     const itemIndex = stateRef.current.weasleyItems.findIndex(i => i.id === itemId);
     if (itemIndex === -1) return 'Không tìm thấy vật phẩm!';
     const item = stateRef.current.weasleyItems[itemIndex];
@@ -1615,7 +1620,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return privateReturnMsg || logText;
   };
 
-  const useWeasleyItem = (itemId: WeasleyItemId, targetId?: string): string | void => {
+  const consumeWeasleyItem = (itemId: WeasleyItemId, targetId?: string): string | void => {
     if (currentPlayerId) {
       const myPlayer = stateRef.current.players.find(p => p.id === currentPlayerId);
       const item = stateRef.current.weasleyItems?.find(i => i.id === itemId);
@@ -1640,7 +1645,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (currentPlayerId) {
-      return useWeasleyItemCore(currentPlayerId, itemId, targetId);
+      return executeWeasleyItemCore(currentPlayerId, itemId, targetId);
     }
   };
 
@@ -1861,7 +1866,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
             // Check active Escort from formation flying
             const activeEscorts = Object.entries(gameState.pendingActions)
-              .filter(([pId, act]) => act.actionName === 'Bay Hộ Tống' && act.targetId === deathEaterTargetId)
+              .filter(([, act]) => act.actionName === 'Bay Hộ Tống' && act.targetId === deathEaterTargetId)
               .map(([pId]) => gameState.players.find(p => p.id === pId))
               .filter((p): p is Player => Boolean(p && p.status !== 'DEAD' && !deadPlayers.includes(p.id)));
 
@@ -2161,7 +2166,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       simulateBotActions,
       skillToast,
       clearSkillToast,
-      useWeasleyItem,
+      consumeWeasleyItem,
       triggerVisualFX,
       clearVisualFX
     }}>

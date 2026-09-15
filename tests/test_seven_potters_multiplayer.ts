@@ -41,12 +41,12 @@ async function runMultiplayerTests() {
   const client1Net = new SevenPottersNetwork();
   const client2Net = new SevenPottersNetwork();
 
-  let hostReceivedJoinReq: Player[] = [];
+  const hostReceivedJoinReq: Player[] = [];
   let client1ReceivedState: GameState | null = null;
   let client2ReceivedState: GameState | null = null;
-  let hostReceivedActions: any[] = [];
-  let hostReceivedInstantSkills: any[] = [];
-  let hostReceivedWeasleyItems: any[] = [];
+  const hostReceivedActions: { senderId: string; payload: { actionName: string; targetId: string } }[] = [];
+  const hostReceivedInstantSkills: { senderId: string; payload: { actionName: string; targetId: string } }[] = [];
+  const hostReceivedWeasleyItems: { senderId: string; payload: { itemId: string; targetId?: string } }[] = [];
 
   // Setup Host Listeners
   hostNet.onMessageReceived = (msg: NetworkMessage) => {
@@ -54,11 +54,11 @@ async function runMultiplayerTests() {
     if (msg.type === 'JOIN_REQUEST') {
       hostReceivedJoinReq.push(msg.payload as Player);
     } else if (msg.type === 'ACTION_SUBMIT') {
-      hostReceivedActions.push({ senderId: msg.senderId, payload: msg.payload });
+      hostReceivedActions.push({ senderId: msg.senderId, payload: msg.payload as { actionName: string; targetId: string } });
     } else if (msg.type === 'INSTANT_SKILL_SUBMIT') {
-      hostReceivedInstantSkills.push({ senderId: msg.senderId, payload: msg.payload });
+      hostReceivedInstantSkills.push({ senderId: msg.senderId, payload: msg.payload as { actionName: string; targetId: string } });
     } else if (msg.type === 'USE_WEASLEY_ITEM') {
-      hostReceivedWeasleyItems.push({ senderId: msg.senderId, payload: msg.payload });
+      hostReceivedWeasleyItems.push({ senderId: msg.senderId, payload: msg.payload as { itemId: string; targetId?: string } });
     }
   };
 
@@ -143,6 +143,9 @@ async function runMultiplayerTests() {
 
     const state1 = client1ReceivedState as GameState | null;
     if (state1 && state1.players.length === 2 && state1.flightStage === 2 && state1.weasleyItems?.length === 1) {
+      if (client2ReceivedState) {
+        console.log('✓ Client 2 cũng nhận được tín hiệu đồng bộ.');
+      }
       console.log('✅ TEST 3 PASSED: Client 1 đã nhận được ROOM_STATE_SYNC với Chặng bay (Stage 2) & Kho Bảo Bối Weasley!');
     } else {
       throw new Error('TEST 3 FAILED: Client 1 không nhận được ROOM_STATE_SYNC hợp lệ');

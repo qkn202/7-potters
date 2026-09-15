@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
+import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { 
   getFirestore, 
   collection, 
@@ -16,7 +16,6 @@ import {
   signInWithCustomToken, 
   signInWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged,
   User,
   Auth 
 } from "firebase/auth";

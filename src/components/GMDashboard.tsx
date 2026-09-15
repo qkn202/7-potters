@@ -13,21 +13,17 @@ import {
   CheckCircle, 
   AlertTriangle, 
   UserX,
-  Crown,
   BookOpen,
-  Sparkles,
-  Shield,
   Eye,
   Wand2
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { CharacterCard, CardInspectorModal } from './CharacterCard';
+import { CardInspectorModal } from './CharacterCard';
 import { 
   PhoenixCrest, 
   DarkMarkCrest, 
   WaxSeal, 
-  CardCornerFlourish,
-  DeathlyHallowsSymbol 
+  CardCornerFlourish
 } from './ArtAssets';
 import { SkyEventBanner } from './SkyEventBanner';
 import { CardDeckModal } from './CardDeckModal';
@@ -70,16 +66,25 @@ export function GMDashboard() {
   const prevPhaseRef = useRef<string>('');
   useEffect(() => {
     if (gameState.phase && prevPhaseRef.current !== gameState.phase) {
-      if (gameState.phase === 'DAY') {
-        setToastMessage(`☀️ LƯỢT BAN NGÀY: Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy ngày HỘI PHƯỢNG HOÀNG!`);
-      } else if (gameState.phase === 'NIGHT') {
-        setToastMessage(`🌙 LƯỢT BAN ĐÊM: Đến lượt TOÀN BỘ PHÙ THỦY (Hội Phượng Hoàng & Tử Thần Thực Tử) cùng Biểu Quyết Tước Đũa!`);
-      }
       prevPhaseRef.current = gameState.phase;
-      const timer = setTimeout(() => {
-        setToastMessage(null);
-      }, 6500);
-      return () => clearTimeout(timer);
+      const msg = gameState.phase === 'DAY'
+        ? '☀️ LƯỢT BAN NGÀY: Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy ngày HỘI PHƯỢNG HOÀNG!'
+        : gameState.phase === 'NIGHT'
+        ? '🌙 LƯỢT BAN ĐÊM: Đến lượt TOÀN BỘ PHÙ THỦY (Hội Phượng Hoàng & Tử Thần Thực Tử) cùng Biểu Quyết Tước Đũa!'
+        : null;
+
+      if (msg) {
+        const showTimer = setTimeout(() => {
+          setToastMessage(msg);
+        }, 0);
+        const clearTimer = setTimeout(() => {
+          setToastMessage(null);
+        }, 6500);
+        return () => {
+          clearTimeout(showTimer);
+          clearTimeout(clearTimer);
+        };
+      }
     }
   }, [gameState.phase]);
 
@@ -179,7 +184,13 @@ export function GMDashboard() {
             </button>
 
             <button
-              onClick={() => setPhase('DAY')}
+              onClick={() => {
+                if (gameState.resolutionReport) {
+                  const confirmSkip = window.confirm('Hiện đang có Báo cáo kết quả hiệp chưa công bố. Bạn có chắc chắn muốn bỏ qua báo cáo và chuyển sang Ban Ngày?');
+                  if (!confirmSkip) return;
+                }
+                setPhase('DAY');
+              }}
               disabled={isDay}
               className={`flex-1 md:flex-initial px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-2 font-serif font-bold text-xs sm:text-sm transition-all border ${
                 isDay 
@@ -191,7 +202,13 @@ export function GMDashboard() {
             </button>
 
             <button
-              onClick={() => setPhase('NIGHT')}
+              onClick={() => {
+                if (gameState.resolutionReport) {
+                  const confirmSkip = window.confirm('Hiện đang có Báo cáo kết quả hiệp chưa công bố. Bạn có chắc chắn muốn bỏ qua báo cáo và chuyển sang Ban Đêm?');
+                  if (!confirmSkip) return;
+                }
+                setPhase('NIGHT');
+              }}
               disabled={isNight}
               className={`flex-1 md:flex-initial px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-2 font-serif font-bold text-xs sm:text-sm transition-all border ${
                 isNight 
@@ -421,7 +438,7 @@ export function GMDashboard() {
                     : 'HỘI PHƯỢNG HOÀNG THẮNG'}
               </h2>
               <p className="text-sm text-[#ebdcb0] font-lora">
-                Trận đấu đã khép lại. Quản trò có thể bấm "Hủy Phòng & Bắt Đầu Lại" ở cột bên phải.
+                Trận đấu đã khép lại. Quản trò có thể bấm &ldquo;Hủy Phòng &amp; Bắt Đầu Lại&rdquo; ở cột bên phải.
               </p>
             </div>
           )}

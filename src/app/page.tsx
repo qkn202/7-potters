@@ -23,7 +23,7 @@ export default function Home() {
     gameState, 
     currentPlayerId, 
     impersonatePlayer,
-    useWeasleyItem,
+    consumeWeasleyItem,
     clearVisualFX,
     roomCode,
     isHost,
@@ -299,7 +299,7 @@ export default function Home() {
         currentPlayerId={currentPlayerId}
         currentPhase={gameState.phase}
         onUseItem={(itemId, targetId) => {
-          return useWeasleyItem(itemId, targetId);
+          return consumeWeasleyItem(itemId, targetId);
         }}
       />
 

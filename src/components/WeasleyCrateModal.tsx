@@ -115,7 +115,7 @@ export function WeasleyCrateModal({
                   Hòm Tiếp Tế Tiệm Phù Thủy Weasley
                 </h3>
                 <p className="text-[11px] text-[#ebdcb0]/65 font-mono">
-                  Weasleys' Wizard Wheezes · Bảo Bối Tẩu Thoát Ma Thuật
+                  Weasleys&apos; Wizard Wheezes · Bảo Bối Tẩu Thoát Ma Thuật
                 </p>
               </div>
             </div>
@@ -203,7 +203,7 @@ export function WeasleyCrateModal({
                           {item.description}
                         </p>
                         <p className="text-[10px] text-[#ebdcb0]/50 italic mt-0.5 font-serif">
-                          "{item.flavor}"
+                          &ldquo;{item.flavor}&rdquo;
                         </p>
                       </div>
                     </div>

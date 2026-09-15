@@ -1,6 +1,6 @@
 import { checkWinCondition, INITIAL_WEASLEY_ITEMS, validateWeasleyItemUse } from '../src/lib/GameContext';
 import { ROLES } from '../src/lib/roles';
-import type { Player, GameState, Role } from '../src/lib/types';
+import type { Player, Role } from '../src/lib/types';
 
 function createMockPlayer(id: string, name: string, role: Role, status: 'ALIVE' | 'DEAD' = 'ALIVE'): Player {
   return {
@@ -22,7 +22,6 @@ async function runMechanicsTests() {
   const bellatrixRole = ROLES['BELLATRIX_LESTRANGE'];
   const hermioneRole = ROLES['HERMIONE_GRANGER'];
   const moodyRole = ROLES['ALASTOR_MOODY'];
-  const luciusRole = ROLES['LUCIUS_MALFOY'];
 
   // -------------------------------------------------------------
   // TEST 1: 4-Stage Flight Track Lore Win Condition
@@ -93,8 +92,6 @@ async function runMechanicsTests() {
   
   // Simulation: Attack targeted on Harry Potter
   const harryPlayer = createMockPlayer('harry_01', 'Harry Potter', harryRole, 'ALIVE');
-  const voldyPlayer = createMockPlayer('voldy_01', 'Lord Voldemort', voldemortRole, 'ALIVE');
-  const luciusPlayer = createMockPlayer('lucius_01', 'Lucius Malfoy', luciusRole, 'ALIVE');
 
   let goldenFlameTriggered = false;
   let harrySurvived = false;
@@ -204,7 +201,7 @@ async function runMechanicsTests() {
   };
 
   const escortsInStage1 = Object.entries(pendingActionsStage1)
-    .filter(([pId, act]) => act.actionName === 'Bay Hộ Tống' && act.targetId === attackedTarget);
+    .filter(([, act]) => act.actionName === 'Bay Hộ Tống' && act.targetId === attackedTarget);
 
   let harrySavedStage1 = false;
   let arthurSavedStage1 = false;

@@ -3,9 +3,7 @@
 import { useGame } from '@/lib/GameContext';
 import { motion } from 'framer-motion';
 import { 
-  ShieldAlert, 
   Crosshair, 
-  Eye, 
   Shield, 
   Wand2, 
   Skull, 
@@ -16,9 +14,7 @@ import {
   Sparkles,
   BookOpen,
   CheckCircle,
-  HelpCircle,
   Flame,
-  Search,
   Maximize2,
   ScrollText
 } from 'lucide-react';
@@ -28,7 +24,6 @@ import {
   PhoenixCrest, 
   DarkMarkCrest, 
   DeathlyHallowsSymbol, 
-  WaxSeal,
   CardCornerFlourish,
   BadgeIcon
 } from './ArtAssets';
@@ -36,7 +31,7 @@ import { CardDeckModal } from './CardDeckModal';
 import { SkyEventBanner } from './SkyEventBanner';
 
 export function PlayerScreen() {
-  const { gameState, currentPlayerId, playerAction, executeInstantSkill, resolveInterrupt, skillToast, clearSkillToast, useWeasleyItem } = useGame();
+  const { gameState, currentPlayerId, playerAction, executeInstantSkill, resolveInterrupt, skillToast, clearSkillToast, consumeWeasleyItem } = useGame();
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isDeckOpen, setIsDeckOpen] = useState(false);
@@ -45,28 +40,42 @@ export function PlayerScreen() {
 
   useEffect(() => {
     if (skillToast) {
-      setToastMessage(skillToast);
-      const timer = setTimeout(() => {
+      const showTimer = setTimeout(() => {
+        setToastMessage(skillToast);
+      }, 0);
+      const clearTimer = setTimeout(() => {
         setToastMessage(null);
         clearSkillToast();
       }, 7000);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(showTimer);
+        clearTimeout(clearTimer);
+      };
     }
   }, [skillToast, clearSkillToast]);
 
   const prevPhaseRef = useRef<string>('');
   useEffect(() => {
     if (gameState.phase && prevPhaseRef.current !== gameState.phase) {
-      if (gameState.phase === 'DAY') {
-        setToastMessage(`☀️ LƯỢT BAN NGÀY: Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy ngày HỘI PHƯỢNG HOÀNG!`);
-      } else if (gameState.phase === 'NIGHT') {
-        setToastMessage(`🌙 LƯỢT BAN ĐÊM: Đến lượt TOÀN BỘ PHÙ THỦY (Hội Phượng Hoàng & Tử Thần Thực Tử) cùng Biểu Quyết Tước Đũa!`);
-      }
       prevPhaseRef.current = gameState.phase;
-      const timer = setTimeout(() => {
-        setToastMessage(null);
-      }, 6500);
-      return () => clearTimeout(timer);
+      const msg = gameState.phase === 'DAY'
+        ? '☀️ LƯỢT BAN NGÀY: Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy ngày HỘI PHƯỢNG HOÀNG!'
+        : gameState.phase === 'NIGHT'
+        ? '🌙 LƯỢT BAN ĐÊM: Đến lượt TOÀN BỘ PHÙ THỦY (Hội Phượng Hoàng & Tử Thần Thực Tử) cùng Biểu Quyết Tước Đũa!'
+        : null;
+
+      if (msg) {
+        const showTimer = setTimeout(() => {
+          setToastMessage(msg);
+        }, 0);
+        const clearTimer = setTimeout(() => {
+          setToastMessage(null);
+        }, 6500);
+        return () => {
+          clearTimeout(showTimer);
+          clearTimeout(clearTimer);
+        };
+      }
     }
   }, [gameState.phase]);
 
@@ -957,7 +966,7 @@ export function PlayerScreen() {
                           )}
                           {(() => {
                             const escorts = Object.entries(gameState.pendingActions)
-                              .filter(([actorId, act]) => act.actionName === 'Bay Hộ Tống' && act.targetId === p.id)
+                              .filter(([, act]) => act.actionName === 'Bay Hộ Tống' && act.targetId === p.id)
                               .map(([actorId]) => gameState.players.find(pl => pl.id === actorId)?.name)
                               .filter(Boolean);
                             if (escorts.length === 0) return null;
@@ -1302,7 +1311,7 @@ export function PlayerScreen() {
                                     setTimeout(() => setToastMessage(null), 3500);
                                     return;
                                   }
-                                  const res = useWeasleyItem(item.id, effectiveTargetId || undefined);
+                                  const res = consumeWeasleyItem(item.id, effectiveTargetId || undefined);
                                   setToastMessage(res || `✓ Đã kích hoạt [${item.name}] thành công!`);
                                   setTimeout(() => setToastMessage(null), 4000);
                                 }}

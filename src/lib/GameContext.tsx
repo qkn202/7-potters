@@ -621,7 +621,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             } else {
               // New player
               nextPlayers.push(reqPlayer);
-              logMsg = `Hệ thống: ${reqPlayer.name} (${reqPlayer.isGM ? 'Quản trò' : 'Phù thủy'}) đã gia nhập phòng!`;
+              logMsg = `Hệ thống: ${reqPlayer.name} (${reqPlayer.isGM ? 'Merlin' : 'Phù thủy'}) đã gia nhập phòng!`;
             }
 
             return {
@@ -729,7 +729,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           }
         } else if (msg.type === 'KICK_PLAYER') {
           if (msg.payload?.targetId === currentPlayerIdRef.current) {
-            setErrorMsg('Bạn đã bị Quản trò mời ra khỏi phòng.');
+            setErrorMsg('Bạn đã bị Merlin mời ra khỏi phòng.');
             leaveGame();
           }
         } else if (msg.type === 'HOST_DISCONNECTED') {
@@ -810,7 +810,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       if (remainingSec === 0) {
         clearInterval(interval);
-        setErrorMsg('Phòng đã giải tán do Quản trò mất kết nối quá 10 phút.');
+        setErrorMsg('Phòng đã giải tán do Merlin mất kết nối quá 10 phút.');
         leaveGame();
       }
     }, 1000);
@@ -1067,7 +1067,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const initialHostState: GameState = {
         ...DEFAULT_STATE,
         players: [hostPlayer],
-        logs: [`Hệ thống: Phòng ${code} đã được tạo bởi ${name} (${isGM ? 'Quản trò' : 'Chủ phòng'}).`],
+        logs: [`Hệ thống: Phòng ${code} đã được tạo bởi ${name} (${isGM ? 'Merlin' : 'Chủ phòng'}).`],
       };
 
       updateState(initialHostState);
@@ -1184,7 +1184,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     updateState(prev => ({
       ...prev,
       players: [...prev.players, newPlayer],
-      logs: [...prev.logs, `${name} (${isGM ? 'Quản trò' : 'Phù thủy'}) đã gia nhập phòng!`],
+      logs: [...prev.logs, `${name} (${isGM ? 'Merlin' : 'Phù thủy'}) đã gia nhập phòng!`],
     }));
   };
 
@@ -1444,7 +1444,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         pendingActions: newPendingActions,
         logs: [
           ...prev.logs, 
-          `Hệ thống: Quản trò đã đuổi ${target.name} khỏi phòng.`,
+          `Hệ thống: Merlin đã đuổi ${target.name} khỏi phòng.`,
           ...(winner ? [`Hệ thống: Trò chơi kết thúc! Phe ${winner === 'DEATH_EATERS' ? 'Tử Thần Thực Tử' : winner === 'ORDER_OF_PHOENIX' ? 'Hội Phượng Hoàng' : 'Trung Lập'} chiến thắng.`] : [])
         ],
         winner: winner || prev.winner,
@@ -1487,7 +1487,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         role: null,
         status: 'ALIVE',
       })),
-      logs: ['Hệ thống: Quản trò đã reset game. Đang chờ chia lại vai trò...'],
+      logs: ['Hệ thống: Merlin đã reset game. Đang chờ chia lại vai trò...'],
     }));
   };
 
@@ -1518,7 +1518,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const executeInstantSkill = (actionName: string, targetId: string) => {
     if (netRef.current && !isHostRef.current) {
       netRef.current.sendInstantSkill(actionName, targetId);
-      return 'Đã gửi câu chú đến Quản trò...';
+      return 'Đã gửi câu chú đến Merlin...';
     }
 
     if (currentPlayerId) {
@@ -1697,7 +1697,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       players: prev.players.map(p => 
         p.id === playerId ? { ...p, status: 'ALIVE' as const } : p
       ),
-      logs: [...prev.logs, `Hệ thống: GM đã hồi sinh ${prev.players.find(p => p.id === playerId)?.name}!`]
+      logs: [...prev.logs, `Hệ thống: Merlin đã hồi sinh ${prev.players.find(p => p.id === playerId)?.name}!`]
     }));
   };
 

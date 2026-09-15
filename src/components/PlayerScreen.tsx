@@ -208,7 +208,7 @@ export function PlayerScreen() {
           </p>
 
           <p className="text-xs font-mono text-[#ebdcb0]/60">
-            Quản Trò (GM) có thể cài đặt lại ván cờ từ bảng điều khiển.
+            Merlin (Quản Trò) có thể cài đặt lại ván cờ từ bảng điều khiển.
           </p>
         </motion.div>
       </div>
@@ -1088,7 +1088,7 @@ export function PlayerScreen() {
                   Ban Ngày là lượt hành động của Tử Thần Thực Tử và các nhân vật đặc biệt (Hermione, Dumbledore, Lupin...).
                 </p>
                 <p className="text-xs text-[#ebdcb0]/60 mt-1 font-mono">
-                  Bạn vui lòng giữ im lặng và chờ đợi Quản Trò kích hoạt ban Đêm.
+                  Bạn vui lòng giữ im lặng và chờ đợi Merlin kích hoạt ban Đêm.
                 </p>
               </div>
             ) : (

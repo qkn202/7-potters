@@ -151,11 +151,11 @@ export default function Home() {
                     value={currentPlayerId || ''}
                     onChange={(e) => impersonatePlayer(e.target.value)}
                     className="bg-transparent text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold focus:outline-none cursor-pointer truncate max-w-[75px] sm:max-w-[145px]"
-                    title="Chế độ giả lập: Tự do chuyển đổi góc nhìn giữa Quản trò, Host và các người chơi khác"
+                    title="Chế độ giả lập: Tự do chuyển đổi góc nhìn giữa Merlin, Host và các người chơi khác"
                   >
                     {gameState.players.map((p, idx) => (
                       <option key={`perspective-${p.id || idx}`} value={p.id} className="bg-[#1a0e07] text-[#ffd88f]">
-                        {p.name} {p.isGM ? '👑 (GM)' : (p.isBot || p.name.includes('(Bot)') || p.id.startsWith('bot_')) ? '🤖' : ''} {p.role ? `· ${p.role.name}` : ''}
+                        {p.name} {p.isGM ? '👑 (Merlin)' : (p.isBot || p.name.includes('(Bot)') || p.id.startsWith('bot_')) ? '🤖' : ''} {p.role ? `· ${p.role.name}` : ''}
                       </option>
                     ))}
                   </select>
@@ -192,11 +192,11 @@ export default function Home() {
         <div className="bg-gradient-to-r from-red-950 via-amber-950 to-red-950 border-b border-red-700/80 text-amber-200 px-4 py-2.5 text-center text-xs sm:text-sm font-serif flex items-center justify-center gap-2 animate-pulse z-30">
           <Clock className="w-4 h-4 text-amber-400 shrink-0" />
           <span>
-            <strong>Cảnh Báo:</strong> Quản trò / Chủ phòng đang tạm ngắt kết nối. Phòng chơi sẽ được bảo lưu trong:{' '}
+            <strong>Cảnh Báo:</strong> Merlin / Chủ phòng đang tạm ngắt kết nối. Phòng chơi sẽ được bảo lưu trong:{' '}
             <strong className="font-mono text-white text-sm bg-black/40 px-2 py-0.5 rounded border border-amber-500/50">
               {Math.floor(disconnectCountdown / 60)}:{(disconnectCountdown % 60).toString().padStart(2, '0')}
             </strong>
-            {' '}(Đang chờ Quản trò kết nối lại...)
+            {' '}(Đang chờ Merlin kết nối lại...)
           </span>
         </div>
       )}

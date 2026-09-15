@@ -151,12 +151,12 @@ export function GMDashboard() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
             <div className="shrink-0">
-              <WaxSeal variant="gold" letter="GM" size="md" />
+              <WaxSeal variant="gold" letter="M" size="md" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-mono uppercase tracking-widest text-[#ffd88f] font-bold">
-                  BỘ PHÁP THUẬT · BÀN ĐIỀU HÀNH QUẢN TRÒ
+                  BỘ PHÁP THUẬT · BÀN ĐIỀU HÀNH MERLIN
                 </span>
                 <span className="text-[#7a5229]">•</span>
                 <span className="text-xs font-mono text-[#ebdcb0]">
@@ -254,7 +254,7 @@ export function GMDashboard() {
             )}
           </div>
           <div className="text-[11px] font-mono text-[#ebdcb0]/80 bg-black/40 px-2.5 py-1 rounded border border-[#7a5229]/60 shrink-0">
-            {isDay ? 'GM nhắc nhở Tử Thần Thực Tử & nhân vật ngày' : 'GM nhắc nhở toàn thể phù thủy biểu quyết'}
+            {isDay ? 'Merlin nhắc nhở Tử Thần Thực Tử & nhân vật ngày' : 'Merlin nhắc nhở toàn thể phù thủy biểu quyết'}
           </div>
         </div>
       </div>
@@ -358,7 +358,7 @@ export function GMDashboard() {
                 >
                   <div className="flex items-center justify-between border-b border-[#b45309]/30 pb-2">
                     <h4 className="font-bold text-sm text-[#7f1d1d] uppercase flex items-center gap-1.5">
-                      <ScrollText size={16} /> Báo Cáo Tuyệt Mật Quản Trò (Lượt {gameState.round})
+                      <ScrollText size={16} /> Báo Cáo Tuyệt Mật Merlin (Lượt {gameState.round})
                     </h4>
                     <span className="text-[10px] font-mono text-[#b45309] font-bold">CONFIDENTIAL</span>
                   </div>
@@ -380,7 +380,7 @@ export function GMDashboard() {
                           <strong className="block font-bold">Yêu Cầu Can Thiệp Từ Người Chơi:</strong>
                           {gameState.resolutionReport.needsInterrupt.reason}
                           <p className="mt-1 text-[11px] text-red-800">
-                            Người chơi có thể chọn trên màn hình cá nhân, hoặc Quản Trò có thể can thiệp ngay:
+                            Người chơi có thể chọn trên màn hình cá nhân, hoặc Merlin có thể can thiệp ngay:
                           </p>
                         </div>
                       </div>
@@ -388,7 +388,7 @@ export function GMDashboard() {
                       {/* GM Manual/Random Override */}
                       <div className="p-3 bg-[#1a0e07] border border-[#bd8436] rounded-xl flex items-center justify-between gap-2">
                         <span className="text-xs font-serif font-bold text-[#ffd88f]">
-                          👑 Quyền Quản Trò:
+                          👑 Quyền Năng Merlin:
                         </span>
                         <button
                           onClick={() => {
@@ -438,7 +438,7 @@ export function GMDashboard() {
                     : 'HỘI PHƯỢNG HOÀNG THẮNG'}
               </h2>
               <p className="text-sm text-[#ebdcb0] font-lora">
-                Trận đấu đã khép lại. Quản trò có thể bấm &ldquo;Hủy Phòng &amp; Bắt Đầu Lại&rdquo; ở cột bên phải.
+                Trận đấu đã khép lại. Merlin có thể bấm &ldquo;Hủy Phòng &amp; Bắt Đầu Lại&rdquo; ở cột bên phải.
               </p>
             </div>
           )}
@@ -453,7 +453,7 @@ export function GMDashboard() {
                   Danh Sách Thẻ Bài Bí Mật Của Người Chơi
                 </h3>
                 <p className="text-xs text-[#ebdcb0] font-lora">
-                  Nhấn vào người chơi để thi triển quyền năng Quản Trò (Giết / Hồi sinh / Đuổi / Xem thẻ)
+                  Nhấn vào người chơi để thi triển quyền năng Merlin (Giết / Hồi sinh / Đuổi / Xem thẻ)
                 </p>
               </div>
             </div>

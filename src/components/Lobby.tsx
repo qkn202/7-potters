@@ -296,7 +296,7 @@ export function Lobby() {
                         isFellowDeathEater ? 'text-emerald-400/90 font-bold' : 'text-[#ebdcb0]/60'
                       }`}>
                         {p.isGM 
-                          ? 'Quản Trò (GM)' 
+                          ? 'Merlin (Quản Trò)' 
                           : isFellowDeathEater 
                             ? `🐍 Đồng minh: ${p.role?.name}${p.role?.id === 'VOLDEMORT' ? ' 👑' : ''}`
                             : p.role 
@@ -378,17 +378,17 @@ export function Lobby() {
             <div className="relative rounded-2xl hpvn-panel-gold p-4 sm:p-6 flex flex-col justify-between min-h-auto lg:min-h-[460px]">
               <div>
                 <div className="flex items-center gap-2 border-b border-[#7a5229] pb-3 mb-4">
-                  <WaxSeal variant="gold" letter="GM" size="sm" />
+                  <WaxSeal variant="gold" letter="M" size="sm" />
                   <div>
                     <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] tracking-wide">
-                      Bảng Lệnh Quản Trò
+                      Bảng Lệnh Merlin (Quản Trò)
                     </h3>
                     <p className="text-[11px] text-[#ebdcb0]/60 font-mono">Điều khiển phòng & Chia bài</p>
                   </div>
                 </div>
 
                 <p className="text-xs text-[#ebdcb0] font-lora leading-relaxed mb-6">
-                  Bạn đang giữ quyền quản trò. Thêm bot thử nghiệm nếu cần, sau đó xáo bộ thẻ và ấn bắt đầu chiến dịch.
+                  Bạn đang nắm quyền Merlin. Thêm bot thử nghiệm nếu cần, sau đó xáo bộ thẻ và ấn bắt đầu chiến dịch.
                 </p>
 
                 <div className="space-y-3">
@@ -437,7 +437,7 @@ export function Lobby() {
                 Đang Chuẩn Bị Bùa Chú
               </h3>
               <p className="text-xs text-[#ebdcb0] font-lora max-w-xs leading-relaxed mb-6">
-                Quản trò đang tập hợp các phù thủy và chuẩn bị chia sẻ thẻ bài định mệnh. Vui lòng giữ yên lặng trong sảnh!
+                Merlin đang tập hợp các phù thủy và chuẩn bị chia sẻ thẻ bài định mệnh. Vui lòng giữ yên lặng trong sảnh!
               </p>
               
               <div className="p-3 bg-[#120803] rounded-xl border border-[#5a3a1f] text-[11px] text-[#ebdcb0] font-mono max-w-xs">

@@ -182,9 +182,13 @@ export function JoinForm() {
         // Guest mode
         finalName = guestName.trim();
         if (!finalName) {
-          setLocalError('Vui lòng nhập Danh Xưng / Bí Danh Phù Thủy!');
-          setIsSubmitting(false);
-          return;
+          if (isGM) {
+            finalName = 'Merlin';
+          } else {
+            setLocalError('Vui lòng nhập Danh Xưng / Bí Danh Phù Thủy!');
+            setIsSubmitting(false);
+            return;
+          }
         }
       }
 
@@ -467,7 +471,7 @@ export function JoinForm() {
                       value={guestName}
                       onChange={(e) => setGuestName(e.target.value)}
                       className="w-full px-4 py-3 bg-[#120803] border-2 border-[#7a5229] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-2 focus:ring-[#bd8436]/40 text-[#f5eedb] placeholder-[#8c622e] font-lora transition-all"
-                      placeholder="Ví dụ: Harry, Moody Mắt Điên, Albus..."
+                      placeholder={isGM ? "Merlin" : "Ví dụ: Harry, Moody Mắt Điên, Albus..."}
                       required={authTab === 'guest'}
                     />
                     <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#bd8436]">
@@ -485,7 +489,15 @@ export function JoinForm() {
           {/* GM Role Toggle Card (Chỉ hiển thị khi Tạo Phòng hoặc Thử Nghiệm, khi Tham Gia phòng thì luôn là Người Chơi) */}
           {mode !== 'join' && (
             <div 
-              onClick={() => setIsGM(!isGM)}
+              onClick={() => {
+                const nextGM = !isGM;
+                setIsGM(nextGM);
+                if (nextGM && !guestName.trim()) {
+                  setGuestName('Merlin');
+                } else if (!nextGM && guestName === 'Merlin') {
+                  setGuestName('');
+                }
+              }}
               className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between select-none ${
                 isGM 
                   ? 'bg-[#3a2213] border-[#ffd88f]' 
@@ -502,10 +514,10 @@ export function JoinForm() {
                 </div>
                 <div>
                   <span className={`block font-serif font-bold text-xs sm:text-sm ${isGM ? 'text-[#ffd88f]' : 'text-[#ebdcb0]'}`}>
-                    Vai trò Quản Trò (Game Master)
+                    Vai trò Merlin (Quản Trò)
                   </span>
                   <span className="text-[10px] sm:text-[11px] text-[#ebdcb0]/70 block font-mono">
-                    {isGM ? 'Nắm giữ cuốn sổ định đoạt ván cờ' : 'Người chơi nhận thẻ nhân vật'}
+                    {isGM ? 'Đại Pháp Sư Merlin nắm giữ cuốn sổ định đoạt ván cờ' : 'Người chơi nhận thẻ nhân vật'}
                   </span>
                 </div>
               </div>
@@ -514,7 +526,15 @@ export function JoinForm() {
                 type="checkbox"
                 id="isGM"
                 checked={isGM}
-                onChange={(e) => setIsGM(e.target.checked)}
+                onChange={(e) => {
+                  const nextGM = e.target.checked;
+                  setIsGM(nextGM);
+                  if (nextGM && !guestName.trim()) {
+                    setGuestName('Merlin');
+                  } else if (!nextGM && guestName === 'Merlin') {
+                    setGuestName('');
+                  }
+                }}
                 className="w-4 h-4 rounded border-[#7a5229] text-[#bd8436] focus:ring-[#bd8436] bg-[#120803] pointer-events-none"
               />
             </div>
@@ -535,20 +555,20 @@ export function JoinForm() {
                 </>
               ) : (
                 <>
-                  <WaxSeal variant={isGM ? 'gold' : 'red'} letter={isGM ? 'GM' : 'P'} size="sm" />
+                  <WaxSeal variant={isGM ? 'gold' : 'red'} letter={isGM ? 'M' : 'P'} size="sm" />
                   <span>
                     {currentUserProfile ? (
                       mode === 'create'
-                        ? (isGM ? 'Mở Phòng (GM HPVN)' : `Tạo Phòng Với ${currentUserProfile.username}`)
+                        ? (isGM ? 'Mở Phòng (Merlin HPVN)' : `Tạo Phòng Với ${currentUserProfile.username}`)
                         : mode === 'join'
                         ? `Vào Phòng (${currentUserProfile.username})`
                         : `Vào Giả Lập (${currentUserProfile.username})`
                     ) : (
                       mode === 'create'
-                        ? (isGM ? 'Thiết Lập Phòng GM' : 'Mở Phòng Bầu Trời')
+                        ? (isGM ? 'Thiết Lập Bàn Merlin' : 'Mở Phòng Bầu Trời')
                         : mode === 'join'
                         ? 'Gia Nhập Phòng'
-                        : (isGM ? 'Vào Bàn Quản Trò' : 'Gia Nhập Giả Lập')
+                        : (isGM ? 'Vào Bàn Merlin (Quản Trò)' : 'Gia Nhập Giả Lập')
                     )}
                   </span>
                   <Sparkles size={18} className="text-[#ffd88f]" />

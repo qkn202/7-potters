@@ -39,9 +39,10 @@ export default function Home() {
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
 
   // Quyền đổi góc nhìn (Perspective Switcher):
-  // CHỈ DUY NHẤT Quản Trò (GM) mới được phép đổi góc nhìn.
-  // Người chơi thường (non-GM) TUYỆT ĐỐI KHÔNG được phép đổi góc nhìn để bảo đảm công bằng, không bị lộ thẻ bài bí mật!
-  const canSwitchPerspective = Boolean(currentPlayer?.isGM);
+  // CHỈ DUY NHẤT ở chế độ Giả Lập (!roomCode), host và tất cả người chơi khác mới có thể nhìn qua góc nhìn của nhau để kiểm thử.
+  // Ở chế độ phòng Online (có roomCode), TUYỆT ĐỐI KHÔNG AI được đổi góc nhìn để bảo đảm tính bảo mật, tránh nhìn trộm thẻ bài bí mật!
+  const isSimulationMode = !roomCode;
+  const canSwitchPerspective = isSimulationMode;
 
   // Screen routing based on state
   let content;
@@ -97,10 +98,13 @@ export default function Home() {
                 </span>
               </>
             ) : (
-              <>
-                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-sky-400 shrink-0" />
-                <span>Cục bộ</span>
-              </>
+              <span 
+                title="Chế độ Giả Lập: Cho phép đổi góc nhìn tự do giữa các người chơi để kiểm thử"
+                className="flex items-center gap-1 font-bold text-cyan-300 font-mono text-[10px] sm:text-[11px]"
+              >
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                <span className="hidden sm:inline">Chế độ </span>Giả Lập
+              </span>
             )}
           </div>
 
@@ -134,20 +138,20 @@ export default function Home() {
             <span className="text-[11px] hidden sm:inline md:hidden">Bí Kíp</span>
           </button>
 
-          {/* Perspective Indicator / Impersonator: CHỈ QUẢN TRÒ MỚI CÓ QUYỀN ĐỔI GÓC NHÌN */}
+          {/* Perspective Indicator / Impersonator: CHỈ DUY NHẤT Ở CHẾ ĐỘ GIẢ LẬP MỚI MỞ CHO TẤT CẢ MỌI NGƯỜI */}
           {gameState.players.length > 0 && (
-            <div className="flex items-center gap-1 sm:gap-1.5 bg-[#1a0e07] px-1.5 sm:px-2 py-1 rounded border border-[#7a5229] text-xs shrink-0 max-w-[85px] sm:max-w-[180px]">
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-[#1a0e07] px-1.5 sm:px-2 py-1 rounded border border-[#7a5229] text-xs shrink-0 max-w-[100px] sm:max-w-[190px]">
               {canSwitchPerspective ? (
                 <>
-                  <Bot size={12} className="text-amber-400 shrink-0" />
-                  <span className="hidden md:inline text-[11px] text-amber-200/90 font-mono font-semibold">
+                  <Bot size={12} className="text-cyan-400 shrink-0" />
+                  <span className="hidden md:inline text-[11px] text-cyan-200/90 font-mono font-semibold">
                     Góc nhìn:
                   </span>
                   <select
                     value={currentPlayerId || ''}
                     onChange={(e) => impersonatePlayer(e.target.value)}
-                    className="bg-transparent text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold focus:outline-none cursor-pointer truncate max-w-[65px] sm:max-w-[140px]"
-                    title="Quản trò: Chuyển góc nhìn để giám sát hoặc điều phối ván đấu"
+                    className="bg-transparent text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold focus:outline-none cursor-pointer truncate max-w-[75px] sm:max-w-[145px]"
+                    title="Chế độ giả lập: Tự do chuyển đổi góc nhìn giữa Quản trò, Host và các người chơi khác"
                   >
                     {gameState.players.map((p, idx) => (
                       <option key={`perspective-${p.id || idx}`} value={p.id} className="bg-[#1a0e07] text-[#ffd88f]">
@@ -160,7 +164,7 @@ export default function Home() {
                 <>
                   <User size={12} className="text-[#ffd88f] shrink-0" />
                   <span 
-                    className="text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold truncate max-w-[65px] sm:max-w-[140px]"
+                    className="text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold truncate max-w-[75px] sm:max-w-[145px]"
                     title={`Bạn đang tham gia với tư cách: ${currentPlayer?.name}`}
                   >
                     {currentPlayer?.name || 'Phù thủy'}

@@ -54,6 +54,18 @@ export function PlayerScreen() {
     }
   }, [skillToast, clearSkillToast]);
 
+  const prevPhaseRef = useRef(gameState.phase);
+  useEffect(() => {
+    if (prevPhaseRef.current !== gameState.phase) {
+      if (gameState.phase === 'DAY') {
+        setToastMessage(`☀️ LƯỢT BAN NGÀY BẮT ĐẦU: Đến lượt phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy ngày HỘI PHƯỢNG HOÀNG!`);
+      } else if (gameState.phase === 'NIGHT') {
+        setToastMessage(`🌙 LƯỢT BAN ĐÊM BẮT ĐẦU: Đến lượt TOÀN BỘ PHÙ THỦY (Hội Phượng Hoàng & Tử Thần Thực Tử) Biểu Quyết Tước Đũa!`);
+      }
+      prevPhaseRef.current = gameState.phase;
+    }
+  }, [gameState.phase]);
+
   const playerLogsEndRef = useRef<HTMLDivElement>(null);
   const playerLogsContainerRef = useRef<HTMLDivElement>(null);
 
@@ -263,6 +275,66 @@ export function PlayerScreen() {
             >
               <BookOpen size={14} /> Bí Kíp Thẻ Bài
             </button>
+          </div>
+        </div>
+
+        {/* THÔNG BÁO RÕ RÀNG: LƯỢT PHE NÀO ĐANG HÀNH ĐỘNG */}
+        <div className={`mt-3 p-2.5 sm:p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition-all ${
+          isDay
+            ? 'bg-gradient-to-r from-[#211005]/95 via-[#331a0a]/95 to-[#1c0e05]/95 border-amber-500/70 shadow-[0_0_12px_rgba(245,158,11,0.15)]'
+            : 'bg-gradient-to-r from-[#0d071a]/95 via-[#180e2b]/95 to-[#0b0517]/95 border-indigo-500/70 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
+        }`}>
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <span className="text-[10px] font-mono text-[#ebdcb0]/80 uppercase font-bold tracking-wider shrink-0">
+              LƯỢT HÀNH ĐỘNG:
+            </span>
+            {isDay ? (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500 font-mono font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wide">
+                  <DarkMarkCrest className="w-3.5 h-3.5" />
+                  Phe Tử Thần Thực Tử (Ám sát)
+                </span>
+                <span className="text-[10px] sm:text-[11px] font-serif font-bold text-[#ffd88f]">
+                  + Phù thủy ngày Hội Phượng Hoàng (Hermione, Dumbledore, Lupin, Kingsley)
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-950 text-cyan-300 border border-indigo-500 font-mono font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wide">
+                  <Moon size={12} className="text-cyan-300" />
+                  Toàn Thể Phù Thủy (Tất Cả Các Phe)
+                </span>
+                <span className="text-[10px] sm:text-[11px] font-serif font-bold text-cyan-200/90">
+                  Biểu Quyết Bùa Tước Khí Giới (Expelliarmus)
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="shrink-0 self-start sm:self-auto">
+            {isDead ? (
+              <span className="text-[10px] font-mono font-bold text-red-400 bg-red-950/80 px-2 py-0.5 rounded border border-red-800 flex items-center gap-1">
+                <Skull size={11} /> Bạn đã tử trận, không thể hành động
+              </span>
+            ) : isDay ? (
+              me.role?.faction === 'DEATH_EATERS' ? (
+                <span className="text-[10px] font-mono font-bold text-emerald-300 bg-emerald-950/90 px-2 py-0.5 rounded border border-emerald-600 flex items-center gap-1 animate-pulse">
+                  <Sparkles size={11} className="text-emerald-400" /> 👉 ĐẾN LƯỢT BẠN (Tử Thần Thực Tử ám sát)
+                </span>
+              ) : hasDaySkill ? (
+                <span className="text-[10px] font-mono font-bold text-amber-300 bg-amber-950/90 px-2 py-0.5 rounded border border-amber-600 flex items-center gap-1 animate-pulse">
+                  <Sparkles size={11} className="text-amber-400" /> 👉 ĐẾN LƯỢT BẠN (Thi triển kỹ năng ngày)
+                </span>
+              ) : (
+                <span className="text-[10px] font-mono text-amber-200/70 bg-black/40 px-2 py-0.5 rounded border border-amber-900/60 flex items-center gap-1">
+                  🛡️ Lượt phe đối phương (Bạn quan sát &amp; thảo luận)
+                </span>
+              )
+            ) : (
+              <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950/90 px-2 py-0.5 rounded border border-cyan-600 flex items-center gap-1 animate-pulse">
+                <Sparkles size={11} className="text-cyan-300" /> 👉 ĐẾN LƯỢT BẠN (Biểu quyết Tước Đũa)
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -546,21 +618,44 @@ export function PlayerScreen() {
                     {me.role.ability || me.role.description}
                   </p>
 
-                  {/* Phase cue for player */}
-                  <div className="mt-1 pt-1 border-t border-[#7a5229]/40 flex items-center gap-1 text-[9px] sm:text-[10px] font-mono text-[#ebdcb0]/70">
-                    {isDay ? (
-                      hasDaySkill ? (
-                        <span className="text-amber-300 font-bold flex items-center gap-1">
-                          ⚡ Ban Ngày: Bạn có kỹ năng kích hoạt! Chọn 1 mục tiêu bên dưới.
+                  {/* Phase cue for player with explicit faction turn notification */}
+                  <div className="mt-2 pt-2 border-t border-[#7a5229]/50 flex flex-col gap-1 text-[9px] sm:text-[10px] font-mono">
+                    <div className="flex items-center gap-1.5 flex-wrap font-bold">
+                      <span className="text-[#ebdcb0]/75 uppercase">LƯỢT HIỆN TẠI:</span>
+                      {isDay ? (
+                        <span className="text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/60 inline-flex items-center gap-1">
+                          ☀️ Ban Ngày: Phe Tử Thần Thực Tử &amp; Phù thủy ngày
                         </span>
                       ) : (
-                        <span>☀️ Ban Ngày: Bạn không có kỹ năng ngày. Thảo luận trên Mạng Floo!</span>
-                      )
-                    ) : (
-                      <span className="text-cyan-300 flex items-center gap-1">
-                        🌙 Ban Đêm: Chọn 1 người bên dưới để biểu quyết Tước Đũa / Hành động!
-                      </span>
-                    )}
+                        <span className="text-cyan-300 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-600/60 inline-flex items-center gap-1">
+                          🌙 Ban Đêm: Toàn Bộ Phù Thủy (Cả 2 phe biểu quyết)
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      {isDead ? (
+                        <span className="text-red-400">Bạn đã tử trận (quan sát và thảo luận trên Mạng Floo).</span>
+                      ) : isDay ? (
+                        me.role?.faction === 'DEATH_EATERS' ? (
+                          <span className="text-emerald-300 font-bold flex items-center gap-1">
+                            ⚡ Đến lượt bạn: Phe Tử Thần Thực Tử chọn mục tiêu Ám sát bên dưới!
+                          </span>
+                        ) : hasDaySkill ? (
+                          <span className="text-amber-300 font-bold flex items-center gap-1">
+                            ⚡ Đến lượt bạn: Thi triển kỹ năng ngày của nhân vật bên dưới!
+                          </span>
+                        ) : (
+                          <span className="text-amber-200/80">
+                            🛡️ Lượt phe đối phương hành động. Hãy thảo luận trên Mạng Floo!
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-cyan-300 font-bold flex items-center gap-1">
+                          ✨ Đến lượt bạn: Toàn thể phù thủy cùng biểu quyết Tước Đũa Expelliarmus bên dưới!
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

@@ -159,6 +159,43 @@ export function GMDashboard() {
             </button>
           </div>
         </div>
+
+        {/* Thông báo lượt phe hành động cho GM */}
+        <div className={`mt-4 p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-all ${
+          isDay
+            ? 'bg-gradient-to-r from-[#211005]/95 via-[#331a0a]/95 to-[#1c0e05]/95 border-amber-500/70 shadow-[0_0_12px_rgba(245,158,11,0.15)]'
+            : 'bg-gradient-to-r from-[#0d071a]/95 via-[#180e2b]/95 to-[#0b0517]/95 border-indigo-500/70 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
+        }`}>
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <span className="text-[11px] font-mono text-[#ebdcb0]/90 uppercase font-bold tracking-wider shrink-0">
+              LƯỢT HÀNH ĐỘNG HIỆN TẠI:
+            </span>
+            {isDay ? (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500 font-mono font-extrabold text-xs uppercase tracking-wide">
+                  <DarkMarkCrest className="w-3.5 h-3.5" />
+                  Phe Tử Thần Thực Tử (Ám sát)
+                </span>
+                <span className="text-xs font-serif font-bold text-[#ffd88f]">
+                  + Phù thủy ngày Hội Phượng Hoàng (Hermione, Dumbledore, Lupin, Kingsley)
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-950 text-cyan-300 border border-indigo-500 font-mono font-extrabold text-xs uppercase tracking-wide">
+                  <Moon size={12} className="text-cyan-300" />
+                  Toàn Thể Phù Thủy (Tất Cả Các Phe: Hội Phượng Hoàng &amp; Tử Thần Thực Tử)
+                </span>
+                <span className="text-xs font-serif font-bold text-cyan-200/90">
+                  Biểu Quyết Bùa Tước Khí Giới (Expelliarmus)
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="text-[11px] font-mono text-[#ebdcb0]/80 bg-black/40 px-2.5 py-1 rounded border border-[#7a5229]/60 shrink-0">
+            {isDay ? 'GM nhắc nhở Tử Thần Thực Tử & nhân vật ngày' : 'GM nhắc nhở toàn thể phù thủy biểu quyết'}
+          </div>
+        </div>
       </div>
 
       {/* Mobile & Tablet GM Navigation Tabs (screens < xl) */}

@@ -1368,7 +1368,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           ...prev.logs, 
           `Hệ thống: Trận Không Chiến Bảy Potter bùng nổ! Chặng 1/${maxStages}: Xuất phát từ Số 4 Privet Drive!`,
           'Hệ thống: 🌙 Biến cố [Bầu Trời Surrey Tĩnh Lặng] đang kích hoạt: Đa Quả Dịch bảo vệ danh tính, hãy chọn người bay hộ tống để cùng né đòn!',
-          'Hệ thống: Ban Ngày (Lượt 1) bắt đầu. Mọi phù thủy hãy cơ động bay hộ tống hoặc thi triển bùa chú!'
+          'Hệ thống: ☀️ BAN NGÀY (Lượt 1) bắt đầu. Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy đặc biệt HỘI PHƯỢNG HOÀNG hành động! Mọi phù thủy hãy cơ động bay hộ tống hoặc thi triển bùa chú!'
         ],
       };
     });
@@ -1386,9 +1386,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         newRound += 1;
         newFlightStage = Math.min(maxS, newFlightStage + 1);
         nextSkyEvent = getSkyEventForStage(newFlightStage, maxS);
-        logMsg = `Hệ thống: Tiến vào Chặng ${newFlightStage}/${maxS}: [${nextSkyEvent.title}] (Lượt ${newRound}). Biến cố kích hoạt!`;
+        logMsg = `Hệ thống: Tiến vào Chặng ${newFlightStage}/${maxS}: [${nextSkyEvent.title}] (Lượt ${newRound}). ☀️ BAN NGÀY: Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Nhân vật ngày HỘI PHƯỢNG HOÀNG (Hermione, Dumbledore, Lupin, Kingsley) hành động!`;
       } else if (phase === 'NIGHT') {
-        logMsg = `Hệ thống: Ban Đêm (Lượt ${newRound}) bắt đầu. Toàn bộ người sống thức dậy Hội ý Khẩn cấp & Thẩm vấn Tước Đũa Expelliarmus!`;
+        logMsg = `Hệ thống: 🌙 BAN ĐÊM (Lượt ${newRound}) bắt đầu. Đến lượt TOÀN BỘ PHÙ THỦY (Tất Cả Các Phe: Hội Phượng Hoàng & Tử Thần Thực Tử) cùng thức dậy tranh luận & Biểu Quyết Tước Đũa Expelliarmus!`;
       }
 
       const winner = checkWinCondition(prev.players, newFlightStage, maxS);

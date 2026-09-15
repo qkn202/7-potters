@@ -39,11 +39,9 @@ export default function Home() {
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
 
   // Quyền đổi góc nhìn (Perspective Switcher):
-  // CHỈ DUY NHẤT Quản Trò (GM) trong phòng chơi hoặc chế độ cục bộ không phòng (!roomCode) mới được phép đổi góc nhìn.
+  // CHỈ DUY NHẤT Quản Trò (GM) mới được phép đổi góc nhìn.
   // Người chơi thường (non-GM) TUYỆT ĐỐI KHÔNG được phép đổi góc nhìn để bảo đảm công bằng, không bị lộ thẻ bài bí mật!
-  const canSwitchPerspective = Boolean(
-    currentPlayer?.isGM || (!roomCode && !currentPlayer)
-  );
+  const canSwitchPerspective = Boolean(currentPlayer?.isGM);
 
   // Screen routing based on state
   let content;

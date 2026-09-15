@@ -54,15 +54,19 @@ export function PlayerScreen() {
     }
   }, [skillToast, clearSkillToast]);
 
-  const prevPhaseRef = useRef(gameState.phase);
+  const prevPhaseRef = useRef<string>('');
   useEffect(() => {
-    if (prevPhaseRef.current !== gameState.phase) {
+    if (gameState.phase && prevPhaseRef.current !== gameState.phase) {
       if (gameState.phase === 'DAY') {
-        setToastMessage(`☀️ LƯỢT BAN NGÀY BẮT ĐẦU: Đến lượt phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy ngày HỘI PHƯỢNG HOÀNG!`);
+        setToastMessage(`☀️ LƯỢT BAN NGÀY: Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy ngày HỘI PHƯỢNG HOÀNG!`);
       } else if (gameState.phase === 'NIGHT') {
-        setToastMessage(`🌙 LƯỢT BAN ĐÊM BẮT ĐẦU: Đến lượt TOÀN BỘ PHÙ THỦY (Hội Phượng Hoàng & Tử Thần Thực Tử) Biểu Quyết Tước Đũa!`);
+        setToastMessage(`🌙 LƯỢT BAN ĐÊM: Đến lượt TOÀN BỘ PHÙ THỦY (Hội Phượng Hoàng & Tử Thần Thực Tử) cùng Biểu Quyết Tước Đũa!`);
       }
       prevPhaseRef.current = gameState.phase;
+      const timer = setTimeout(() => {
+        setToastMessage(null);
+      }, 6500);
+      return () => clearTimeout(timer);
     }
   }, [gameState.phase]);
 
@@ -227,7 +231,42 @@ export function PlayerScreen() {
 
   return (
     <div className="max-w-7xl mx-auto py-6 px-4">
-      
+      {/* Floating Global Announcement Toast: Luôn hiển thị nổi bật ở đỉnh màn hình */}
+      {toastMessage && (
+        <motion.div 
+          key="player-floating-toast"
+          initial={{ opacity: 0, y: -20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -20, scale: 0.95 }}
+          className="fixed top-14 sm:top-16 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-lg shadow-2xl pointer-events-auto"
+          onClick={() => setToastMessage(null)}
+        >
+          <div className={`p-3 sm:p-4 border-2 rounded-2xl text-center font-serif text-xs sm:text-sm font-bold flex items-center justify-between gap-2.5 backdrop-blur-md cursor-pointer ${
+            toastMessage.startsWith('⚠️')
+              ? 'bg-[#3d1800]/95 border-amber-500 text-amber-200 shadow-[0_0_20px_rgba(245,158,11,0.5)]'
+              : toastMessage.includes('BAN NGÀY')
+                ? 'bg-gradient-to-r from-[#2a1305]/95 via-[#3f1f0a]/95 to-[#2a1305]/95 border-amber-400 text-[#ffd88f] shadow-[0_0_20px_rgba(245,158,11,0.5)]'
+                : toastMessage.includes('BAN ĐÊM')
+                  ? 'bg-gradient-to-r from-[#0d071a]/95 via-[#1d0e33]/95 to-[#0d071a]/95 border-indigo-400 text-cyan-200 shadow-[0_0_20px_rgba(99,102,241,0.5)]'
+                  : 'bg-[#044e36]/95 border-emerald-400 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.5)]'
+          }`}>
+            <div className="flex items-center gap-2 text-left min-w-0">
+              {toastMessage.startsWith('⚠️') ? (
+                <AlertTriangle size={18} className="text-amber-400 shrink-0" />
+              ) : toastMessage.includes('BAN NGÀY') ? (
+                <Sun size={18} className="text-amber-400 shrink-0 animate-spin-slow" />
+              ) : toastMessage.includes('BAN ĐÊM') ? (
+                <Moon size={18} className="text-cyan-300 shrink-0" />
+              ) : (
+                <CheckCircle size={18} className="text-emerald-300 shrink-0" />
+              )}
+              <span className="leading-snug">{toastMessage}</span>
+            </div>
+            <span className="text-[10px] font-mono text-white/50 shrink-0 px-1 hover:text-white">✕</span>
+          </div>
+        </motion.div>
+      )}
+
       {/* Top Banner: Atmospheric Day/Night Tracker & Global Actions */}
       <div className="relative rounded-2xl border-2 border-[#bd8436] p-3 sm:p-5 mb-3 sm:mb-6 overflow-hidden"
         style={{

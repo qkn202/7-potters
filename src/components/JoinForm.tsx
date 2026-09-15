@@ -192,7 +192,8 @@ export function JoinForm() {
       if (mode === 'create') {
         await createRoom(finalName, isGM, extraData);
       } else if (mode === 'join') {
-        await joinRoom(cleanCode, finalName, isGM, extraData);
+        // Người tham gia phòng vào chơi luôn là Người Chơi (không thể là GM)
+        await joinRoom(cleanCode, finalName, false, extraData);
       } else {
         // Single-device / Mock mode
         joinGame(finalName, isGM, extraData);
@@ -481,41 +482,43 @@ export function JoinForm() {
             </div>
           )}
 
-          {/* GM Role Toggle Card */}
-          <div 
-            onClick={() => setIsGM(!isGM)}
-            className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between select-none ${
-              isGM 
-                ? 'bg-[#3a2213] border-[#ffd88f]' 
-                : 'bg-[#180e07] border-[#5a3a1f] hover:border-[#7a5229]'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl border ${
+          {/* GM Role Toggle Card (Chỉ hiển thị khi Tạo Phòng hoặc Thử Nghiệm, khi Tham Gia phòng thì luôn là Người Chơi) */}
+          {mode !== 'join' && (
+            <div 
+              onClick={() => setIsGM(!isGM)}
+              className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between select-none ${
                 isGM 
-                  ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ebdcb0]' 
-                  : 'bg-[#120803] text-[#ebdcb0] border-[#5a3a1f]'
-              }`}>
-                <Crown size={17} />
+                  ? 'bg-[#3a2213] border-[#ffd88f]' 
+                  : 'bg-[#180e07] border-[#5a3a1f] hover:border-[#7a5229]'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl border ${
+                  isGM 
+                    ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ebdcb0]' 
+                    : 'bg-[#120803] text-[#ebdcb0] border-[#5a3a1f]'
+                }`}>
+                  <Crown size={17} />
+                </div>
+                <div>
+                  <span className={`block font-serif font-bold text-xs sm:text-sm ${isGM ? 'text-[#ffd88f]' : 'text-[#ebdcb0]'}`}>
+                    Vai trò Quản Trò (Game Master)
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] text-[#ebdcb0]/70 block font-mono">
+                    {isGM ? 'Nắm giữ cuốn sổ định đoạt ván cờ' : 'Người chơi nhận thẻ nhân vật'}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className={`block font-serif font-bold text-xs sm:text-sm ${isGM ? 'text-[#ffd88f]' : 'text-[#ebdcb0]'}`}>
-                  Vai trò Quản Trò (Game Master)
-                </span>
-                <span className="text-[10px] sm:text-[11px] text-[#ebdcb0]/70 block font-mono">
-                  {isGM ? 'Nắm giữ cuốn sổ định đoạt ván cờ' : 'Người chơi nhận thẻ nhân vật'}
-                </span>
-              </div>
-            </div>
 
-            <input
-              type="checkbox"
-              id="isGM"
-              checked={isGM}
-              onChange={(e) => setIsGM(e.target.checked)}
-              className="w-4 h-4 rounded border-[#7a5229] text-[#bd8436] focus:ring-[#bd8436] bg-[#120803] pointer-events-none"
-            />
-          </div>
+              <input
+                type="checkbox"
+                id="isGM"
+                checked={isGM}
+                onChange={(e) => setIsGM(e.target.checked)}
+                className="w-4 h-4 rounded border-[#7a5229] text-[#bd8436] focus:ring-[#bd8436] bg-[#120803] pointer-events-none"
+              />
+            </div>
+          )}
 
           {/* Wax Sealed Entrance Action Button */}
           <button

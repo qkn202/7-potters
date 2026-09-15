@@ -85,39 +85,39 @@ export function SkyEventBanner({ event, phase }: SkyEventBannerProps) {
   const theme = getThemeStyles();
 
   return (
-    <div className={`relative rounded-2xl border-2 ${theme.border} bg-gradient-to-r ${theme.bg} p-3.5 sm:p-4 shadow-xl backdrop-blur-md overflow-hidden transition-all duration-300`}>
+    <div className={`relative rounded-xl sm:rounded-2xl border-2 ${theme.border} bg-gradient-to-r ${theme.bg} p-2.5 sm:p-4 shadow-xl backdrop-blur-md overflow-hidden transition-all duration-300`}>
       {/* Subtle ambient light glow in corner */}
       <div className="absolute -top-12 -right-12 w-36 h-36 bg-[#ffd88f]/5 rounded-full blur-2xl pointer-events-none" />
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-black/40 border border-[#7a5229]/60 flex items-center justify-center flex-shrink-0 shadow-inner">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3 relative z-10">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-black/40 border border-[#7a5229]/60 flex items-center justify-center flex-shrink-0 shadow-inner">
             {renderIcon()}
           </div>
 
           <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-[10px] sm:text-[11px] font-mono font-black uppercase px-2.5 py-0.5 rounded-full border ${theme.badgeBg} flex items-center gap-1`}>
-                <Sparkles size={11} /> {event.badgeText}
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span className={`text-[9px] sm:text-[11px] font-mono font-black uppercase px-2 py-0.5 rounded-full border ${theme.badgeBg} flex items-center gap-1`}>
+                <Sparkles size={10} /> {event.badgeText}
               </span>
-              <span className="text-[10px] font-mono text-[#ffd88f]/80 uppercase tracking-widest hidden sm:inline">
+              <span className="text-[9px] sm:text-[10px] font-mono text-[#ffd88f]/80 uppercase tracking-widest hidden sm:inline">
                 Chặng {event.stage} · Bầu Trời Chiến Thuật
               </span>
             </div>
 
-            <h3 className={`text-base sm:text-lg md:text-xl font-title font-bold ${theme.accent} tracking-wide mt-0.5 truncate`}>
+            <h3 className={`text-sm sm:text-lg md:text-xl font-title font-bold ${theme.accent} tracking-wide mt-0.5 truncate`}>
               {event.title}
             </h3>
-            <p className="text-[11px] sm:text-xs text-[#ebdcb0]/90 font-lora italic leading-snug line-clamp-1 sm:line-clamp-none">
+            <p className="text-[10px] sm:text-xs text-[#ebdcb0]/90 font-lora italic leading-snug truncate">
               {event.subtitle}
             </p>
           </div>
         </div>
 
         {/* Tactical Rule Tip Box */}
-        <div className="self-stretch sm:self-auto sm:max-w-md bg-black/40 rounded-xl p-2.5 border border-[#7a5229]/40 flex items-start gap-2 flex-shrink-0">
-          <AlertCircle className="w-4 h-4 text-[#ffd88f] flex-shrink-0 mt-0.5" />
-          <p className="text-[11px] sm:text-xs text-[#f5eedb] font-serif leading-relaxed">
+        <div className="self-stretch sm:self-auto sm:max-w-md bg-black/40 rounded-lg sm:rounded-xl p-2 sm:p-2.5 border border-[#7a5229]/40 flex items-start gap-1.5 sm:gap-2 flex-shrink-0">
+          <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ffd88f] flex-shrink-0 mt-0.5" />
+          <p className="text-[10px] sm:text-xs text-[#f5eedb] font-serif leading-relaxed">
             <strong className="text-[#ffd88f]">Luật Chặng: </strong>
             {event.tacticalTip}
           </p>

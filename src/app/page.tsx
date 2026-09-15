@@ -38,9 +38,12 @@ export default function Home() {
 
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
 
-  // Chế độ chơi với AI/Bot hoặc Thử nghiệm cục bộ: Mở hoàn toàn góc nhìn để tiện kiểm thử
-  const hasBots = gameState.players.some(p => p.isBot || p.name.includes('(Bot)') || p.id.startsWith('bot_'));
-  const isTestOrBotMode = !roomCode || hasBots;
+  // Quyền đổi góc nhìn (Perspective Switcher):
+  // CHỈ DUY NHẤT Quản Trò (GM) trong phòng chơi hoặc chế độ cục bộ không phòng (!roomCode) mới được phép đổi góc nhìn.
+  // Người chơi thường (non-GM) TUYỆT ĐỐI KHÔNG được phép đổi góc nhìn để bảo đảm công bằng, không bị lộ thẻ bài bí mật!
+  const canSwitchPerspective = Boolean(
+    currentPlayer?.isGM || (!roomCode && !currentPlayer)
+  );
 
   // Screen routing based on state
   let content;
@@ -55,48 +58,50 @@ export default function Home() {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-between">
+    <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
       
       {/* Top Magical Navigation Bar - Styled after HPVN Floo Shoutbox Header */}
-      <header className="sticky top-0 z-40 hpvn-header-banner px-2.5 sm:px-4 py-2 flex items-center justify-between backdrop-blur-md">
-        <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <PhoenixCrest className="w-5 h-5 sm:w-7 sm:h-7" />
+      <header className="sticky top-0 z-40 hpvn-header-banner px-2 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between backdrop-blur-md gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <PhoenixCrest className="w-5 h-5 sm:w-7 sm:h-7 shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="font-title-magical font-bold text-base sm:text-xl md:text-2xl tracking-wide text-[#ffd88f] flex items-center gap-1 leading-none truncate">
-                <span>⚡</span> HPVN · BẢY POTTER <span>⚡</span>
+              <span className="font-title-magical font-bold text-xs sm:text-xl md:text-2xl tracking-wide text-[#ffd88f] flex items-center gap-1 leading-none">
+                <span className="hidden sm:inline">⚡</span> 
+                <span className="truncate hidden sm:inline">HPVN · BẢY POTTER</span> 
+                <span className="truncate sm:hidden">BẢY POTTER</span> 
+                <span className="hidden sm:inline">⚡</span>
               </span>
-              <span className="text-[9px] sm:text-[10px] font-lora italic text-[#ebdcb0]/80 tracking-widest hidden md:inline">
+              <span className="text-[9px] sm:text-[10px] font-lora italic text-[#ebdcb0]/80 tracking-widest hidden lg:inline truncate">
                 MẠNG FLOO HỘI PHƯỢNG HOÀNG · TRẬN CHIẾN TRÊN KHÔNG
               </span>
             </div>
-            <DarkMarkCrest className="w-5 h-5 sm:w-7 sm:h-7 hidden sm:block" />
+            <DarkMarkCrest className="w-5 h-5 sm:w-7 sm:h-7 hidden sm:block shrink-0" />
           </div>
         </div>
 
         {/* Center/Right Controls: Perspective Switcher & Rulebook */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           
           {/* Floo Realtime Status Beacon */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1a0e07]/80 border border-[#7a5229] text-[11px] font-mono text-[#ffd88f]">
+          <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-lg bg-[#1a0e07]/90 border border-[#7a5229] text-[10px] sm:text-[11px] font-mono text-[#ffd88f] shrink-0">
             {roomCode ? (
               <>
-                <span className={`w-2 h-2 rounded-full ${
+                <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0 ${
                   connStatus === 'connected' 
                     ? 'bg-emerald-400 animate-pulse' 
                     : connStatus === 'connecting' || connStatus === 'reconnecting'
                     ? 'bg-amber-400 animate-pulse'
                     : 'bg-red-500'
                 }`} />
-                <span className="hidden sm:inline font-bold">Phòng: {roomCode}</span>
-                <span className="text-[10px] text-[#ebdcb0]/80 hidden md:inline">
-                  ({connStatus === 'connected' ? 'Trực Tuyến' : connStatus === 'connecting' ? 'Đang Nối...' : 'Mất Kết Nối'})
+                <span className="font-bold">
+                  <span className="hidden sm:inline">Phòng: </span>#{roomCode}
                 </span>
               </>
             ) : (
               <>
-                <span className="w-2 h-2 rounded-full bg-sky-400" />
-                <span className="hidden sm:inline">Cục bộ</span>
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-sky-400 shrink-0" />
+                <span>Cục bộ</span>
               </>
             )}
           </div>
@@ -109,10 +114,11 @@ export default function Home() {
             <button
               onClick={() => setIsWeasleyCrateOpen(true)}
               title="Hòm Đồ Tiệm Phù Thủy Weasley"
-              className="hpvn-btn-gold px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer relative"
+              className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer relative shrink-0"
             >
-              <Package size={14} className="text-amber-300" />
-              <span className="text-[11px] sm:text-xs">Bảo Bối Weasley</span>
+              <Package size={14} className="text-amber-300 shrink-0" />
+              <span className="text-[11px] sm:text-xs hidden md:inline">Bảo Bối Weasley</span>
+              <span className="text-[11px] hidden sm:inline md:hidden">Bảo Bối</span>
               {(gameState.weasleyItems || []).some(i => i.count > 0) && (
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping absolute -top-0.5 -right-0.5" />
               )}
@@ -123,32 +129,27 @@ export default function Home() {
           <button
             onClick={() => setIsDeckOpen(true)}
             title="Xem 22 thẻ bài & luật chơi"
-            className="hpvn-btn-gold px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer"
+            className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0"
           >
-            <BookOpen size={14} />
-            <span className="text-[11px] sm:text-xs">Bí Kíp<span className="hidden sm:inline"> 22 Thẻ Bài</span></span>
+            <BookOpen size={14} className="shrink-0" />
+            <span className="text-[11px] sm:text-xs hidden md:inline">Bí Kíp 22 Thẻ Bài</span>
+            <span className="text-[11px] hidden sm:inline md:hidden">Bí Kíp</span>
           </button>
 
-          {/* Perspective Indicator / Impersonator: Mở hoàn toàn duy nhất ở chế độ chơi với AI/Bot hoặc thử nghiệm */}
+          {/* Perspective Indicator / Impersonator: CHỈ QUẢN TRÒ MỚI CÓ QUYỀN ĐỔI GÓC NHÌN */}
           {gameState.players.length > 0 && (
-            <div className={`flex items-center gap-1.5 bg-[#1a0e07] px-2 py-1 rounded border text-xs transition-all ${
-              isTestOrBotMode ? 'border-[#bd8436] shadow-[0_0_8px_rgba(189,132,54,0.25)]' : 'border-[#7a5229]'
-            }`}>
-              {hasBots ? (
-                <Bot size={13} className="text-amber-400 shrink-0" />
-              ) : (
-                <User size={12} className="text-[#ffd88f] shrink-0" />
-              )}
-              {isTestOrBotMode ? (
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-[#1a0e07] px-1.5 sm:px-2 py-1 rounded border border-[#7a5229] text-xs shrink-0 max-w-[85px] sm:max-w-[180px]">
+              {canSwitchPerspective ? (
                 <>
+                  <Bot size={12} className="text-amber-400 shrink-0" />
                   <span className="hidden md:inline text-[11px] text-amber-200/90 font-mono font-semibold">
                     Góc nhìn:
                   </span>
                   <select
                     value={currentPlayerId || ''}
                     onChange={(e) => impersonatePlayer(e.target.value)}
-                    className="bg-transparent text-[11px] sm:text-xs text-[#ffd88f] font-serif font-bold focus:outline-none cursor-pointer max-w-[110px] sm:max-w-[170px] truncate"
-                    title="Chế độ chơi cùng Bot/AI: Mở toàn bộ góc nhìn để tự do kiểm thử mọi nhân vật"
+                    className="bg-transparent text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold focus:outline-none cursor-pointer truncate max-w-[65px] sm:max-w-[140px]"
+                    title="Quản trò: Chuyển góc nhìn để giám sát hoặc điều phối ván đấu"
                   >
                     {gameState.players.map((p, idx) => (
                       <option key={`perspective-${p.id || idx}`} value={p.id} className="bg-[#1a0e07] text-[#ffd88f]">
@@ -158,9 +159,15 @@ export default function Home() {
                   </select>
                 </>
               ) : (
-                <span className="text-[11px] sm:text-xs text-[#ffd88f] font-serif font-bold truncate max-w-[110px] sm:max-w-[160px]">
-                  {currentPlayer?.name || 'Phù thủy'} {currentPlayer?.isGM ? '👑 (GM)' : ''}
-                </span>
+                <>
+                  <User size={12} className="text-[#ffd88f] shrink-0" />
+                  <span 
+                    className="text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold truncate max-w-[65px] sm:max-w-[140px]"
+                    title={`Bạn đang tham gia với tư cách: ${currentPlayer?.name}`}
+                  >
+                    {currentPlayer?.name || 'Phù thủy'}
+                  </span>
+                </>
               )}
             </div>
           )}

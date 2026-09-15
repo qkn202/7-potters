@@ -29,7 +29,8 @@ import {
   DarkMarkCrest, 
   DeathlyHallowsSymbol, 
   WaxSeal,
-  CardCornerFlourish 
+  CardCornerFlourish,
+  BadgeIcon
 } from './ArtAssets';
 import { CardDeckModal } from './CardDeckModal';
 import { SkyEventBanner } from './SkyEventBanner';
@@ -216,38 +217,38 @@ export function PlayerScreen() {
     <div className="max-w-7xl mx-auto py-6 px-4">
       
       {/* Top Banner: Atmospheric Day/Night Tracker & Global Actions */}
-      <div className="relative rounded-2xl border-2 border-[#bd8436] p-4 sm:p-5 mb-8 overflow-hidden"
+      <div className="relative rounded-2xl border-2 border-[#bd8436] p-3 sm:p-5 mb-3 sm:mb-6 overflow-hidden"
         style={{
           background: isDay 
             ? 'linear-gradient(90deg, #3d2412 0%, #26160c 50%, #170c06 100%)' 
             : 'linear-gradient(90deg, #1c0f24 0%, #15091c 50%, #0d0612 100%)',
         }}
       >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className={`p-3 rounded-2xl border ${
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
+            <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl border shrink-0 ${
               isDay 
                 ? 'bg-[#5c3f1f] text-[#ffd88f] border-[#ebdcb0]/60' 
                 : 'bg-[#2f143d] text-cyan-300 border-indigo-500/50'
             }`}>
-              {isDay ? <Sun size={26} className="animate-spin-slow text-[#ffd88f]" /> : <Moon size={26} />}
+              {isDay ? <Sun size={22} className="animate-spin-slow text-[#ffd88f]" /> : <Moon size={22} />}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono uppercase tracking-widest text-[#ffd88f]">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#ffd88f]">
                   Lượt {gameState.round}
                 </span>
                 <span className="text-[#7a5229]">•</span>
-                <span className={`text-xs font-mono font-bold uppercase px-2 py-0.5 rounded border ${
+                <span className={`text-[10px] sm:text-xs font-mono font-bold uppercase px-2 py-0.5 rounded border ${
                   isDay ? 'bg-[#180e07] text-[#ffd88f] border-[#7a5229]' : 'bg-[#120617] text-cyan-300 border-indigo-800'
                 }`}>
                   {isDay ? 'Ban Ngày · Ám Sát & Soi Thân Phận' : 'Ban Đêm · Diễn Đàn & Biểu Quyết Tước Đũa'}
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-title-magical font-bold text-[#ffd88f] mt-0.5 tracking-wide">
+              <h2 className="text-lg sm:text-2xl md:text-3xl font-title-magical font-bold text-[#ffd88f] mt-0.5 tracking-wide truncate">
                 {isDay ? 'Bầu Trời Ngày · Mật Đàm Tử Thần' : 'Bầu Trời Đêm · Hội Đồng Phán Quyết'}
               </h2>
-              <p className="text-xs text-[#ebdcb0] font-lora mt-0.5">
+              <p className="text-[11px] sm:text-xs text-[#ebdcb0] font-lora mt-0.5 hidden xs:block">
                 {isDay 
                   ? 'Tử Thần Thực Tử đang săn đuổi. Các thành viên có kỹ năng ban ngày có thể thi triển bùa phép.' 
                   : 'Toàn bộ các phù thủy thức dậy. Tranh luận, vạch trần kẻ ác và biểu quyết Bùa Tước Khí Giới (Expelliarmus)!'}
@@ -255,7 +256,7 @@ export function PlayerScreen() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
             <button
               onClick={() => setIsDeckOpen(true)}
               className="hpvn-btn-gold px-3.5 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-1.5"
@@ -267,12 +268,12 @@ export function PlayerScreen() {
       </div>
 
       {/* Dynamic In-Flight Sky Event Banner */}
-      <div className="mb-6">
+      <div className="mb-3 sm:mb-6">
         <SkyEventBanner event={gameState.currentSkyEvent} phase={gameState.phase} />
       </div>
 
       {/* Mobile Navigation Tab Bar (hidden on lg screens) */}
-      <div className="lg:hidden flex items-center bg-[#120803] p-1 rounded-xl border border-[#7a5229] mb-4">
+      <div className="lg:hidden flex items-center bg-[#120803] p-1 rounded-xl border border-[#7a5229] mb-3">
         <button
           onClick={() => setMobileTab('battle')}
           className={`flex-1 py-2 rounded-lg text-xs font-serif font-bold flex items-center justify-center gap-1.5 transition-all ${
@@ -285,13 +286,16 @@ export function PlayerScreen() {
         </button>
         <button
           onClick={() => setMobileTab('card')}
-          className={`flex-1 py-2 rounded-lg text-xs font-serif font-bold flex items-center justify-center gap-1.5 transition-all ${
+          className={`flex-1 py-2 rounded-lg text-xs font-serif font-bold flex items-center justify-center gap-1.5 transition-all relative ${
             mobileTab === 'card'
               ? 'hpvn-btn-gold'
               : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
           }`}
         >
-          <Sparkles size={14} /> Thẻ Của Bạn
+          <Sparkles size={14} className="text-amber-400" /> Thẻ Của Bạn
+          {me.role && (
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse absolute top-1 right-2" />
+          )}
         </button>
         <button
           onClick={() => setMobileTab('log')}
@@ -309,6 +313,20 @@ export function PlayerScreen() {
         
         {/* Left Column: Player's Deluxe 3D Character Card (col-span-5) */}
         <div className={`space-y-4 lg:col-span-5 ${mobileTab === 'card' ? 'block' : 'hidden lg:block'}`}>
+          {/* Mobile Quick Return Button */}
+          <div className="lg:hidden flex items-center justify-between pb-2 mb-1 border-b border-[#7a5229]/60">
+            <button
+              onClick={() => setMobileTab('battle')}
+              className="hpvn-btn-gold px-3 py-1.5 rounded-xl text-xs font-serif font-bold flex items-center gap-1.5 cursor-pointer active:scale-95"
+            >
+              <Crosshair size={13} />
+              <span>← Quay lại Bàn Tác Chiến</span>
+            </button>
+            <span className="text-[10px] font-mono text-[#ffd88f]/80">
+              Nhấn thẻ để lật mặt sau ↻
+            </span>
+          </div>
+
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-serif uppercase tracking-widest text-amber-400 font-bold flex items-center gap-1.5">
               <Sparkles size={14} /> Thẻ Bài Của Bạn
@@ -375,6 +393,211 @@ export function PlayerScreen() {
 
         {/* Right Column: Battle Grid & Spell Arsenal (col-span-7) */}
         <div className={`space-y-6 lg:col-span-7 ${mobileTab === 'battle' ? 'block' : 'hidden lg:block'}`}>
+          
+          {/* ================= MOBILE EXCLUSIVE: PLAYER IDENTITY HERO CARD ================= */}
+          {/* Luôn hiển thị trên màn hình mobile khi ở tab Tác Chiến để người chơi biết rõ mình là ai, phe nào, bùa chú gì */}
+          <div 
+            className="lg:hidden relative rounded-2xl border-2 overflow-hidden shadow-xl"
+            style={{
+              background: me.role?.faction === 'DEATH_EATERS'
+                ? 'linear-gradient(135deg, #041f15 0%, #083323 50%, #03140e 100%)'
+                : me.role?.faction === 'NEUTRAL'
+                  ? 'linear-gradient(135deg, #1b0c26 0%, #291238 50%, #0e0514 100%)'
+                  : 'linear-gradient(135deg, #2b170c 0%, #3e2212 50%, #1a0e07 100%)',
+              borderColor: me.role?.faction === 'DEATH_EATERS'
+                ? '#10b981'
+                : me.role?.faction === 'NEUTRAL'
+                  ? '#a855f7'
+                  : '#bd8436',
+            }}
+          >
+            <CardCornerFlourish className={`absolute top-2 left-2 w-4 h-4 pointer-events-none opacity-80 ${
+              me.role?.faction === 'DEATH_EATERS' ? 'text-emerald-400' : 'text-[#bd8436]'
+            }`} />
+            <CardCornerFlourish className={`absolute top-2 right-2 w-4 h-4 pointer-events-none -scale-x-100 opacity-80 ${
+              me.role?.faction === 'DEATH_EATERS' ? 'text-emerald-400' : 'text-[#bd8436]'
+            }`} />
+
+            <div className="p-3 sm:p-4">
+              {/* Header Strip: Label + Status */}
+              <div 
+                className="flex items-center justify-between gap-2 border-b pb-1.5 mb-2.5"
+                style={{
+                  borderColor: me.role?.faction === 'DEATH_EATERS' ? 'rgba(16,185,129,0.3)' : 'rgba(189,132,54,0.3)',
+                }}
+              >
+                <div className="flex items-center gap-1.5">
+                  <Sparkles size={12} className={me.role?.faction === 'DEATH_EATERS' ? 'text-emerald-400 animate-pulse' : 'text-[#ffd88f] animate-pulse'} />
+                  <span className={`text-[10px] font-mono font-extrabold uppercase tracking-widest ${
+                    me.role?.faction === 'DEATH_EATERS' ? 'text-emerald-300' : 'text-[#ffd88f]'
+                  }`}>
+                    Thẻ Danh Tính Của Bạn
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  {isDead ? (
+                    <span className="flex items-center gap-1 text-[9px] font-mono font-bold text-red-300 bg-red-950/90 px-1.5 py-0.5 rounded border border-red-700">
+                      <Skull size={10} /> Tử Trận
+                    </span>
+                  ) : me.status === 'INJURED' ? (
+                    <span className="flex items-center gap-1 text-[9px] font-mono font-bold text-amber-300 bg-amber-950/90 px-1.5 py-0.5 rounded border border-amber-700">
+                      <AlertTriangle size={10} /> Bị Thương
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-300 bg-emerald-950/90 px-1.5 py-0.5 rounded border border-emerald-700">
+                      <Activity size={10} /> Còn Sống
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Main Profile Info Row */}
+              <div className="flex items-start gap-3">
+                {/* Chocolate Frog Portrait Thumbnail (Tap to inspect) */}
+                <div 
+                  onClick={() => setInspectSelf(true)}
+                  className={`relative w-14 h-18 sm:w-16 sm:h-20 rounded-xl overflow-hidden border-2 shrink-0 bg-black cursor-pointer group shadow-lg transition-transform active:scale-95 ${
+                    me.role?.faction === 'DEATH_EATERS'
+                      ? 'border-emerald-400 ring-2 ring-emerald-500/40'
+                      : 'border-[#ffd88f] ring-2 ring-amber-500/40'
+                  }`}
+                  title="Nhấn để xem thẻ bài 3D và điển tích"
+                >
+                  {me.role?.image ? (
+                    <img 
+                      src={me.role.image} 
+                      alt={me.role.name}
+                      className={`w-full h-full object-cover object-top transition-transform group-hover:scale-105 duration-300 ${
+                        isDead ? 'grayscale contrast-125' : ''
+                      }`}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-black flex items-center justify-center">
+                      <BadgeIcon badge={me.role?.badge} className="w-7 h-7 text-amber-400" />
+                    </div>
+                  )}
+                  {/* Subtle 3D Inspect hint on image */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-[9px] font-mono text-white font-bold">
+                    <Maximize2 size={14} />
+                  </div>
+                </div>
+
+                {/* Identity Text Details */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] font-mono text-[#ebdcb0]/75">
+                      Tài khoản: <strong className="text-white">{me.name}</strong>
+                    </span>
+                  </div>
+
+                  <h3 className={`text-lg sm:text-xl font-title-magical font-black tracking-wide leading-tight mt-0.5 ${
+                    me.role?.faction === 'DEATH_EATERS'
+                      ? 'text-emerald-300'
+                      : me.role?.faction === 'NEUTRAL'
+                        ? 'text-purple-300'
+                        : 'text-[#ffd88f]'
+                  }`}>
+                    {me.role?.name || 'Chưa nhận vai'}
+                  </h3>
+
+                  <p className="text-[10px] sm:text-[11px] font-serif text-[#ebdcb0]/85 italic line-clamp-1">
+                    {me.role?.title || me.role?.description}
+                  </p>
+
+                  {/* Faction Badge */}
+                  <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                    {me.role?.faction === 'DEATH_EATERS' ? (
+                      <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-950/90 text-emerald-300 border border-emerald-500/70">
+                        <DarkMarkCrest className="w-2.5 h-2.5" />
+                        Tử Thần Thực Tử
+                      </span>
+                    ) : me.role?.faction === 'NEUTRAL' ? (
+                      <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-purple-950/90 text-purple-300 border border-purple-500/70">
+                        <DeathlyHallowsSymbol className="w-2.5 h-2.5" />
+                        Phe Trung Lập
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-amber-950/90 text-amber-300 border border-amber-500/70">
+                        <PhoenixCrest className="w-2.5 h-2.5" />
+                        Hội Phượng Hoàng
+                      </span>
+                    )}
+
+                    <button
+                      onClick={() => setInspectSelf(true)}
+                      className="text-[9px] font-serif font-bold text-[#ffd88f] hover:text-white bg-[#140b05] px-2 py-0.5 rounded-full border border-[#7a5229] flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
+                    >
+                      <Maximize2 size={9} />
+                      <span>Xem thẻ 3D</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Special Ability Box */}
+              {me.role && (
+                <div className="mt-2.5 p-2 rounded-xl bg-black/45 border border-[#7a5229]/50 text-xs font-lora">
+                  <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-serif font-bold text-[#ffd88f] mb-0.5">
+                    <Wand2 size={11} className={me.role?.faction === 'DEATH_EATERS' ? 'text-emerald-400' : 'text-amber-400'} />
+                    <span>Quyền Năng: {me.role.name}</span>
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-[#ebdcb0]/90 leading-relaxed font-lora">
+                    {me.role.ability || me.role.description}
+                  </p>
+
+                  {/* Phase cue for player */}
+                  <div className="mt-1 pt-1 border-t border-[#7a5229]/40 flex items-center gap-1 text-[9px] sm:text-[10px] font-mono text-[#ebdcb0]/70">
+                    {isDay ? (
+                      hasDaySkill ? (
+                        <span className="text-amber-300 font-bold flex items-center gap-1">
+                          ⚡ Ban Ngày: Bạn có kỹ năng kích hoạt! Chọn 1 mục tiêu bên dưới.
+                        </span>
+                      ) : (
+                        <span>☀️ Ban Ngày: Bạn không có kỹ năng ngày. Thảo luận trên Mạng Floo!</span>
+                      )
+                    ) : (
+                      <span className="text-cyan-300 flex items-center gap-1">
+                        🌙 Ban Đêm: Chọn 1 người bên dưới để biểu quyết Tước Đũa / Hành động!
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Death Eater Allies Quick Strip (Chỉ hiển thị cho Tử Thần Thực Tử) */}
+              {me.role?.faction === 'DEATH_EATERS' && (
+                <div className="mt-2 p-1.5 rounded-lg bg-[#02180e] border border-emerald-600/60 text-[10px]">
+                  <div className="flex items-center gap-1 text-emerald-300 font-mono font-bold text-[9px] uppercase mb-1">
+                    <DarkMarkCrest className="w-2.5 h-2.5" />
+                    <span>Đồng Minh Cùng Hội ({gameState.players.filter(p => !p.isGM && p.role?.faction === 'DEATH_EATERS' && p.id !== me.id).length}):</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {gameState.players
+                      .filter(p => !p.isGM && p.role?.faction === 'DEATH_EATERS' && p.id !== me.id)
+                      .map((ally, idx) => (
+                        <span
+                          key={`mobile-ally-${ally.id || idx}`}
+                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono ${
+                            ally.status === 'DEAD'
+                              ? 'bg-red-950/80 text-red-400 line-through border border-red-800'
+                              : 'bg-emerald-950 text-emerald-200 border border-emerald-600'
+                          }`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${ally.status === 'DEAD' ? 'bg-red-500' : 'bg-emerald-400'}`} />
+                          {ally.name} ({ally.role?.name})
+                        </span>
+                      ))}
+                    {gameState.players.filter(p => !p.isGM && p.role?.faction === 'DEATH_EATERS' && p.id !== me.id).length === 0 && (
+                      <span className="text-[9px] text-emerald-400/60 italic font-lora">
+                        Bạn là Tử Thần Thực Tử duy nhất trận này!
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           
           {/* Death Eater Secret Alliance Awakening Banner */}
           {me.role?.faction === 'DEATH_EATERS' && (
@@ -1029,7 +1252,7 @@ export function PlayerScreen() {
 
       {/* Mobile Sticky Action Bar at Bottom of Viewport */}
       {mobileTab === 'battle' && effectiveTargetPlayer && !isDead && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-3 pb-safe bg-gradient-to-t from-black via-[#140b05]/95 to-[#140b05]/80 border-t border-[#bd8436]/50 backdrop-blur-md">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 px-3 pt-2.5 pb-6 sm:pb-3 pb-safe bg-gradient-to-t from-black via-[#140b05]/98 to-[#140b05]/90 border-t-2 border-[#bd8436]/70 backdrop-blur-lg shadow-[0_-8px_25px_rgba(0,0,0,0.8)]">
           <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
             <div className="min-w-0 flex-1">
               <span className={`text-[10px] font-mono uppercase tracking-wider block ${

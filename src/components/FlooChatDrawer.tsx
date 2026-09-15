@@ -175,11 +175,11 @@ export function FlooHeaderTrigger({ onClick, className = "" }: { onClick: () => 
       type="button"
       onClick={onClick}
       title="Mở Mạng Floo (Chat In-App Seven Potters)"
-      className={`hpvn-btn-gold px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1.5 cursor-pointer text-[#ffd88f] border border-[#7a5229] transition-colors ${className}`}
+      className={`hpvn-btn-gold px-2 sm:px-3 py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1.5 cursor-pointer text-[#ffd88f] border border-[#7a5229] transition-colors shrink-0 ${className}`}
     >
       <Flame size={14} className="text-[#ffd88f] animate-pulse shrink-0" />
-      <span className="text-[11px] sm:text-xs tracking-wide">
-        Mạng Floo <span className="hidden md:inline">(Chat)</span>
+      <span className="text-[11px] sm:text-xs tracking-wide hidden xs:inline">
+        Mạng Floo
       </span>
       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
     </button>
@@ -188,25 +188,26 @@ export function FlooHeaderTrigger({ onClick, className = "" }: { onClick: () => 
 
 /**
  * Floating Magic Handle Widget on bottom/right edge (7 Potters Theme)
+ * Tinh gọn trên mobile thành biểu tượng đốm lửa ma thuật nổi ở đáy góc phải, tránh đè lên thẻ mục tiêu
  */
 export function FlooFloatingTrigger({ onClick }: { onClick: () => void }) {
   return (
-    <div className="fixed bottom-20 sm:bottom-6 right-3 sm:right-6 z-40">
+    <div className="fixed bottom-3 sm:bottom-6 right-3 sm:right-6 z-30">
       <button
         type="button"
         onClick={onClick}
-        className="group px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-[#1c0f07] hover:bg-[#28180e] border-2 border-[#bd8436] text-[#ffd88f] font-serif font-bold text-xs flex items-center gap-2 transition-all cursor-pointer active:scale-95 select-none"
+        className="group p-2.5 sm:px-3.5 sm:py-2.5 rounded-full sm:rounded-2xl bg-[#1c0f07]/95 hover:bg-[#28180e] border-2 border-[#bd8436] text-[#ffd88f] font-serif font-bold text-xs flex items-center gap-2 transition-all cursor-pointer active:scale-95 shadow-[0_4px_16px_rgba(0,0,0,0.6)] backdrop-blur-md select-none"
         title="Mở Mạng Floo HPVN (Chat In-App)"
       >
         <div className="relative flex items-center justify-center">
-          <Flame size={17} className="text-[#ffd88f] group-hover:scale-110 transition-transform" />
-          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+          <Flame size={18} className="text-[#ffd88f] group-hover:scale-110 transition-transform animate-pulse" />
+          <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
         </div>
-        <div className="flex flex-col text-left leading-tight">
+        <div className="hidden sm:flex flex-col text-left leading-tight">
           <span className="text-[11px] font-black tracking-wider uppercase text-[#ffd88f]">
             Mạng Floo
           </span>
-          <span className="text-[9px] font-lora text-[#bd8436] hidden sm:inline">
+          <span className="text-[9px] font-lora text-[#bd8436]">
             Chat In-App 💬
           </span>
         </div>

@@ -93,55 +93,55 @@ export function FlightTrack({ flightStage = 1, maxStages = 4, goldenFlameUsed, r
   const progressPct = ((currentStage - 1) / (stages.length - 1)) * 100;
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-3 py-2 sm:py-2.5">
-      <div className="relative bg-gradient-to-r from-[#170c06]/95 via-[#231207]/95 to-[#170c06]/95 border border-[#8a6032]/70 rounded-xl p-2.5 sm:p-3.5 shadow-xl shadow-black/40 backdrop-blur-md overflow-hidden">
+    <div className="w-full max-w-5xl mx-auto px-2 py-1 sm:px-3 sm:py-2.5">
+      <div className="relative bg-gradient-to-r from-[#170c06]/95 via-[#231207]/95 to-[#170c06]/95 border border-[#8a6032]/70 rounded-xl p-2 sm:p-3.5 shadow-xl shadow-black/40 backdrop-blur-md overflow-hidden">
         
         {/* Subtle magical background shimmer */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/5 via-transparent to-transparent pointer-events-none" />
 
         {/* Header bar within the track */}
-        <div className="flex items-center justify-between gap-2 mb-2 sm:mb-3 text-xs">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="flex h-2 w-2 relative">
+        <div className="flex items-center justify-between gap-1.5 mb-1.5 sm:mb-3 text-xs">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+            <span className="flex h-1.5 w-1.5 sm:h-2 sm:w-2 relative shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-amber-500" />
             </span>
-            <span className="font-serif font-bold text-[#ffd88f] text-[11px] sm:text-xs tracking-wider uppercase">
-              Hành Trình Về Hang Sóc · Chặng {currentStage}/{totalStages}
+            <span className="font-serif font-bold text-[#ffd88f] text-[10px] sm:text-xs tracking-wider uppercase truncate">
+              Về Hang Sóc · Chặng {currentStage}/{totalStages}
             </span>
           </div>
 
           {/* Golden Flame indicator */}
-          <div className="flex items-center gap-1.5 bg-[#120803]/80 px-2 py-0.5 rounded-full border border-[#7a5229]/60 text-[10px] sm:text-[11px]">
+          <div className="flex items-center gap-1 bg-[#120803]/80 px-1.5 sm:px-2 py-0.5 rounded-full border border-[#7a5229]/60 text-[9px] sm:text-[11px] shrink-0">
             {goldenFlameUsed ? (
               <>
-                <Flame size={12} className="text-amber-500 animate-pulse" />
-                <span className="text-amber-300 font-serif">Tia Lửa Vàng: <strong className="text-amber-400">Đã Phát Hỏa</strong></span>
+                <Flame size={11} className="text-amber-500 animate-pulse shrink-0" />
+                <span className="text-amber-300 font-serif">Tia Lửa Vàng: <strong className="text-amber-400">Đã Bắn</strong></span>
               </>
             ) : (
               <>
-                <Sparkles size={12} className="text-emerald-400" />
-                <span className="text-[#ebdcb0]/80 font-serif">Tia Lửa Vàng: <strong className="text-emerald-400">Sẵn Sàng Cứu Harry</strong></span>
+                <Sparkles size={11} className="text-emerald-400 shrink-0" />
+                <span className="text-[#ebdcb0]/80 font-serif">Tia Lửa Vàng: <strong className="text-emerald-400">Sẵn Sàng</strong></span>
               </>
             )}
           </div>
         </div>
 
         {/* Progress Timeline Track */}
-        <div className="relative my-2 sm:my-3">
+        <div className="relative my-1.5 sm:my-3">
           {/* Background baseline track */}
-          <div className="absolute top-1/2 left-4 right-4 sm:left-8 sm:right-8 -translate-y-1/2 h-1 bg-[#3a200f] rounded-full" />
+          <div className="absolute top-1/2 left-3 right-3 sm:left-8 sm:right-8 -translate-y-1/2 h-0.5 sm:h-1 bg-[#3a200f] rounded-full" />
           
           {/* Active Glowing Progress Track */}
           <motion.div 
-            className="absolute top-1/2 left-4 sm:left-8 -translate-y-1/2 h-1 bg-gradient-to-r from-amber-600 via-amber-400 to-amber-300 rounded-full shadow-[0_0_8px_rgba(251,191,36,0.6)]"
+            className="absolute top-1/2 left-3 sm:left-8 -translate-y-1/2 h-0.5 sm:h-1 bg-gradient-to-r from-amber-600 via-amber-400 to-amber-300 rounded-full shadow-[0_0_8px_rgba(251,191,36,0.6)]"
             initial={{ width: 0 }}
-            animate={{ width: `calc(${progressPct}% - ${progressPct > 0 ? '16px' : '0px'})` }}
+            animate={{ width: `calc(${progressPct}% - ${progressPct > 0 ? '12px' : '0px'})` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           />
 
           {/* Dynamic Nodes on the Track */}
-          <div className="relative flex justify-between items-center px-1 sm:px-4">
+          <div className="relative flex justify-between items-center px-0.5 sm:px-4">
             {stages.map((s) => {
               const isPast = s.stage < currentStage;
               const isCurrent = s.stage === currentStage;
@@ -152,18 +152,18 @@ export function FlightTrack({ flightStage = 1, maxStages = 4, goldenFlameUsed, r
                 <div key={`flight-stage-${s.stage}`} className="flex flex-col items-center group">
                   {/* Node Circle */}
                   <div 
-                    className={`relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    className={`relative w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                       isCurrent 
-                        ? 'bg-gradient-to-b from-amber-400 to-amber-700 text-black shadow-[0_0_14px_rgba(251,191,36,0.8)] ring-2 ring-amber-200 scale-110 z-10' 
+                        ? 'bg-gradient-to-b from-amber-400 to-amber-700 text-black shadow-[0_0_12px_rgba(251,191,36,0.8)] ring-1.5 sm:ring-2 ring-amber-200 scale-105 sm:scale-110 z-10' 
                         : isPast 
                         ? 'bg-[#2b170a] text-amber-400 border border-amber-500/60' 
                         : 'bg-[#1a0e06] text-[#7a5229] border border-[#3e2410]'
                     }`}
                   >
                     {isPast ? (
-                      <Check size={14} className="sm:w-4 sm:h-4 stroke-[2.5]" />
+                      <Check size={11} className="sm:w-4 sm:h-4 stroke-[2.5]" />
                     ) : (
-                      <Icon size={14} className="sm:w-4 sm:h-4" />
+                      <Icon size={12} className="sm:w-4 sm:h-4" />
                     )}
 
                     {/* Ping ring on current stage */}
@@ -173,8 +173,8 @@ export function FlightTrack({ flightStage = 1, maxStages = 4, goldenFlameUsed, r
                   </div>
 
                   {/* Stage Label */}
-                  <div className="text-center mt-1 sm:mt-1.5 max-w-[65px] sm:max-w-[95px]">
-                    <span className={`block font-serif text-[10px] sm:text-xs font-bold truncate leading-tight ${
+                  <div className="text-center mt-1 max-w-[58px] sm:max-w-[95px]">
+                    <span className={`block font-serif text-[9px] sm:text-xs font-bold truncate leading-tight ${
                       isCurrent 
                         ? 'text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]' 
                         : isPast 
@@ -194,11 +194,11 @@ export function FlightTrack({ flightStage = 1, maxStages = 4, goldenFlameUsed, r
         </div>
 
         {/* Subtle sub-text */}
-        <div className="text-center text-[10px] sm:text-[11px] text-[#ebdcb0]/60 font-serif italic mt-1">
+        <div className="text-center text-[9px] sm:text-[11px] text-[#ebdcb0]/60 font-serif italic mt-0.5 hidden xs:block">
           {currentStage >= totalStages ? (
             <span className="text-amber-400 font-bold">✨ Đoàn bay đã đáp xuống Hang Sóc! Bùa bảo hộ cổ xưa bảo vệ toàn thắng!</span>
           ) : (
-            <span>Mỗi hiệp sống sót đưa đoàn bay tiến gần hơn đến Hang Sóc. Sống sót đến Chặng {totalStages} để chiến thắng!</span>
+            <span>Sống sót đến Chặng {totalStages} để đưa Harry về Hang Sóc an toàn!</span>
           )}
         </div>
 

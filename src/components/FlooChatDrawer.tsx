@@ -178,7 +178,7 @@ export function FlooHeaderTrigger({ onClick, className = "" }: { onClick: () => 
       className={`hpvn-btn-gold px-2 sm:px-3 py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1.5 cursor-pointer text-[#ffd88f] border border-[#7a5229] transition-colors shrink-0 ${className}`}
     >
       <Flame size={14} className="text-[#ffd88f] animate-pulse shrink-0" />
-      <span className="text-[11px] sm:text-xs tracking-wide hidden xs:inline">
+      <span className="text-[11px] sm:text-xs tracking-wide hidden sm:inline">
         Mạng Floo
       </span>
       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
@@ -190,9 +190,9 @@ export function FlooHeaderTrigger({ onClick, className = "" }: { onClick: () => 
  * Floating Magic Handle Widget on bottom/right edge (7 Potters Theme)
  * Tinh gọn trên mobile thành biểu tượng đốm lửa ma thuật nổi ở đáy góc phải, tránh đè lên thẻ mục tiêu
  */
-export function FlooFloatingTrigger({ onClick }: { onClick: () => void }) {
+export function FlooFloatingTrigger({ onClick, className = "" }: { onClick: () => void; className?: string }) {
   return (
-    <div className="fixed bottom-3 sm:bottom-6 right-3 sm:right-6 z-30">
+    <div className={`floo-floating-widget fixed bottom-3 sm:bottom-6 right-3 sm:right-6 z-30 transition-all duration-300 ${className}`}>
       <button
         type="button"
         onClick={onClick}

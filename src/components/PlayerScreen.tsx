@@ -1244,8 +1244,8 @@ export function PlayerScreen() {
                           {me.role?.id === 'KINGSLEY_SHACKLEBOLT' && (
                             <button
                               onClick={() => {
-                                playerAction('Kingsley Kích Hoạt', 'ALL');
-                                setToastMessage('✓ Đã kích hoạt thế trận ứng cứu hôm nay (Tỷ lệ 50%).');
+                                playerAction('Chỉ huy Phản công', 'ALL');
+                                setToastMessage('✓ Đã chỉ huy toàn quân phản công hôm nay (Tỷ lệ 50% hạ sát Tử Thần Thực Tử).');
                                 setTimeout(() => setToastMessage(null), 3500);
                               }}
                               disabled={isDead}
@@ -1253,9 +1253,9 @@ export function PlayerScreen() {
                             >
                               <Shield size={18} />
                               <span>
-                                {myAction?.actionName === 'Kingsley Kích Hoạt'
-                                  ? '✓ Đã Kích Hoạt Ứng Cứu Hôm Nay'
-                                  : 'Kích Hoạt Ứng Cứu (50%)'}
+                                {myAction?.actionName === 'Chỉ huy Phản công' || myAction?.actionName === 'Kingsley Kích Hoạt'
+                                  ? '✓ Đã Kích Hoạt Phản Công Hôm Nay'
+                                  : 'Chỉ Huy Phản Công (50%)'}
                               </span>
                             </button>
                           )}
@@ -1395,7 +1395,7 @@ export function PlayerScreen() {
 
       {/* Mobile Sticky Action Bar at Bottom of Viewport */}
       {mobileTab === 'battle' && effectiveTargetPlayer && !isDead && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 px-3 pt-2.5 pb-6 sm:pb-3 pb-safe bg-gradient-to-t from-black via-[#140b05]/98 to-[#140b05]/90 border-t-2 border-[#bd8436]/70 backdrop-blur-lg shadow-[0_-8px_25px_rgba(0,0,0,0.8)]">
+        <div className="mobile-target-sticky-bar lg:hidden fixed bottom-0 left-0 right-0 z-40 px-3 pt-2.5 pb-6 sm:pb-3 pb-safe bg-gradient-to-t from-black via-[#140b05]/98 to-[#140b05]/90 border-t-2 border-[#bd8436]/70 backdrop-blur-lg shadow-[0_-8px_25px_rgba(0,0,0,0.8)]">
           <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
             <div className="min-w-0 flex-1">
               <span className={`text-[10px] font-mono uppercase tracking-wider block ${

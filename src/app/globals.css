@@ -261,3 +261,9 @@ body {
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 1rem);
 }
+
+/* Elevate Floo floating widget when mobile target sticky bar is active */
+body:has(.mobile-target-sticky-bar) .floo-floating-widget {
+  bottom: 5.5rem !important;
+}
+

@@ -59,6 +59,7 @@ export function Lobby() {
   
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
   const isGM = currentPlayer?.isGM;
+  const hasControl = Boolean(isGM || isHost);
 
   if (gameState.phase !== 'LOBBY') return null;
 
@@ -307,8 +308,8 @@ export function Lobby() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    {/* GM Kick player button in lobby */}
-                    {isGM && !p.isGM && (
+                    {/* GM / Host Kick player button in lobby */}
+                    {hasControl && !p.isGM && p.id !== currentPlayerId && (
                       <button
                         type="button"
                         onClick={(e) => {
@@ -373,22 +374,22 @@ export function Lobby() {
         </div>
 
         {/* Right Column: GM Controls or Player Waiting Status */}
-        <div className={`lg:col-span-1 ${isGM ? 'order-1 lg:order-2' : 'order-2'}`}>
-          {isGM ? (
+        <div className={`lg:col-span-1 ${hasControl ? 'order-1 lg:order-2' : 'order-2'}`}>
+          {hasControl ? (
             <div className="relative rounded-2xl hpvn-panel-gold p-4 sm:p-6 flex flex-col justify-between min-h-auto lg:min-h-[460px]">
               <div>
                 <div className="flex items-center gap-2 border-b border-[#7a5229] pb-3 mb-4">
                   <WaxSeal variant="gold" letter="M" size="sm" />
                   <div>
                     <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] tracking-wide">
-                      Bảng Lệnh Merlin (Quản Trò)
+                      Bảng Lệnh {isGM ? 'Merlin (Quản Trò)' : 'Chủ Phòng'}
                     </h3>
-                    <p className="text-[11px] text-[#ebdcb0]/60 font-mono">Điều khiển phòng & Chia bài</p>
+                    <p className="text-[11px] text-[#ebdcb0]/60 font-mono">Điều khiển phòng &amp; Chia bài</p>
                   </div>
                 </div>
 
                 <p className="text-xs text-[#ebdcb0] font-lora leading-relaxed mb-6">
-                  Bạn đang nắm quyền Merlin. Thêm bot thử nghiệm nếu cần, sau đó xáo bộ thẻ và ấn bắt đầu chiến dịch.
+                  Bạn đang nắm quyền điều phối chiến dịch. Thêm bot thử nghiệm nếu cần, sau đó xáo bộ thẻ và ấn bắt đầu chiến dịch.
                 </p>
 
                 <div className="space-y-3">

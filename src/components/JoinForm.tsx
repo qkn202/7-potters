@@ -48,7 +48,7 @@ export function JoinForm() {
   // Game Room Mode
   const [mode, setMode] = useState<JoinMode>('create');
   const [roomCodeInput, setRoomCodeInput] = useState('');
-  const [isGM, setIsGM] = useState(false);
+  const [isGM, setIsGM] = useState(true);
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -62,6 +62,7 @@ export function JoinForm() {
   const [hpvnAccount, setHpvnAccount] = useState('');
   const [hpvnPassword, setHpvnPassword] = useState('');
   const [guestName, setGuestName] = useState('');
+  const [guestHouse, setGuestHouse] = useState<string>('GRYFFINDOR');
 
   // Check URL query param ?room=CODE on mount
   useEffect(() => {
@@ -71,6 +72,8 @@ export function JoinForm() {
       if (roomParam && roomParam.trim()) {
         setRoomCodeInput(roomParam.trim().toUpperCase());
         setMode('join');
+        setIsGM(false);
+        setAuthTab('guest');
       }
     }
   }, []);
@@ -190,6 +193,10 @@ export function JoinForm() {
             return;
           }
         }
+        extraData = {
+          house: guestHouse,
+          userTag: isGM ? 'Quản Trò' : 'Phù thủy',
+        };
       }
 
       // Execute room entry
@@ -263,7 +270,7 @@ export function JoinForm() {
         <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#120803] rounded-xl border border-[#7a5229]/60 mb-5 relative z-10">
           <button
             type="button"
-            onClick={() => { setMode('create'); setLocalError(null); }}
+            onClick={() => { setMode('create'); setIsGM(true); setLocalError(null); }}
             className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               mode === 'create'
                 ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'
@@ -276,7 +283,7 @@ export function JoinForm() {
 
           <button
             type="button"
-            onClick={() => { setMode('join'); setLocalError(null); }}
+            onClick={() => { setMode('join'); setIsGM(false); setAuthTab('guest'); setLocalError(null); }}
             className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               mode === 'join'
                 ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'
@@ -289,7 +296,7 @@ export function JoinForm() {
 
           <button
             type="button"
-            onClick={() => { setMode('mock'); setLocalError(null); }}
+            onClick={() => { setMode('mock'); setIsGM(true); setLocalError(null); }}
             className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               mode === 'mock'
                 ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'
@@ -461,25 +468,57 @@ export function JoinForm() {
 
               {/* Tab 2: Guest Player Name Input */}
               {authTab === 'guest' && (
-                <div className="space-y-2 p-3.5 bg-[#180e07] rounded-2xl border border-[#5a3a1f]">
-                  <label className="block text-xs font-serif uppercase tracking-widest text-[#ffd88f] mb-1 font-bold">
-                    Danh Xưng / Bí Danh Phù Thủy
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={guestName}
-                      onChange={(e) => setGuestName(e.target.value)}
-                      className="w-full px-4 py-3 bg-[#120803] border-2 border-[#7a5229] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-2 focus:ring-[#bd8436]/40 text-[#f5eedb] placeholder-[#8c622e] font-lora transition-all"
-                      placeholder={isGM ? "Merlin" : "Ví dụ: Harry, Moody Mắt Điên, Albus..."}
-                      required={authTab === 'guest'}
-                    />
-                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#bd8436]">
-                      <Wand2 size={18} />
+                <div className="space-y-3 p-3.5 bg-[#180e07] rounded-2xl border border-[#5a3a1f]">
+                  <div>
+                    <label className="block text-xs font-serif uppercase tracking-widest text-[#ffd88f] mb-1 font-bold">
+                      Danh Xưng / Bí Danh Phù Thủy
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={guestName}
+                        onChange={(e) => setGuestName(e.target.value)}
+                        className="w-full px-4 py-3 bg-[#120803] border-2 border-[#7a5229] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-2 focus:ring-[#bd8436]/40 text-[#f5eedb] placeholder-[#8c622e] font-lora transition-all"
+                        placeholder={isGM ? "Merlin" : "Ví dụ: Harry, Moody Mắt Điên, Albus..."}
+                        required={authTab === 'guest'}
+                      />
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#bd8436]">
+                        <Wand2 size={18} />
+                      </div>
                     </div>
                   </div>
+
+                  {/* Hogwarts House Picker for Guests */}
+                  <div>
+                    <label className="block text-[11px] font-serif uppercase tracking-wider text-[#ffd88f] mb-1.5 font-bold">
+                      Chọn Nhà Hogwarts Của Bạn
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                      {[
+                        { id: 'GRYFFINDOR', name: 'Gryffindor', badge: '🦁', color: 'border-red-600 bg-red-950/70 text-[#ffd88f]' },
+                        { id: 'SLYTHERIN', name: 'Slytherin', badge: '🐍', color: 'border-emerald-600 bg-emerald-950/70 text-emerald-300' },
+                        { id: 'RAVENCLAW', name: 'Ravenclaw', badge: '🦅', color: 'border-sky-600 bg-sky-950/70 text-sky-300' },
+                        { id: 'HUFFLEPUFF', name: 'Hufflepuff', badge: '🦡', color: 'border-amber-600 bg-amber-950/70 text-amber-300' },
+                      ].map((h) => (
+                        <button
+                          key={h.id}
+                          type="button"
+                          onClick={() => setGuestHouse(h.id)}
+                          className={`py-2 px-1.5 rounded-xl border text-xs font-serif flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                            guestHouse === h.id
+                              ? `${h.color} ring-2 ring-[#ffd88f]/70 font-bold shadow-md scale-[1.02]`
+                              : 'bg-[#120803] border-[#5a3a1f] text-[#ebdcb0]/70 hover:border-[#7a5229]'
+                          }`}
+                        >
+                          <span className="text-sm">{h.badge}</span>
+                          <span className="truncate text-[11px]">{h.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <p className="text-[10px] text-[#ebdcb0]/60 font-mono italic">
-                    Chế độ khách: Tên hiển thị tự do, không có huy hiệu Nhà Hogwarts.
+                    Chế độ khách: Tự do chọn danh xưng và Nhà Hogwarts yêu thích.
                   </p>
                 </div>
               )}

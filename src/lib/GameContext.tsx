@@ -2407,11 +2407,30 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (isKingsleyActive) {
-        const dePlayers = gameState.players.filter(p => p.role?.faction === 'DEATH_EATERS' && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
-        if (dePlayers.length > 0) {
-          const deVictim = dePlayers[Math.floor(Math.random() * dePlayers.length)];
-          summary.push(`Phản công thành công! Kingsley đã dẫn đầu bắn hạ Tử Thần Thực Tử ${deVictim.name}!`);
-          deadPlayers.push(deVictim.id);
+        // Kiểm tra xem đêm nay có thành viên nào của Hội Phượng Hoàng vừa bị hạ sát không
+        const orderMembersFallen = deadPlayers.some(id => {
+          const p = gameState.players.find(x => x.id === id);
+          return p && p.role?.faction === 'ORDER_OF_PHOENIX';
+        });
+
+        if (orderMembersFallen) {
+          // Tung đồng xu xác suất 50% (Coin Flip)
+          const coinFlipSuccess = Math.random() < 0.5;
+          if (coinFlipSuccess) {
+            const dePlayers = gameState.players.filter(p => p.role?.faction === 'DEATH_EATERS' && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
+            if (dePlayers.length > 0) {
+              // Ưu tiên bắn hạ tay sai Tử Thần Thực Tử trước để trận chiến không kết thúc quá chóng vánh
+              const deMinions = dePlayers.filter(p => p.role?.id !== 'VOLDEMORT');
+              const targetPool = deMinions.length > 0 ? deMinions : dePlayers;
+              const deVictim = targetPool[Math.floor(Math.random() * targetPool.length)];
+              summary.push(`🪙 [ĐỒNG XU NGỬA - 50% THÀNH CÔNG] Đồng đội ngã xuống kích hoạt phản xạ Thần Sáng! Kingsley Shacklebolt chỉ huy phản công xuất sắc, bắn hạ Tử Thần Thực Tử ${deVictim.name}!`);
+              deadPlayers.push(deVictim.id);
+            }
+          } else {
+            summary.push(`🪙 [ĐỒNG XU SẤP - 50% THẤT BẠI] Kingsley Shacklebolt đã chỉ huy toàn quân nổ súng phản kích, nhưng phe Tử Thần Thực Tử đã kịp thời biến ảo tẩu thoát trong làn khói đen!`);
+          }
+        } else {
+          summary.push(`Kingsley Shacklebolt đã sẵn sàng thế trận phản công, nhưng đêm nay phi đội an toàn và không có ai ngã xuống nên đòn phản kích không phát hỏa.`);
         }
       }
 

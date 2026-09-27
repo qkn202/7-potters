@@ -178,7 +178,7 @@ export const ROLES: Record<string, Role> = {
     phaseType: 'NIGHT',
     cardNumber: '№ 13/21',
     description: 'Thần Sáng điềm tĩnh, chỉ huy đội cận vệ và là niềm hy vọng của Bộ.',
-    ability: 'Nếu có 1 HPH bị TTTT giết ban đêm, Kingsley có 50% cơ hội (tung đồng xu bởi Merlin) cứu sống người đó.',
+    ability: 'Nếu có thành viên Hội bị ám sát ban đêm, Kingsley có 50% cơ hội (tung đồng xu) chỉ huy phản công bắn hạ 1 Tử Thần Thực Tử.',
     tacticalTip: 'Kích hoạt thế trận ứng cứu mỗi khi cảm nhận phe ác sắp ra đòn nhắm vào nhân vật mấu chốt.',
     flavorQuote: '“The Ministry has fallen. Scrimgeour is dead. They are coming.”',
     badge: 'shield',

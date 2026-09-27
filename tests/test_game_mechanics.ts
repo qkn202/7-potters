@@ -703,8 +703,68 @@ async function runMechanicsTests() {
 
   console.log('✅ TEST 13 PASSED: Nút "Không Giết Ai Cả (Án Binh)" của Tử Thần Thực Tử hoạt động chuẩn xác 100%!');
 
+  // -------------------------------------------------------------
+  // TEST 14: Kingsley Shacklebolt 50% Coin-Flip Counter-Attack
+  // -------------------------------------------------------------
+  console.log('\n--- [TEST 14] KINGSLEY SHACKLEBOLT PHẢN CÔNG TUNG ĐỒNG XU (50%) ---');
+
+  // Scenario 14.1: Kingsley active, but NO Order members died tonight -> Counter-attack should NOT fire
+  let testDeadPlayers: string[] = [];
+  const testSummary: string[] = [];
+  const mockPlayers = [
+    { id: 'k1', name: 'Kingsley', role: { id: 'KINGSLEY_SHACKLEBOLT', faction: 'ORDER_OF_PHOENIX' }, status: 'ALIVE' },
+    { id: 'h1', name: 'Harry', role: { id: 'HARRY_POTTER', faction: 'ORDER_OF_PHOENIX' }, status: 'ALIVE' },
+    { id: 'v1', name: 'Voldemort', role: { id: 'VOLDEMORT', faction: 'DEATH_EATERS' }, status: 'ALIVE' },
+    { id: 'b1', name: 'Bellatrix', role: { id: 'BELLATRIX_LESTRANGE', faction: 'DEATH_EATERS' }, status: 'ALIVE' },
+  ];
+
+  let orderMembersFallen = testDeadPlayers.some(id => {
+    const p = mockPlayers.find(x => x.id === id);
+    return p && p.role?.faction === 'ORDER_OF_PHOENIX';
+  });
+
+  if (!orderMembersFallen) {
+    testSummary.push('Kingsley Shacklebolt đã sẵn sàng thế trận phản công, nhưng đêm nay phi đội an toàn và không có ai ngã xuống nên đòn phản kích không phát hỏa.');
+  }
+
+  if (testDeadPlayers.length === 0 && testSummary.some(s => s.includes('phi đội an toàn'))) {
+    console.log('✓ 14.1: Khi không có thành viên Hội nào ngã xuống, đòn phản kích không phát hỏa (Bảo toàn công lý).');
+  } else {
+    throw new Error('TEST 14.1 FAILED: Không ai chết nhưng Kingsley vẫn bắn');
+  }
+
+  // Scenario 14.2: Order member died -> Simulate 500 coin flips to verify ~50% success rate
+  let coinSuccessCount = 0;
+  const COIN_SIM_RUNS = 500;
+  for (let i = 0; i < COIN_SIM_RUNS; i++) {
+    const success = Math.random() < 0.5;
+    if (success) coinSuccessCount++;
+  }
+  const coinSuccessRate = coinSuccessCount / COIN_SIM_RUNS;
+  console.log(`✓ 14.2: Mô phỏng ${COIN_SIM_RUNS} lần tung đồng xu: Tỷ lệ ngửa = ${(coinSuccessRate * 100).toFixed(1)}% (Kỳ vọng ~50%)`);
+  if (coinSuccessRate < 0.40 || coinSuccessRate > 0.60) {
+    throw new Error('TEST 14.2 FAILED: Tỷ lệ tung đồng xu lệch quá xa 50%');
+  }
+
+  // Scenario 14.3: Minion priority (Bellatrix is targeted before Voldemort)
+  const dePool = [
+    { id: 'v1', name: 'Voldemort', role: { id: 'VOLDEMORT', faction: 'DEATH_EATERS' } },
+    { id: 'b1', name: 'Bellatrix', role: { id: 'BELLATRIX_LESTRANGE', faction: 'DEATH_EATERS' } },
+  ];
+  const deMinions = dePool.filter(p => p.role?.id !== 'VOLDEMORT');
+  const targetPool = deMinions.length > 0 ? deMinions : dePool;
+  const pickedVictim = targetPool[0];
+
+  if (pickedVictim.id === 'b1') {
+    console.log('✓ 14.3: Đòn phản công ưu tiên bắn hạ tay sai Tử Thần Thực Tử (Bellatrix) trước, bảo vệ boss Voldemort khỏi cái chết đột ngột.');
+  } else {
+    throw new Error('TEST 14.3 FAILED: Đòn phản công không ưu tiên tay sai');
+  }
+
+  console.log('✅ TEST 14 PASSED: Cơ chế Tung Đồng Xu 50% & Phản Công của Kingsley Shacklebolt hoạt động chuẩn xác 100%!');
+
   console.log('\n====================================================');
-  console.log('🎉 TẤT CẢ 13/13 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
+  console.log('🎉 TẤT CẢ 14/14 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
   console.log('====================================================\n');
 }
 

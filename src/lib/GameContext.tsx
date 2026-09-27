@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
-import { GameState, Player, GamePhase, Faction, Role, NetworkMessage, WeasleyItem, WeasleyItemId, SkyEvent, ActiveVisualFX, ActiveVisualFXType, InterruptState } from './types';
+import { GameState, Player, GamePhase, Faction, Role, NetworkMessage, WeasleyItem, WeasleyItemId, SkyEvent, ActiveVisualFX, ActiveVisualFXType, InterruptState, RoleHistoryEntry } from './types';
 import { ROLES } from './roles';
 import { SevenPottersNetwork } from './peerNetwork';
 
@@ -183,6 +183,7 @@ const DEFAULT_STATE: GameState = {
   interruptState: null,
   activeFX: null,
   previousRoleMap: {},
+  roleHistory: {},
 };
 
 // Helper to normalize action names for consistent comparison (case-insensitive)
@@ -283,6 +284,18 @@ export function fisherYatesShuffle<T>(array: T[]): T[] {
 }
 
 /**
+ * Trích xuất định danh bền vững cho người chơi (persistent player key)
+ * Ưu tiên hpvnUid -> userTag -> name (chuẩn hóa thường) -> id
+ * Đảm bảo người chơi F5/refresh hoặc rejoin vẫn giữ nguyên lịch sử vai trò.
+ */
+export function getPlayerKey(player: { id: string; name: string; hpvnUid?: string; userTag?: string }): string {
+  if (player.hpvnUid) return `hpvn_${player.hpvnUid}`;
+  if (player.userTag) return `tag_${player.userTag.trim().toLowerCase()}`;
+  if (player.name && player.name.trim()) return `name_${player.name.trim().toLowerCase()}`;
+  return player.id;
+}
+
+/**
  * Calculates a penalty score for an assignment based on anti-repetition rules.
  * Higher penalty = more repetitive / less desirable.
  */
@@ -300,21 +313,19 @@ export function calculateAssignmentPenalty(
     const assignedRole = assignment[i];
     if (!assignedRole) continue;
 
-    // Phạt nặng nếu cùng 1 người nhận lại đúng vai cũ liên tiếp
+    // Phạt cực nặng nếu cùng 1 người nhận lại đúng vai cũ liên tiếp
     if (assignedRole.id === prevRoleId) {
       if (assignedRole.id === 'HARRY_POTTER' || assignedRole.id === 'VOLDEMORT') {
-        penalty += 100; // Cực kỳ tránh lặp vai Harry hoặc Voldemort cho cùng 1 người!
+        penalty += 10000; // Cực kỳ tránh lặp vai Harry hoặc Voldemort cho cùng 1 người!
       } else {
-        penalty += 25; // Tránh lặp lại đúng nhân vật cũ
+        penalty += 1000; // Tránh lặp lại đúng nhân vật cũ
       }
     }
 
-    // Phạt nhẹ nếu lặp lại cùng một phe phái khi phòng đủ đông (>= 5 người)
-    if (players.length >= 5) {
-      const prevRole = ROLES[prevRoleId];
-      if (prevRole && prevRole.faction === assignedRole.faction) {
-        penalty += 2;
-      }
+    // CHỐNG CHUỖI 4T LIÊN TIẾP: Phạt cực nặng nếu lặp lại phe Tử Thần Thực Tử
+    const prevRole = ROLES[prevRoleId];
+    if (prevRole && prevRole.faction === 'DEATH_EATERS' && assignedRole.faction === 'DEATH_EATERS') {
+      penalty += 5000; // Tuyệt đối không cho 1 người làm 4T 2 ván liên tiếp!
     }
   }
   return penalty;
@@ -355,36 +366,131 @@ export function getOptimalBalance(N: number): { evilCount: number; goodCount: nu
 }
 
 /**
- * Fair role assignment engine:
- * 1. Uses Fisher-Yates shuffle to sample roles and eliminate TimSort biases.
- * 2. Incorporates Polyjuice Decoys (POTTER_FAKE) into the good pool to fit the 7 Potters theme.
- * 3. Uses a 40-iteration penalty-minimization optimizer to ensure players do not repeat consecutive roles.
- * 4. Eliminates the tail `.pop()` bias so Host (Player 0) has equal chance for all roles.
- * 5. Uses the Monte Carlo calibrated OPTIMAL_BALANCE_SPEC table for flawless faction balance (N = 4..15).
+ * Thuật toán phân bổ vai trò công bằng 2 giai đoạn (Guaranteed Fair 2-Phase Role Engine):
+ * Giai đoạn 1 (Faction Balancing):
+ * - Đảm bảo KHÔNG AI bị làm Tử Thần Thực Tử (4T) 2 ván liên tiếp (Streak tối đa = 1).
+ * - Sử dụng điểm ưu tiên dựa trên lịch sử số lần làm 4T và số ván đã chơi để luân phiên đều cho mọi người.
+ * Giai đoạn 2 (Character Assignment):
+ * - Voldemort và Harry Potter luôn được luân chuyển cho người chưa từng nhận ở ván trước.
+ * - Các vai trò khác được xáo ngẫu nhiên chuẩn Fisher-Yates, tránh trùng nhân vật cũ.
+ * Giai đoạn 3 (Persistence & Sync):
+ * - Cập nhật roleHistory và previousRoleMap, lưu vào localStorage để bền vững qua F5/reload.
  */
 export function assignRolesFairly(
   players: Player[],
-  previousRoleMap?: Record<string, string>
-): { players: Player[]; previousRoleMap: Record<string, string> } {
+  previousRoleMap?: Record<string, string>,
+  roleHistory?: Record<string, RoleHistoryEntry>
+): { 
+  players: Player[]; 
+  previousRoleMap: Record<string, string>;
+  roleHistory: Record<string, RoleHistoryEntry>;
+} {
   const nonGmPlayers = players.filter(p => !p.isGM);
   const N = nonGmPlayers.length;
   if (N === 0) {
-    return { players, previousRoleMap: previousRoleMap || {} };
+    return { players, previousRoleMap: previousRoleMap || {}, roleHistory: roleHistory || {} };
   }
 
   const balance = getOptimalBalance(N);
-  let evilCount = balance.evilCount;
-  let goodCount = balance.goodCount;
+  const evilCount = balance.evilCount;
+  const goodCount = balance.goodCount;
 
-  // Base pool of Death Eaters
+  // Khôi phục roleHistory từ localStorage nếu có
+  let localSavedHistory: Record<string, RoleHistoryEntry> = {};
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem('seven-potters-role-history');
+      if (raw) localSavedHistory = JSON.parse(raw);
+    }
+  } catch (e) {}
+
+  const mergedHistory: Record<string, RoleHistoryEntry> = {
+    ...localSavedHistory,
+    ...(roleHistory || {}),
+  };
+
+  const prevMap = previousRoleMap || {};
+
+  // GIAI ĐOẠN 1: PHÂN BỔ PHE PHÁI (FACTION PARTITIONING)
+  // Tính điểm ưu tiên cho từng người chơi:
+  const scored = nonGmPlayers.map(p => {
+    const key = getPlayerKey(p);
+    // Kiểm tra xem ván trước người này có là 4T không
+    const prevRoleId = prevMap[p.id] || p.previousRoleId;
+    const prevWasEvil = (prevRoleId && ROLES[prevRoleId]?.faction === 'DEATH_EATERS') || (p.role?.faction === 'DEATH_EATERS');
+    const existingHist = mergedHistory[key];
+    
+    const consecutiveEvil = existingHist 
+      ? (existingHist.consecutiveEvil || 0)
+      : prevWasEvil ? 1 : (p.consecutiveEvil || 0);
+
+    const totalEvil = existingHist ? existingHist.totalEvil : (prevWasEvil ? 1 : 0);
+    const totalGames = existingHist ? existingHist.totalGames : 0;
+
+    // Phạt cực nặng nếu vừa là 4T ở ván liền kề (-50,000)
+    // Người chưa là 4T hoặc ít là 4T nhất sẽ được điểm cao nhất
+    let score = Math.random() * 20; // Nhiễu ngẫu nhiên để công bằng giữa các người có cùng tỷ lệ
+    if (consecutiveEvil > 0) {
+      score -= 50000 * consecutiveEvil;
+    } else {
+      const evilRatio = totalGames > 0 ? (totalEvil / totalGames) : 0;
+      score += (1 - evilRatio) * 100;
+    }
+
+    return { 
+      player: p, 
+      score, 
+      key, 
+      hist: {
+        consecutiveEvil,
+        totalEvil,
+        totalGames,
+        lastRoleId: existingHist?.lastRoleId || prevRoleId,
+        lastRoleName: existingHist?.lastRoleName || (prevRoleId ? ROLES[prevRoleId]?.name : undefined),
+      } 
+    };
+  });
+
+  // Sắp xếp giảm dần theo điểm: top evilCount người chơi sẽ nhận phe Tử Thần Thực Tử
+  scored.sort((a, b) => b.score - a.score);
+
+  const evilSelected = scored.slice(0, evilCount);
+  const goodSelected = scored.slice(evilCount);
+
+  // GIAI ĐOẠN 2: CHIA NHÂN VẬT TRONG TỪNG PHE (CHARACTER ASSIGNMENT)
+  const assignments: Map<string, Role> = new Map();
+
+  // --- PHE TỬ THẦN THỰC TỬ ---
   const baseEvilPool: Role[] = [
     ROLES.BELLATRIX_LESTRANGE,
     ROLES.LUCIUS_MALFOY,
     ROLES.PETER_PETTIGREW,
     ROLES.FENRIR_GREYBACK,
   ];
+  const shuffledEvil = fisherYatesShuffle(baseEvilPool);
 
-  // Base pool of Order of Phoenix & Polyjuice Decoys
+  // Chọn Voldemort: ưu tiên người chưa từng là Voldemort ở ván trước
+  const voldemortCandidates = [...evilSelected].sort((a, b) => {
+    const aWasVold = (a.hist.lastRoleId === 'VOLDEMORT' || prevMap[a.player.id] === 'VOLDEMORT') ? 1 : 0;
+    const bWasVold = (b.hist.lastRoleId === 'VOLDEMORT' || prevMap[b.player.id] === 'VOLDEMORT') ? 1 : 0;
+    return aWasVold - bWasVold;
+  });
+
+  const voldemortCandidate = voldemortCandidates[0];
+  if (voldemortCandidate) {
+    assignments.set(voldemortCandidate.player.id, ROLES.VOLDEMORT);
+  }
+
+  const remainingEvil = evilSelected.filter(x => x.player.id !== voldemortCandidate?.player.id);
+  remainingEvil.forEach((item, idx) => {
+    let chosenRole = shuffledEvil[idx % shuffledEvil.length];
+    if (chosenRole.id === item.hist.lastRoleId && shuffledEvil.length > 1) {
+      chosenRole = shuffledEvil[(idx + 1) % shuffledEvil.length];
+    }
+    assignments.set(item.player.id, chosenRole);
+  });
+
+  // --- PHE HỘI PHƯỢNG HOÀNG ---
   const baseGoodPool: Role[] = [
     ROLES.POTTER_FAKE,
     ROLES.POTTER_FAKE,
@@ -404,64 +510,73 @@ export function assignRolesFairly(
     ROLES.FLEUR_DELACOUR,
     ROLES.NYMPHADORA_TONKS,
   ];
+  const shuffledGood = fisherYatesShuffle(baseGoodPool);
 
-  const shuffledEvilPool = fisherYatesShuffle(baseEvilPool);
-  const shuffledGoodPool = fisherYatesShuffle(baseGoodPool);
+  // Chọn Harry Potter: ưu tiên người chưa từng là Harry ở ván trước
+  const harryCandidates = [...goodSelected].sort((a, b) => {
+    const aWasHarry = (a.hist.lastRoleId === 'HARRY_POTTER' || prevMap[a.player.id] === 'HARRY_POTTER') ? 1 : 0;
+    const bWasHarry = (b.hist.lastRoleId === 'HARRY_POTTER' || prevMap[b.player.id] === 'HARRY_POTTER') ? 1 : 0;
+    return aWasHarry - bWasHarry;
+  });
 
-  const selectedRoles: Role[] = [];
-
-  if (goodCount > 0) {
-    selectedRoles.push(ROLES.HARRY_POTTER);
-    goodCount--;
-  }
-  if (evilCount > 0) {
-    selectedRoles.push(ROLES.VOLDEMORT);
-    evilCount--;
-  }
-
-  for (let i = 0; i < evilCount; i++) {
-    selectedRoles.push(shuffledEvilPool[i % shuffledEvilPool.length] || ROLES.PETER_PETTIGREW);
-  }
-  for (let i = 0; i < goodCount; i++) {
-    selectedRoles.push(shuffledGoodPool[i % shuffledGoodPool.length] || ROLES.POTTER_FAKE);
+  const harryCandidate = harryCandidates[0];
+  if (harryCandidate) {
+    assignments.set(harryCandidate.player.id, ROLES.HARRY_POTTER);
   }
 
-  const prevMap = previousRoleMap || {};
-
-  // Find the permutation of selectedRoles that minimizes penalty
-  let bestAssignment = fisherYatesShuffle(selectedRoles);
-  let bestPenalty = calculateAssignmentPenalty(bestAssignment, nonGmPlayers, prevMap);
-
-  if (bestPenalty > 0) {
-    for (let attempt = 0; attempt < 40; attempt++) {
-      const candidate = fisherYatesShuffle(selectedRoles);
-      const penalty = calculateAssignmentPenalty(candidate, nonGmPlayers, prevMap);
-      if (penalty < bestPenalty) {
-        bestAssignment = candidate;
-        bestPenalty = penalty;
-        if (bestPenalty === 0) break;
-      }
+  const remainingGood = goodSelected.filter(x => x.player.id !== harryCandidate?.player.id);
+  remainingGood.forEach((item, idx) => {
+    let chosenRole = shuffledGood[idx % shuffledGood.length];
+    if (chosenRole.id === item.hist.lastRoleId && shuffledGood.length > 1) {
+      chosenRole = shuffledGood[(idx + 1) % shuffledGood.length];
     }
-  }
+    assignments.set(item.player.id, chosenRole);
+  });
 
+  // GIAI ĐOẠN 3: ĐỒNG BỘ LỊCH SỬ VÀ GẮN VAI TRÒ
   const newRoleMap: Record<string, string> = { ...prevMap };
-  let assignIdx = 0;
+  const newRoleHistory: Record<string, RoleHistoryEntry> = { ...mergedHistory };
 
   const newPlayers = players.map(p => {
     if (p.isGM) return p;
-    const assignedRole = bestAssignment[assignIdx++] || ROLES.POTTER_FAKE;
+    const assignedRole = assignments.get(p.id) || ROLES.POTTER_FAKE;
     newRoleMap[p.id] = assignedRole.id;
+
+    const key = getPlayerKey(p);
+    const oldHist = newRoleHistory[key] || {
+      consecutiveEvil: 0,
+      totalEvil: 0,
+      totalGames: 0,
+    };
+    const isEvil = assignedRole.faction === 'DEATH_EATERS';
+
+    newRoleHistory[key] = {
+      consecutiveEvil: isEvil ? ((oldHist.consecutiveEvil || 0) + 1) : 0,
+      totalEvil: isEvil ? ((oldHist.totalEvil || 0) + 1) : (oldHist.totalEvil || 0),
+      totalGames: (oldHist.totalGames || 0) + 1,
+      lastRoleId: assignedRole.id,
+      lastRoleName: assignedRole.name,
+    };
+
     return {
       ...p,
       role: assignedRole,
       status: 'ALIVE' as const,
       previousRoleId: assignedRole.id,
+      consecutiveEvil: newRoleHistory[key].consecutiveEvil,
     };
   });
+
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('seven-potters-role-history', JSON.stringify(newRoleHistory));
+    }
+  } catch (e) {}
 
   return {
     players: newPlayers,
     previousRoleMap: newRoleMap,
+    roleHistory: newRoleHistory,
   };
 }
 
@@ -1512,9 +1627,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const N = playersToAssign.length;
       if (N === 0) return prev;
 
-      const { players: newPlayers, previousRoleMap: newRoleMap } = assignRolesFairly(
+      const { players: newPlayers, previousRoleMap: newRoleMap, roleHistory: newRoleHistory } = assignRolesFairly(
         prev.players,
-        prev.previousRoleMap
+        prev.previousRoleMap,
+        prev.roleHistory
       );
 
       // Thang Chặng Co Giãn Tự Động theo Bảng Cân Bằng (Game Balance Optimization)
@@ -1533,6 +1649,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ...prev,
         players: newPlayers,
         previousRoleMap: newRoleMap,
+        roleHistory: newRoleHistory,
         maxStages,
         weasleyItems: updatedWeasleyItems,
         logs: [
@@ -1689,6 +1806,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const resetGame = () => {
     updateState(prev => {
       const carriedRoleMap: Record<string, string> = { ...(prev.previousRoleMap || {}) };
+      const carriedRoleHistory: Record<string, RoleHistoryEntry> = { ...(prev.roleHistory || {}) };
       prev.players.forEach(p => {
         if (p.role) {
           carriedRoleMap[p.id] = p.role.id;
@@ -1703,11 +1821,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         goldenFlameUsed: false,
         weasleyItems: INITIAL_WEASLEY_ITEMS,
         previousRoleMap: carriedRoleMap,
+        roleHistory: carriedRoleHistory,
         players: prev.players.map(p => ({
           ...p,
           role: null,
           status: 'ALIVE',
           previousRoleId: p.role?.id || p.previousRoleId,
+          consecutiveEvil: p.consecutiveEvil,
         })),
         logs: ['Hệ thống: Merlin đã reset game. Đang chờ chia lại vai trò mới (chống lặp vai)...'],
       };

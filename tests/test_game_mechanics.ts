@@ -611,6 +611,54 @@ async function runMechanicsTests() {
     throw new Error('TEST 12.3 FAILED: Bản sao Harry (POTTER_FAKE) không bao giờ xuất hiện trong bàn chơi');
   }
 
+  // 12.4: Anti-streak 4T (Death Eater) guarantee across 100 consecutive games
+  console.log('--- [TEST 12.4] KIỂM THỬ TRIỆT ĐỂ CHỐNG LẶP 4T (DEATH EATER) 100 VÁN LIÊN TỤC ---');
+  let currentSimPlayers = [...initialPlayers];
+  let currentRoleMap: Record<string, string> = {};
+  let currentRoleHistory: any = {};
+  const consecutiveEvilTracker: Record<string, number> = {};
+  const maxConsecutiveEvil: Record<string, number> = {};
+  const totalEvilCount: Record<string, number> = {};
+
+  initialPlayers.forEach(p => {
+    consecutiveEvilTracker[p.id] = 0;
+    maxConsecutiveEvil[p.id] = 0;
+    totalEvilCount[p.id] = 0;
+  });
+
+  const TOTAL_SERIES_GAMES = 100;
+  for (let g = 0; g < TOTAL_SERIES_GAMES; g++) {
+    const res = assignRolesFairly(currentSimPlayers, currentRoleMap, currentRoleHistory);
+    currentSimPlayers = res.players;
+    currentRoleMap = res.previousRoleMap;
+    currentRoleHistory = res.roleHistory;
+
+    res.players.forEach(p => {
+      const isEvil = p.role?.faction === 'DEATH_EATERS';
+      if (isEvil) {
+        consecutiveEvilTracker[p.id] = (consecutiveEvilTracker[p.id] || 0) + 1;
+        totalEvilCount[p.id] = (totalEvilCount[p.id] || 0) + 1;
+        if (consecutiveEvilTracker[p.id] > maxConsecutiveEvil[p.id]) {
+          maxConsecutiveEvil[p.id] = consecutiveEvilTracker[p.id];
+        }
+        if (consecutiveEvilTracker[p.id] > 1) {
+          throw new Error(`TEST 12.4 FAILED: Người chơi [${p.name}] bị làm 4T liên tiếp ${consecutiveEvilTracker[p.id]} ván ở ván thứ ${g + 1}!`);
+        }
+      } else {
+        consecutiveEvilTracker[p.id] = 0;
+      }
+    });
+  }
+
+  console.log(`✓ 12.4: Sau ${TOTAL_SERIES_GAMES} ván liên tục:`);
+  Object.keys(maxConsecutiveEvil).forEach(pid => {
+    const pName = initialPlayers.find(p => p.id === pid)?.name;
+    console.log(`   ➔ [${pName}]: Max chuỗi 4T liên tiếp = ${maxConsecutiveEvil[pid]} ván, Tổng số lần làm 4T = ${totalEvilCount[pid]}/${TOTAL_SERIES_GAMES} (${((totalEvilCount[pid]/TOTAL_SERIES_GAMES)*100).toFixed(1)}%)`);
+    if (maxConsecutiveEvil[pid] > 1) {
+      throw new Error(`TEST 12.4 FAILED: [${pName}] bị chuỗi 4T vượt quá 1 ván!`);
+    }
+  });
+
   console.log('✅ TEST 12 PASSED: Thuật toán chia bài công bằng, ngẫu nhiên chuẩn Knuth & chống lặp vai 100%!');
 
   // -------------------------------------------------------------

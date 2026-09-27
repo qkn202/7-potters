@@ -33,6 +33,15 @@ export interface Player {
   userTag?: string;
   hpvnUid?: string;
   previousRoleId?: string;
+  consecutiveEvil?: number;
+}
+
+export interface RoleHistoryEntry {
+  consecutiveEvil: number;
+  totalEvil: number;
+  totalGames: number;
+  lastRoleId?: string;
+  lastRoleName?: string;
 }
 
 export type GamePhase = 'LOBBY' | 'DAY' | 'NIGHT' | 'END';
@@ -97,6 +106,7 @@ export interface GameState {
   interruptState: InterruptState | null;
   activeFX?: ActiveVisualFX | null;
   previousRoleMap?: Record<string, string>;
+  roleHistory?: Record<string, RoleHistoryEntry>;
 }
 
 export interface InterruptState {

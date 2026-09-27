@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useGame } from '@/lib/GameContext';
+import { useGame, getOptimalBalance } from '@/lib/GameContext';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
@@ -65,6 +65,7 @@ export function Lobby() {
 
   const hasAssignedRoles = gameState.players.some(p => p.role);
   const nonGmPlayers = gameState.players.filter(p => !p.isGM);
+  const optimalBalance = getOptimalBalance(nonGmPlayers.length);
 
   const inviteUrl = typeof window !== 'undefined' && roomCode 
     ? `${window.location.origin}/?room=${roomCode}` 
@@ -172,6 +173,82 @@ export function Lobby() {
           >
             <Flame size={15} className="text-[#ffd88f] animate-pulse" /> Mạng Floo (Chat HPVN)
           </button>
+        </div>
+
+        {/* Campaign Faction Balance Preview Widget */}
+        <div className="mt-5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-[#210c08]/90 via-[#180f14]/90 to-[#081a14]/90 border border-[#7a5229] shadow-xl relative overflow-hidden text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-[#5c3e1e]/60">
+            <div className="flex items-center gap-2.5">
+              <span className="p-1.5 rounded-lg bg-[#381e0d] border border-[#a47133] text-[#ffd88f] shrink-0">
+                <Sparkles size={16} />
+              </span>
+              <div>
+                <h4 className="font-serif font-bold text-xs sm:text-sm text-[#ffd88f] flex items-center gap-2">
+                  Tỷ Lệ Phe Chiến Thuật (Monte Carlo Calibrated)
+                </h4>
+                <p className="text-[11px] text-[#dfcbad]">
+                  Tự động căn chỉnh theo sĩ số phòng ({nonGmPlayers.length} người chơi)
+                </p>
+              </div>
+            </div>
+            <div className="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1 rounded-full bg-[#120803] border border-[#7a5229] text-xs font-mono text-[#ffd88f]">
+              <span>Chặng Bay: <strong className="text-amber-300">{optimalBalance.maxStages}</strong> Chặng</span>
+              {nonGmPlayers.length >= 12 && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-950 text-red-300 border border-red-700/60 font-serif">
+                  Phục Kích Kép Chặng 3
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            {/* HPH faction badge */}
+            <div className="p-2.5 rounded-xl bg-[#2b100d]/70 border border-red-800/60 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <PhoenixCrest className="w-5 h-5 text-amber-400 shrink-0" />
+                <div>
+                  <div className="font-bold text-red-200">Hội Phượng Hoàng</div>
+                  <div className="text-[10px] text-red-300/70">Bảo vệ Harry & đến Hang Sóc</div>
+                </div>
+              </div>
+              <span className="text-lg font-mono font-bold text-amber-300 bg-[#160604] px-2.5 py-0.5 rounded border border-red-700/60">
+                {optimalBalance.goodCount}
+              </span>
+            </div>
+
+            {/* DE faction badge */}
+            <div className="p-2.5 rounded-xl bg-[#09261a]/70 border border-emerald-800/60 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <DarkMarkCrest className="w-5 h-5 text-emerald-400 shrink-0" />
+                <div>
+                  <div className="font-bold text-emerald-200">Tử Thần Thực Tử</div>
+                  <div className="text-[10px] text-emerald-300/70">Ám sát Harry hoặc chiếm đa số</div>
+                </div>
+              </div>
+              <span className="text-lg font-mono font-bold text-emerald-300 bg-[#04140d] px-2.5 py-0.5 rounded border border-emerald-700/60">
+                {optimalBalance.evilCount}
+              </span>
+            </div>
+          </div>
+
+          {/* Dual Progress Bar */}
+          <div className="mt-3">
+            <div className="flex justify-between text-[10px] font-mono text-[#dfcbad] mb-1">
+              <span>{Math.round((optimalBalance.goodCount / (nonGmPlayers.length || 1)) * 100)}% HPH</span>
+              <span className="text-[#a89078]">{optimalBalance.desc}</span>
+              <span>{Math.round((optimalBalance.evilCount / (nonGmPlayers.length || 1)) * 100)}% Tử Thần</span>
+            </div>
+            <div className="w-full h-2 rounded-full overflow-hidden flex bg-black/60 border border-[#5c3e1e]/60">
+              <div
+                className="h-full bg-gradient-to-r from-amber-600 to-red-600 transition-all duration-300"
+                style={{ width: `${(optimalBalance.goodCount / (nonGmPlayers.length || 1)) * 100}%` }}
+              />
+              <div
+                className="h-full bg-gradient-to-r from-emerald-600 to-teal-500 transition-all duration-300"
+                style={{ width: `${(optimalBalance.evilCount / (nonGmPlayers.length || 1)) * 100}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 

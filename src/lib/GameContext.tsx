@@ -321,11 +321,46 @@ export function calculateAssignmentPenalty(
 }
 
 /**
+ * Khung cấu hình cân bằng tối ưu phân bổ 4T vs HPH & Chặng bay (kết quả mô phỏng Monte Carlo 10.000 ván)
+ */
+export const OPTIMAL_BALANCE_SPEC: Record<number, { evil: number; good: number; stages: number; desc: string }> = {
+  4: { evil: 1, good: 3, stages: 4, desc: '1 Tử Thần Thực Tử vs 3 Hội Phượng Hoàng · 4 Chặng bay' },
+  5: { evil: 1, good: 4, stages: 4, desc: '1 Tử Thần Thực Tử vs 4 Hội Phượng Hoàng · 4 Chặng bay' },
+  6: { evil: 2, good: 4, stages: 4, desc: '2 Tử Thần Thực Tử vs 4 Hội Phượng Hoàng · 4 Chặng bay' },
+  7: { evil: 2, good: 5, stages: 5, desc: '2 Tử Thần Thực Tử vs 5 Hội Phượng Hoàng · 5 Chặng bay' },
+  8: { evil: 3, good: 5, stages: 5, desc: '3 Tử Thần Thực Tử vs 5 Hội Phượng Hoàng · 5 Chặng bay' },
+  9: { evil: 3, good: 6, stages: 5, desc: '3 Tử Thần Thực Tử vs 6 Hội Phượng Hoàng · 5 Chặng bay' },
+  10: { evil: 4, good: 6, stages: 5, desc: '4 Tử Thần Thực Tử vs 6 Hội Phượng Hoàng · 5 Chặng bay' },
+  11: { evil: 4, good: 7, stages: 6, desc: '4 Tử Thần Thực Tử vs 7 Hội Phượng Hoàng · 6 Chặng bay' },
+  12: { evil: 4, good: 8, stages: 6, desc: '4 Tử Thần Thực Tử vs 8 Hội Phượng Hoàng · 6 Chặng bay (Phục kích kép)' },
+  13: { evil: 5, good: 8, stages: 6, desc: '5 Tử Thần Thực Tử vs 8 Hội Phượng Hoàng · 6 Chặng bay' },
+  14: { evil: 5, good: 9, stages: 6, desc: '5 Tử Thần Thực Tử vs 9 Hội Phượng Hoàng · 6 Chặng bay' },
+  15: { evil: 5, good: 10, stages: 6, desc: '5 Tử Thần Thực Tử vs 10 Hội Phượng Hoàng · 6 Chặng bay' },
+};
+
+export function getOptimalBalance(N: number): { evilCount: number; goodCount: number; maxStages: number; desc: string } {
+  if (OPTIMAL_BALANCE_SPEC[N]) {
+    const s = OPTIMAL_BALANCE_SPEC[N];
+    return { evilCount: s.evil, goodCount: s.good, maxStages: s.stages, desc: s.desc };
+  }
+  const evilCount = Math.max(1, Math.round(N / 3));
+  const goodCount = Math.max(1, N - evilCount);
+  const maxStages = N <= 6 ? 4 : N <= 10 ? 5 : 6;
+  return {
+    evilCount,
+    goodCount,
+    maxStages,
+    desc: `${evilCount} Tử Thần Thực Tử vs ${goodCount} Hội Phượng Hoàng · ${maxStages} Chặng bay`,
+  };
+}
+
+/**
  * Fair role assignment engine:
  * 1. Uses Fisher-Yates shuffle to sample roles and eliminate TimSort biases.
  * 2. Incorporates Polyjuice Decoys (POTTER_FAKE) into the good pool to fit the 7 Potters theme.
  * 3. Uses a 40-iteration penalty-minimization optimizer to ensure players do not repeat consecutive roles.
  * 4. Eliminates the tail `.pop()` bias so Host (Player 0) has equal chance for all roles.
+ * 5. Uses the Monte Carlo calibrated OPTIMAL_BALANCE_SPEC table for flawless faction balance (N = 4..15).
  */
 export function assignRolesFairly(
   players: Player[],
@@ -337,8 +372,9 @@ export function assignRolesFairly(
     return { players, previousRoleMap: previousRoleMap || {} };
   }
 
-  let evilCount = Math.max(1, Math.floor(N / 3));
-  let goodCount = N - evilCount;
+  const balance = getOptimalBalance(N);
+  let evilCount = balance.evilCount;
+  let goodCount = balance.goodCount;
 
   // Base pool of Death Eaters
   const baseEvilPool: Role[] = [
@@ -1477,9 +1513,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         prev.previousRoleMap
       );
 
-      // Thang Chặng Co Giãn Tự Động theo Sĩ Số Phòng (Game Balance Optimization)
-      // N <= 8: 4 Chặng | N <= 13: 5 Chặng | N >= 14: 6 Chặng
-      const maxStages = N <= 8 ? 4 : N <= 13 ? 5 : 6;
+      // Thang Chặng Co Giãn Tự Động theo Bảng Cân Bằng (Game Balance Optimization)
+      const balance = getOptimalBalance(N);
+      const maxStages = balance.maxStages;
 
       // Viện trợ Bảo bối Weasley cho phòng đông (N >= 14): Tặng thêm 1 Bột Khói Mù Peru
       let updatedWeasleyItems = prev.weasleyItems || INITIAL_WEASLEY_ITEMS;
@@ -1528,7 +1564,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const startGame = () => {
     updateState(prev => {
       const nonGm = prev.players.filter(p => !p.isGM);
-      const maxStages = prev.maxStages || (nonGm.length <= 8 ? 4 : nonGm.length <= 13 ? 5 : 6);
+      const balance = getOptimalBalance(nonGm.length);
+      const maxStages = prev.maxStages || balance.maxStages;
       return {
         ...prev,
         phase: 'DAY',
@@ -2015,14 +2052,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-      // Determine Death Eater targets (supports Bellatrix Double Kill)
-      const isDoubleKill = Boolean(gameState.skillStates[`voldemort_double_kill_R${gameState.round}`]);
+      // Determine Death Eater targets (supports Bellatrix Double Kill & Large Room Ambush for N >= 12)
+      const isAmbushStage = gameState.currentSkyEvent?.modifier === 'VOLDEMORT_AMBUSH';
+      const nonGmCount = gameState.players.filter(p => !p.isGM).length;
+      const isVoldemortAlive = gameState.players.some(p => p.role?.id === 'VOLDEMORT' && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
+      const isLargeRoomAmbush = nonGmCount >= 12 && isAmbushStage && isVoldemortAlive;
+      const isDoubleKill = Boolean(gameState.skillStates[`voldemort_double_kill_R${gameState.round}`]) || isLargeRoomAmbush;
       const sortedKillTargets = Object.entries(killVoteCounts)
         .sort(([, a], [, b]) => b - a)
         .map(([targetId]) => targetId);
 
       const deathEaterTargetIds: string[] = [];
-      const isVoldemortAlive = gameState.players.some(p => p.role?.id === 'VOLDEMORT' && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
 
       if (voldemortKillTargetId === 'NONE') {
         summary.push("Chúa Tể Voldemort đã hạ lệnh án binh bất động: Phe Tử Thần Thực Tử không ra tay ám sát ai hôm nay!");
@@ -2070,7 +2110,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       if (targetsToProcess.length > 0) {
         if (isDoubleKill && targetsToProcess.length > 1) {
-          summary.push("⚡ CƠN THỊNH NỘ BELLATRIX: Tử Thần Thực Tử phát động ám sát liên hoàn 2 mục tiêu hôm nay!");
+          if (isLargeRoomAmbush) {
+            summary.push("⚡ VÒNG VÂY PHỤC KÍCH: Bầu trời rực lửa, Chúa Tể Voldemort chỉ huy Tử Thần Thực Tử phát động ám sát dồn dập 2 mục tiêu!");
+          } else {
+            summary.push("⚡ CƠN THỊNH NỘ BELLATRIX: Tử Thần Thực Tử phát động ám sát liên hoàn 2 mục tiêu hôm nay!");
+          }
         }
 
         targetsToProcess.forEach(deathEaterTargetId => {

@@ -24,7 +24,8 @@ import {
   Zap,
   Target,
   Compass,
-  Ban
+  Ban,
+  FlaskConical
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { CharacterCard, CardInspectorModal } from './CharacterCard';
@@ -360,16 +361,16 @@ export function PlayerScreen() {
 
         if (me.role?.id === 'PETER_PETTIGREW') {
           return {
-            title: 'Peter Pettigrew · Do Thám Thân Phận',
+            title: 'Peter Pettigrew · Người Hầu Cận Voldemort',
             badge: 'Do Thám Hắc Ám',
             badgeVariant: 'emerald' as const,
             alert: undefined as string | undefined,
             steps: [
-              { num: '1', title: 'Soi phe phái ban đêm', desc: 'Chọn 1 người rồi bấm "Thi Triển Soi Phe" để kiểm tra họ có thuộc Hội Phượng Hoàng hay không.' },
-              { num: '2', title: 'Hỗ trợ Chúa Tể', desc: 'Cùng phối hợp dồn phiếu "Ám Sát" vào mục tiêu với Chúa Tể Voldemort.' }
+              { num: '1', title: 'Do thám nhân vật đặc biệt', desc: 'Chọn 1 người chơi phe Hội Phượng Hoàng rồi bấm "Thi Triển Soi Đặc Biệt" để xem họ có phải nhân vật đặc biệt (bất kì loại nào) hay không.' },
+              { num: '2', title: 'Quyền năng Ám Sát', desc: 'Sau khi do thám, bạn vẫn có toàn quyền dồn đòn ám sát (Avada Kedavra) cùng Voldemort và phe Tử Thần Thực Tử.' }
             ],
-            tip: 'Dùng kết quả soi để loại trừ các Bản Sao và chỉ điểm cho Voldemort bắn chuẩn xác!',
-            statusText: myAction ? `✓ Đã lưu mục tiêu: [${myVotedTarget?.name}]` : 'Chọn mục tiêu bên dưới để soi phe hoặc dồn đòn ám sát',
+            tip: 'Mỗi đêm trước khi giết người, hãy do thám để vạch mặt những ai là nhân vật đặc biệt (có thể là Harry thật hoặc các cột trụ của Hội), loại trừ các Bản Sao thường dân!',
+            statusText: myAction ? `✓ Đã lưu mục tiêu: [${myVotedTarget?.name}]` : 'Chọn mục tiêu bên dưới để do thám hoặc dồn đòn ám sát',
             statusType: myAction ? 'success' as const : 'info' as const,
           };
         }
@@ -835,6 +836,76 @@ export function PlayerScreen() {
               </div>
             </div>
           )}
+
+          {/* Severus Snape Special Characters Network (Thân Tín Dumbledore) */}
+          {me.role?.id === 'SEVERUS_SNAPE' && (
+            <div className="rounded-xl border border-purple-500/60 bg-[#160a1e] p-3.5 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+              <div className="flex items-center gap-2 text-purple-300 font-title font-bold text-sm mb-2 border-b border-purple-900/60 pb-1.5">
+                <FlaskConical className="w-4 h-4 text-purple-400 animate-pulse" />
+                <span>Mạng Lưới Thân Tín Dumbledore</span>
+              </div>
+              <p className="text-[11px] text-purple-200/80 font-lora italic mb-2.5 leading-relaxed">
+                Bạn biết danh tính tất cả nhân vật đặc biệt của cả hai phe (ngoại trừ Harry Potter & Voldemort). Phe phái được ẩn hoàn toàn: bạn không được biết ai ở phía Tử Thần Thực Tử!
+              </p>
+              <div className="space-y-1.5">
+                {gameState.players
+                  .filter(p => !p.isGM && p.id !== me.id && p.role && p.role.id !== 'HARRY_POTTER' && p.role.id !== 'VOLDEMORT' && p.role.id !== 'POTTER_FAKE')
+                  .map((spec, idx) => (
+                    <div key={spec.id ? `snape-spec-item-${spec.id}` : `snape-spec-item-${idx}`} className="flex items-center justify-between text-xs font-mono text-purple-200 bg-purple-950/40 px-2 py-1.5 rounded-lg border border-purple-800/40">
+                      <span className="flex items-center gap-1.5">
+                        <span className={`w-2 h-2 rounded-full ${spec.status === 'DEAD' ? 'bg-red-500' : 'bg-purple-400 animate-pulse'}`} />
+                        <span className={spec.status === 'DEAD' ? 'line-through text-purple-400/50' : 'font-serif font-bold'}>{spec.name}</span>
+                      </span>
+                      <span className="text-[10px] text-purple-300/90 font-mono bg-purple-900/60 px-1.5 py-0.5 rounded border border-purple-500/40">
+                        Nhân Vật Đặc Biệt
+                      </span>
+                    </div>
+                  ))}
+                {gameState.players.filter(p => !p.isGM && p.id !== me.id && p.role && p.role.id !== 'HARRY_POTTER' && p.role.id !== 'VOLDEMORT' && p.role.id !== 'POTTER_FAKE').length === 0 && (
+                  <p className="text-[11px] text-purple-400/60 font-lora italic">
+                    Không có nhân vật đặc biệt nào khác trong ván này!
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Peter Pettigrew Spy Journal (Do Thám Nhân Vật Đặc Biệt) */}
+          {me.role?.id === 'PETER_PETTIGREW' && (
+            <div className="rounded-xl border border-emerald-600/60 bg-[#071911] p-3.5 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+              <div className="flex items-center gap-2 text-emerald-300 font-title font-bold text-sm mb-2 border-b border-emerald-900/60 pb-1.5">
+                <Target className="w-4 h-4 text-emerald-400 animate-pulse" />
+                <span>Sổ Tay Do Thám Đuôi Trùn</span>
+              </div>
+              <p className="text-[11px] text-emerald-200/80 font-lora italic mb-2.5 leading-relaxed">
+                Người hầu cận của Voldemort: Mỗi đêm trước khi giết, bạn có thể soi 1 người phe Hội xem có phải là nhân vật đặc biệt (bất kì loại nào) hay không. Bạn vẫn giữ toàn quyền ám sát!
+              </p>
+              <div className="space-y-1.5">
+                {gameState.players
+                  .filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`])
+                  .map((insp, idx) => {
+                    const status = gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${insp.id}`];
+                    const isSpec = status === 'SPECIAL';
+                    return (
+                      <div key={insp.id ? `pettigrew-insp-item-${insp.id}` : `pettigrew-insp-item-${idx}`} className="flex items-center justify-between text-xs font-mono text-emerald-200 bg-emerald-950/40 px-2 py-1.5 rounded-lg border border-emerald-800/40">
+                        <span className="flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${insp.status === 'DEAD' ? 'bg-red-500' : isSpec ? 'bg-amber-400 animate-pulse' : 'bg-gray-400'}`} />
+                          <span className={insp.status === 'DEAD' ? 'line-through text-emerald-600' : 'font-serif font-bold'}>{insp.name}</span>
+                        </span>
+                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${isSpec ? 'text-amber-300 bg-amber-950/80 border-amber-500/50' : 'text-gray-400 bg-gray-900/80 border-gray-700'}`}>
+                          {isSpec ? '✨ Nhân Vật Đặc Biệt' : '👤 Bản Sao / Thường'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                {gameState.players.filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`]).length === 0 && (
+                  <p className="text-[11px] text-emerald-400/60 font-lora italic">
+                    Chưa do thám ai. Đêm nay hãy chọn 1 người phe Hội rồi bấm &quot;Thi Triển Soi Đặc Biệt&quot;!
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Column: Battle Grid & Spell Arsenal (col-span-7) */}
@@ -1065,6 +1136,73 @@ export function PlayerScreen() {
                   </div>
                 </div>
               )}
+
+              {/* Snape Special Network Quick Strip (Mobile) */}
+              {me.role?.id === 'SEVERUS_SNAPE' && (
+                <div className="mt-2 p-1.5 rounded-lg bg-[#14081c] border border-purple-600/60 text-[10px]">
+                  <div className="flex items-center gap-1 text-purple-300 font-mono font-bold text-[9px] uppercase mb-1">
+                    <FlaskConical className="w-2.5 h-2.5 text-purple-400" />
+                    <span>Nhân Vật Đặc Biệt Cả Hai Phe ({gameState.players.filter(p => !p.isGM && p.id !== me.id && p.role && p.role.id !== 'HARRY_POTTER' && p.role.id !== 'VOLDEMORT' && p.role.id !== 'POTTER_FAKE').length}):</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {gameState.players
+                      .filter(p => !p.isGM && p.id !== me.id && p.role && p.role.id !== 'HARRY_POTTER' && p.role.id !== 'VOLDEMORT' && p.role.id !== 'POTTER_FAKE')
+                      .map((spec, idx) => (
+                        <span
+                          key={`mobile-snape-spec-${spec.id || idx}`}
+                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono ${
+                            spec.status === 'DEAD'
+                              ? 'bg-red-950/80 text-red-400 line-through border border-red-800'
+                              : 'bg-purple-950 text-purple-200 border border-purple-600'
+                          }`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${spec.status === 'DEAD' ? 'bg-red-500' : 'bg-purple-400'}`} />
+                          {spec.name} (Đặc Biệt)
+                        </span>
+                      ))}
+                    {gameState.players.filter(p => !p.isGM && p.id !== me.id && p.role && p.role.id !== 'HARRY_POTTER' && p.role.id !== 'VOLDEMORT' && p.role.id !== 'POTTER_FAKE').length === 0 && (
+                      <span className="text-[9px] text-purple-400/60 italic font-lora">
+                        Không có nhân vật đặc biệt nào khác!
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Pettigrew Inspected Quick Strip (Mobile) */}
+              {me.role?.id === 'PETER_PETTIGREW' && (
+                <div className="mt-2 p-1.5 rounded-lg bg-[#071911] border border-emerald-600/60 text-[10px]">
+                  <div className="flex items-center gap-1 text-emerald-300 font-mono font-bold text-[9px] uppercase mb-1">
+                    <Target className="w-2.5 h-2.5 text-emerald-400" />
+                    <span>Đã Do Thám ({gameState.players.filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`]).length}):</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {gameState.players
+                      .filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`])
+                      .map((insp, idx) => {
+                        const status = gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${insp.id}`];
+                        const isSpec = status === 'SPECIAL';
+                        return (
+                          <span
+                            key={`mobile-pettigrew-insp-${insp.id || idx}`}
+                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono ${
+                              isSpec
+                                ? 'bg-amber-950 text-amber-200 border border-amber-600'
+                                : 'bg-gray-900 text-gray-400 border border-gray-700'
+                            }`}
+                          >
+                            {insp.name}: {isSpec ? '✨ Đặc Biệt' : 'Bản Sao'}
+                          </span>
+                        );
+                      })}
+                    {gameState.players.filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`]).length === 0 && (
+                      <span className="text-[9px] text-emerald-400/60 italic font-lora">
+                        Chưa do thám ai đêm nay!
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
@@ -1167,6 +1305,103 @@ export function PlayerScreen() {
                       </div>
                     );
                   })}
+              </div>
+            </div>
+          )}
+
+          {/* Severus Snape Special Characters Awakening Banner */}
+          {me.role?.id === 'SEVERUS_SNAPE' && (
+            <div className="relative rounded-2xl border-2 border-purple-500/80 p-4 sm:p-5 overflow-hidden bg-gradient-to-r from-[#180a22] via-[#240e32] to-[#180a22] shadow-[0_0_20px_rgba(168,85,247,0.18)]">
+              <CardCornerFlourish className="absolute top-2 left-2 w-5 h-5 text-purple-400 pointer-events-none" />
+              <CardCornerFlourish className="absolute top-2 right-2 w-5 h-5 text-purple-400 -scale-x-100 pointer-events-none" />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-800/80 pb-3 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2.5 rounded-xl bg-purple-950/90 border border-purple-400 text-purple-300">
+                    <FlaskConical className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono font-extrabold uppercase tracking-widest text-purple-300 bg-purple-950 px-2 py-0.5 rounded border border-purple-500">
+                        Bậc Thầy Độc Dược
+                      </span>
+                      <span className="text-[10px] font-mono text-purple-300/80">
+                        • Mạng Lưới Thân Tín Dumbledore
+                      </span>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-title font-bold text-purple-200 tracking-wide mt-0.5">
+                      Nhân Vật Đặc Biệt Cả Hai Phe
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="text-xs font-mono text-purple-300 bg-purple-950/90 px-3 py-1.5 rounded-xl border border-purple-500 self-start sm:self-auto flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse" />
+                  <span>Ẩn Phe Phái: <strong className="text-purple-200">Không Biết Ai Là Tử Thần Thực Tử</strong></span>
+                </div>
+              </div>
+
+              <p className="text-xs text-purple-200/90 font-lora mb-3.5 leading-relaxed">
+                Là người thân tín của Cụ Dumbledore, bạn biết rõ những phù thủy nắm giữ vai trò cốt cán của cả hai phe (ngoại trừ Harry Potter và Voldemort). Bạn có thể dùng thông tin này để phục vụ bất kì bên nào:
+              </p>
+
+              {/* Roster Grid of Special Characters for Snape */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                {gameState.players
+                  .filter(p => !p.isGM && p.id !== me.id && p.role && p.role.id !== 'HARRY_POTTER' && p.role.id !== 'VOLDEMORT' && p.role.id !== 'POTTER_FAKE')
+                  .map((spec, idx) => {
+                    const isSpecDead = spec.status === 'DEAD';
+                    const isSpecInjured = spec.status === 'INJURED';
+
+                    return (
+                      <div
+                        key={spec.id ? `snape-grid-card-${spec.id}` : `snape-grid-card-${idx}`}
+                        className={`p-2.5 rounded-xl border transition-all flex items-center justify-between ${
+                          isSpecDead
+                            ? 'bg-red-950/20 border-red-900/40 opacity-60'
+                            : 'bg-[#1b0c26] border-purple-500/70 shadow-[0_0_10px_rgba(168,85,247,0.15)]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 border border-purple-500/60 bg-purple-950 flex items-center justify-center">
+                            <FlaskConical className="w-4 h-4 text-purple-300" />
+                          </div>
+
+                          <div className="truncate">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`text-xs font-serif font-bold truncate ${isSpecDead ? 'line-through text-gray-500' : 'text-purple-100'}`}>
+                                {spec.name}
+                              </span>
+                            </div>
+                            <span className="text-[10px] font-mono text-purple-300 block truncate">
+                              Nhân Vật Đặc Biệt
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 ml-2">
+                          {isSpecDead ? (
+                            <span className="text-[9px] font-mono text-red-400 bg-red-950 px-1.5 py-0.5 rounded border border-red-800">
+                              Tử trận
+                            </span>
+                          ) : isSpecInjured ? (
+                            <span className="text-[9px] font-mono text-amber-300 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-600">
+                              Bị thương
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-mono text-purple-300 bg-purple-950 px-1.5 py-0.5 rounded border border-purple-600">
+                              Còn sống
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                {gameState.players.filter(p => !p.isGM && p.id !== me.id && p.role && p.role.id !== 'HARRY_POTTER' && p.role.id !== 'VOLDEMORT' && p.role.id !== 'POTTER_FAKE').length === 0 && (
+                  <p className="text-xs text-purple-400/70 font-lora italic col-span-3 py-2">
+                    Không có nhân vật đặc biệt nào khác trong bàn chơi này.
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -1368,6 +1603,14 @@ export function PlayerScreen() {
                 const isPDead = p.status === 'DEAD';
                 const isPInjured = p.status === 'INJURED';
                 const isFellowDeathEater = me.role?.faction === 'DEATH_EATERS' && p.role?.faction === 'DEATH_EATERS';
+                const isSpecialForSnape = me.role?.id === 'SEVERUS_SNAPE' && 
+                  p.role && 
+                  p.role.id !== 'HARRY_POTTER' && 
+                  p.role.id !== 'VOLDEMORT' && 
+                  p.role.id !== 'POTTER_FAKE';
+                const pettigrewInspectStatus = me.role?.id === 'PETER_PETTIGREW'
+                  ? gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`]
+                  : null;
                 const canSelectDead = isNight && me.role?.id === 'REMUS_LUPIN';
                 const disabled = isPDead && !canSelectDead;
                 const voteCount = isDay ? (voteCountsByTarget[p.id] || 0) : 0;
@@ -1414,6 +1657,12 @@ export function PlayerScreen() {
                           <CheckCircle size={14} />
                         ) : isFellowDeathEater ? (
                           <DarkMarkCrest className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : isSpecialForSnape ? (
+                          <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
+                        ) : pettigrewInspectStatus === 'SPECIAL' ? (
+                          <Target className="w-3.5 h-3.5 text-amber-400" />
+                        ) : pettigrewInspectStatus === 'NORMAL' ? (
+                          <Target className="w-3.5 h-3.5 text-gray-500" />
                         ) : isPDead ? (
                           <Skull size={14} />
                         ) : (
@@ -1440,6 +1689,24 @@ export function PlayerScreen() {
                             <span className="text-[9px] font-mono font-black text-emerald-200 bg-emerald-950/95 px-2 py-0.5 rounded border border-emerald-400 flex items-center gap-1 uppercase tracking-wider">
                               <DarkMarkCrest className="w-2.5 h-2.5 text-emerald-300" />
                               Đồng Minh: {p.role?.name} {p.role?.id === 'VOLDEMORT' ? '👑' : ''}
+                            </span>
+                          )}
+                          {isSpecialForSnape && (
+                            <span className="text-[9px] font-mono font-bold text-purple-200 bg-purple-950/95 px-2 py-0.5 rounded border border-purple-500/70 flex items-center gap-1">
+                              <FlaskConical className="w-2.5 h-2.5 text-purple-400" />
+                              Nhân Vật Đặc Biệt (Ẩn Phe)
+                            </span>
+                          )}
+                          {pettigrewInspectStatus === 'SPECIAL' && (
+                            <span className="text-[9px] font-mono font-bold text-amber-300 bg-amber-950/95 px-2 py-0.5 rounded border border-amber-500/70 flex items-center gap-1">
+                              <Target className="w-2.5 h-2.5 text-amber-400" />
+                              Do Thám: Nhân Vật Đặc Biệt ✨
+                            </span>
+                          )}
+                          {pettigrewInspectStatus === 'NORMAL' && (
+                            <span className="text-[9px] font-mono text-gray-400 bg-gray-900/95 px-2 py-0.5 rounded border border-gray-700 flex items-center gap-1">
+                              <Target className="w-2.5 h-2.5 text-gray-500" />
+                              Do Thám: Bản Sao / Thường Dân
                             </span>
                           )}
                           {isPInjured && (
@@ -1634,7 +1901,7 @@ export function PlayerScreen() {
                   (() => {
                 let skillName: string | null = null;
                 if (me.role?.id === 'HERMIONE_GRANGER') skillName = 'Soi Danh Tính';
-                if (me.role?.id === 'PETER_PETTIGREW') skillName = 'Soi Phe';
+                if (me.role?.id === 'PETER_PETTIGREW') skillName = 'Soi Đặc Biệt';
                 if (me.role?.id === 'REMUS_LUPIN') skillName = 'Hồi Sinh';
                 if (me.role?.id === 'FENRIR_GREYBACK') skillName = 'Cắn';
 
@@ -1646,7 +1913,7 @@ export function PlayerScreen() {
 
                 // Determine if current skill is on cooldown
                 const isSkillOnCooldown = (skillName === 'Soi Danh Tính' && hermioneUsed) ||
-                  (skillName === 'Soi Phe' && pettigrewUsed) ||
+                  ((skillName === 'Soi Đặc Biệt' || skillName === 'Soi Phe') && pettigrewUsed) ||
                   (skillName === 'Hồi Sinh' && lupinUsed) ||
                   (skillName === 'Cắn' && fenrirUsed);
 
@@ -1690,8 +1957,8 @@ export function PlayerScreen() {
                             <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
                               {skillName === 'Soi Danh Tính'
                                 ? 'Hỏi Merlin để biết chính xác thẻ bài thật của người này'
-                                : skillName === 'Soi Phe'
-                                  ? 'Kiểm tra xem người này có thuộc Hội Phượng Hoàng hay không'
+                                : skillName === 'Soi Đặc Biệt' || skillName === 'Soi Phe'
+                                  ? 'Do thám xem người này có phải là Nhân Vật Đặc Biệt của phe Hội hay không'
                                   : skillName === 'Hồi Sinh'
                                     ? 'Cứu sống lại 1 đồng đội đã tử trận (1 lần duy nhất)'
                                     : skillName === 'Cắn'

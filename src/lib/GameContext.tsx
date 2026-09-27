@@ -747,8 +747,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const stateKey = `${me.id}_HERMIONE_R${curState.round}`;
       if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng soi trong lượt này rồi!';
       
-      let roleName = target.role?.name || 'Không rõ';
-      if (target.role?.id === 'SEVERUS_SNAPE') roleName = 'Tử Thần Thực Tử';
+      const roleName = target.role?.name || 'Không rõ';
 
       updateState({
         ...curState,
@@ -758,21 +757,34 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       return `Vai trò của ${target.name} là: ${roleName}`;
     }
 
-    if (actionName === 'Soi Phe' && me.role?.id === 'PETER_PETTIGREW') {
-      if (curState.phase !== 'NIGHT') return 'Kỹ năng soi phe chỉ có hiệu lực vào ban đêm!';
+    if ((actionName === 'Soi Đặc Biệt' || actionName === 'Soi Phe' || actionName === 'Soi Nhân Vật Đặc Biệt') && me.role?.id === 'PETER_PETTIGREW') {
+      if (curState.phase !== 'NIGHT') return 'Kỹ năng do thám chỉ có hiệu lực vào ban đêm!';
       const stateKey = `${me.id}_PETTIGREW_R${curState.round}`;
-      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng soi phe trong lượt này rồi!';
+      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng do thám trong lượt này rồi!';
 
-      let faction = target.role?.faction === 'ORDER_OF_PHOENIX' ? 'Hội Phượng Hoàng' : 
-                    target.role?.faction === 'DEATH_EATERS' ? 'Tử Thần Thực Tử' : 'Trung Lập';
-      if (target.role?.id === 'SEVERUS_SNAPE') faction = 'Hội Phượng Hoàng';
+      if (target.role?.faction !== 'ORDER_OF_PHOENIX') {
+        return `Mục tiêu ${target.name} không thuộc Hội Phượng Hoàng! (Chỉ có thể do thám thành viên phe Hội Phượng Hoàng)`;
+      }
+
+      // Kiểm tra xem mục tiêu có phải nhân vật đặc biệt - bất kì loại nào (khác POTTER_FAKE)
+      const isSpecial = target.role.id !== 'POTTER_FAKE';
+      const inspectKey = `${me.id}_PETTIGREW_INSPECTED_${target.id}`;
 
       updateState({
         ...curState,
-        skillStates: { ...curState.skillStates, [stateKey]: true },
-        logs: [...curState.logs, `Hệ thống: Pettigrew đã soi phe của ${target.name}.`]
+        skillStates: { 
+          ...curState.skillStates, 
+          [stateKey]: true,
+          [inspectKey]: isSpecial ? 'SPECIAL' : 'NORMAL'
+        },
+        logs: [...curState.logs, `Hệ thống: Pettigrew đã bí mật do thám ${target.name}.`]
       });
-      return `Phe của ${target.name} là: ${faction}`;
+
+      if (isSpecial) {
+        return `✓ KẾT QUẢ DO THÁM: ${target.name} LÀ một Nhân Vật Đặc Biệt của Hội Phượng Hoàng!`;
+      } else {
+        return `✗ KẾT QUẢ DO THÁM: ${target.name} KHÔNG PHẢI là Nhân Vật Đặc Biệt (Chỉ là Bản Sao Potter / Thành viên thông thường)!`;
+      }
     }
 
     if (actionName === 'Hồi Sinh' && me.role?.id === 'REMUS_LUPIN') {

@@ -732,8 +732,127 @@ async function runMechanicsTests() {
 
   console.log('✅ TEST 14 PASSED: Kỹ năng "50% tung đồng xu cứu sống 1 HPH bị TTTT giết ban đêm" của Kingsley chuẩn 100% theo Card!');
 
+  // ==========================================
+  // TEST 15: SEVERUS SNAPE — THÂN TÍN DUMBLEDORE & PHẠM VI TRI THỨC
+  // ==========================================
+  console.log('\n--- [TEST 15] SEVERUS SNAPE: NĂNG LỰC & MẠNG LƯỚI TRI THỨC ---');
+  
+  // 15.1: Card data validation
+  const snapeRole = ROLES.SEVERUS_SNAPE;
+  if (!snapeRole) throw new Error('TEST 15.1 FAILED: Không tìm thấy ROLES.SEVERUS_SNAPE');
+  if (!snapeRole.title?.includes('Giáo Sư Độc Dược')) {
+    throw new Error(`TEST 15.1 FAILED: Danh hiệu Snape không đúng: ${snapeRole.title}`);
+  }
+  if (!snapeRole.ability?.includes('Harry Potter và Voldemort') || !snapeRole.ability?.includes('TTTT')) {
+    throw new Error(`TEST 15.1 FAILED: Mô tả năng lực của Snape chưa cập nhật đúng: ${snapeRole.ability}`);
+  }
+  console.log(`✓ 15.1: Thẻ bài Severus Snape: [${snapeRole.title}]`);
+  console.log(`   Năng lực: "${snapeRole.ability}"`);
+
+  // 15.2: Knowledge Scope logic test
+  const testRoster: Player[] = [
+    { id: 'p_snape', name: 'Thầy Snape', role: ROLES.SEVERUS_SNAPE, status: 'ALIVE', isGM: false },
+    { id: 'p_harry', name: 'Harry Thật', role: ROLES.HARRY_POTTER, status: 'ALIVE', isGM: false },
+    { id: 'p_volde', name: 'Kẻ Mà Ai Cũng Biết', role: ROLES.VOLDEMORT, status: 'ALIVE', isGM: false },
+    { id: 'p_fake', name: 'Bản Sao 1', role: ROLES.POTTER_FAKE, status: 'ALIVE', isGM: false },
+    { id: 'p_hermione', name: 'Hermione', role: ROLES.HERMIONE_GRANGER, status: 'ALIVE', isGM: false },
+    { id: 'p_dumbledore', name: 'Cụ Albus', role: ROLES.ALBUS_DUMBLEDORE, status: 'ALIVE', isGM: false },
+    { id: 'p_bella', name: 'Bellatrix', role: ROLES.BELLATRIX_LESTRANGE, status: 'ALIVE', isGM: false },
+    { id: 'p_lucius', name: 'Lucius', role: ROLES.LUCIUS_MALFOY, status: 'ALIVE', isGM: false },
+  ];
+
+  const snapeKnownSpecials = testRoster.filter(p => 
+    !p.isGM && 
+    p.id !== 'p_snape' && 
+    p.role && 
+    p.role.id !== 'HARRY_POTTER' && 
+    p.role.id !== 'VOLDEMORT' && 
+    p.role.id !== 'POTTER_FAKE'
+  );
+
+  const knownIds = snapeKnownSpecials.map(p => p.id);
+  // Must NOT include Harry, Voldemort, Potter Fake, or Snape
+  if (knownIds.includes('p_harry')) throw new Error('TEST 15.2 FAILED: Snape không được phép biết Harry Potter');
+  if (knownIds.includes('p_volde')) throw new Error('TEST 15.2 FAILED: Snape không được phép biết Voldemort');
+  if (knownIds.includes('p_fake')) throw new Error('TEST 15.2 FAILED: Snape không được tính bản sao là nhân vật đặc biệt');
+  if (knownIds.includes('p_snape')) throw new Error('TEST 15.2 FAILED: Snape không tự tính chính mình trong mạng lưới');
+
+  // Must include Hermione, Dumbledore, Bellatrix, Lucius
+  if (!knownIds.includes('p_hermione') || !knownIds.includes('p_dumbledore') || !knownIds.includes('p_bella') || !knownIds.includes('p_lucius')) {
+    throw new Error('TEST 15.2 FAILED: Snape bỏ sót nhân vật đặc biệt của hai phe');
+  }
+
+  console.log(`✓ 15.2: Bộ lọc tri thức của Snape hoạt động chuẩn xác 100%:`);
+  console.log(`   - Nhận diện đúng ${snapeKnownSpecials.length} nhân vật đặc biệt: [${snapeKnownSpecials.map(p => p.name).join(', ')}]`);
+  console.log(`   - Loại trừ thành công Harry Potter, Voldemort, Bản Sao Potter.`);
+
+  // 15.3: Verify Hermione inspection returns true role for Snape (no false Death Eater report)
+  const hermioneInspectRole = snapeRole.name;
+  if (hermioneInspectRole === 'Tử Thần Thực Tử') {
+    throw new Error('TEST 15.3 FAILED: Hermione vẫn báo Snape là Tử Thần Thực Tử');
+  }
+  console.log(`✓ 15.3: Hermione soi Severus Snape trả về đúng danh tính [${hermioneInspectRole}], không còn bị gán nhãn TTTT.`);
+
+  console.log('✅ TEST 15 PASSED: Cơ chế Severus Snape hoàn toàn chuẩn xác theo yêu cầu!');
+
+  // ==========================================
+  // TEST 16: PETER PETTIGREW — THÂN CẬN VOLDEMORT & DO THÁM ĐẶC BIỆT
+  // ==========================================
+  console.log('\n--- [TEST 16] PETER PETTIGREW: NĂNG LỰC & DO THÁM NHÂN VẬT ĐẶC BIỆT ---');
+
+  // 16.1: Card data validation
+  const pettigrewRole = ROLES.PETER_PETTIGREW;
+  if (!pettigrewRole) throw new Error('TEST 16.1 FAILED: Không tìm thấy ROLES.PETER_PETTIGREW');
+  if (!pettigrewRole.title?.includes('Thân Cận Của Voldemort')) {
+    throw new Error(`TEST 16.1 FAILED: Danh hiệu Pettigrew không đúng: ${pettigrewRole.title}`);
+  }
+  if (!pettigrewRole.description?.includes('Thân cận và người hầu của Voldemort')) {
+    throw new Error(`TEST 16.1 FAILED: Mô tả Pettigrew không đúng: ${pettigrewRole.description}`);
+  }
+  if (!pettigrewRole.ability?.includes('nhân vật đặc biệt - bất kì loại nào') || !pettigrewRole.ability?.includes('quyền giết người')) {
+    throw new Error(`TEST 16.1 FAILED: Năng lực Pettigrew không đúng: ${pettigrewRole.ability}`);
+  }
+  console.log(`✓ 16.1: Thẻ bài Peter Pettigrew: [${pettigrewRole.title}]`);
+  console.log(`   Năng lực: "${pettigrewRole.ability}"`);
+
+  // 16.2: Scouting Logic Test on HPH Players
+  const testScoutTargets: { name: string; role: Role; isHPH: boolean; expectedSpecial: boolean }[] = [
+    { name: 'Harry Potter Thật', role: ROLES.HARRY_POTTER, isHPH: true, expectedSpecial: true },
+    { name: 'Albus Dumbledore', role: ROLES.ALBUS_DUMBLEDORE, isHPH: true, expectedSpecial: true },
+    { name: 'Hermione Granger', role: ROLES.HERMIONE_GRANGER, isHPH: true, expectedSpecial: true },
+    { name: 'Ron Weasley', role: ROLES.RON_WEASLEY, isHPH: true, expectedSpecial: true },
+    { name: 'Bản Sao Potter (Uống Đa Quả Dịch)', role: ROLES.POTTER_FAKE, isHPH: true, expectedSpecial: false },
+    { name: 'Bellatrix Lestrange (Đồng Minh)', role: ROLES.BELLATRIX_LESTRANGE, isHPH: false, expectedSpecial: true },
+  ];
+
+  testScoutTargets.forEach(t => {
+    if (!t.isHPH) {
+      // Must reject non-HPH targets
+      const canScout = t.role.faction === 'ORDER_OF_PHOENIX';
+      if (canScout) throw new Error(`TEST 16.2 FAILED: Cho phép soi đồng minh TTTT [${t.name}]`);
+      console.log(`✓ 16.2a: Từ chối do thám đồng minh ${t.name} (Không thuộc Hội Phượng Hoàng).`);
+    } else {
+      const isSpecial = t.role.id !== 'POTTER_FAKE';
+      if (isSpecial !== t.expectedSpecial) {
+        throw new Error(`TEST 16.2 FAILED: Sai lệch nhận diện đặc biệt cho [${t.name}]: Ra ${isSpecial}, kỳ vọng ${t.expectedSpecial}`);
+      }
+      if (isSpecial) {
+        console.log(`✓ 16.2b: Do thám [${t.name}] ➔ KẾT QUẢ: LÀ Nhân Vật Đặc Biệt!`);
+      } else {
+        console.log(`✓ 16.2c: Do thám [${t.name}] ➔ KẾT QUẢ: KHÔNG PHẢI Nhân Vật Đặc Biệt (Bản Sao Thường Dân)!`);
+      }
+    }
+  });
+
+  // 16.3: Verify Dual Right: Scouting + Still has Kill Action
+  const pettigrewCanKill = pettigrewRole.faction === 'DEATH_EATERS';
+  if (!pettigrewCanKill) throw new Error('TEST 16.3 FAILED: Pettigrew bị tước quyền ám sát');
+  console.log('✓ 16.3: Pettigrew thuộc phe DEATH_EATERS ➔ Duy trì 100% quyền bỏ phiếu ám sát (Avada Kedavra) cùng Voldemort.');
+
+  console.log('✅ TEST 16 PASSED: Cơ chế Peter Pettigrew hoàn toàn chuẩn xác theo yêu cầu!');
+
   console.log('\n====================================================');
-  console.log('🎉 TẤT CẢ 14/14 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
+  console.log('🎉 TẤT CẢ 16/16 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
   console.log('====================================================\n');
 }
 

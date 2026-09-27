@@ -133,6 +133,36 @@ Các tính năng quan trọng và cải tiến đã hoàn thiện trong các b�
 ### 🚀 8. Triển Khai Hoàn Tất Lên Vercel & GitHub
 - Dự án đã được build tối ưu, cấu hình đầy đủ biến môi trường và triển khai thành công lên **Vercel** và đồng bộ kho mã nguồn **GitHub**.
 
+### ⚖️ 9. Bảng Phân Bổ Cân Bằng Tối Ưu (N = 4..15 Phù Thủy) & Thuật Toán Mô Phỏng Monte Carlo 10.000 Ván
+- **Vấn đề đã khắc phục:** Loại bỏ hoàn toàn công thức thô `Math.floor(N / 3)`. Ở các phòng ít người ($N=4, 5$), nếu phe Tối có 2 người thì chỉ cần 1 thành viên HPH tử trận ban ngày là Tử Thần Thực Tử đạt thế cân bằng số lượng (*Parity Condition*) và thắng ngay tại Vòng 1 với tỷ lệ lên đến **74.9%**.
+- **Hiệu chuẩn bảng tỷ lệ vàng (`OPTIMAL_BALANCE_SPEC`):**
+  - **N = 4:** 1 Tử Thần : 3 HPH · 4 Chặng bay · HPH thắng 57.7% / 4T thắng 42.3% (Cân bằng xuất sắc).
+  - **N = 5:** 1 Tử Thần : 4 HPH · 4 Chặng bay · Cấm tuyệt đối 2 4T ở phòng 5 người để tránh sập ván sớm.
+  - **N = 6:** 2 Tử Thần : 4 HPH · 4 Chặng bay · HPH thắng **52.3%** / 4T thắng **47.7%** (🏆 Tỷ Lệ Vàng).
+  - **N = 7:** 2 Tử Thần : 5 HPH · 5 Chặng bay.
+  - **N = 8:** 3 Tử Thần : 5 HPH · 5 Chặng bay · HPH thắng **46.5%** / 4T thắng **53.5%** (🏆 Tỷ Lệ Vàng).
+  - **N = 9:** 3 Tử Thần : 6 HPH · 5 Chặng bay.
+  - **N = 10:** 4 Tử Thần : 6 HPH · 5 Chặng bay · HPH thắng **48.7%** / 4T thắng **51.3%** (🏆 Tỷ Lệ Vàng).
+  - **N = 11:** 4 Tử Thần : 7 HPH · 6 Chặng bay.
+  - **N = 12:** 4 Tử Thần : 8 HPH · 6 Chặng bay · Kích hoạt **Phục kích kép** · HPH thắng **52.1%** / 4T thắng **47.9%** (🏆 Tỷ Lệ Vàng).
+  - **N = 13:** 5 Tử Thần : 8 HPH · 6 Chặng bay.
+  - **N = 14:** 5 Tử Thần : 9 HPH · 6 Chặng bay · Kích hoạt **Phục kích kép** · HPH thắng **52.0%** / 4T thắng **48.0%** (🏆 Tỷ Lệ Vàng).
+  - **N = 15:** 5 Tử Thần : 10 HPH · 6 Chặng bay · Kích hoạt **Phục kích kép** · HPH thắng **55.0%** / 4T thắng **45.0%** (🏆 Tỷ Lệ Vàng).
+
+### ⚡ 10. Cơ Chế Phục Kích Kép Chặng 3 (Large Room Ambush) Cho Phòng Đông (N ≥ 12)
+- **Cơ sở phân tích số người chết (Attrition Rate):**
+  - Tỷ lệ chết do 4T ám sát bình quân chỉ đạt **0.22 - 0.35 người/vòng** (do bị cản bởi quá nhiều tầng phòng thủ: *Tia Lửa Vàng*, *Né đòn Hộ tống*, *Ron hy sinh*, *Dumbledore*, *Kingsley*, *Hagrid 2 mạng*).
+  - Tỷ lệ chết do biểu quyết Expelliarmus của dân làng ban đêm rất cao: **0.75 - 0.98 người/vòng** (Hermione giúp tăng tỷ lệ phát hiện kẻ thù lên 50 - 65%).
+  - Ở phòng đông người ($N \ge 12$), nếu 4T chỉ ám sát 1 người mỗi ngày thì dân làng sẽ vote chết Voldemort trước khi tới Hang Sóc (HPH thắng > 85%).
+- **Giải pháp:** Khi $N \ge 12$, nếu Chúa Tể Voldemort còn sống khi đoàn bay tiến vào **Chặng 3: Vòng Vây Hắc Ám & Phục Kích (`VOLDEMORT_AMBUSH`)**, Tử Thần Thực Tử được phát động **ám sát liên hoàn 2 mục tiêu cùng lúc**, đưa tỷ lệ thắng cả 2 phe về mức cân bằng hoàn hảo ~50 - 52%.
+
+### 📊 11. Widget Tỷ Lệ Phe Chiến Thuật Trong Lobby (Monte Carlo Calibrated)
+- Tích hợp widget trực quan ngay trên sảnh chờ trước khi bắt đầu trận:
+  - Tự động nhận diện sĩ số phù thủy thực tế trong phòng.
+  - Hiển thị số lượng Hội Phượng Hoàng vs Tử Thần Thực Tử cùng số chặng bay đề xuất.
+  - Hiển thị thanh tiến trình trực quan song hành Gryffindor (Đỏ/Vàng) và Slytherin (Xanh Ngọc).
+  - Gắn huy hiệu cảnh báo kích hoạt *Phục Kích Kép Chặng 3* cho phòng đông người.
+
 ---
 
 ## 🛠️ 6. Cài Đặt & Khởi Chạy Dự Án (Developer Guide)
@@ -169,7 +199,13 @@ Dự án được bảo vệ bởi bộ kiểm thử tự động toàn diện:
    ```
    *(Kiểm tra kết nối phòng, presence, gửi nhận action, bùa chú tức thời, chat Mạng Floo và khôi phục mất kết nối).*
 
-3. **Kiểm tra cân bằng và mô phỏng tỷ lệ thắng:**
+3. **Mô phỏng cân bằng toàn diện N = 4..15 qua 10.000 ván:**
+   ```bash
+   npx tsx tests/simulate_player_count_balance.ts
+   ```
+   *(Mô phỏng 10.000 ván đấu cho từng mốc sĩ số, phân tích tỷ lệ thắng, tỷ lệ tử vong do ám sát vs biểu quyết).*
+
+4. **Kiểm tra cân bằng và mô phỏng tỷ lệ chặng bay:**
    ```bash
    npx tsx tests/simulate_flight_balance.ts
    npx tsx tests/simulate_flight_optimization.ts

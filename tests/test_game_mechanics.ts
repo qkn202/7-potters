@@ -66,23 +66,23 @@ async function runMechanicsTests() {
   // TEST 2: Weasleys' Wizard Wheezes Items Initialization
   // -------------------------------------------------------------
   console.log('\n--- [TEST 2] KHO BẢO BỐI TIỆM PHÙ THỦY WEASLEY (INITIAL STATE) ---');
-  if (INITIAL_WEASLEY_ITEMS.length === 3) {
+  if (INITIAL_WEASLEY_ITEMS.length === 2) {
     console.log(`✓ Đã nạp thành công ${INITIAL_WEASLEY_ITEMS.length} bảo bối đặc biệt.`);
   } else {
-    throw new Error('TEST 2 FAILED: Số lượng bảo bối không bằng 3');
+    throw new Error('TEST 2 FAILED: Số lượng bảo bối không bằng 2');
   }
 
   const darknessItem = INITIAL_WEASLEY_ITEMS.find(i => i.id === 'DARKNESS_POWDER');
   const fanciesItem = INITIAL_WEASLEY_ITEMS.find(i => i.id === 'FAINTING_FANCIES');
-  const mirrorItem = INITIAL_WEASLEY_ITEMS.find(i => i.id === 'TWO_WAY_MIRROR');
+  const mirrorItem = INITIAL_WEASLEY_ITEMS.find((i: any) => i.id === 'TWO_WAY_MIRROR');
 
-  if (darknessItem && fanciesItem && mirrorItem) {
+  if (darknessItem && fanciesItem && !mirrorItem) {
     console.log(`✓ [${darknessItem.name}]: Cho phép che giấu mọi đòn ám sát trong đêm.`);
     console.log(`✓ [${fanciesItem.name}]: Làm ngất và cấm biểu quyết 1 mục tiêu.`);
-    console.log(`✓ [${mirrorItem.name}]: Gương 2 chiều hé lộ phe phái bí mật.`);
-    console.log('✅ TEST 2 PASSED: Toàn bộ 3 bảo bối Weasley có cấu trúc hợp lệ!');
+    console.log(`✓ [Gương Hai Chiều]: Đã loại bỏ hoàn toàn khỏi kho bảo bối theo yêu cầu.`);
+    console.log('✅ TEST 2 PASSED: Toàn bộ 2 bảo bối Weasley có cấu trúc hợp lệ!');
   } else {
-    throw new Error('TEST 2 FAILED: Thiếu bảo bối trong danh sách khởi tạo');
+    throw new Error('TEST 2 FAILED: Danh sách bảo bối khởi tạo không chính xác');
   }
 
   // -------------------------------------------------------------
@@ -282,54 +282,17 @@ async function runMechanicsTests() {
   }
   
   // -------------------------------------------------------------
-  // TEST 9: Sirius's Two-Way Mirror Faction Inspection Mechanics
+  // TEST 9: Loại Bỏ Gương Hai Chiều Khỏi Kho Bảo Bối Weasley
   // -------------------------------------------------------------
-  console.log('\n--- [TEST 9] GƯƠNG HAI CHIỀU CỦA SIRIUS (SOI PHE BÍ MẬT) ---');
-  const snapeRole = ROLES['SEVERUS_SNAPE'];
-
-  // Mirror Inspection Function Logic
-  function inspectWithTwoWayMirror(target: Player): string {
-    let targetFaction = target.role?.faction === 'ORDER_OF_PHOENIX' 
-      ? 'Hội Phượng Hoàng 🦅' 
-      : target.role?.faction === 'DEATH_EATERS' 
-      ? 'Tử Thần Thực Tử 🐍' 
-      : 'Trung Lập ⚖️';
-
-    // Severus Snape: Occlumency lore protection
-    if (target.role?.id === 'SEVERUS_SNAPE') {
-      targetFaction = 'Hội Phượng Hoàng 🦅';
-    }
-    return `🪞 Qua Gương Hai Chiều của Sirius, bạn nhìn thấu tâm can của ${target.name}: Người này thuộc phe [${targetFaction}]!`;
-  }
-
-  // Case A: Inspect Bellatrix Lestrange (Death Eater)
-  const bellaPlayer = createMockPlayer('p_bella', 'Bellatrix Lestrange', bellatrixRole, 'ALIVE');
-  const bellaInspection = inspectWithTwoWayMirror(bellaPlayer);
-  if (bellaInspection.includes('Tử Thần Thực Tử 🐍')) {
-    console.log('✓ Soi Bellatrix Lestrange qua Gương Hai Chiều ➔ Phát hiện chính xác: [Tử Thần Thực Tử 🐍]');
+  console.log('\n--- [TEST 9] XÁC NHẬN LOẠI BỎ ITEM GƯƠNG HAI CHIỀU CỦA SIRIUS ---');
+  const hasMirrorInStore = INITIAL_WEASLEY_ITEMS.some((i: any) => i.id === 'TWO_WAY_MIRROR');
+  if (!hasMirrorInStore) {
+    console.log('✓ Gương Hai Chiều không còn tồn tại trong kho bảo bối Weasley.');
   } else {
-    throw new Error(`TEST 9.1 FAILED: Bellatrix không ra Tử Thần Thực Tử: ${bellaInspection}`);
+    throw new Error('TEST 9 FAILED: Gương Hai Chiều vẫn còn trong INITIAL_WEASLEY_ITEMS');
   }
 
-  // Case B: Inspect Hermione Granger (Order of Phoenix)
-  const hermionePlayer = createMockPlayer('p_hermione', 'Hermione Granger', hermioneRole, 'ALIVE');
-  const hermioneInspection = inspectWithTwoWayMirror(hermionePlayer);
-  if (hermioneInspection.includes('Hội Phượng Hoàng 🦅')) {
-    console.log('✓ Soi Hermione Granger qua Gương Hai Chiều ➔ Xác nhận đồng minh: [Hội Phượng Hoàng 🦅]');
-  } else {
-    throw new Error(`TEST 9.2 FAILED: Hermione không ra Hội Phượng Hoàng: ${hermioneInspection}`);
-  }
-
-  // Case C: Inspect Severus Snape (Spy / Occlumency Master)
-  const snapePlayer = createMockPlayer('p_snape', 'Severus Snape', snapeRole, 'ALIVE');
-  const snapeInspection = inspectWithTwoWayMirror(snapePlayer);
-  if (snapeInspection.includes('Hội Phượng Hoàng 🦅')) {
-    console.log('✓ Soi Severus Snape qua Gương Hai Chiều ➔ Bế Quan Bí Thuật bảo vệ danh tính: [Hội Phượng Hoàng 🦅]');
-  } else {
-    throw new Error(`TEST 9.3 FAILED: Snape không được ngụy trang phe: ${snapeInspection}`);
-  }
-
-  console.log('✅ TEST 9 PASSED: Gương Hai Chiều của Sirius soi phe chính xác và tuân thủ lore ma thuật!');
+  console.log('✅ TEST 9 PASSED: Loại bỏ hoàn toàn item Gương Hai Chiều khỏi game!');
 
   // -------------------------------------------------------------
   // TEST 10: Cinematic Visual FX (Hiệu Ứng Thị Giác Điện Ảnh)

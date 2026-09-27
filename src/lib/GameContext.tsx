@@ -63,16 +63,6 @@ export const INITIAL_WEASLEY_ITEMS: WeasleyItem[] = [
     icon: 'Flame',
     phaseAllowed: 'ANY',
   },
-  {
-    id: 'TWO_WAY_MIRROR',
-    name: 'Gương Hai Chiều Của Sirius',
-    count: 1,
-    maxCount: 1,
-    description: 'Chiếu gương về phía 1 người chơi trên bầu trời để soi rõ phe phái bí mật (Hội Phượng Hoàng hay Tử Thần Thực Tử).',
-    flavor: 'Bộ gương liên lạc bí mật từng được James Potter và Sirius Black sử dụng tại Hogwarts.',
-    icon: 'Eye',
-    phaseAllowed: 'ANY',
-  },
 ];
 
 export const SKY_EVENTS: Record<number, SkyEvent> = {
@@ -1922,31 +1912,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       newSkillStates[`FAINTING_FANCIES_${targetId}_R${stateRef.current.round}`] = true;
       logText = `🍬 ${actor.name} đã lén thả Kẹo Ngất Xỉu Cấp Tốc vào túi áo của ${target?.name}! ${target?.name} đã ngất xỉu và bị tước quyền bỏ phiếu đêm nay!`;
       privateReturnMsg = logText;
-    } else if (itemId === 'TWO_WAY_MIRROR') {
-      if (!targetId) return 'Vui lòng chọn 1 người để kết nối Gương Hai Chiều!';
-      const target = stateRef.current.players.find(p => p.id === targetId);
-      if (!target) return 'Không tìm thấy người chơi mục tiêu!';
-
-      let targetFaction = target.role?.faction === 'ORDER_OF_PHOENIX' 
-        ? 'Hội Phượng Hoàng 🦅' 
-        : target.role?.faction === 'DEATH_EATERS' 
-        ? 'Tử Thần Thực Tử 🐍' 
-        : 'Trung Lập ⚖️';
-
-      // Severus Snape: Bậc thầy Bế Quan Bí Thuật (Occlumency) - Luôn hiển thị phe Hội Phượng Hoàng khi soi
-      if (target.role?.id === 'SEVERUS_SNAPE') {
-        targetFaction = 'Hội Phượng Hoàng 🦅';
-      }
-
-      logText = `🪞 ${actor.name} đã chiếu Gương Hai Chiều về phía ${target.name}! Kênh liên lạc bí mật đã được mở giữa hai người.`;
-      privateReturnMsg = `🪞 Qua Gương Hai Chiều của Sirius, bạn nhìn thấu tâm can của ${target.name}: Người này thuộc phe [${targetFaction}]!`;
-      activeFX = {
-        id: `fx_mirror_${Date.now()}`,
-        type: 'TWO_WAY_MIRROR',
-        title: '🪞 GƯƠNG HAI CHIỀU SIRIUS',
-        subtitle: `Kênh liên lạc bí thuật kết nối tới ${target.name}!`,
-        timestamp: Date.now(),
-      };
     }
 
     updateState({

@@ -46,7 +46,7 @@ export interface RoleHistoryEntry {
 
 export type GamePhase = 'LOBBY' | 'DAY' | 'NIGHT' | 'END';
 
-export type WeasleyItemId = 'DARKNESS_POWDER' | 'FAINTING_FANCIES' | 'TWO_WAY_MIRROR';
+export type WeasleyItemId = 'DARKNESS_POWDER' | 'FAINTING_FANCIES';
 
 export interface WeasleyItem {
   id: WeasleyItemId;

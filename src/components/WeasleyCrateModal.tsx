@@ -40,8 +40,6 @@ export function WeasleyCrateModal({
         return <Sparkles className="w-5 h-5 text-purple-400" />;
       case 'FAINTING_FANCIES':
         return <Cookie className="w-5 h-5 text-amber-400" />;
-      case 'TWO_WAY_MIRROR':
-        return <Eye className="w-5 h-5 text-cyan-400" />;
       default:
         return <Package className="w-5 h-5 text-amber-400" />;
     }
@@ -50,10 +48,7 @@ export function WeasleyCrateModal({
   const handleActivate = () => {
     if (!selectedItem) return;
 
-    if (
-      (selectedItem.id === 'FAINTING_FANCIES' || selectedItem.id === 'TWO_WAY_MIRROR') &&
-      !selectedTargetId
-    ) {
+    if (selectedItem.id === 'FAINTING_FANCIES' && !selectedTargetId) {
       setActionFeedback('⚠️ Vui lòng chọn 1 người chơi để áp dụng bảo bối!');
       return;
     }
@@ -69,17 +64,6 @@ export function WeasleyCrateModal({
         res.includes('hết'))
     ) {
       setActionFeedback(res);
-      return;
-    }
-
-    if (typeof res === 'string' && selectedItem.id === 'TWO_WAY_MIRROR') {
-      setActionFeedback(res);
-      setTimeout(() => {
-        setActionFeedback(null);
-        setSelectedItem(null);
-        setSelectedTargetId('');
-        onClose();
-      }, 3500);
       return;
     }
 
@@ -225,12 +209,10 @@ export function WeasleyCrateModal({
           {/* Target selection if required */}
           {selectedItem &&
             selectedItem.count > 0 &&
-            (selectedItem.id === 'FAINTING_FANCIES' || selectedItem.id === 'TWO_WAY_MIRROR') && (
+            selectedItem.id === 'FAINTING_FANCIES' && (
               <div className="mt-3 pt-3 border-t border-[#7a5229]/50 bg-[#170a04] p-3 rounded-xl border border-[#7a5229]/40">
                 <label className="block text-xs font-serif font-bold text-amber-300 mb-1.5">
-                  {selectedItem.id === 'FAINTING_FANCIES'
-                    ? '🎯 Chọn mục tiêu chuốc Kẹo Ngất Xỉu (Mất quyền vote đêm nay):'
-                    : '🪞 Chọn đồng đội để soi Gương Hai Chiều:'}
+                  🎯 Chọn mục tiêu chuốc Kẹo Ngất Xỉu (Mất quyền vote đêm nay):
                 </label>
                 <select
                   value={selectedTargetId}

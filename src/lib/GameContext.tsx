@@ -182,6 +182,22 @@ const DEFAULT_STATE: GameState = {
   skillStates: {},
   interruptState: null,
   activeFX: null,
+  previousRoleMap: {},
+};
+
+// Helper to normalize action names for consistent comparison (case-insensitive)
+const normalizeAction = (actionName: string): string => actionName.toLowerCase().trim();
+const isKillAction = (actionName: string): boolean => normalizeAction(actionName) === 'giết';
+const isVoteAction = (actionName: string): boolean => {
+  const n = normalizeAction(actionName);
+  return n === 'biểu quyết tước đũa' || n === 'bỏ phiếu treo cổ';
+};
+const isEscortAction = (actionName: string): boolean => normalizeAction(actionName) === 'bay hộ tống';
+const isProtectAction = (actionName: string): boolean => normalizeAction(actionName) === 'bảo vệ';
+const isHagridEscortAction = (actionName: string): boolean => normalizeAction(actionName) === 'bảo kê';
+const isKingsleyAction = (actionName: string): boolean => {
+  const n = normalizeAction(actionName);
+  return n === 'chỉ huy phản công' || n === 'kingsley kích hoạt';
 };
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -252,6 +268,166 @@ export const validateWeasleyItemUse = (
 
   return { allowed: true };
 };
+
+/**
+ * Fisher-Yates (Knuth) unbiased array shuffle algorithm.
+ * Guarantees every permutation has exactly 1 / n! uniform probability.
+ */
+export function fisherYatesShuffle<T>(array: T[]): T[] {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+/**
+ * Calculates a penalty score for an assignment based on anti-repetition rules.
+ * Higher penalty = more repetitive / less desirable.
+ */
+export function calculateAssignmentPenalty(
+  assignment: Role[],
+  players: Player[],
+  prevMap: Record<string, string>
+): number {
+  let penalty = 0;
+  for (let i = 0; i < players.length; i++) {
+    const player = players[i];
+    const prevRoleId = prevMap[player.id] || player.previousRoleId;
+    if (!prevRoleId) continue;
+
+    const assignedRole = assignment[i];
+    if (!assignedRole) continue;
+
+    // Phạt nặng nếu cùng 1 người nhận lại đúng vai cũ liên tiếp
+    if (assignedRole.id === prevRoleId) {
+      if (assignedRole.id === 'HARRY_POTTER' || assignedRole.id === 'VOLDEMORT') {
+        penalty += 100; // Cực kỳ tránh lặp vai Harry hoặc Voldemort cho cùng 1 người!
+      } else {
+        penalty += 25; // Tránh lặp lại đúng nhân vật cũ
+      }
+    }
+
+    // Phạt nhẹ nếu lặp lại cùng một phe phái khi phòng đủ đông (>= 5 người)
+    if (players.length >= 5) {
+      const prevRole = ROLES[prevRoleId];
+      if (prevRole && prevRole.faction === assignedRole.faction) {
+        penalty += 2;
+      }
+    }
+  }
+  return penalty;
+}
+
+/**
+ * Fair role assignment engine:
+ * 1. Uses Fisher-Yates shuffle to sample roles and eliminate TimSort biases.
+ * 2. Incorporates Polyjuice Decoys (POTTER_FAKE) into the good pool to fit the 7 Potters theme.
+ * 3. Uses a 40-iteration penalty-minimization optimizer to ensure players do not repeat consecutive roles.
+ * 4. Eliminates the tail `.pop()` bias so Host (Player 0) has equal chance for all roles.
+ */
+export function assignRolesFairly(
+  players: Player[],
+  previousRoleMap?: Record<string, string>
+): { players: Player[]; previousRoleMap: Record<string, string> } {
+  const nonGmPlayers = players.filter(p => !p.isGM);
+  const N = nonGmPlayers.length;
+  if (N === 0) {
+    return { players, previousRoleMap: previousRoleMap || {} };
+  }
+
+  let evilCount = Math.max(1, Math.floor(N / 3));
+  let goodCount = N - evilCount;
+
+  // Base pool of Death Eaters
+  const baseEvilPool: Role[] = [
+    ROLES.BELLATRIX_LESTRANGE,
+    ROLES.LUCIUS_MALFOY,
+    ROLES.PETER_PETTIGREW,
+    ROLES.FENRIR_GREYBACK,
+  ];
+
+  // Base pool of Order of Phoenix & Polyjuice Decoys
+  const baseGoodPool: Role[] = [
+    ROLES.POTTER_FAKE,
+    ROLES.POTTER_FAKE,
+    ROLES.ALBUS_DUMBLEDORE,
+    ROLES.RON_WEASLEY,
+    ROLES.HERMIONE_GRANGER,
+    ROLES.SEVERUS_SNAPE,
+    ROLES.REMUS_LUPIN,
+    ROLES.ALASTOR_MOODY,
+    ROLES.RUBEUS_HAGRID,
+    ROLES.ARTHUR_WEASLEY,
+    ROLES.FRED_WEASLEY,
+    ROLES.GEORGE_WEASLEY,
+    ROLES.MUNDUNGUS_FLETCHER,
+    ROLES.KINGSLEY_SHACKLEBOLT,
+    ROLES.BILL_WEASLEY,
+    ROLES.FLEUR_DELACOUR,
+    ROLES.NYMPHADORA_TONKS,
+  ];
+
+  const shuffledEvilPool = fisherYatesShuffle(baseEvilPool);
+  const shuffledGoodPool = fisherYatesShuffle(baseGoodPool);
+
+  const selectedRoles: Role[] = [];
+
+  if (goodCount > 0) {
+    selectedRoles.push(ROLES.HARRY_POTTER);
+    goodCount--;
+  }
+  if (evilCount > 0) {
+    selectedRoles.push(ROLES.VOLDEMORT);
+    evilCount--;
+  }
+
+  for (let i = 0; i < evilCount; i++) {
+    selectedRoles.push(shuffledEvilPool[i % shuffledEvilPool.length] || ROLES.PETER_PETTIGREW);
+  }
+  for (let i = 0; i < goodCount; i++) {
+    selectedRoles.push(shuffledGoodPool[i % shuffledGoodPool.length] || ROLES.POTTER_FAKE);
+  }
+
+  const prevMap = previousRoleMap || {};
+
+  // Find the permutation of selectedRoles that minimizes penalty
+  let bestAssignment = fisherYatesShuffle(selectedRoles);
+  let bestPenalty = calculateAssignmentPenalty(bestAssignment, nonGmPlayers, prevMap);
+
+  if (bestPenalty > 0) {
+    for (let attempt = 0; attempt < 40; attempt++) {
+      const candidate = fisherYatesShuffle(selectedRoles);
+      const penalty = calculateAssignmentPenalty(candidate, nonGmPlayers, prevMap);
+      if (penalty < bestPenalty) {
+        bestAssignment = candidate;
+        bestPenalty = penalty;
+        if (bestPenalty === 0) break;
+      }
+    }
+  }
+
+  const newRoleMap: Record<string, string> = { ...prevMap };
+  let assignIdx = 0;
+
+  const newPlayers = players.map(p => {
+    if (p.isGM) return p;
+    const assignedRole = bestAssignment[assignIdx++] || ROLES.POTTER_FAKE;
+    newRoleMap[p.id] = assignedRole.id;
+    return {
+      ...p,
+      role: assignedRole,
+      status: 'ALIVE' as const,
+      previousRoleId: assignedRole.id,
+    };
+  });
+
+  return {
+    players: newPlayers,
+    previousRoleMap: newRoleMap,
+  };
+}
 
 const SESSION_EXPIRY_MS = 4 * 60 * 60 * 1000; // 4 hours session validity
 
@@ -383,20 +559,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     updateState(prev => {
       const me = prev.players.find(p => p.id === actorId);
       if (!me || me.status === 'DEAD' || me.isGM) return prev;
-      const target = targetId === 'ALL' ? null : prev.players.find(p => p.id === targetId);
-      if (targetId !== 'ALL' && !target) return prev;
+      const target = (targetId === 'ALL' || targetId === 'NONE') ? null : prev.players.find(p => p.id === targetId);
+      if (targetId !== 'ALL' && targetId !== 'NONE' && !target) return prev;
       
-      const isPublicVote = actionName === 'Bỏ phiếu Treo Cổ' || actionName === 'Biểu quyết Tước Đũa';
-      const isEscort = actionName === 'Bay Hộ Tống';
+      const normalizedAction = actionName.toLowerCase().trim();
+      const isPublicVote = normalizedAction === 'biểu quyết tước đũa' || normalizedAction === 'bỏ phiếu treo cổ';
+      const isEscort = normalizedAction === 'bay hộ tống';
       const logMessage = isPublicVote
         ? `[${me.name}] đã biểu quyết Tước Đũa (Expelliarmus).`
-        : isEscort
-          ? `[${me.name}] đã cơ động bay hộ tống sát cánh cùng [${target?.name}].`
-          : `[${me.name}] đã xác nhận hành động bí mật.`;
+        : `[${me.name}] đã xác nhận hành động bí mật.`;
 
-      const newEscortPairs = isEscort && target
-        ? { ...(prev.escortPairs || {}), [me.id]: target.id }
-        : prev.escortPairs;
+      const newEscortPairs = { ...(prev.escortPairs || {}) };
+      if (isEscort && target) {
+        newEscortPairs[me.id] = target.id;
+      } else {
+        delete newEscortPairs[me.id];
+      }
 
       return {
         ...prev,
@@ -573,6 +751,28 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, [updateState]);
 
+  // Auto-resolve interrupt with random choice after timeout (for offline players)
+  const resolveInterruptAuto = useCallback(() => {
+    const curState = stateRef.current;
+    if (!curState.interruptState || !curState.resolutionReport) return;
+    const { type, playerId } = curState.interruptState;
+
+    // Find valid targets (alive, not GM, not self)
+    const validTargets = curState.players.filter(p =>
+      p.id !== playerId && p.status !== 'DEAD' && !p.isGM
+    );
+
+    if (validTargets.length === 0) {
+      // No valid targets, just resolve without action
+      resolveInterruptCore(playerId);
+      return;
+    }
+
+    // Random target
+    const randomTarget = validTargets[Math.floor(Math.random() * validTargets.length)];
+    resolveInterruptCore(randomTarget.id);
+  }, [resolveInterruptCore]);
+
   // Setup Network Listeners
   const attachNetworkListeners = useCallback((net: SevenPottersNetwork, asHost: boolean) => {
     net.onConnectionStatusChange = (status, error) => {
@@ -677,7 +877,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         } else if (msg.type === 'ESCORT_SUBMIT') {
           const { targetId } = msg.payload || {};
           if (targetId) {
-            executePlayerActionCore(msg.senderId, 'Bay Hộ Tống', targetId);
+            executePlayerActionCore(msg.senderId, 'bay hộ tống', targetId);
           }
         } else if (msg.type === 'PLAYER_LEFT') {
           const leavingId = msg.payload?.playerId || msg.senderId;
@@ -821,6 +1021,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     return () => clearInterval(interval);
   }, [hostDisconnectedAt]);
+
+  // Auto-resolve interrupt after 60 seconds timeout
+  useEffect(() => {
+    if (!gameState.interruptState) return;
+
+    const timeoutId = setTimeout(() => {
+      console.log('[7-Potters] Interrupt timeout - auto-resolving');
+      resolveInterruptAuto();
+    }, 60000); // 60 seconds
+
+    return () => clearTimeout(timeoutId);
+  }, [gameState.interruptState, resolveInterruptAuto]);
 
   // Mobile background tab switch & network resume listener
   useEffect(() => {
@@ -1260,58 +1472,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const N = playersToAssign.length;
       if (N === 0) return prev;
 
-      let evilCount = Math.max(1, Math.floor(N / 3));
-      let goodCount = N - evilCount;
-
-      const evilPool = [
-        ROLES.BELLATRIX_LESTRANGE,
-        ROLES.LUCIUS_MALFOY,
-        ROLES.PETER_PETTIGREW,
-        ROLES.FENRIR_GREYBACK,
-      ].sort(() => Math.random() - 0.5);
-
-      const goodPool = [
-        ROLES.ALBUS_DUMBLEDORE,
-        ROLES.RON_WEASLEY,
-        ROLES.HERMIONE_GRANGER,
-        ROLES.SEVERUS_SNAPE,
-        ROLES.REMUS_LUPIN,
-        ROLES.ALASTOR_MOODY,
-        ROLES.RUBEUS_HAGRID,
-        ROLES.ARTHUR_WEASLEY,
-        ROLES.FRED_WEASLEY,
-        ROLES.GEORGE_WEASLEY,
-        ROLES.MUNDUNGUS_FLETCHER,
-        ROLES.KINGSLEY_SHACKLEBOLT,
-        ROLES.BILL_WEASLEY,
-        ROLES.FLEUR_DELACOUR,
-        ROLES.NYMPHADORA_TONKS,
-      ].sort(() => Math.random() - 0.5);
-
-      const selectedRoles: Role[] = [];
-      
-      if (goodCount > 0) {
-        selectedRoles.push(ROLES.HARRY_POTTER);
-        goodCount--;
-      }
-      if (evilCount > 0) {
-        selectedRoles.push(ROLES.VOLDEMORT);
-        evilCount--;
-      }
-
-      for (let i = 0; i < evilCount; i++) {
-        selectedRoles.push(evilPool[i] || ROLES.PETER_PETTIGREW);
-      }
-      for (let i = 0; i < goodCount; i++) {
-        selectedRoles.push(goodPool[i] || ROLES.POTTER_FAKE);
-      }
-
-      selectedRoles.sort(() => Math.random() - 0.5);
-
-      const newPlayers = prev.players.map(p => {
-        if (p.isGM) return p;
-        return { ...p, role: selectedRoles.pop() || ROLES.POTTER_FAKE };
-      });
+      const { players: newPlayers, previousRoleMap: newRoleMap } = assignRolesFairly(
+        prev.players,
+        prev.previousRoleMap
+      );
 
       // Thang Chặng Co Giãn Tự Động theo Sĩ Số Phòng (Game Balance Optimization)
       // N <= 8: 4 Chặng | N <= 13: 5 Chặng | N >= 14: 6 Chặng
@@ -1328,11 +1492,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       return {
         ...prev,
         players: newPlayers,
+        previousRoleMap: newRoleMap,
         maxStages,
         weasleyItems: updatedWeasleyItems,
         logs: [
           ...prev.logs, 
-          `Hệ thống: Vai trò đã được phân phát! Phi đội ${N} người ➔ Hành trình thiết lập ${maxStages} Chặng bay để về Hang Sóc.`,
+          `Hệ thống: Vai trò đã được phân phát công bằng & xoay tua ma thuật! Phi đội ${N} người ➔ Hành trình thiết lập ${maxStages} Chặng bay để về Hang Sóc.`,
           ...(N >= 14 ? ['Hệ thống: 🎁 Do phòng đông người, Tiệm Phù Thủy Weasley viện trợ thêm +1 Bột Khói Mù Peru!'] : [])
         ],
       };
@@ -1479,20 +1644,31 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetGame = () => {
-    updateState(prev => ({
-      ...DEFAULT_STATE,
-      flightStage: 1,
-      currentSkyEvent: SKY_EVENTS[1],
-      escortPairs: {},
-      goldenFlameUsed: false,
-      weasleyItems: INITIAL_WEASLEY_ITEMS,
-      players: prev.players.map(p => ({
-        ...p,
-        role: null,
-        status: 'ALIVE',
-      })),
-      logs: ['Hệ thống: Merlin đã reset game. Đang chờ chia lại vai trò...'],
-    }));
+    updateState(prev => {
+      const carriedRoleMap: Record<string, string> = { ...(prev.previousRoleMap || {}) };
+      prev.players.forEach(p => {
+        if (p.role) {
+          carriedRoleMap[p.id] = p.role.id;
+        }
+      });
+
+      return {
+        ...DEFAULT_STATE,
+        flightStage: 1,
+        currentSkyEvent: SKY_EVENTS[1],
+        escortPairs: {},
+        goldenFlameUsed: false,
+        weasleyItems: INITIAL_WEASLEY_ITEMS,
+        previousRoleMap: carriedRoleMap,
+        players: prev.players.map(p => ({
+          ...p,
+          role: null,
+          status: 'ALIVE',
+          previousRoleId: p.role?.id || p.previousRoleId,
+        })),
+        logs: ['Hệ thống: Merlin đã reset game. Đang chờ chia lại vai trò mới (chống lặp vai)...'],
+      };
+    });
   };
 
   const impersonatePlayer = (playerId: string) => {
@@ -1667,40 +1843,40 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
         if (prev.phase === 'NIGHT') {
           const randomTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-          newPendingActions[bot.id] = { actionName: 'Biểu quyết Tước Đũa', targetId: randomTarget.id };
+          newPendingActions[bot.id] = { actionName: 'biểu quyết tước đũa', targetId: randomTarget.id };
           newLogs.push(`[${bot.name}] đã biểu quyết Tước Đũa (Expelliarmus).`);
         } else if (prev.phase === 'DAY') {
           if (bot.role?.faction === 'DEATH_EATERS') {
             const goodTargets = possibleTargets.filter(p => p.role?.faction !== 'DEATH_EATERS');
             const targetPool = goodTargets.length > 0 ? goodTargets : possibleTargets;
             const randomTarget = targetPool[Math.floor(Math.random() * targetPool.length)];
-            newPendingActions[bot.id] = { actionName: 'Giết', targetId: randomTarget.id };
+            newPendingActions[bot.id] = { actionName: 'giết', targetId: randomTarget.id };
             newLogs.push(`[${bot.name}] đã hoàn tất hành động bí mật.`);
           } else if (bot.role?.id === 'ALBUS_DUMBLEDORE') {
             const prevShieldedId = prev.skillStates[`DUMBLEDORE_SHIELDED_R${prev.round - 1}`];
             const validTargets = possibleTargets.filter(p => p.id !== prevShieldedId);
             const targetPool = validTargets.length > 0 ? validTargets : possibleTargets;
             const randomTarget = targetPool[Math.floor(Math.random() * targetPool.length)];
-            newPendingActions[bot.id] = { actionName: 'Bảo vệ', targetId: randomTarget.id };
+            newPendingActions[bot.id] = { actionName: 'bảo vệ', targetId: randomTarget.id };
             newLogs.push(`[${bot.name}] đã hoàn tất hành động bí mật.`);
           } else if (bot.role?.id === 'KINGSLEY_SHACKLEBOLT') {
             if (Math.random() > 0.5) {
-              newPendingActions[bot.id] = { actionName: 'Chỉ huy Phản công', targetId: 'ALL' };
+              newPendingActions[bot.id] = { actionName: 'chỉ huy phản công', targetId: 'ALL' };
               newLogs.push(`[${bot.name}] đã chỉ huy toàn quân phản công!`);
             } else {
               const randomTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-              newPendingActions[bot.id] = { actionName: 'Bay Hộ Tống', targetId: randomTarget.id };
-              newLogs.push(`[${bot.name}] đã cơ động bay hộ tống sát cánh cùng [${randomTarget.name}].`);
+              newPendingActions[bot.id] = { actionName: 'bay hộ tống', targetId: randomTarget.id };
+              newLogs.push(`[${bot.name}] đã xác nhận hành động bí mật.`);
             }
           } else if (bot.role?.id === 'RUBEUS_HAGRID') {
             const harry = possibleTargets.find(p => p.role?.id === 'HARRY_POTTER');
             const target = (harry && Math.random() > 0.3) ? harry : possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-            newPendingActions[bot.id] = { actionName: 'Bảo kê', targetId: target.id };
-            newLogs.push(`[${bot.name}] đã cơ động bay hộ tống sát cánh cùng [${target.name}].`);
+            newPendingActions[bot.id] = { actionName: 'bảo kê', targetId: target.id };
+            newLogs.push(`[${bot.name}] đã xác nhận hành động bí mật.`);
           } else {
             const randomTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-            newPendingActions[bot.id] = { actionName: 'Bay Hộ Tống', targetId: randomTarget.id };
-            newLogs.push(`[${bot.name}] đã cơ động bay hộ tống sát cánh cùng [${randomTarget.name}].`);
+            newPendingActions[bot.id] = { actionName: 'bay hộ tống', targetId: randomTarget.id };
+            newLogs.push(`[${bot.name}] đã xác nhận hành động bí mật.`);
           }
         }
       });
@@ -1745,7 +1921,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        if (action.actionName === 'Bỏ phiếu Treo Cổ' || action.actionName === 'Biểu quyết Tước Đũa') {
+        const normalizedActionName = action.actionName.toLowerCase().trim();
+        const isVoteAction = normalizedActionName === 'biểu quyết tước đũa' || normalizedActionName === 'bỏ phiếu treo cổ';
+        if (isVoteAction) {
           voteCounts[action.targetId] = (voteCounts[action.targetId] || 0) + 1;
         }
       });
@@ -1819,16 +1997,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
         const target = action.targetId === 'ALL' ? null : gameState.players.find(p => p.id === action.targetId);
 
-        if (action.actionName === 'Bảo vệ' && player.role?.id === 'ALBUS_DUMBLEDORE') {
+        if (isProtectAction(action.actionName) && player.role?.id === 'ALBUS_DUMBLEDORE') {
           shieldTargetId = action.targetId;
           summary.push(`Cụ Dumbledore đã giăng màn bảo vệ lên ${target?.name}.`);
           newSkillStates[`DUMBLEDORE_SHIELDED_R${gameState.round}`] = shieldTargetId;
-        } else if (action.actionName === 'Bảo kê' && player.role?.id === 'RUBEUS_HAGRID') {
+        } else if (isHagridEscortAction(action.actionName) && player.role?.id === 'RUBEUS_HAGRID') {
           summary.push(`Bác Hagrid đã đưa ${target?.name} lên chiếc mô-tô bay hộ tống!`);
-        } else if ((action.actionName === 'Chỉ huy Phản công' || action.actionName === 'Kingsley Kích Hoạt') && player.role?.id === 'KINGSLEY_SHACKLEBOLT') {
+        } else if (isKingsleyAction(action.actionName) && player.role?.id === 'KINGSLEY_SHACKLEBOLT') {
           isKingsleyActive = true;
           summary.push(`Kingsley Shacklebolt đã chỉ huy toàn quân phản công!`);
-        } else if (action.actionName === 'Giết') {
+        } else if (isKillAction(action.actionName)) {
           if (player.role?.id === 'VOLDEMORT') {
             voldemortKillTargetId = action.targetId;
           } else {
@@ -1844,14 +2022,35 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         .map(([targetId]) => targetId);
 
       const deathEaterTargetIds: string[] = [];
-      if (voldemortKillTargetId) {
+      const isVoldemortAlive = gameState.players.some(p => p.role?.id === 'VOLDEMORT' && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
+
+      if (voldemortKillTargetId === 'NONE') {
+        summary.push("Chúa Tể Voldemort đã hạ lệnh án binh bất động: Phe Tử Thần Thực Tử không ra tay ám sát ai hôm nay!");
+      } else if (voldemortKillTargetId) {
         deathEaterTargetIds.push(voldemortKillTargetId);
-      }
-      sortedKillTargets.forEach(tId => {
-        if (!deathEaterTargetIds.includes(tId)) {
-          deathEaterTargetIds.push(tId);
+        if (isDoubleKill) {
+          const secondTarget = sortedKillTargets.find(tId => tId !== 'NONE' && !deathEaterTargetIds.includes(tId));
+          if (secondTarget) deathEaterTargetIds.push(secondTarget);
         }
-      });
+      } else {
+        // Voldemort is dead or did not submit an action
+        const noneVotes = killVoteCounts['NONE'] || 0;
+        const validPlayerTargets = sortedKillTargets.filter(tId => tId !== 'NONE');
+        if (validPlayerTargets.length > 0) {
+          const topTarget = validPlayerTargets[0];
+          const topVotes = killVoteCounts[topTarget] || 0;
+          if (topVotes > noneVotes) {
+            deathEaterTargetIds.push(topTarget);
+            if (isDoubleKill && validPlayerTargets.length > 1 && (killVoteCounts[validPlayerTargets[1]] || 0) > noneVotes) {
+              deathEaterTargetIds.push(validPlayerTargets[1]);
+            }
+          } else {
+            summary.push("Phe Tử Thần Thực Tử đã quyết định án binh bất động: Không ám sát ai hôm nay!");
+          }
+        } else if (noneVotes > 0) {
+          summary.push("Phe Tử Thần Thực Tử đã quyết định án binh bất động: Không ám sát ai hôm nay!");
+        }
+      }
 
       // Check Lucius Malfoy's silence curse
       const isSilenced = Boolean(gameState.skillStates[`voldemort_silenced_R${gameState.round}`]);
@@ -1881,145 +2080,152 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           if (deathEaterTargetId === shieldTargetId) {
             summary.push(`Tử Thần Thực Tử tấn công ${victim.name}, nhưng đã bị Màn chắn Dumbledore chặn đứng hoàn toàn!`);
           } else {
-            let hagridProtecting = false;
-            Object.entries(gameState.pendingActions).forEach(([pId, act]) => {
-              const actor = gameState.players.find(p => p.id === pId);
-              if (actor?.role?.id === 'RUBEUS_HAGRID' && (act.actionName === 'Bảo kê' || act.actionName === 'Bay Hộ Tống') && act.targetId === deathEaterTargetId) {
-                hagridProtecting = true;
-              }
-            });
+            let escortShielded = false;
+            let ronShielded = false;
+            let goldenFlameShielded = false;
 
-            if (hagridProtecting) {
-              summary.push(`Tử Thần Thực Tử tấn công ${victim.name}! Bác Hagrid đã lấy thân mình đỡ đòn hộ tống an toàn! Bác Hagrid tử trận!`);
-              const hagrid = gameState.players.find(p => p.role?.id === 'RUBEUS_HAGRID');
-              if (hagrid && !deadPlayers.includes(hagrid.id)) {
+            // Check if Hagrid is escorting this target
+            const hagrid = gameState.players.find(p => p.role?.id === 'RUBEUS_HAGRID' && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
+            const hagridProtecting = Boolean(
+              hagrid && Object.entries(gameState.pendingActions).some(([pId, act]) => 
+                pId === hagrid.id && (isHagridEscortAction(act.actionName) || isEscortAction(act.actionName)) && act.targetId === deathEaterTargetId
+              )
+            );
+
+            // Check active Escort from formation flying (excluding Hagrid to avoid double count)
+            const activeEscorts = Object.entries(gameState.pendingActions)
+              .filter(([pId, act]) => isEscortAction(act.actionName) && act.targetId === deathEaterTargetId && pId !== hagrid?.id)
+              .map(([pId]) => gameState.players.find(p => p.id === pId))
+              .filter((p): p is Player => Boolean(p && p.status !== 'DEAD' && !deadPlayers.includes(p.id)));
+
+            const primaryEscort = hagridProtecting ? hagrid : (activeEscorts[0] || null);
+            const modifier = gameState.currentSkyEvent?.modifier || 'PERFECT_DISGUISE';
+
+            // 1. Evade Stages (Stage 1 & 2): Escort evades successfully, Golden Flame preserved! (No escort identity revealed)
+            if (primaryEscort && (modifier === 'PERFECT_DISGUISE' || modifier === 'TURBULENCE_BLIND')) {
+              escortShielded = true;
+              if (modifier === 'PERFECT_DISGUISE') {
+                summary.push(`Đòn tấn công của Tử Thần Thực Tử nhắm vào ${victim.name} đã bị chệch hướng hoàn toàn giữa màn đêm! ${victim.name} an toàn thoát nạn!`);
+              } else {
+                summary.push(`Cơn bão sấm chớp mù mịt làm đòn tấn công nhắm vào ${victim.name} bị nổ tung giữa không trung! ${victim.name} an toàn thoát nạn!`);
+              }
+            } 
+            // 2. Golden Flame Wand Retaliation (Tia Lửa Vàng): Triggers before any escort has to sacrifice, or if Harry is escorting
+            else if (!gameState.goldenFlameUsed && (victim.role?.id === 'HARRY_POTTER' || primaryEscort?.role?.id === 'HARRY_POTTER' || activeEscorts.some(e => e.role?.id === 'HARRY_POTTER'))) {
+              goldenFlameShielded = true;
+              newSkillStates['GOLDEN_FLAME_TRIGGERED'] = true;
+              newSkillStates[`voldemort_silenced_R${gameState.round + 1}`] = true;
+              summary.push(`⚡ TIA LỬA VÀNG BÙNG NỔ! Chiếc đũa phép lông đuôi phượng hoàng của Harry tự động nhận diện và phản pháo Chúa Tể Voldemort! Đòn chí mạng bị thiêu rụi hoàn toàn! Đũa phép Lucius Malfoy bị nổ tung!`);
+            }
+            // 3. Hagrid Sacrifice (when Golden Flame already spent)
+            else if (hagridProtecting && hagrid) {
+              summary.push(`Tử Thần Thực Tử tấn công trong đêm! Bác Hagrid đã dũng cảm tử trận!`);
+              if (!deadPlayers.includes(hagrid.id)) {
                 deadPlayers.push(hagrid.id);
               }
-            } else {
-              let escortShielded = false;
-              let ronShielded = false;
-              let goldenFlameShielded = false;
-
-              // Check active Escort from formation flying
-              const activeEscorts = Object.entries(gameState.pendingActions)
-                .filter(([, act]) => act.actionName === 'Bay Hộ Tống' && act.targetId === deathEaterTargetId)
-                .map(([pId]) => gameState.players.find(p => p.id === pId))
-                .filter((p): p is Player => Boolean(p && p.status !== 'DEAD' && !deadPlayers.includes(p.id)));
-
-              if (activeEscorts.length > 0) {
-                escortShielded = true;
-                const escort = activeEscorts[0];
-                const modifier = gameState.currentSkyEvent?.modifier || 'PERFECT_DISGUISE';
-
-                if (modifier === 'PERFECT_DISGUISE') {
-                  summary.push(`🛡️ BAY HỘ TỐNG: ${escort.name} đã liệng chổi bay áp sát chắn đòn cho ${victim.name}! Nhờ Đa Quả Dịch che giấu, đòn tấn công của Tử Thần Thực Tử bị chệch hướng hoàn toàn! Cả hai an toàn thoát nạn!`);
-                } else if (modifier === 'TURBULENCE_BLIND') {
-                  summary.push(`⚡ MÂY BÃO CHẮN GIÓ: ${escort.name} dũng cảm liệng vào tầng mây chắn gió cho ${victim.name}! Cơn bão sấm chớp làm đòn đánh bị nổ tung giữa không trung! Cả hai an toàn!`);
-                } else {
-                  summary.push(`🛡️ ANH HÙNG HỘ TỐNG: ${escort.name} đã dũng cảm lấy thân mình lao ra chắn đòn chí mạng cho ${victim.name}! ${victim.name} được bảo toàn tính mạng, ${escort.name} tử trận!`);
-                  if (!deadPlayers.includes(escort.id)) {
-                    deadPlayers.push(escort.id);
-                  }
-                }
+              escortShielded = true;
+            }
+            // 4. Bay Hộ Tống Heroic Sacrifice (Stage 3+, when Golden Flame already spent)
+            else if (activeEscorts.length > 0) {
+              escortShielded = true;
+              const escort = activeEscorts[0];
+              summary.push(`Tử Thần Thực Tử tấn công trong đêm! ${escort.name} đã trúng đòn tử thương và tử trận!`);
+              if (!deadPlayers.includes(escort.id)) {
+                deadPlayers.push(escort.id);
+              }
+            }
+            // 5. Ron Weasley Sacrifice (when Golden Flame already spent and no escort)
+            else if (victim.role?.id === 'HARRY_POTTER' && resolvedPlayers.find(p => p.role?.id === 'RON_WEASLEY' && p.status !== 'DEAD' && !deadPlayers.includes(p.id))) {
+              const ron = resolvedPlayers.find(p => p.role?.id === 'RON_WEASLEY' && p.status !== 'DEAD' && !deadPlayers.includes(p.id))!;
+              summary.push(`Tử Thần Thực Tử tấn công Harry Potter thật! Nhưng Ron Weasley đã dũng cảm lao ra đỡ đòn chí mạng thay cho Harry! Ron Weasley tử trận!`);
+              deadPlayers.push(ron.id);
+              ronShielded = true;
+            }
+            // 6. Direct Attack Hits
+            else {
+              if (victim.role?.id === 'HARRY_POTTER') {
+                summary.push(`Chúa Tể Voldemort đã tấn công trúng Harry Potter thật! Tia Chớp Định Mệnh giáng xuống!`);
+              } else if (victim.role?.id === 'POTTER_FAKE') {
+                summary.push(`Tử Thần Thực Tử đã bắn trúng một Potter Giả mạo (${victim.name})!`);
               } else {
-                const ron = resolvedPlayers.find(p => p.role?.id === 'RON_WEASLEY' && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
+                summary.push(`Tử Thần Thực Tử đã hạ sát ${victim.name}!`);
+              }
 
-                if (victim.role?.id === 'HARRY_POTTER' && ron) {
-                  summary.push(`Tử Thần Thực Tử tấn công Harry Potter thật! Nhưng Ron Weasley đã dũng cảm lao ra đỡ đòn chí mạng thay cho Harry! Ron Weasley tử trận!`);
-                  deadPlayers.push(ron.id);
-                  ronShielded = true;
-                } else if (victim.role?.id === 'HARRY_POTTER' && !gameState.goldenFlameUsed) {
-                  // TWIN CORES / GOLDEN FLAME TRIGGER!
-                  goldenFlameShielded = true;
-                  newSkillStates['GOLDEN_FLAME_TRIGGERED'] = true;
-                  newSkillStates[`voldemort_silenced_R${gameState.round + 1}`] = true;
-                  summary.push(`⚡ TIA LỬA VÀNG BÙNG NỔ! Chiếc đũa phép lông đuôi phượng hoàng của Harry tự động nhận diện và phản pháo Chúa Tể Voldemort! Harry thoát chết trong gang tấc! Đũa phép mượn của Lucius Malfoy bị thiêu rụi nổ tung!`);
-                } else {
-                  if (victim.role?.id === 'HARRY_POTTER') {
-                    summary.push(`Chúa Tể Voldemort đã tấn công trúng Harry Potter thật! Tia Chớp Định Mệnh giáng xuống!`);
-                  } else if (victim.role?.id === 'POTTER_FAKE') {
-                    summary.push(`Tử Thần Thực Tử đã bắn trúng một Potter Giả mạo (${victim.name})!`);
+              if (victim.role?.id === 'SEVERUS_SNAPE') {
+                summary.push(`Giáo sư Snape đã trúng Lời Nguyền Hắc Ám và gục ngã!`);
+              }
+
+              if (victim.role?.id === 'MUNDUNGUS_FLETCHER') {
+                const alreadyUsed = Boolean(gameState.skillStates[`${victim.id}_SWAP_USED`]);
+                if (alreadyUsed) {
+                  summary.push(`Mundungus Fletcher đã từng dùng quyền tráo đổi sinh mệnh trước đó, nay không thể chạy trốn và tử trận!`);
+                  if (!deadPlayers.includes(victim.id)) deadPlayers.push(victim.id);
+                } else if (victim.name.includes('(Bot)')) {
+                  const swapCandidates = gameState.players.filter(p => p.id !== victim.id && !p.isGM && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
+                  if (swapCandidates.length > 0) {
+                    const swapTarget = swapCandidates[Math.floor(Math.random() * swapCandidates.length)];
+                    summary.push(`Mundungus Fletcher (Bot) đã hoảng loạn Độn Thổ và lôi ${swapTarget.name} ra chết thay!`);
+                    deadPlayers.push(swapTarget.id);
+                    newSkillStates[`${victim.id}_SWAP_USED`] = true;
                   } else {
-                    summary.push(`Tử Thần Thực Tử đã hạ sát ${victim.name}!`);
+                    deadPlayers.push(victim.id);
                   }
-
-                  if (victim.role?.id === 'SEVERUS_SNAPE') {
-                    summary.push(`Giáo sư Snape đã trúng Lời Nguyền Hắc Ám và gục ngã!`);
-                  }
-
-                  if (victim.role?.id === 'MUNDUNGUS_FLETCHER') {
-                    const alreadyUsed = Boolean(gameState.skillStates[`${victim.id}_SWAP_USED`]);
-                    if (alreadyUsed) {
-                      summary.push(`Mundungus Fletcher đã từng dùng quyền tráo đổi sinh mệnh trước đó, nay không thể chạy trốn và tử trận!`);
-                      if (!deadPlayers.includes(victim.id)) deadPlayers.push(victim.id);
-                    } else if (victim.name.includes('(Bot)')) {
-                      const swapCandidates = gameState.players.filter(p => p.id !== victim.id && !p.isGM && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
-                      if (swapCandidates.length > 0) {
-                        const swapTarget = swapCandidates[Math.floor(Math.random() * swapCandidates.length)];
-                        summary.push(`Mundungus Fletcher (Bot) đã hoảng loạn Độn Thổ và lôi ${swapTarget.name} ra chết thay!`);
-                        deadPlayers.push(swapTarget.id);
-                        newSkillStates[`${victim.id}_SWAP_USED`] = true;
-                      } else {
-                        deadPlayers.push(victim.id);
-                      }
-                    } else {
-                      needsInterrupt = {
-                        playerId: victim.id,
-                        type: 'MUNDUNGUS_SWAP' as const,
-                        reason: 'Mundungus bị bắn trúng! Hãy chọn 1 người chết thay!'
-                      };
-                    }
-                  }
-
-                  if (victim.role?.id === 'BILL_WEASLEY' || victim.role?.id === 'FLEUR_DELACOUR') {
-                    const partnerRoleId = victim.role.id === 'BILL_WEASLEY' ? 'FLEUR_DELACOUR' : 'BILL_WEASLEY';
-                    const partner = resolvedPlayers.find(p => p.role?.id === partnerRoleId && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
-
-                    if (partner) {
-                      if (victim.status === 'INJURED') {
-                        summary.push(`${victim.name} đã bị thương từ trước, nay trúng thêm đòn chí mạng và tử trận!`);
-                        if (!deadPlayers.includes(victim.id)) deadPlayers.push(victim.id);
-                      } else {
-                        summary.push(`Nhờ tình yêu & liên kết ma thuật Veela bảo hộ từ ${partner.name}, ${victim.name} đã kiên cường đỡ đòn và chỉ bị THƯƠNG nặng (chưa chết)!`);
-                        injuredPlayers.push(victim.id);
-                      }
-                    } else {
-                      summary.push(`${victim.name} không còn người bạn đời che chở bên cạnh, đã trúng đòn chí mạng và tử trận!`);
-                      if (!deadPlayers.includes(victim.id)) deadPlayers.push(victim.id);
-                    }
-                  }
-
-                  if (victim.role?.id === 'NYMPHADORA_TONKS') {
-                    if (victim.name.includes('(Bot)')) {
-                      const morphCandidates = gameState.players.filter(p => p.id !== victim.id && !p.isGM && p.role && !deadPlayers.includes(p.id));
-                      if (morphCandidates.length > 0) {
-                        const morphTarget = morphCandidates[Math.floor(Math.random() * morphCandidates.length)];
-                        summary.push(`Trước khi ngã xuống, Tonks (Bot) đã biến hình thành ${morphTarget.name} và tiếp tục chiến đấu!`);
-                        resolvedPlayers = resolvedPlayers.map(p => p.id === victim.id ? { ...p, role: morphTarget.role } : p);
-                      } else {
-                        deadPlayers.push(victim.id);
-                      }
-                    } else {
-                      needsInterrupt = {
-                        playerId: victim.id,
-                        type: 'TONKS_MORPH' as const,
-                        reason: 'Tonks trúng đòn tử thương! Hãy chọn 1 người để sao chép thân phận!'
-                      };
-                    }
-                  }
+                } else {
+                  needsInterrupt = {
+                    playerId: victim.id,
+                    type: 'MUNDUNGUS_SWAP' as const,
+                    reason: 'Mundungus bị bắn trúng! Hãy chọn 1 người chết thay!'
+                  };
                 }
               }
 
-              if (!needsInterrupt && 
-                  victim.role?.id !== 'BILL_WEASLEY' && 
-                  victim.role?.id !== 'FLEUR_DELACOUR' && 
-                  victim.role?.id !== 'MUNDUNGUS_FLETCHER' && 
-                  !ronShielded && 
-                  !goldenFlameShielded && 
-                  !escortShielded) {
-                if (!deadPlayers.includes(deathEaterTargetId)) {
-                  deadPlayers.push(deathEaterTargetId);
+              if (victim.role?.id === 'BILL_WEASLEY' || victim.role?.id === 'FLEUR_DELACOUR') {
+                const partnerRoleId = victim.role.id === 'BILL_WEASLEY' ? 'FLEUR_DELACOUR' : 'BILL_WEASLEY';
+                const partner = resolvedPlayers.find(p => p.role?.id === partnerRoleId && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
+
+                if (partner) {
+                  if (victim.status === 'INJURED') {
+                    summary.push(`${victim.name} đã bị thương từ trước, nay trúng thêm đòn chí mạng và tử trận!`);
+                    if (!deadPlayers.includes(victim.id)) deadPlayers.push(victim.id);
+                  } else {
+                    summary.push(`Nhờ tình yêu & liên kết ma thuật Veela bảo hộ từ ${partner.name}, ${victim.name} đã kiên cường đỡ đòn và chỉ bị THƯƠNG nặng (chưa chết)!`);
+                    injuredPlayers.push(victim.id);
+                  }
+                } else {
+                  summary.push(`${victim.name} không còn người bạn đời che chở bên cạnh, đã trúng đòn chí mạng và tử trận!`);
+                  if (!deadPlayers.includes(victim.id)) deadPlayers.push(victim.id);
                 }
+              }
+
+              if (victim.role?.id === 'NYMPHADORA_TONKS') {
+                if (victim.name.includes('(Bot)')) {
+                  const morphCandidates = gameState.players.filter(p => p.id !== victim.id && !p.isGM && p.role && !deadPlayers.includes(p.id));
+                  if (morphCandidates.length > 0) {
+                    const morphTarget = morphCandidates[Math.floor(Math.random() * morphCandidates.length)];
+                    summary.push(`Trước khi ngã xuống, Tonks (Bot) đã biến hình thành ${morphTarget.name} và tiếp tục chiến đấu!`);
+                    resolvedPlayers = resolvedPlayers.map(p => p.id === victim.id ? { ...p, role: morphTarget.role } : p);
+                  } else {
+                    deadPlayers.push(victim.id);
+                  }
+                } else {
+                  needsInterrupt = {
+                    playerId: victim.id,
+                    type: 'TONKS_MORPH' as const,
+                    reason: 'Tonks trúng đòn tử thương! Hãy chọn 1 người để sao chép thân phận!'
+                  };
+                }
+              }
+            }
+
+            if (!needsInterrupt && 
+                victim.role?.id !== 'BILL_WEASLEY' && 
+                victim.role?.id !== 'FLEUR_DELACOUR' && 
+                victim.role?.id !== 'MUNDUNGUS_FLETCHER' && 
+                !ronShielded && 
+                !goldenFlameShielded && 
+                !escortShielded) {
+              if (!deadPlayers.includes(deathEaterTargetId)) {
+                deadPlayers.push(deathEaterTargetId);
               }
             }
           }

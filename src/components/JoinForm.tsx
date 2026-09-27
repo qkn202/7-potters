@@ -63,12 +63,24 @@ export function JoinForm() {
   const [hpvnPassword, setHpvnPassword] = useState('');
   const [guestName, setGuestName] = useState('');
   const [guestHouse, setGuestHouse] = useState<string>('GRYFFINDOR');
+  const [skyOfficeIdentity, setSkyOfficeIdentity] = useState<{ name: string; house?: string } | null>(null);
 
   // Check URL query param ?room=CODE on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const roomParam = params.get('room');
+      const skyOfficePlayer = params.get('skyofficePlayer');
+      const skyOfficeName = params.get('skyofficeName')?.trim().slice(0, 32);
+      const rawHouse = params.get('skyofficeHouse')?.toUpperCase();
+      const validHouses = ['GRYFFINDOR', 'SLYTHERIN', 'RAVENCLAW', 'HUFFLEPUFF'];
+      if (skyOfficePlayer && skyOfficeName) {
+        const house = rawHouse && validHouses.includes(rawHouse) ? rawHouse : undefined;
+        setSkyOfficeIdentity({ name: skyOfficeName, house });
+        setGuestName(skyOfficeName);
+        if (house) setGuestHouse(house);
+        setAuthTab('guest');
+      }
       if (roomParam && roomParam.trim()) {
         setRoomCodeInput(roomParam.trim().toUpperCase());
         setMode('join');
@@ -148,7 +160,11 @@ export function JoinForm() {
       let finalName = '';
       let extraData: { house?: string; userTag?: string; hpvnUid?: string } | undefined = undefined;
 
-      if (currentUserProfile) {
+      if (skyOfficeIdentity) {
+        // SkyOffice supplies a display identity for this embedded game session.
+        finalName = skyOfficeIdentity.name;
+        extraData = { house: skyOfficeIdentity.house, userTag: 'SkyOffice' };
+      } else if (currentUserProfile) {
         // Authenticated via persistent session
         finalName = currentUserProfile.username.trim();
         extraData = {

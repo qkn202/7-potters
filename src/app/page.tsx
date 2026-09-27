@@ -13,7 +13,8 @@ import {
   DeathlyHallowsSymbol 
 } from '@/components/ArtAssets';
 import { FlooChatDrawer, FlooHeaderTrigger, FlooFloatingTrigger } from '@/components/FlooChatDrawer';
-import { BookOpen, User, RotateCcw, AlertTriangle, Wifi, WifiOff, Clock, Package, Bot } from 'lucide-react';
+import Link from 'next/link';
+import { BookOpen, User, RotateCcw, AlertTriangle, Wifi, WifiOff, Clock, Package, Bot, Sparkles } from 'lucide-react';
 import { FlightTrack } from '@/components/FlightTrack';
 import { WeasleyCrateModal } from '@/components/WeasleyCrateModal';
 import { CinematicFXOverlay } from '@/components/CinematicFXOverlay';

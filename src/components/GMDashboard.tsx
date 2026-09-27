@@ -100,8 +100,10 @@ export function GMDashboard() {
   Object.values(gameState.pendingActions).forEach(act => {
     if (act.actionName === 'Bỏ phiếu Treo Cổ' || act.actionName === 'Biểu quyết Tước Đũa') {
       votesReceived[act.targetId] = (votesReceived[act.targetId] || 0) + 1;
-    } else if (act.actionName === 'Giết') {
-      killReceived[act.targetId] = (killReceived[act.targetId] || 0) + 1;
+    } else if (act.actionName === 'Giết' || act.actionName.toLowerCase() === 'giết') {
+      if (act.targetId && act.targetId !== 'NONE') {
+        killReceived[act.targetId] = (killReceived[act.targetId] || 0) + 1;
+      }
     } else if (act.actionName === 'Bay Hộ Tống') {
       escortsReceived[act.targetId] = (escortsReceived[act.targetId] || 0) + 1;
     }
@@ -535,7 +537,9 @@ export function GMDashboard() {
                       const pAction = gameState.pendingActions[p.id];
                       const targetName = pAction?.targetId === 'ALL' 
                         ? 'Tất cả' 
-                        : gameState.players.find(x => x.id === pAction?.targetId)?.name;
+                        : pAction?.targetId === 'NONE'
+                          ? 'Không ai cả (Án Binh)'
+                          : gameState.players.find(x => x.id === pAction?.targetId)?.name;
                       const pVotes = isNight ? (votesReceived[p.id] || 0) : 0;
                       const pKills = isDay ? (killReceived[p.id] || 0) : 0;
                       const pEscorts = isDay ? (escortsReceived[p.id] || 0) : 0;
@@ -550,7 +554,13 @@ export function GMDashboard() {
                             <span className="text-emerald-300 font-bold flex items-center gap-1 truncate" title={`${pAction.actionName} ➔ ${targetName}`}>
                               <CheckCircle size={12} className="text-emerald-400 flex-shrink-0" />
                               <span className="truncate">
-                                {pAction.actionName === 'Bay Hộ Tống' ? `🛡️ Hộ tống: ${targetName}` : (pAction.actionName === 'Bỏ phiếu Treo Cổ' || pAction.actionName === 'Biểu quyết Tước Đũa') ? `Tước Đũa: ${targetName}` : `${pAction.actionName}: ${targetName}`}
+                                {pAction.actionName === 'Bay Hộ Tống' 
+                                  ? `🛡️ Hộ tống: ${targetName}` 
+                                  : pAction.targetId === 'NONE'
+                                    ? '🚫 Án binh bất động (Không giết)'
+                                    : (pAction.actionName === 'Bỏ phiếu Treo Cổ' || pAction.actionName === 'Biểu quyết Tước Đũa') 
+                                      ? `Tước Đũa: ${targetName}` 
+                                      : `${pAction.actionName}: ${targetName}`}
                               </span>
                             </span>
                           ) : (

@@ -32,6 +32,7 @@ export interface Player {
   house?: string;
   userTag?: string;
   hpvnUid?: string;
+  previousRoleId?: string;
 }
 
 export type GamePhase = 'LOBBY' | 'DAY' | 'NIGHT' | 'END';
@@ -95,6 +96,7 @@ export interface GameState {
   skillStates: Record<string, boolean | string>; // Lưu trạng thái dùng skill (VD: 'playerID_LUPIN': true, 'DUMBLEDORE_R1': 'targetId')
   interruptState: InterruptState | null;
   activeFX?: ActiveVisualFX | null;
+  previousRoleMap?: Record<string, string>;
 }
 
 export interface InterruptState {

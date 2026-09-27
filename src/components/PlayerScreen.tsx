@@ -16,7 +16,15 @@ import {
   CheckCircle,
   Flame,
   Maximize2,
-  ScrollText
+  ScrollText,
+  ChevronDown,
+  ChevronUp,
+  Info,
+  HelpCircle,
+  Zap,
+  Target,
+  Compass,
+  Ban
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { CharacterCard, CardInspectorModal } from './CharacterCard';
@@ -30,6 +38,20 @@ import {
 import { CardDeckModal } from './CardDeckModal';
 import { SkyEventBanner } from './SkyEventBanner';
 
+// Helper to normalize action names for consistent comparison
+const normalizeAction = (actionName: string): string => actionName.toLowerCase().trim();
+const isVoteAction = (actionName: string): boolean => {
+  const n = normalizeAction(actionName);
+  return n === 'biểu quyết tước đũa' || n === 'bỏ phiếu treo cổ';
+};
+const isKillAction = (actionName: string): boolean => normalizeAction(actionName) === 'giết';
+const isEscortAction = (actionName: string): boolean => normalizeAction(actionName) === 'bay hộ tống';
+const isProtectAction = (actionName: string): boolean => normalizeAction(actionName) === 'bảo vệ';
+const isKingsleyAction = (actionName: string): boolean => {
+  const n = normalizeAction(actionName);
+  return n === 'chỉ huy phản công' || n === 'kingsley kích hoạt';
+};
+
 export function PlayerScreen() {
   const { gameState, currentPlayerId, playerAction, executeInstantSkill, resolveInterrupt, skillToast, clearSkillToast, consumeWeasleyItem } = useGame();
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
@@ -37,6 +59,7 @@ export function PlayerScreen() {
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [inspectSelf, setInspectSelf] = useState(false);
   const [mobileTab, setMobileTab] = useState<'battle' | 'card' | 'log'>('battle');
+  const [isCoachExpanded, setIsCoachExpanded] = useState(true);
 
   useEffect(() => {
     if (skillToast) {
@@ -222,21 +245,324 @@ export function PlayerScreen() {
   const hasDaySkill = me.role?.faction === 'DEATH_EATERS' || 
     ['ALBUS_DUMBLEDORE', 'HERMIONE_GRANGER', 'REMUS_LUPIN', 'KINGSLEY_SHACKLEBOLT'].includes(me.role?.id || '');
 
+  const isSilenced = Boolean(gameState.skillStates[`voldemort_silenced_R${gameState.round}`]);
+  const isDoubleKill = Boolean(gameState.skillStates[`voldemort_double_kill_R${gameState.round}`]);
+
   const myAction = me ? gameState.pendingActions[me.id] : null;
-  const myVotedTarget = myAction ? gameState.players.find(p => p.id === myAction.targetId) : null;
-  const effectiveTargetId = selectedTarget ?? myAction?.targetId ?? null;
+  const myVotedTarget = myAction && myAction.targetId !== 'NONE' ? gameState.players.find(p => p.id === myAction.targetId) : null;
+  const effectiveTargetId = selectedTarget ?? (myAction?.targetId && myAction.targetId !== 'NONE' ? myAction.targetId : null);
   const effectiveTargetPlayer = gameState.players.find(p => p.id === effectiveTargetId);
 
   // Live vote and kill counts
   const voteCountsByTarget: Record<string, number> = {};
   const killCountsByTarget: Record<string, number> = {};
   Object.values(gameState.pendingActions).forEach(action => {
-    if (action.actionName === 'Bỏ phiếu Treo Cổ' || action.actionName === 'Biểu quyết Tước Đũa') {
+    if (isVoteAction(action.actionName)) {
       voteCountsByTarget[action.targetId] = (voteCountsByTarget[action.targetId] || 0) + 1;
-    } else if (action.actionName === 'Giết') {
-      killCountsByTarget[action.targetId] = (killCountsByTarget[action.targetId] || 0) + 1;
+    } else if (isKillAction(action.actionName)) {
+      if (action.targetId && action.targetId !== 'NONE') {
+        killCountsByTarget[action.targetId] = (killCountsByTarget[action.targetId] || 0) + 1;
+      }
     }
   });
+
+  // Dynamic Action Coach Guide Computation for New Players
+  const coachGuide = (() => {
+    if (isDead) {
+      return {
+        title: 'Bạn Đã Tử Trận Trong Trận Không Chiến',
+        badge: 'Khán Giả Ma Pháp',
+        badgeVariant: 'red' as const,
+        steps: [
+          { num: '1', title: 'Giữ bí mật thân phận', desc: 'Không tiết lộ thông tin hay gợi ý phe phái cho người còn đang sống.' },
+          { num: '2', title: 'Quan sát & đàm đạo', desc: 'Theo dõi diễn biến và giao lưu cùng mọi người trên Mạng Floo.' },
+        ],
+        tip: 'Nếu phe Hội Phượng Hoàng có Remus Lupin còn bùa Hồi Sinh, bạn vẫn có cơ hội được hồi sinh trở lại!',
+        alert: undefined as string | undefined,
+        statusText: 'Đang ở trạng thái Khán Giả (đã ngã xuống)',
+        statusType: 'danger' as const,
+      };
+    }
+
+    if (isNight) {
+      const isMoody = me.role?.id === 'ALASTOR_MOODY';
+      return {
+        title: 'Hội Đồng Biểu Quyết Ban Đêm · Expelliarmus',
+        badge: 'Toàn Thể Phù Thủy (Cả 2 Phe)',
+        badgeVariant: 'indigo' as const,
+        steps: [
+          { 
+            num: '1', 
+            title: 'Chọn 1 kẻ tình nghi', 
+            desc: 'Dựa vào tranh luận ban ngày, nhấp chọn 1 người bạn nghi ngờ nhất trong danh sách bên dưới.' 
+          },
+          { 
+            num: '2', 
+            title: 'Bấm nút "Biểu Quyết Tước Đũa"', 
+            desc: 'Gửi lá phiếu của bạn lên máy chủ để cùng cả phòng dồn phiếu loại trừ kẻ ác.' 
+          },
+          ...(isMoody ? [{
+            num: '★',
+            title: 'Đặc quyền Thần Sáng Moody',
+            desc: 'Bạn có thể chọn 1 kẻ khả nghi và bấm nút "Bắn Lén (Avada Kedavra)" để tự tay hạ sát ngay trong đêm!'
+          }] : [])
+        ],
+        tip: 'Người nhận nhiều phiếu nhất đêm nay sẽ bị tước đũa phép trục xuất! Bạn có thể đổi phiếu bất cứ lúc nào trước khi Merlin kết thúc đêm.',
+        alert: undefined as string | undefined,
+        statusText: myAction 
+          ? `✓ Bạn đã bỏ phiếu cho [${myVotedTarget?.name || 'mục tiêu'}] (có thể chọn người khác để đổi phiếu)` 
+          : effectiveTargetPlayer 
+            ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Hãy bấm nút "Biểu Quyết Tước Đũa" bên dưới!`
+            : 'Chưa bỏ phiếu ➔ Vui lòng chọn 1 người chơi trong danh sách bên dưới',
+        statusType: myAction ? 'success' as const : effectiveTargetPlayer ? 'warning' as const : 'info' as const,
+      };
+    }
+
+    if (isDay) {
+      if (me.role?.faction === 'DEATH_EATERS') {
+        if (isSilenced) {
+          return {
+            title: 'Đòn Ám Sát Của Tử Thần Thực Tử Đang Bị Phong Ấn',
+            badge: 'Phong Ấn Ma Pháp',
+            badgeVariant: 'red' as const,
+            alert: 'Lời nguyền Lucius Malfoy: Do Lucius bị tước đũa / Lời nguyền phản phệ, hôm nay phe bạn KHÔNG THỂ ám sát!',
+            steps: [
+              { num: '1', title: 'Ẩn mình khéo léo', desc: 'Thảo luận bình thường trên Mạng Floo như một phù thủy phe tốt.' },
+              { num: '2', title: 'Bảo vệ đồng minh', desc: 'Có thể chọn đồng đội để "Bay Hộ Tống" hoặc chuẩn bị cho đợt biểu quyết Ban Đêm.' },
+            ],
+            tip: 'Hãy quan sát xem ai là Dumbledore hoặc Hermione để lên kế hoạch ám sát cho ngày hôm sau!',
+            statusText: 'Đòn ám sát đang bị khóa trong ngày hôm nay',
+            statusType: 'warning' as const,
+          };
+        }
+
+        if (me.role?.id === 'VOLDEMORT') {
+          return {
+            title: 'Chúa Tể Voldemort · Săn Lùng Harry Potter Thật',
+            badge: 'Lệnh Ám Sát Ban Ngày',
+            badgeVariant: 'emerald' as const,
+            alert: undefined as string | undefined,
+            steps: [
+              { num: '1', title: 'Xác định mục tiêu', desc: 'Phán đoán ai là Harry thật (tránh bắn nhầm vào Bản Sao Harry uống thuốc Đa Quả Dịch!).' },
+              { num: '2', title: 'Ám sát hoặc Án binh', desc: 'Bấm "Ám Sát (Avada Kedavra)" để tiêu diệt, hoặc bấm "Không Giết Ai Cả" nếu muốn án binh thăm dò.' }
+            ],
+            tip: 'Hạ sát trúng Harry thật hoặc tiêu diệt toàn bộ Hội Phượng Hoàng, phe Tử Thần Thực Tử sẽ THẮNG NGAY LẬP TỨC!',
+            statusText: myAction 
+              ? (myAction.targetId === 'NONE' 
+                  ? '✓ Đã chọn: Án Binh Bất Động (Không ám sát ai hôm nay)' 
+                  : `✓ Đã chỉ định mục tiêu ám sát: [${myVotedTarget?.name || 'mục tiêu'}]`) 
+              : effectiveTargetPlayer 
+                ? `👉 Đang nhắm: [${effectiveTargetPlayer.name}] ➔ Bấm nút "Ám Sát (Avada Kedavra)" bên dưới!`
+                : 'Hãy nhấp chọn 1 mục tiêu trong danh sách hoặc bấm "Không Giết Ai Cả"',
+            statusType: myAction ? 'success' as const : effectiveTargetPlayer ? 'warning' as const : 'info' as const,
+          };
+        }
+
+        if (me.role?.id === 'PETER_PETTIGREW') {
+          return {
+            title: 'Peter Pettigrew · Do Thám Thân Phận',
+            badge: 'Do Thám Hắc Ám',
+            badgeVariant: 'emerald' as const,
+            alert: undefined as string | undefined,
+            steps: [
+              { num: '1', title: 'Soi phe phái', desc: 'Chọn 1 người rồi bấm "Thi Triển Soi Phe" để kiểm tra họ có thuộc Hội Phượng Hoàng hay không.' },
+              { num: '2', title: 'Hỗ trợ Chúa Tể', desc: 'Cùng phối hợp dồn phiếu "Ám Sát" vào mục tiêu với Chúa Tể Voldemort.' }
+            ],
+            tip: 'Dùng kết quả soi để loại trừ các Bản Sao và chỉ điểm cho Voldemort bắn chuẩn xác!',
+            statusText: myAction ? `✓ Đã lưu mục tiêu: [${myVotedTarget?.name}]` : 'Chọn mục tiêu bên dưới để soi phe hoặc dồn đòn ám sát',
+            statusType: myAction ? 'success' as const : 'info' as const,
+          };
+        }
+
+        if (me.role?.id === 'FENRIR_GREYBACK') {
+          return {
+            title: 'Fenrir Greyback · Ma Sói Cuồng Bạo',
+            badge: 'Ma Sói Đồ Tể',
+            badgeVariant: 'emerald' as const,
+            alert: undefined as string | undefined,
+            steps: [
+              { num: '1', title: 'Cắn biến đổi', desc: 'Có thể chọn 1 phù thủy phe Hội và bấm "Cắn" (1 lần trong game) để biến họ thành Ma Sói trung lập.' },
+              { num: '2', title: 'Tiếp sức ám sát', desc: 'Hoặc chọn mục tiêu để dồn phiếu "Ám Sát" cùng Chúa Tể Voldemort.' }
+            ],
+            tip: 'Cắn một đồng minh mạnh như Dumbledore hoặc Moody sẽ làm tê liệt sức mạnh của phe Phượng Hoàng!',
+            statusText: myAction ? `✓ Đã lưu mục tiêu: [${myVotedTarget?.name}]` : 'Chọn mục tiêu bên dưới để Cắn hoặc Ám sát',
+            statusType: myAction ? 'success' as const : 'info' as const,
+          };
+        }
+
+        // Bellatrix or Lucius Malfoy
+        const isBella = me.role?.id === 'BELLATRIX_LESTRANGE';
+        return {
+          title: `${me.role?.name || 'Tử Thần Thực Tử'} · Hiệp Lực Ám Sát`,
+          badge: 'Tử Thần Thực Tử',
+          badgeVariant: 'emerald' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Thống nhất mục tiêu', desc: 'Nhìn danh sách đồng minh (tên màu xanh lá) để cùng thống nhất mục tiêu ám sát.' },
+            { num: '2', title: 'Dồn lực hạ sát', desc: 'Chọn người đó và bấm nút "Ám Sát (Avada Kedavra)" để tiếp thêm hỏa lực.' }
+          ],
+          tip: isBella 
+            ? 'Nếu bạn bị treo cổ ban đêm, ban ngày tiếp theo Voldemort sẽ được quyền ám sát tới 2 người!'
+            : 'Tuyệt đối tránh bị treo cổ, vì nếu Lucius chết thì ngày hôm sau Voldemort sẽ mất quyền ám sát!',
+          statusText: myAction 
+            ? (myAction.targetId === 'NONE'
+                ? '✓ Đã chọn: Án Binh Bất Động (Không ám sát ai hôm nay)'
+                : `✓ Đã lưu mục tiêu ám sát: [${myVotedTarget?.name}]`)
+            : effectiveTargetPlayer 
+              ? `👉 Đang nhắm: [${effectiveTargetPlayer.name}] ➔ Bấm nút "Ám Sát (Avada Kedavra)" bên dưới!`
+              : 'Chọn mục tiêu bên dưới để dồn đòn ám sát cùng Chúa Tể hoặc chọn "Không Giết Ai Cả"',
+          statusType: myAction ? 'success' as const : effectiveTargetPlayer ? 'warning' as const : 'info' as const,
+        };
+      }
+
+      // Order of Phoenix with Active Day Skills
+      if (me.role?.id === 'ALBUS_DUMBLEDORE') {
+        return {
+          title: 'Albus Dumbledore · Phù Phép Bảo Vệ (Protego)',
+          badge: 'Bảo Hộ Phượng Hoàng',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Chọn người che chở', desc: 'Chọn 1 đồng đội bạn nghi là Harry hoặc sắp bị phe ác nhắm bắn (không được chọn cùng 1 người 2 ngày liên tiếp).' },
+            { num: '2', title: 'Dựng kết giới', desc: 'Bấm nút "Phù Phép Bảo Vệ" bên dưới để che chở người đó khỏi đòn ám sát hôm nay.' }
+          ],
+          tip: 'Nếu mục tiêu được bạn bảo vệ bị Tử Thần Thực Tử nhắm bắn hôm nay, họ sẽ an toàn sống sót!',
+          statusText: myAction 
+            ? `✓ Đang dựng khiên bảo vệ cho: [${myVotedTarget?.name}]` 
+            : effectiveTargetPlayer 
+              ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Bấm nút "Phù Phép Bảo Vệ" bên dưới!`
+              : 'Vui lòng chọn 1 đồng đội bên dưới để phù phép bảo vệ',
+          statusType: myAction ? 'success' as const : effectiveTargetPlayer ? 'warning' as const : 'info' as const,
+        };
+      }
+
+      if (me.role?.id === 'HERMIONE_GRANGER') {
+        return {
+          title: 'Hermione Granger · Soi Danh Tính Thật',
+          badge: 'Trinh Sát Uyên Bác',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Chọn người cần soi', desc: 'Chọn 1 người chơi bạn nghi ngờ nhất trong danh sách bên dưới.' },
+            { num: '2', title: 'Soi thẻ bài', desc: 'Bấm nút "Thi Triển Soi Danh Tính" để biết chính xác thẻ bài thật của người đó.' }
+          ],
+          tip: 'Ưu tiên soi những người phát ngôn mâu thuẫn hoặc dẫn dắt bỏ phiếu bất thường vào ban đêm.',
+          statusText: effectiveTargetPlayer 
+            ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Bấm nút "Thi Triển Soi Danh Tính" bên dưới!`
+            : 'Chọn 1 người chơi để soi danh tính thật',
+          statusType: effectiveTargetPlayer ? 'warning' as const : 'info' as const,
+        };
+      }
+
+      if (me.role?.id === 'REMUS_LUPIN') {
+        return {
+          title: 'Remus Lupin · Bùa Chú Hồi Sinh',
+          badge: 'Cứu Viện Khẩn Cấp',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Chọn đồng đội ngã xuống', desc: 'Nếu có đồng đội đã tử trận (màu đỏ), hãy nhấp chọn người đó trong danh sách.' },
+            { num: '2', title: 'Hồi sinh', desc: 'Bấm nút "Thi Triển Hồi Sinh" để cứu họ trở lại trận chiến (1 lần duy nhất trong toàn trận).' }
+          ],
+          tip: 'Hãy để dành hồi sinh cho các nhân vật nòng cốt như Dumbledore, Moody, Kingsley hoặc người hộ tống.',
+          statusText: effectiveTargetPlayer 
+            ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Bấm nút "Thi Triển Hồi Sinh" bên dưới!`
+            : 'Chọn 1 đồng đội đã ngã xuống để hồi sinh',
+          statusType: effectiveTargetPlayer ? 'warning' as const : 'info' as const,
+        };
+      }
+
+      if (me.role?.id === 'KINGSLEY_SHACKLEBOLT') {
+        return {
+          title: 'Kingsley Shacklebolt · Chỉ Huy Phản Công',
+          badge: 'Thần Sáng Chỉ Huy',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Kích hoạt thế trận', desc: 'Bấm nút "Chỉ Huy Phản Công" bên dưới để chuẩn bị sẵn thế trận phòng thủ phản kích.' },
+            { num: '2', title: 'Phản kích tự động', desc: 'Nếu có thành viên Hội bị ám sát hôm nay, có 50% cơ hội hạ sát ngược lại 1 Tử Thần Thực Tử.' }
+          ],
+          tip: 'Kích hoạt ngay ban ngày để đảm bảo thế trận bảo hộ cho toàn đội!',
+          statusText: myAction ? '✓ Đã kích hoạt thế trận phản công cho hôm nay' : 'Nhấn nút "Chỉ Huy Phản Công" bên dưới để kích hoạt',
+          statusType: myAction ? 'success' as const : 'info' as const,
+        };
+      }
+
+      // Order with Passive / Decoy / Escort
+      if (me.role?.id === 'HARRY_POTTER') {
+        return {
+          title: 'Harry Potter · Giữ Kín Thân Phận & Sống Sót',
+          badge: 'Kẻ Được Chọn',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Ẩn mình cẩn trọng', desc: 'Bạn là mục tiêu số 1 của phe ác! Đừng để lộ thân phận thật trên Mạng Floo.' },
+            { num: '2', title: 'Bay hộ tống', desc: 'Có thể chọn 1 đồng đội đáng tin cậy và bấm "Bay Hộ Tống" để cùng liệng chổi né đòn.' }
+          ],
+          tip: 'Bạn có 1 lần tự vệ bằng Tia Lửa Vàng của Đũa Phép nếu bị Voldemort nhắm bắn. Khi sống sót tới Hang Sóc (Chặng 4), Hội Phượng Hoàng THẮNG NGAY LẬP TỨC!',
+          statusText: myAction 
+            ? `✓ Đang bay hộ tống cùng: [${myVotedTarget?.name}]` 
+            : 'Ban ngày bạn không có phép tấn công. Hãy thảo luận để ẩn mình an toàn',
+          statusType: myAction ? 'success' as const : 'info' as const,
+        };
+      }
+
+      if (me.role?.id === 'POTTER_FAKE') {
+        return {
+          title: 'Bản Sao Harry · Đóng Giả Bia Đỡ Đạn',
+          badge: 'Đa Quả Dịch Ngụy Trang',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Diễn xuất như Harry', desc: 'Bạn mang ngoại hình Harry! Hãy phát ngôn tự tin như Harry thật trên Mạng Floo để dụ Voldemort bắn lãng phí vào bạn.' },
+            { num: '2', title: 'Bay hộ tống', desc: 'Có thể chọn 1 đồng đội và bấm "Bay Hộ Tống" để cùng bay sát cánh.' }
+          ],
+          tip: 'Nếu phe ác dồn đòn ám sát vào bạn, bạn đã bảo vệ an toàn cho Harry thật một lượt vô giá!',
+          statusText: myAction 
+            ? `✓ Đang bay hộ tống cùng: [${myVotedTarget?.name}]` 
+            : 'Hãy đóng giả làm Harry thật trên Mạng Floo để bảo vệ bạn mình!',
+          statusType: myAction ? 'success' as const : 'info' as const,
+        };
+      }
+
+      if (me.role?.id === 'RON_WEASLEY') {
+        return {
+          title: 'Ron Weasley · Tấm Khiên Sinh Mệnh',
+          badge: 'Bảo Hộ Tự Động',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Khiên chắn tự động', desc: 'Kỹ năng tự động: Nếu Tử Thần Thực Tử bắn vào Harry, bạn sẽ tự động hy sinh đỡ đòn thay bạn mình.' },
+            { num: '2', title: 'Hộ tống & đàm đạo', desc: 'Có thể chọn 1 đồng đội và bấm "Bay Hộ Tống" hoặc thảo luận chỉ điểm trên Mạng Floo.' }
+          ],
+          tip: 'Bạn là tấm khiên sinh mệnh tối hậu của Harry. Hãy cùng các bản sao phân tán sự chú ý của kẻ thù!',
+          statusText: myAction 
+            ? `✓ Đang bay hộ tống cùng: [${myVotedTarget?.name}]` 
+            : 'Kỹ năng đỡ đòn tự động sẵn sàng nếu Harry bị nhắm bắn',
+          statusType: myAction ? 'success' as const : 'info' as const,
+        };
+      }
+
+      // Default Order member
+      return {
+        title: `${me.role?.name || 'Phù Thủy'} · Thành Viên Hội Phượng Hoàng`,
+        badge: 'Đồng Đội Hộ Tống',
+        badgeVariant: 'amber' as const,
+        alert: undefined as string | undefined,
+        steps: [
+          { num: '1', title: 'Truy tìm manh mối', desc: 'Quan sát các câu hỏi và phản ứng trên Mạng Floo để phát hiện kẻ khả nghi.' },
+          { num: '2', title: 'Bay hộ tống', desc: 'Có thể chọn 1 đồng đội đáng tin và bấm "Bay Hộ Tống" để cùng liệng chổi né đòn nếu bị tấn công.' }
+        ],
+        tip: 'Hãy chuẩn bị cho Ban Đêm để toàn thể phù thủy cùng biểu quyết Tước Đũa trục xuất kẻ ác!',
+        statusText: myAction 
+          ? `✓ Đang bay hộ tống cùng: [${myVotedTarget?.name}]` 
+          : 'Thảo luận trên Mạng Floo hoặc chọn 1 người để Bay Hộ Tống',
+        statusType: myAction ? 'success' as const : 'info' as const,
+      };
+    }
+
+    return null;
+  })();
 
   return (
     <div className="max-w-7xl mx-auto py-6 px-4">
@@ -845,6 +1171,163 @@ export function PlayerScreen() {
             </div>
           )}
 
+          {/* ================= 0. DYNAMIC ACTION COACH (TRỢ LÝ TÁC CHIẾN TỨC THÌ) ================= */}
+          {coachGuide && (
+            <div 
+              className="relative rounded-2xl border-2 overflow-hidden shadow-2xl transition-all mb-4 sm:mb-6"
+              style={{
+                background: coachGuide.badgeVariant === 'emerald'
+                  ? 'linear-gradient(135deg, #021a11 0%, #063120 50%, #02140d 100%)'
+                  : coachGuide.badgeVariant === 'indigo'
+                    ? 'linear-gradient(135deg, #0a0614 0%, #160c29 50%, #080312 100%)'
+                    : coachGuide.badgeVariant === 'red'
+                      ? 'linear-gradient(135deg, #240505 0%, #380a0a 50%, #1c0303 100%)'
+                      : 'linear-gradient(135deg, #241206 0%, #381e0c 50%, #1a0c04 100%)',
+                borderColor: coachGuide.badgeVariant === 'emerald'
+                  ? '#10b981'
+                  : coachGuide.badgeVariant === 'indigo'
+                    ? '#818cf8'
+                    : coachGuide.badgeVariant === 'red'
+                      ? '#ef4444'
+                      : '#f59e0b',
+              }}
+            >
+              {/* Decorative corner flourishes */}
+              <CardCornerFlourish className={`absolute top-2 left-2 w-4 h-4 pointer-events-none opacity-70 ${
+                coachGuide.badgeVariant === 'emerald' ? 'text-emerald-400' : coachGuide.badgeVariant === 'indigo' ? 'text-indigo-400' : 'text-amber-400'
+              }`} />
+              <CardCornerFlourish className={`absolute top-2 right-2 w-4 h-4 pointer-events-none -scale-x-100 opacity-70 ${
+                coachGuide.badgeVariant === 'emerald' ? 'text-emerald-400' : coachGuide.badgeVariant === 'indigo' ? 'text-indigo-400' : 'text-amber-400'
+              }`} />
+
+              {/* Header Bar */}
+              <div className="p-3 sm:p-4 border-b border-white/10 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`p-2 rounded-xl border shrink-0 ${
+                    coachGuide.badgeVariant === 'emerald'
+                      ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500'
+                      : coachGuide.badgeVariant === 'indigo'
+                        ? 'bg-indigo-950/90 text-cyan-300 border-indigo-500'
+                        : coachGuide.badgeVariant === 'red'
+                          ? 'bg-red-950/90 text-red-300 border-red-600'
+                          : 'bg-amber-950/90 text-amber-300 border-amber-500'
+                  }`}>
+                    <Compass size={18} className="animate-spin-slow" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full border ${
+                        coachGuide.badgeVariant === 'emerald'
+                          ? 'bg-emerald-950 text-emerald-300 border-emerald-600'
+                          : coachGuide.badgeVariant === 'indigo'
+                            ? 'bg-indigo-950 text-cyan-300 border-indigo-600'
+                            : coachGuide.badgeVariant === 'red'
+                              ? 'bg-red-950 text-red-300 border-red-600'
+                              : 'bg-amber-950 text-amber-300 border-amber-600'
+                      }`}>
+                        {coachGuide.badge}
+                      </span>
+                      <span className="text-[10px] font-mono text-white/50">• TRỢ LÝ HÀNH ĐỘNG</span>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-title font-bold text-white tracking-wide truncate mt-0.5">
+                      {coachGuide.title}
+                    </h3>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsCoachExpanded(!isCoachExpanded)}
+                  className="text-xs font-mono font-bold text-amber-300 hover:text-white bg-black/40 px-2.5 py-1 rounded-lg border border-white/20 flex items-center gap-1 shrink-0 transition-all cursor-pointer active:scale-95"
+                  title={isCoachExpanded ? 'Thu gọn chỉ dẫn' : 'Mở rộng chỉ dẫn chi tiết'}
+                >
+                  {isCoachExpanded ? (
+                    <>
+                      <span className="hidden xs:inline">Thu gọn</span>
+                      <ChevronUp size={14} />
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden xs:inline">Chi tiết</span>
+                      <ChevronDown size={14} />
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Expanded Step Guide */}
+              {isCoachExpanded && (
+                <div className="p-3 sm:p-4 space-y-3">
+                  {coachGuide.alert && (
+                    <div className="p-2.5 rounded-xl bg-red-950/80 border border-red-700 text-xs text-red-200 font-serif flex items-center gap-2">
+                      <AlertTriangle size={16} className="text-red-400 shrink-0" />
+                      <span>{coachGuide.alert}</span>
+                    </div>
+                  )}
+
+                  {/* Steps 1-2-3 */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {coachGuide.steps.map((st, sIdx) => (
+                      <div 
+                        key={`coach-step-${sIdx}`}
+                        className="p-2.5 rounded-xl bg-black/40 border border-white/10 flex items-start gap-2.5"
+                      >
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center font-mono font-black text-xs shrink-0 mt-0.5 ${
+                          coachGuide.badgeVariant === 'emerald'
+                            ? 'bg-emerald-500 text-black'
+                            : coachGuide.badgeVariant === 'indigo'
+                              ? 'bg-indigo-400 text-black'
+                              : 'bg-amber-400 text-black'
+                        }`}>
+                          {st.num}
+                        </span>
+                        <div className="text-xs font-lora text-white/90 leading-snug">
+                          {st.title && <strong className="block text-white font-serif mb-0.5">{st.title}</strong>}
+                          <span>{st.desc}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Tactical Tip Box */}
+                  {coachGuide.tip && (
+                    <div className="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/30 flex items-start gap-2 text-xs font-lora text-amber-200/90 leading-relaxed">
+                      <Sparkles size={14} className="text-amber-400 shrink-0 mt-0.5" />
+                      <span><strong>Mẹo vàng:</strong> {coachGuide.tip}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Live Action Status Strip (Always visible) */}
+              <div className="px-3 sm:px-4 py-2 bg-black/60 border-t border-white/10 flex items-center justify-between gap-2 text-[11px] font-mono">
+                <div className="flex items-center gap-2 truncate">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${
+                    coachGuide.statusType === 'success'
+                      ? 'bg-emerald-400 animate-pulse'
+                      : coachGuide.statusType === 'warning'
+                        ? 'bg-amber-400 animate-bounce'
+                        : 'bg-cyan-400'
+                  }`} />
+                  <span className={`truncate font-semibold ${
+                    coachGuide.statusType === 'success'
+                      ? 'text-emerald-300'
+                      : coachGuide.statusType === 'warning'
+                        ? 'text-amber-300'
+                        : 'text-cyan-200'
+                  }`}>
+                    {coachGuide.statusText}
+                  </span>
+                </div>
+
+                {effectiveTargetPlayer && (
+                  <span className="shrink-0 text-[10px] text-white/70 bg-white/10 px-2 py-0.5 rounded border border-white/20">
+                    Mục tiêu: <strong className="text-white">{effectiveTargetPlayer.name}</strong>
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* 1. Skies of Privet Drive: Target Selection Grid */}
           <div className="relative rounded-2xl hpvn-panel-gold p-5 overflow-hidden">
             <CardCornerFlourish className="absolute top-2 left-2 w-5 h-5 text-[#bd8436] pointer-events-none" />
@@ -865,7 +1348,7 @@ export function PlayerScreen() {
                 {myAction && (
                   <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/90 px-3 py-1 rounded-full border border-emerald-500/80 flex items-center gap-1.5">
                     <CheckCircle size={13} className="text-emerald-400" />
-                    Đã lưu: {myVotedTarget?.name || 'Mục tiêu'}
+                    Đã lưu: {myAction.targetId === 'NONE' ? 'Án Binh (Không Giết)' : (myVotedTarget?.name || 'Mục tiêu')}
                   </span>
                 )}
                 {selectedTarget && selectedTarget !== myAction?.targetId && (
@@ -964,19 +1447,6 @@ export function PlayerScreen() {
                               Bị thương
                             </span>
                           )}
-                          {(() => {
-                            const escorts = Object.entries(gameState.pendingActions)
-                              .filter(([, act]) => act.actionName === 'Bay Hộ Tống' && act.targetId === p.id)
-                              .map(([actorId]) => gameState.players.find(pl => pl.id === actorId)?.name)
-                              .filter(Boolean);
-                            if (escorts.length === 0) return null;
-                            return (
-                              <span className="text-[9px] font-mono font-bold text-amber-200 bg-amber-950/90 px-1.5 py-0.5 rounded border border-amber-500/80 flex items-center gap-1">
-                                <Shield size={10} className="text-amber-400" />
-                                Hộ tống: {escorts.join(', ')}
-                              </span>
-                            );
-                          })()}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className={`text-[10px] font-mono ${
@@ -1064,10 +1534,18 @@ export function PlayerScreen() {
                         PHIẾU BẦU ĐÃ ĐƯỢC LƯU VÀO MÁY CHỦ
                       </span>
                       <p className="font-serif text-sm sm:text-base text-[#f5eedb] font-bold">
-                        {(myAction.actionName === 'Bỏ phiếu Treo Cổ' || myAction.actionName === 'Biểu quyết Tước Đũa') ? 'Biểu quyết Tước Đũa' : `Hành động: ${myAction.actionName}`}:{' '}
-                        <span className="text-[#ffd88f] underline decoration-[#bd8436] font-extrabold text-base">
-                          {myVotedTarget?.name || 'Mục tiêu'}
-                        </span>
+                        {myAction.targetId === 'NONE' ? (
+                          <span className="text-emerald-300 font-extrabold text-base">
+                            🚫 Án Binh Bất Động (Không Ám Sát Hôm Nay)
+                          </span>
+                        ) : (
+                          <>
+                            {isVoteAction(myAction.actionName) ? 'Biểu quyết Tước Đũa' : `Hành động: ${myAction.actionName}`}:{' '}
+                            <span className="text-[#ffd88f] underline decoration-[#bd8436] font-extrabold text-base">
+                              {myVotedTarget?.name || 'Mục tiêu'}
+                            </span>
+                          </>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -1107,17 +1585,26 @@ export function PlayerScreen() {
                           }
                         }}
                         disabled={!effectiveTargetId || isDead}
-                        className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-phoenix font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40"
+                        className="flex-1 py-3 px-4 rounded-xl hpvn-btn-phoenix flex items-center justify-between sm:justify-start gap-3 shadow-lg disabled:opacity-40"
                       >
-                        <Skull size={18} />
-                        <span>Bắn Lén (Avada Kedavra)</span>
+                        <div className="p-2 rounded-lg bg-black/40 border border-red-400/40 text-red-300 shrink-0">
+                          <Skull size={20} />
+                        </div>
+                        <div className="flex flex-col text-left min-w-0">
+                          <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-[#ffd88f] truncate">
+                            Bắn Lén (Avada Kedavra)
+                          </span>
+                          <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
+                            Thần Sáng kết liễu bí mật 1 mục tiêu khả nghi ngay trong đêm
+                          </span>
+                        </div>
                       </button>
                     )}
 
                     <button
                       onClick={() => {
                         if (effectiveTargetId) {
-                          playerAction('Biểu quyết Tước Đũa', effectiveTargetId);
+                          playerAction('biểu quyết tước đũa', effectiveTargetId);
                           setSelectedTarget(effectiveTargetId);
                           const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
                           setToastMessage(`✓ Đã lưu phiếu biểu quyết Tước Đũa cho: ${tName}!`);
@@ -1125,16 +1612,23 @@ export function PlayerScreen() {
                         }
                       }}
                       disabled={!effectiveTargetId || isDead}
-                      className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-phoenix font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40"
+                      className="flex-1 py-3 px-4 rounded-xl hpvn-btn-phoenix flex items-center justify-between sm:justify-start gap-3 shadow-lg disabled:opacity-40"
                     >
-                      <Crosshair size={18} />
-                      <span>
-                        {myAction?.targetId === effectiveTargetId
-                          ? `✓ Đã Lưu Phiếu Tước Đũa (${effectiveTargetPlayer?.name})`
-                          : myAction
-                            ? `🔄 Đổi Phiếu Sang: ${effectiveTargetPlayer?.name}`
-                            : `Biểu Quyết Tước Đũa ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
-                      </span>
+                      <div className="p-2 rounded-lg bg-black/40 border border-amber-400/40 text-[#ffd88f] shrink-0">
+                        <Crosshair size={20} />
+                      </div>
+                      <div className="flex flex-col text-left min-w-0">
+                        <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-[#ffd88f] truncate">
+                          {myAction?.targetId === effectiveTargetId
+                            ? `✓ Đã Lưu Phiếu Tước Đũa (${effectiveTargetPlayer?.name})`
+                            : myAction
+                              ? `🔄 Đổi Phiếu Sang: ${effectiveTargetPlayer?.name}`
+                              : `Biểu Quyết Tước Đũa ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
+                        </span>
+                        <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
+                          Bỏ phiếu trục xuất kẻ tình nghi ra khỏi trận không chiến
+                        </span>
+                      </div>
                     </button>
                   </div>
                 ) : (
@@ -1146,8 +1640,17 @@ export function PlayerScreen() {
                     if (me.role?.id === 'REMUS_LUPIN') skillName = 'Hồi Sinh';
                     if (me.role?.id === 'FENRIR_GREYBACK') skillName = 'Cắn';
 
-                    const isSilenced = Boolean(gameState.skillStates[`voldemort_silenced_R${gameState.round}`]);
-                    const isDoubleKill = Boolean(gameState.skillStates[`voldemort_double_kill_R${gameState.round}`]);
+                    // Check skill cooldowns
+                    const hermioneUsed = Boolean(gameState.skillStates[`${me.id}_HERMIONE_R${gameState.round}`]);
+                    const pettigrewUsed = Boolean(gameState.skillStates[`${me.id}_PETTIGREW_R${gameState.round}`]);
+                    const lupinUsed = Boolean(gameState.skillStates[`${me.id}_LUPIN`]);
+                    const fenrirUsed = Boolean(gameState.skillStates[`${me.id}_FENRIR`]);
+
+                    // Determine if current skill is on cooldown
+                    const isSkillOnCooldown = (skillName === 'Soi Danh Tính' && hermioneUsed) ||
+                      (skillName === 'Soi Phe' && pettigrewUsed) ||
+                      (skillName === 'Hồi Sinh' && lupinUsed) ||
+                      (skillName === 'Cắn' && fenrirUsed);
 
                     return (
                       <div className="space-y-3">
@@ -1169,94 +1672,170 @@ export function PlayerScreen() {
                           {skillName && (
                             <button
                               onClick={() => {
-                                if (effectiveTargetId) {
+                                if (effectiveTargetId && !isSkillOnCooldown) {
                                   const res = executeInstantSkill(skillName!, effectiveTargetId);
                                   setToastMessage(res || 'Đã thi triển');
                                   setTimeout(() => setToastMessage(null), 5000);
                                 }
                               }}
-                              disabled={!effectiveTargetId || isDead}
-                              className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-gold font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40"
+                              disabled={!effectiveTargetId || isDead || isSkillOnCooldown}
+                              className={`flex-1 py-3 px-4 rounded-xl hpvn-btn-gold flex items-center justify-between sm:justify-start gap-3 shadow-lg ${isSkillOnCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              title={isSkillOnCooldown ? 'Đã dùng kỹ năng này trong lượt này!' : ''}
                             >
-                              <Wand2 size={18} />
-                              <span>Thi Triển {skillName}</span>
+                              <div className="p-2 rounded-lg bg-black/40 border border-amber-400/40 text-[#ffd88f] shrink-0">
+                                <Wand2 size={20} />
+                              </div>
+                              <div className="flex flex-col text-left min-w-0">
+                                <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-[#ffd88f] truncate">
+                                  {isSkillOnCooldown ? `Đã Dùng: ${skillName}` : `Thi Triển ${skillName}`}
+                                </span>
+                                <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
+                                  {skillName === 'Soi Danh Tính'
+                                    ? 'Hỏi Merlin để biết chính xác thẻ bài thật của người này'
+                                    : skillName === 'Soi Phe'
+                                      ? 'Kiểm tra xem người này có thuộc Hội Phượng Hoàng hay không'
+                                      : skillName === 'Hồi Sinh'
+                                        ? 'Cứu sống lại 1 đồng đội đã tử trận (1 lần duy nhất)'
+                                        : skillName === 'Cắn'
+                                          ? 'Biến mục tiêu thành Ma Sói (Trung Lập) và tước toàn bộ kỹ năng'
+                                          : 'Thi triển quyền năng ma pháp'}
+                                </span>
+                              </div>
                             </button>
                           )}
 
                           {me.role?.faction === 'DEATH_EATERS' && (
-                            <button
-                              onClick={() => {
-                                if (effectiveTargetId) {
-                                  playerAction('Giết', effectiveTargetId);
-                                  setSelectedTarget(effectiveTargetId);
-                                  const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
-                                  setToastMessage(`✓ Đã lưu mục tiêu Ám Sát: ${tName}!`);
+                            <>
+                              <button
+                                onClick={() => {
+                                  if (effectiveTargetId) {
+                                    playerAction('giết', effectiveTargetId);
+                                    setSelectedTarget(effectiveTargetId);
+                                    const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
+                                    setToastMessage(`✓ Đã lưu mục tiêu Ám Sát: ${tName}!`);
+                                    setTimeout(() => setToastMessage(null), 3500);
+                                  }
+                                }}
+                                disabled={!effectiveTargetId || isDead || isSilenced}
+                                className="flex-1 py-3 px-4 rounded-xl hpvn-btn-floo flex items-center justify-between sm:justify-start gap-3 shadow-lg disabled:opacity-40"
+                              >
+                                <div className="p-2 rounded-lg bg-black/40 border border-emerald-400/40 text-emerald-300 shrink-0">
+                                  <Skull size={20} />
+                                </div>
+                                <div className="flex flex-col text-left min-w-0">
+                                  <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-emerald-200 truncate">
+                                    {isSilenced
+                                      ? 'Bị phong ấn (Không thể ám sát)'
+                                      : myAction?.targetId === effectiveTargetId && isKillAction(myAction?.actionName || '')
+                                        ? `✓ Đã Lưu Mục Tiêu Ám Sát (${effectiveTargetPlayer?.name})`
+                                        : isKillAction(myAction?.actionName || '') && myAction?.targetId !== 'NONE'
+                                          ? `🔄 Đổi Mục Tiêu Ám Sát Sang: ${effectiveTargetPlayer?.name}`
+                                          : `Ám Sát (Avada Kedavra) ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
+                                  </span>
+                                  <span className="text-[10px] sm:text-[11px] font-lora text-emerald-200/80 font-normal truncate">
+                                    Chỉ định mục tiêu để phe Tử Thần Thực Tử hạ sát hôm nay
+                                  </span>
+                                </div>
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  playerAction('giết', 'NONE');
+                                  setSelectedTarget(null);
+                                  setToastMessage('✓ Đã chọn: Không ám sát ai hôm nay! (Án binh bất động)');
                                   setTimeout(() => setToastMessage(null), 3500);
-                                }
-                              }}
-                              disabled={!effectiveTargetId || isDead || isSilenced}
-                              className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-floo font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40"
-                            >
-                              <Skull size={18} />
-                              <span>
-                                {isSilenced
-                                  ? 'Bị phong ấn (Không thể ám sát)'
-                                  : myAction?.targetId === effectiveTargetId && myAction?.actionName === 'Giết'
-                                    ? `✓ Đã Lưu Mục Tiêu Ám Sát (${effectiveTargetPlayer?.name})`
-                                    : myAction?.actionName === 'Giết'
-                                      ? `🔄 Đổi Mục Tiêu Ám Sát Sang: ${effectiveTargetPlayer?.name}`
-                                      : `Ám Sát (Avada Kedavra) ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
-                              </span>
-                            </button>
+                                }}
+                                disabled={isDead || isSilenced}
+                                className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-between sm:justify-start gap-3 shadow-lg transition-all active:scale-95 disabled:opacity-40 cursor-pointer ${
+                                  myAction?.targetId === 'NONE' && isKillAction(myAction?.actionName || '')
+                                    ? 'bg-gradient-to-r from-emerald-950 via-teal-950 to-slate-950 border-2 border-emerald-400 text-emerald-200 ring-2 ring-emerald-500/40'
+                                    : 'bg-gradient-to-r from-slate-900/90 via-zinc-900 to-black hover:border-zinc-500 border-2 border-zinc-700/80 text-zinc-300'
+                                }`}
+                              >
+                                <div className={`p-2 rounded-lg bg-black/40 border shrink-0 ${
+                                  myAction?.targetId === 'NONE' && isKillAction(myAction?.actionName || '')
+                                    ? 'border-emerald-400 text-emerald-300'
+                                    : 'border-zinc-600 text-zinc-400'
+                                }`}>
+                                  <Ban size={20} />
+                                </div>
+                                <div className="flex flex-col text-left min-w-0">
+                                  <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-zinc-200 truncate">
+                                    {myAction?.targetId === 'NONE' && isKillAction(myAction?.actionName || '')
+                                      ? '✓ Đang Chọn: Không Giết Ai Cả'
+                                      : 'Không Giết Ai Cả (Án Binh)'}
+                                  </span>
+                                  <span className="text-[10px] sm:text-[11px] font-lora text-zinc-400 font-normal truncate">
+                                    Ẩn mình quan sát, không ra tay ám sát ai trong ngày hôm nay
+                                  </span>
+                                </div>
+                              </button>
+                            </>
                           )}
 
                           {me.role?.id === 'ALBUS_DUMBLEDORE' && (
                             <button
                               onClick={() => {
-                                if (effectiveTargetId) {
-                                  const prevShieldedId = gameState.skillStates[`DUMBLEDORE_SHIELDED_R${gameState.round - 1}`];
-                                  if (prevShieldedId && prevShieldedId === effectiveTargetId) {
-                                    setToastMessage('⚠️ Dumbledore không được bảo vệ cùng 1 người 2 lượt liên tiếp!');
-                                    setTimeout(() => setToastMessage(null), 4000);
-                                    return;
-                                  }
-                                  playerAction('Bảo vệ', effectiveTargetId);
-                                  setSelectedTarget(effectiveTargetId);
-                                  const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
-                                  setToastMessage(`✓ Đã lưu khiên Bảo Vệ cho: ${tName}!`);
-                                  setTimeout(() => setToastMessage(null), 3500);
+                                if (!effectiveTargetId) return;
+
+                                // FIX: Check BEFORE sending action
+                                const prevShieldedId = gameState.skillStates[`DUMBLEDORE_SHIELDED_R${gameState.round - 1}`];
+                                if (prevShieldedId && prevShieldedId === effectiveTargetId) {
+                                  setToastMessage('⚠️ Dumbledore không được bảo vệ cùng 1 người 2 lượt liên tiếp!');
+                                  setTimeout(() => setToastMessage(null), 4000);
+                                  return; // Exit early - action NOT sent
                                 }
+
+                                playerAction('bảo vệ', effectiveTargetId);
+                                setSelectedTarget(effectiveTargetId);
+                                const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
+                                setToastMessage(`✓ Đã lưu khiên Bảo Vệ cho: ${tName}!`);
+                                setTimeout(() => setToastMessage(null), 3500);
                               }}
                               disabled={!effectiveTargetId || isDead}
-                              className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-gold font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40"
+                              className="flex-1 py-3 px-4 rounded-xl hpvn-btn-gold flex items-center justify-between sm:justify-start gap-3 shadow-lg disabled:opacity-40"
                             >
-                              <Shield size={18} />
-                              <span>
-                                {myAction?.targetId === effectiveTargetId && myAction?.actionName === 'Bảo vệ'
-                                  ? `✓ Đã Lưu Khiên Bảo Vệ (${effectiveTargetPlayer?.name})`
-                                  : myAction?.actionName === 'Bảo vệ'
-                                    ? `🔄 Đổi Bảo Vệ Sang: ${effectiveTargetPlayer?.name}`
-                                    : `Phù Phép Bảo Vệ (Protego) ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
-                              </span>
+                              <div className="p-2 rounded-lg bg-black/40 border border-amber-400/40 text-[#ffd88f] shrink-0">
+                                <Shield size={20} />
+                              </div>
+                              <div className="flex flex-col text-left min-w-0">
+                                <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-[#ffd88f] truncate">
+                                  {myAction?.targetId === effectiveTargetId && isProtectAction(myAction?.actionName || '')
+                                    ? `✓ Đã Lưu Khiên Bảo Vệ (${effectiveTargetPlayer?.name})`
+                                    : isProtectAction(myAction?.actionName || '')
+                                      ? `🔄 Đổi Bảo Vệ Sang: ${effectiveTargetPlayer?.name}`
+                                      : `Phù Phép Bảo Vệ (Protego) ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
+                                </span>
+                                <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
+                                  Dựng kết giới cứu sống mục tiêu nếu phe ác tấn công hôm nay
+                                </span>
+                              </div>
                             </button>
                           )}
 
                           {me.role?.id === 'KINGSLEY_SHACKLEBOLT' && (
                             <button
                               onClick={() => {
-                                playerAction('Chỉ huy Phản công', 'ALL');
+                                playerAction('chỉ huy phản công', 'ALL');
                                 setToastMessage('✓ Đã chỉ huy toàn quân phản công hôm nay (Tỷ lệ 50% hạ sát Tử Thần Thực Tử).');
                                 setTimeout(() => setToastMessage(null), 3500);
                               }}
                               disabled={isDead}
-                              className="flex-1 py-3.5 px-4 rounded-xl hpvn-btn-gold font-serif font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 disabled:opacity-40"
+                              className="flex-1 py-3 px-4 rounded-xl hpvn-btn-gold flex items-center justify-between sm:justify-start gap-3 shadow-lg disabled:opacity-40"
                             >
-                              <Shield size={18} />
-                              <span>
-                                {myAction?.actionName === 'Chỉ huy Phản công' || myAction?.actionName === 'Kingsley Kích Hoạt'
-                                  ? '✓ Đã Kích Hoạt Phản Công Hôm Nay'
-                                  : 'Chỉ Huy Phản Công (50%)'}
-                              </span>
+                              <div className="p-2 rounded-lg bg-black/40 border border-amber-400/40 text-[#ffd88f] shrink-0">
+                                <Shield size={20} />
+                              </div>
+                              <div className="flex flex-col text-left min-w-0">
+                                <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-[#ffd88f] truncate">
+                                  {isKingsleyAction(myAction?.actionName || '')
+                                    ? '✓ Đã Kích Hoạt Phản Công Hôm Nay'
+                                    : 'Chỉ Huy Phản Công (50%)'}
+                                </span>
+                                <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
+                                  Sẵn sàng thế trận: 50% hạ sát ngược lại 1 Tử Thần Thực Tử nếu có người ngã xuống
+                                </span>
+                              </div>
                             </button>
                           )}
 
@@ -1269,7 +1848,7 @@ export function PlayerScreen() {
                                   setTimeout(() => setToastMessage(null), 3500);
                                   return;
                                 }
-                                playerAction('Bay Hộ Tống', effectiveTargetId);
+                                playerAction('bay hộ tống', effectiveTargetId);
                                 setSelectedTarget(effectiveTargetId);
                                 const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
                                 setToastMessage(`✓ Đã xác nhận Bay Hộ Tống sát cánh cùng: ${tName}!`);
@@ -1277,16 +1856,23 @@ export function PlayerScreen() {
                               }
                             }}
                             disabled={!effectiveTargetId || isDead || effectiveTargetId === me.id}
-                            className="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-700/90 via-amber-800 to-amber-950 hover:from-amber-600 hover:to-amber-800 border-2 border-amber-400/90 font-serif font-black text-xs sm:text-sm text-[#ffd88f] flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
+                            className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-700/90 via-amber-800 to-amber-950 hover:from-amber-600 hover:to-amber-800 border-2 border-amber-400/90 flex items-center justify-between sm:justify-start gap-3 shadow-lg transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
                           >
-                            <Shield size={18} className="text-amber-300" />
-                            <span>
-                              {myAction?.targetId === effectiveTargetId && myAction?.actionName === 'Bay Hộ Tống'
-                                ? `✓ Đang Bay Hộ Tống (${effectiveTargetPlayer?.name})`
-                                : myAction?.actionName === 'Bay Hộ Tống'
-                                  ? `🔄 Đổi Hộ Tống Sang: ${effectiveTargetPlayer?.name}`
-                                  : `Bay Hộ Tống ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
-                            </span>
+                            <div className="p-2 rounded-lg bg-black/40 border border-amber-400/40 text-amber-300 shrink-0">
+                              <Shield size={20} />
+                            </div>
+                            <div className="flex flex-col text-left min-w-0">
+                              <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-[#ffd88f] truncate">
+                                {myAction?.targetId === effectiveTargetId && isEscortAction(myAction?.actionName || '')
+                                  ? `✓ Đang Bay Hộ Tống (${effectiveTargetPlayer?.name})`
+                                  : isEscortAction(myAction?.actionName || '')
+                                    ? `🔄 Đổi Hộ Tống Sang: ${effectiveTargetPlayer?.name}`
+                                    : `Bay Hộ Tống ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
+                              </span>
+                              <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
+                                Liệng chổi bay cùng để chia sẻ rủi ro, né đòn hoặc che chắn thay đồng đội
+                              </span>
+                            </div>
                           </button>
                         </div>
 
@@ -1439,23 +2025,44 @@ export function PlayerScreen() {
             ) : (
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 {me.role?.faction === 'DEATH_EATERS' && (
-                  <button
-                    onClick={() => {
-                      playerAction('Giết', effectiveTargetId!);
-                      setSelectedTarget(effectiveTargetId);
-                      setToastMessage(`✓ Đã lưu mục tiêu Ám Sát: ${effectiveTargetPlayer.name}!`);
-                      setTimeout(() => setToastMessage(null), 3500);
-                    }}
-                    className="px-3 py-2 rounded-xl hpvn-btn-floo font-serif font-bold text-xs flex items-center gap-1 active:scale-95"
-                  >
-                    <Skull size={13} />
-                    <span>Ám Sát</span>
-                  </button>
+                  <>
+                    <button
+                      onClick={() => {
+                        playerAction('giết', effectiveTargetId!);
+                        setSelectedTarget(effectiveTargetId);
+                        setToastMessage(`✓ Đã lưu mục tiêu Ám Sát: ${effectiveTargetPlayer.name}!`);
+                        setTimeout(() => setToastMessage(null), 3500);
+                      }}
+                      disabled={isSilenced}
+                      className="px-3 py-2 rounded-xl hpvn-btn-floo font-serif font-bold text-xs flex items-center gap-1 active:scale-95 disabled:opacity-40"
+                    >
+                      <Skull size={13} />
+                      <span>Ám Sát</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        playerAction('giết', 'NONE');
+                        setSelectedTarget(null);
+                        setToastMessage('✓ Đã chọn: Không ám sát ai hôm nay! (Án binh)');
+                        setTimeout(() => setToastMessage(null), 3500);
+                      }}
+                      disabled={isSilenced}
+                      className={`px-3 py-2 rounded-xl font-serif font-bold text-xs flex items-center gap-1 active:scale-95 disabled:opacity-40 border ${
+                        myAction?.targetId === 'NONE' && isKillAction(myAction?.actionName || '')
+                          ? 'bg-emerald-950 text-emerald-300 border-emerald-400'
+                          : 'bg-zinc-800 text-zinc-300 border-zinc-600 hover:bg-zinc-700'
+                      }`}
+                    >
+                      <Ban size={13} />
+                      <span>{myAction?.targetId === 'NONE' && isKillAction(myAction?.actionName || '') ? '✓ Án Binh' : 'Không Giết'}</span>
+                    </button>
+                  </>
                 )}
                 {me.role?.id === 'ALBUS_DUMBLEDORE' && (
                   <button
                     onClick={() => {
-                      playerAction('Bảo vệ', effectiveTargetId!);
+                      playerAction('bảo vệ', effectiveTargetId!);
                       setSelectedTarget(effectiveTargetId);
                       setToastMessage(`✓ Đã lưu khiên Bảo Vệ cho: ${effectiveTargetPlayer.name}!`);
                       setTimeout(() => setToastMessage(null), 3500);
@@ -1469,7 +2076,7 @@ export function PlayerScreen() {
                 {effectiveTargetId !== me.id && (
                   <button
                     onClick={() => {
-                      playerAction('Bay Hộ Tống', effectiveTargetId!);
+                      playerAction('bay hộ tống', effectiveTargetId!);
                       setSelectedTarget(effectiveTargetId);
                       setToastMessage(`✓ Đã lưu mục tiêu Bay Hộ Tống: ${effectiveTargetPlayer.name}!`);
                       setTimeout(() => setToastMessage(null), 3500);
@@ -1477,7 +2084,7 @@ export function PlayerScreen() {
                     className="px-3 py-2 rounded-xl bg-amber-800 hover:bg-amber-700 text-[#ffd88f] border border-amber-500 font-serif font-bold text-xs flex items-center gap-1 active:scale-95"
                   >
                     <Shield size={13} />
-                    <span>{myAction?.targetId === effectiveTargetId && myAction?.actionName === 'Bay Hộ Tống' ? '✓ Đang Hộ Tống' : 'Hộ Tống'}</span>
+                    <span>{myAction?.targetId === effectiveTargetId && isEscortAction(myAction?.actionName || '') ? '✓ Đang Hộ Tống' : 'Hộ Tống'}</span>
                   </button>
                 )}
               </div>

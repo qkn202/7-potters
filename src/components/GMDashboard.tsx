@@ -68,9 +68,9 @@ export function GMDashboard() {
     if (gameState.phase && prevPhaseRef.current !== gameState.phase) {
       prevPhaseRef.current = gameState.phase;
       const msg = gameState.phase === 'DAY'
-        ? '☀️ LƯỢT BAN NGÀY: Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy ngày HỘI PHƯỢNG HOÀNG!'
+        ? '☀️ LƯỢT BAN NGÀY: Đến lượt TOÀN BỘ PHÙ THỦY (Hội Phượng Hoàng & Tử Thần Thực Tử) cùng thảo luận & Biểu Quyết Tước Đũa!'
         : gameState.phase === 'NIGHT'
-        ? '🌙 LƯỢT BAN ĐÊM: Đến lượt TOÀN BỘ PHÙ THỦY (Hội Phượng Hoàng & Tử Thần Thực Tử) cùng Biểu Quyết Tước Đũa!'
+        ? '🌙 LƯỢT BAN ĐÊM: Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy HỘI PHƯỢNG HOÀNG (Hermione, Dumbledore, Lupin, Kingsley)!'
         : null;
 
       if (msg) {
@@ -225,7 +225,7 @@ export function GMDashboard() {
 
         {/* Thông báo lượt phe hành động cho GM */}
         <div className={`mt-4 p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-all ${
-          isDay
+          isNight
             ? 'bg-gradient-to-r from-[#211005]/95 via-[#331a0a]/95 to-[#1c0e05]/95 border-amber-500/70 shadow-[0_0_12px_rgba(245,158,11,0.15)]'
             : 'bg-gradient-to-r from-[#0d071a]/95 via-[#180e2b]/95 to-[#0b0517]/95 border-indigo-500/70 shadow-[0_0_12px_rgba(99,102,241,0.2)]'
         }`}>
@@ -233,14 +233,14 @@ export function GMDashboard() {
             <span className="text-[11px] font-mono text-[#ebdcb0]/90 uppercase font-bold tracking-wider shrink-0">
               LƯỢT HÀNH ĐỘNG HIỆN TẠI:
             </span>
-            {isDay ? (
+            {isNight ? (
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500 font-mono font-extrabold text-xs uppercase tracking-wide">
                   <DarkMarkCrest className="w-3.5 h-3.5" />
                   Phe Tử Thần Thực Tử (Ám sát)
                 </span>
                 <span className="text-xs font-serif font-bold text-[#ffd88f]">
-                  + Phù thủy ngày Hội Phượng Hoàng (Hermione, Dumbledore, Lupin, Kingsley)
+                  + Phù thủy Hội Phượng Hoàng (Hermione, Dumbledore, Lupin, Kingsley) &amp; Bay Hộ Tống
                 </span>
               </div>
             ) : (
@@ -256,7 +256,7 @@ export function GMDashboard() {
             )}
           </div>
           <div className="text-[11px] font-mono text-[#ebdcb0]/80 bg-black/40 px-2.5 py-1 rounded border border-[#7a5229]/60 shrink-0">
-            {isDay ? 'Merlin nhắc nhở Tử Thần Thực Tử & nhân vật ngày' : 'Merlin nhắc nhở toàn thể phù thủy biểu quyết'}
+            {isNight ? 'Merlin nhắc nhở Tử Thần Thực Tử & nhân vật đêm' : 'Merlin nhắc nhở toàn thể phù thủy biểu quyết'}
           </div>
         </div>
       </div>
@@ -320,7 +320,7 @@ export function GMDashboard() {
                           ? 'bg-emerald-950 text-emerald-300 border-emerald-600'
                           : 'bg-[#2a170a] text-[#ffd88f] border-[#7a5229]'
                       }`}>
-                        {isNight ? '🗳️ Biểu quyết Tước Đũa: ' : '⚡ Hành động: '}
+                        {isDay ? '🗳️ Biểu quyết Tước Đũa: ' : '⚡ Hành động đêm: '}
                         {votedCount}/{totalAlive} người sống
                       </span>
                       <span className="text-[11px] text-[#ebdcb0]/70 font-mono hidden sm:inline">
@@ -540,9 +540,9 @@ export function GMDashboard() {
                         : pAction?.targetId === 'NONE'
                           ? 'Không ai cả (Án Binh)'
                           : gameState.players.find(x => x.id === pAction?.targetId)?.name;
-                      const pVotes = isNight ? (votesReceived[p.id] || 0) : 0;
-                      const pKills = isDay ? (killReceived[p.id] || 0) : 0;
-                      const pEscorts = isDay ? (escortsReceived[p.id] || 0) : 0;
+                      const pVotes = isDay ? (votesReceived[p.id] || 0) : 0;
+                      const pKills = isNight ? (killReceived[p.id] || 0) : 0;
+                      const pEscorts = isNight ? (escortsReceived[p.id] || 0) : 0;
 
                       return (
                         <div className="mt-2.5 pt-2 border-t border-[#7a5229]/40 flex items-center justify-between gap-1 text-[11px] font-mono">

@@ -634,6 +634,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (me.status === 'DEAD') return 'Bạn đã tử trận, không thể sử dụng kỹ năng!';
 
     if (actionName === 'Soi Danh Tính' && me.role?.id === 'HERMIONE_GRANGER') {
+      if (curState.phase !== 'NIGHT') return 'Kỹ năng soi danh tính chỉ có hiệu lực vào ban đêm!';
       if (target.role?.id === 'HARRY_POTTER' || target.role?.id === 'VOLDEMORT') {
         return 'Bùa chú bị phản phệ! Bạn không thể soi danh tính của Harry Potter hoặc Chúa Tể Voldemort (theo luật thẻ bài)!';
       }
@@ -653,6 +654,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (actionName === 'Soi Phe' && me.role?.id === 'PETER_PETTIGREW') {
+      if (curState.phase !== 'NIGHT') return 'Kỹ năng soi phe chỉ có hiệu lực vào ban đêm!';
       const stateKey = `${me.id}_PETTIGREW_R${curState.round}`;
       if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng soi phe trong lượt này rồi!';
 
@@ -669,6 +671,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (actionName === 'Hồi Sinh' && me.role?.id === 'REMUS_LUPIN') {
+      if (curState.phase !== 'NIGHT') return 'Thuốc hồi sinh chỉ có hiệu lực vào ban đêm!';
       if (curState.skillStates[`${me.id}_LUPIN`]) return 'Bạn đã hết thuốc hồi sinh!';
       if (target.status === 'ALIVE') return 'Mục tiêu đang hoàn toàn khỏe mạnh, không cần dùng thuốc!';
       updateState({
@@ -682,11 +685,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     if (actionName === 'Bắn Lén' && me.role?.id === 'ALASTOR_MOODY') {
       if (curState.skillStates[`${me.id}_MOODY`]) return 'Bạn đã hết đạn!';
-      if (curState.phase !== 'NIGHT') return 'Chỉ được bắn lén vào ban đêm!';
+      if (curState.phase !== 'DAY') return 'Chỉ được bắn lén vào ban ngày (lúc biểu quyết)!';
       if (target.status === 'DEAD') return 'Mục tiêu đã chết, không thể bắn!';
       
       let deadIds = [targetId];
-      let logs = [...curState.logs, `Hệ thống: Đoàng! Moody đã bắn lén chết ${target.name} trong đêm!`];
+      let logs = [...curState.logs, `Hệ thống: Đoàng! Moody đã bắn lén chết ${target.name} giữa ban ngày!`];
       
       if (target.role?.faction === 'ORDER_OF_PHOENIX') {
         deadIds.push(me.id);
@@ -713,6 +716,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (actionName === 'Cắn' && me.role?.id === 'FENRIR_GREYBACK') {
+      if (curState.phase !== 'NIGHT') return 'Kỹ năng cắn chỉ có hiệu lực vào ban đêm!';
       if (curState.skillStates[`${me.id}_FENRIR`]) return 'Bạn đã dùng vết cắn ma sói rồi (chỉ dùng 1 lần trong ván)!';
       if (target.status === 'DEAD') return 'Mục tiêu đã chết, không thể cắn!';
       if (target.role?.faction === 'DEATH_EATERS') return 'Không thể cắn đồng minh Tử Thần Thực Tử!';
@@ -1568,7 +1572,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const maxStages = prev.maxStages || balance.maxStages;
       return {
         ...prev,
-        phase: 'DAY',
+        phase: 'NIGHT',
         round: 1,
         flightStage: 1,
         maxStages,
@@ -1579,7 +1583,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           ...prev.logs, 
           `Hệ thống: Trận Không Chiến Bảy Potter bùng nổ! Chặng 1/${maxStages}: Xuất phát từ Số 4 Privet Drive!`,
           'Hệ thống: 🌙 Biến cố [Bầu Trời Surrey Tĩnh Lặng] đang kích hoạt: Đa Quả Dịch bảo vệ danh tính, hãy chọn người bay hộ tống để cùng né đòn!',
-          'Hệ thống: ☀️ BAN NGÀY (Lượt 1) bắt đầu. Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy đặc biệt HỘI PHƯỢNG HOÀNG hành động! Mọi phù thủy hãy cơ động bay hộ tống hoặc thi triển bùa chú!'
+          'Hệ thống: 🌙 BAN ĐÊM (Lượt 1) bắt đầu. Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy đặc biệt HỘI PHƯỢNG HOÀNG (Hermione, Dumbledore, Lupin, Kingsley) hành động! Mọi phù thủy hãy cơ động bay hộ tống hoặc thi triển bùa chú!'
         ],
       };
     });
@@ -1593,13 +1597,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       let nextSkyEvent = prev.currentSkyEvent || getSkyEventForStage(1, maxS);
       let logMsg = `Hệ thống: Chuyển sang ${phase}.`;
       
-      if (phase === 'DAY') {
+      if (phase === 'NIGHT' && prev.phase === 'DAY') {
         newRound += 1;
         newFlightStage = Math.min(maxS, newFlightStage + 1);
         nextSkyEvent = getSkyEventForStage(newFlightStage, maxS);
-        logMsg = `Hệ thống: Tiến vào Chặng ${newFlightStage}/${maxS}: [${nextSkyEvent.title}] (Lượt ${newRound}). ☀️ BAN NGÀY: Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Nhân vật ngày HỘI PHƯỢNG HOÀNG (Hermione, Dumbledore, Lupin, Kingsley) hành động!`;
+        logMsg = `Hệ thống: Tiến vào Chặng ${newFlightStage}/${maxS}: [${nextSkyEvent.title}] (Lượt ${newRound}). 🌙 BAN ĐÊM: Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Nhân vật HỘI PHƯỢNG HOÀNG (Hermione, Dumbledore, Lupin, Kingsley) hành động! Mọi phù thủy hãy cơ động bay hộ tống hoặc thi triển bùa chú!`;
       } else if (phase === 'NIGHT') {
-        logMsg = `Hệ thống: 🌙 BAN ĐÊM (Lượt ${newRound}) bắt đầu. Đến lượt TOÀN BỘ PHÙ THỦY (Tất Cả Các Phe: Hội Phượng Hoàng & Tử Thần Thực Tử) cùng thức dậy tranh luận & Biểu Quyết Tước Đũa Expelliarmus!`;
+        logMsg = `Hệ thống: 🌙 BAN ĐÊM (Lượt ${newRound}) bắt đầu. Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Nhân vật HỘI PHƯỢNG HOÀNG (Hermione, Dumbledore, Lupin, Kingsley) hành động! Mọi phù thủy hãy cơ động bay hộ tống hoặc thi triển bùa chú!`;
+      } else if (phase === 'DAY') {
+        logMsg = `Hệ thống: ☀️ BAN NGÀY (Lượt ${newRound}) bắt đầu. Đến lượt TOÀN BỘ PHÙ THỦY (Tất Cả Các Phe: Hội Phượng Hoàng & Tử Thần Thực Tử) cùng thức dậy tranh luận & Biểu Quyết Tước Đũa Expelliarmus!`;
       }
 
       const winner = checkWinCondition(prev.players, newFlightStage, maxS);
@@ -1878,11 +1884,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         const possibleTargets = prev.players.filter(p => p.id !== bot.id && p.status !== 'DEAD' && !p.isGM);
         if (possibleTargets.length === 0) return;
 
-        if (prev.phase === 'NIGHT') {
+        if (prev.phase === 'DAY') {
           const randomTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
           newPendingActions[bot.id] = { actionName: 'biểu quyết tước đũa', targetId: randomTarget.id };
           newLogs.push(`[${bot.name}] đã biểu quyết Tước Đũa (Expelliarmus).`);
-        } else if (prev.phase === 'DAY') {
+        } else if (prev.phase === 'NIGHT') {
           if (bot.role?.faction === 'DEATH_EATERS') {
             const goodTargets = possibleTargets.filter(p => p.role?.faction !== 'DEATH_EATERS');
             const targetPool = goodTargets.length > 0 ? goodTargets : possibleTargets;
@@ -1944,7 +1950,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const newSkillStates: Record<string, boolean | string> = {};
     let resolvedPlayers = [...gameState.players];
 
-    if (gameState.phase === 'NIGHT') {
+    if (gameState.phase === 'DAY') {
       const voteCounts: Record<string, number> = {};
       Object.entries(gameState.pendingActions).forEach(([playerId, action]) => {
         const voter = gameState.players.find(p => p.id === playerId);
@@ -1980,7 +1986,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!topTargetId) {
-        summary.push("Không có ai bỏ phiếu đêm nay.");
+        summary.push("Không có ai bỏ phiếu hôm nay.");
       } else if (isTie) {
         summary.push(`Có sự hòa phiếu (cao nhất ${maxVotes} phiếu). Không ai bị tước đũa phép!`);
       } else {
@@ -1988,10 +1994,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         summary.push(`Với ${maxVotes} phiếu, ${target?.name} đã trúng Bùa Tước Khí Giới (Expelliarmus) và bị loại khỏi trận không chiến!`);
         
         if (target?.role?.id === 'BELLATRIX_LESTRANGE') {
-          summary.push(`CẢNH BÁO: Bellatrix đã chết! Sáng mai Voldemort được quyền giết 2 người.`);
+          summary.push(`CẢNH BÁO: Bellatrix đã chết! Đêm nay Voldemort được quyền giết 2 người (Cơn Thịnh Nộ Bellatrix).`);
           newSkillStates[`voldemort_double_kill_R${gameState.round + 1}`] = true;
         } else if (target?.role?.id === 'LUCIUS_MALFOY') {
-          summary.push(`CẢNH BÁO: Lucius đã chết! Sáng mai Voldemort bị phong ấn ma pháp (không thể ra đòn).`);
+          summary.push(`CẢNH BÁO: Lucius đã chết! Đêm nay Voldemort bị phong ấn ma pháp (Lời Nguyền Lucius Malfoy).`);
           newSkillStates[`voldemort_silenced_R${gameState.round + 1}`] = true;
         } else if (target?.role?.id === 'NYMPHADORA_TONKS') {
           if (target.name.includes('(Bot)')) {
@@ -2021,7 +2027,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         deadPlayers = processDominoEffect(gameState.players, deadPlayers, summary);
       }
     } else {
-      // Ban Ngày (DAY)
+      // Ban Đêm (NIGHT): 4T Ám sát, Dumbledore bảo vệ, Kingsley phản công, Hộ tống & Vật phẩm
       let shieldTargetId: string | null = null;
       let isKingsleyActive: boolean = false;
       
@@ -2065,7 +2071,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const deathEaterTargetIds: string[] = [];
 
       if (voldemortKillTargetId === 'NONE') {
-        summary.push("Chúa Tể Voldemort đã hạ lệnh án binh bất động: Phe Tử Thần Thực Tử không ra tay ám sát ai hôm nay!");
+        summary.push("Chúa Tể Voldemort đã hạ lệnh án binh bất động: Phe Tử Thần Thực Tử không ra tay ám sát ai đêm nay!");
       } else if (voldemortKillTargetId) {
         deathEaterTargetIds.push(voldemortKillTargetId);
         if (isDoubleKill) {
@@ -2085,17 +2091,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
               deathEaterTargetIds.push(validPlayerTargets[1]);
             }
           } else {
-            summary.push("Phe Tử Thần Thực Tử đã quyết định án binh bất động: Không ám sát ai hôm nay!");
+            summary.push("Phe Tử Thần Thực Tử đã quyết định án binh bất động: Không ám sát ai đêm nay!");
           }
         } else if (noneVotes > 0) {
-          summary.push("Phe Tử Thần Thực Tử đã quyết định án binh bất động: Không ám sát ai hôm nay!");
+          summary.push("Phe Tử Thần Thực Tử đã quyết định án binh bất động: Không ám sát ai đêm nay!");
         }
       }
 
       // Check Lucius Malfoy's silence curse
       const isSilenced = Boolean(gameState.skillStates[`voldemort_silenced_R${gameState.round}`]);
       if (isSilenced) {
-        summary.push("Chúa Tể Voldemort bị phong ấn ma pháp (Lời Nguyền Lucius Malfoy) và không thể ra đòn hôm nay!");
+        summary.push("Chúa Tể Voldemort bị phong ấn ma pháp (Lời Nguyền Lucius Malfoy) và không thể ra đòn đêm nay!");
         deathEaterTargetIds.length = 0;
       }
 
@@ -2113,7 +2119,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           if (isLargeRoomAmbush) {
             summary.push("⚡ VÒNG VÂY PHỤC KÍCH: Bầu trời rực lửa, Chúa Tể Voldemort chỉ huy Tử Thần Thực Tử phát động ám sát dồn dập 2 mục tiêu!");
           } else {
-            summary.push("⚡ CƠN THỊNH NỘ BELLATRIX: Tử Thần Thực Tử phát động ám sát liên hoàn 2 mục tiêu hôm nay!");
+            summary.push("⚡ CƠN THỊNH NỘ BELLATRIX: Tử Thần Thực Tử phát động ám sát liên hoàn 2 mục tiêu đêm nay!");
           }
         }
 
@@ -2323,23 +2329,25 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
 
     const isNextDay = gameState.phase === 'NIGHT';
+    const isNextNight = gameState.phase === 'DAY';
     const maxS = gameState.maxStages || 4;
-    const nextFlightStage = isNextDay ? Math.min(maxS, (gameState.flightStage || 1) + 1) : (gameState.flightStage || 1);
+    const nextFlightStage = isNextNight ? Math.min(maxS, (gameState.flightStage || 1) + 1) : (gameState.flightStage || 1);
     const winner = checkWinCondition(newPlayers, nextFlightStage, maxS);
+    const nextRound = winner ? gameState.round : (isNextNight ? gameState.round + 1 : gameState.round);
     const resolutionLogs = summary.map(line => `Hệ thống: ${line}`);
 
     const isGoldenFlameTriggered = Boolean(newSkillStates?.['GOLDEN_FLAME_TRIGGERED']);
     const updatedGoldenFlameUsed = gameState.goldenFlameUsed || isGoldenFlameTriggered;
 
-    // Reset daytime buffs like Peruvian darkness when night arrives
+    // Reset night buffs like Peruvian darkness when day arrives
     const nextSkillStates = { ...gameState.skillStates, ...(newSkillStates || {}) };
     if (isNextDay) {
       delete nextSkillStates['PERUVIAN_DARKNESS_ACTIVE'];
     }
 
     const nextSkyEvent = getSkyEventForStage(nextFlightStage, maxS);
-    const flightLog = (isNextDay && !winner) 
-      ? [`Hệ thống: ✈️ Phi đội vượt qua hiểm nguy, tiến vào Chặng ${nextFlightStage}/${maxS}: [${nextSkyEvent.title}]!`] 
+    const flightLog = (isNextNight && !winner) 
+      ? [`Hệ thống: ✈️ Phi đội vượt qua hiểm nguy, tiến vào Chặng ${nextFlightStage}/${maxS}: [${nextSkyEvent.title}]! (Lượt ${nextRound})`] 
       : [];
 
     // Cinematic Visual FX Selection
@@ -2374,7 +2382,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         subtitle: `Tia chớp lục sắc xé toạc màn đêm: ${deadNames} đã tử nạn!`,
         timestamp: now,
       };
-    } else if (isNextDay && !winner) {
+    } else if (isNextNight && !winner) {
       if (nextFlightStage >= maxS) {
         activeFX = {
           id: `fx_burrow_${now}`,
@@ -2422,7 +2430,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       ],
       winner,
       phase: winner ? 'END' : (gameState.phase === 'DAY' ? 'NIGHT' : 'DAY'),
-      round: winner ? gameState.round : (isNextDay ? gameState.round + 1 : gameState.round)
+      round: nextRound
     });
   };
 

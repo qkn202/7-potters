@@ -198,7 +198,7 @@ const isProtectAction = (actionName: string): boolean => normalizeAction(actionN
 const isHagridEscortAction = (actionName: string): boolean => normalizeAction(actionName) === 'bảo kê';
 const isKingsleyAction = (actionName: string): boolean => {
   const n = normalizeAction(actionName);
-  return n === 'chỉ huy phản công' || n === 'kingsley kích hoạt';
+  return n === 'chỉ huy ứng cứu' || n === 'ứng cứu' || n === 'cứu sống' || n === 'chỉ huy phản công' || n === 'kingsley kích hoạt';
 };
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -2024,8 +2024,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             newLogs.push(`[${bot.name}] đã hoàn tất hành động bí mật.`);
           } else if (bot.role?.id === 'KINGSLEY_SHACKLEBOLT') {
             if (Math.random() > 0.5) {
-              newPendingActions[bot.id] = { actionName: 'chỉ huy phản công', targetId: 'ALL' };
-              newLogs.push(`[${bot.name}] đã chỉ huy toàn quân phản công!`);
+              newPendingActions[bot.id] = { actionName: 'chỉ huy ứng cứu', targetId: 'ALL' };
+              newLogs.push(`[${bot.name}] đã sẵn sàng thế trận ứng cứu đồng đội!`);
             } else {
               const randomTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
               newPendingActions[bot.id] = { actionName: 'bay hộ tống', targetId: randomTarget.id };
@@ -2168,7 +2168,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           summary.push(`Bác Hagrid đã đưa ${target?.name} lên chiếc mô-tô bay hộ tống!`);
         } else if (isKingsleyAction(action.actionName) && player.role?.id === 'KINGSLEY_SHACKLEBOLT') {
           isKingsleyActive = true;
-          summary.push(`Kingsley Shacklebolt đã chỉ huy toàn quân phản công!`);
+          summary.push(`Thần Sáng Kingsley Shacklebolt đã sẵn sàng thế trận ứng cứu đồng đội (50% cơ hội tung đồng xu cứu sống)!`);
         } else if (isKillAction(action.actionName)) {
           if (player.role?.id === 'VOLDEMORT') {
             voldemortKillTargetId = action.targetId;
@@ -2407,30 +2407,25 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (isKingsleyActive) {
-        // Kiểm tra xem đêm nay có thành viên nào của Hội Phượng Hoàng vừa bị hạ sát không
-        const orderMembersFallen = deadPlayers.some(id => {
+        // Kỹ năng Thần Sáng (chuẩn theo Card): Nếu có 1 HPH bị TTTT giết ban đêm, Kingsley có 50% cơ hội (tung đồng xu bởi Merlin) cứu sống người đó
+        const fallenOrderMemberIds = deadPlayers.filter(id => {
           const p = gameState.players.find(x => x.id === id);
           return p && p.role?.faction === 'ORDER_OF_PHOENIX';
         });
 
-        if (orderMembersFallen) {
-          // Tung đồng xu xác suất 50% (Coin Flip)
+        if (fallenOrderMemberIds.length > 0) {
+          // Tung đồng xu xác suất 50% bởi Merlin
           const coinFlipSuccess = Math.random() < 0.5;
           if (coinFlipSuccess) {
-            const dePlayers = gameState.players.filter(p => p.role?.faction === 'DEATH_EATERS' && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
-            if (dePlayers.length > 0) {
-              // Ưu tiên bắn hạ tay sai Tử Thần Thực Tử trước để trận chiến không kết thúc quá chóng vánh
-              const deMinions = dePlayers.filter(p => p.role?.id !== 'VOLDEMORT');
-              const targetPool = deMinions.length > 0 ? deMinions : dePlayers;
-              const deVictim = targetPool[Math.floor(Math.random() * targetPool.length)];
-              summary.push(`🪙 [ĐỒNG XU NGỬA - 50% THÀNH CÔNG] Đồng đội ngã xuống kích hoạt phản xạ Thần Sáng! Kingsley Shacklebolt chỉ huy phản công xuất sắc, bắn hạ Tử Thần Thực Tử ${deVictim.name}!`);
-              deadPlayers.push(deVictim.id);
-            }
+            // Cứu sống 1 thành viên Hội bị TTTT hạ sát
+            const rescuedId = fallenOrderMemberIds[0];
+            const rescuedPlayer = gameState.players.find(p => p.id === rescuedId);
+            deadPlayers = deadPlayers.filter(id => id !== rescuedId);
+            summary.push(`🪙 [ĐỒNG XU NGỬA - 50% THÀNH CÔNG] Thần Sáng Kingsley Shacklebolt đã kịp thời xuất hiện, tung bùa hộ mệnh giải cứu ${rescuedPlayer?.name || 'đồng đội'} thoát chết trong gang tấc và hồi phục an toàn!`);
           } else {
-            summary.push(`🪙 [ĐỒNG XU SẤP - 50% THẤT BẠI] Kingsley Shacklebolt đã chỉ huy toàn quân nổ súng phản kích, nhưng phe Tử Thần Thực Tử đã kịp thời biến ảo tẩu thoát trong làn khói đen!`);
+            const fallenNames = fallenOrderMemberIds.map(id => gameState.players.find(p => p.id === id)?.name).filter(Boolean).join(', ');
+            summary.push(`🪙 [ĐỒNG XU SẤP - 50% THẤT BẠI] Kingsley Shacklebolt đã dốc sức lao tới ứng cứu ${fallenNames}, nhưng bùa chú hắc ám của Tử Thần Thực Tử quá hiểm hóc và bất thành!`);
           }
-        } else {
-          summary.push(`Kingsley Shacklebolt đã sẵn sàng thế trận phản công, nhưng đêm nay phi đội an toàn và không có ai ngã xuống nên đòn phản kích không phát hỏa.`);
         }
       }
 

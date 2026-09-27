@@ -49,7 +49,7 @@ const isEscortAction = (actionName: string): boolean => normalizeAction(actionNa
 const isProtectAction = (actionName: string): boolean => normalizeAction(actionName) === 'bảo vệ';
 const isKingsleyAction = (actionName: string): boolean => {
   const n = normalizeAction(actionName);
-  return n === 'chỉ huy phản công' || n === 'kingsley kích hoạt';
+  return n === 'chỉ huy ứng cứu' || n === 'ứng cứu' || n === 'cứu sống' || n === 'chỉ huy phản công' || n === 'kingsley kích hoạt';
 };
 
 export function PlayerScreen() {
@@ -474,16 +474,16 @@ export function PlayerScreen() {
 
       if (me.role?.id === 'KINGSLEY_SHACKLEBOLT') {
         return {
-          title: 'Kingsley Shacklebolt · Chỉ Huy Phản Công',
+          title: 'Kingsley Shacklebolt · Chỉ Huy Ứng Cứu',
           badge: 'Thần Sáng Chỉ Huy',
           badgeVariant: 'amber' as const,
           alert: undefined as string | undefined,
           steps: [
-            { num: '1', title: 'Kích hoạt thế trận', desc: 'Bấm nút "Chỉ Huy Phản Công" bên dưới để chuẩn bị sẵn thế trận phòng thủ phản kích.' },
-            { num: '2', title: 'Phản kích tự động', desc: 'Nếu có thành viên Hội bị ám sát đêm nay, có 50% cơ hội hạ sát ngược lại 1 Tử Thần Thực Tử.' }
+            { num: '1', title: 'Kích hoạt thế trận', desc: 'Bấm nút "Chỉ Huy Ứng Cứu" bên dưới để chuẩn bị sẵn thế trận ứng cứu cho toàn phi đội.' },
+            { num: '2', title: 'Cứu sống đồng đội (50%)', desc: 'Nếu có 1 thành viên Hội bị Tử Thần Thực Tử giết ban đêm, có 50% cơ hội (tung đồng xu Merlin) cứu sống người đó!' }
           ],
-          tip: 'Kích hoạt ngay ban đêm để đảm bảo thế trận bảo hộ cho toàn đội!',
-          statusText: myAction ? '✓ Đã kích hoạt thế trận phản công cho đêm nay' : 'Nhấn nút "Chỉ Huy Phản Công" bên dưới để kích hoạt',
+          tip: 'Kích hoạt ngay ban đêm để bảo toàn sinh mạng cho các nhân vật mấu chốt của Hội!',
+          statusText: myAction ? '✓ Đã kích hoạt thế trận ứng cứu cho đêm nay' : 'Nhấn nút "Chỉ Huy Ứng Cứu" bên dưới để kích hoạt',
           statusType: myAction ? 'success' as const : 'info' as const,
         };
       }
@@ -1814,8 +1814,8 @@ export function PlayerScreen() {
                       {me.role?.id === 'KINGSLEY_SHACKLEBOLT' && (
                         <button
                           onClick={() => {
-                            playerAction('chỉ huy phản công', 'ALL');
-                            setToastMessage('✓ Đã chỉ huy toàn quân phản công đêm nay (Tỷ lệ 50% hạ sát Tử Thần Thực Tử).');
+                            playerAction('chỉ huy ứng cứu', 'ALL');
+                            setToastMessage('✓ Đã chỉ huy toàn quân sẵn sàng ứng cứu đêm nay (50% cơ hội tung đồng xu cứu sống đồng đội).');
                             setTimeout(() => setToastMessage(null), 3500);
                           }}
                           disabled={isDead}
@@ -1827,11 +1827,11 @@ export function PlayerScreen() {
                           <div className="flex flex-col text-left min-w-0">
                             <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-[#ffd88f] truncate">
                               {isKingsleyAction(myAction?.actionName || '')
-                                ? '✓ Đã Kích Hoạt Phản Công Đêm Nay'
-                                : 'Chỉ Huy Phản Công (50%)'}
+                                ? '✓ Đã Kích Hoạt Ứng Cứu Đêm Nay'
+                                : 'Chỉ Huy Ứng Cứu (50%)'}
                             </span>
                             <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
-                              Sẵn sàng thế trận: 50% hạ sát ngược lại 1 Tử Thần Thực Tử nếu có người ngã xuống
+                              Sẵn sàng thế trận: 50% tung đồng xu cứu sống 1 thành viên Hội bị ám sát
                             </span>
                           </div>
                         </button>

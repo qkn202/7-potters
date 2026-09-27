@@ -190,6 +190,10 @@ const isKingsleyAction = (actionName: string): boolean => {
   const n = normalizeAction(actionName);
   return n === 'chỉ huy ứng cứu' || n === 'ứng cứu' || n === 'cứu sống' || n === 'chỉ huy phản công' || n === 'kingsley kích hoạt';
 };
+const isSectumsempraAction = (actionName: string): boolean => {
+  const n = normalizeAction(actionName);
+  return n.includes('sectumsempra') || n.includes('bọc lót');
+};
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
@@ -703,6 +707,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const target = (targetId === 'ALL' || targetId === 'NONE') ? null : prev.players.find(p => p.id === targetId);
       if (targetId !== 'ALL' && targetId !== 'NONE' && !target) return prev;
       
+      // Check if actor is silenced by stray Sectumsempra
+      const isSectumSilenced = Boolean(prev.skillStates[`${actorId}_SECTUMSEMPRA_SILENCED_R${prev.round}`]);
+      if (isSectumSilenced && actionName !== 'NONE') {
+        setSkillToast('⚠️ Bạn đang bị thương do trúng bùa lạc Sectumsempra (mất một bên tai) nên không thể thi triển kỹ năng!');
+        return prev;
+      }
+
+      // Check Peter Pettigrew's Life Debt constraint against Harry Potter
+      if (me.role?.id === 'PETER_PETTIGREW' && isKillAction(actionName) && target?.role?.id === 'HARRY_POTTER') {
+        setSkillToast('⚠️ BÀN TAY BẠC PHẢN PHỆ! Do Món Nợ Sinh Mệnh với Harry Potter ở Lều Hét, bàn tay của bạn bị co giật và không thể giương đũa ám sát Kẻ Được Chọn! Hãy để Voldemort hoặc đồng minh khác ra tay!');
+        return {
+          ...prev,
+          logs: [...prev.logs, `Hệ thống: [Peter Pettigrew] Bàn tay bạc phản phệ do Món Nợ Sinh Mệnh! Không thể hạ sát Harry Potter.`]
+        };
+      }
+
       const normalizedAction = actionName.toLowerCase().trim();
       const isPublicVote = normalizedAction === 'biểu quyết tước đũa' || normalizedAction === 'bỏ phiếu treo cổ';
       const isEscort = normalizedAction === 'bay hộ tống';
@@ -738,6 +758,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (!me || !target) return;
     if (me.status === 'DEAD') return 'Bạn đã tử trận, không thể sử dụng kỹ năng!';
 
+    if (curState.skillStates[`${actorId}_SECTUMSEMPRA_SILENCED_R${curState.round}`]) {
+      return '⚠️ Bạn đang bị thương do trúng bùa lạc Sectumsempra (mất một bên tai) nên không thể thi triển kỹ năng!';
+    }
+
     if (actionName === 'Soi Danh Tính' && me.role?.id === 'HERMIONE_GRANGER') {
       if (curState.phase !== 'NIGHT') return 'Kỹ năng soi danh tính chỉ có hiệu lực vào ban đêm!';
       if (target.role?.id === 'HARRY_POTTER' || target.role?.id === 'VOLDEMORT') {
@@ -747,7 +771,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const stateKey = `${me.id}_HERMIONE_R${curState.round}`;
       if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng soi trong lượt này rồi!';
       
-      const roleName = target.role?.name || 'Không rõ';
+      let roleName = target.role?.name || 'Không rõ';
+      if (target.role?.id === 'SEVERUS_SNAPE') {
+        roleName = 'Severus Snape (Bậc Thầy Bế Quan Bí Thuật - Tâm Trí Bất Khả Xâm Phạm)';
+      }
 
       updateState({
         ...curState,
@@ -757,18 +784,58 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       return `Vai trò của ${target.name} là: ${roleName}`;
     }
 
-    if ((actionName === 'Soi Đặc Biệt' || actionName === 'Soi Phe' || actionName === 'Soi Nhân Vật Đặc Biệt') && me.role?.id === 'PETER_PETTIGREW') {
-      if (curState.phase !== 'NIGHT') return 'Kỹ năng do thám chỉ có hiệu lực vào ban đêm!';
+    if ((actionName === 'Đánh Hơi' || actionName === 'Soi Đặc Biệt' || actionName === 'Soi Phe' || actionName === 'Soi Nhân Vật Đặc Biệt') && me.role?.id === 'PETER_PETTIGREW') {
+      if (curState.phase !== 'NIGHT') return 'Kỹ năng đánh hơi chỉ có hiệu lực vào ban đêm!';
       const stateKey = `${me.id}_PETTIGREW_R${curState.round}`;
-      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng do thám trong lượt này rồi!';
+      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng đánh hơi trong lượt này rồi!';
 
       if (target.role?.faction !== 'ORDER_OF_PHOENIX') {
-        return `Mục tiêu ${target.name} không thuộc Hội Phượng Hoàng! (Chỉ có thể do thám thành viên phe Hội Phượng Hoàng)`;
+        return `Mục tiêu ${target.name} không thuộc Hội Phượng Hoàng! (Chỉ có thể đánh hơi thành viên phe Hội Phượng Hoàng)`;
       }
 
-      // Kiểm tra xem mục tiêu có phải nhân vật đặc biệt - bất kì loại nào (khác POTTER_FAKE)
-      const isSpecial = target.role.id !== 'POTTER_FAKE';
       const inspectKey = `${me.id}_PETTIGREW_INSPECTED_${target.id}`;
+
+      if (target.role?.id === 'HARRY_POTTER') {
+        updateState({
+          ...curState,
+          skillStates: { 
+            ...curState.skillStates, 
+            [stateKey]: true,
+            [inspectKey]: 'HARRY_POTTER'
+          },
+          logs: [...curState.logs, `Hệ thống: Pettigrew đã bí mật đánh hơi ${target.name}.`]
+        });
+        return `⚡ KẾT QUẢ ĐÁNH HƠI: ĐÍCH DANH HARRY POTTER THẬT! Mùi hương của Kẻ Được Chọn — người nắm giữ Món Nợ Mạng của bạn!`;
+      }
+
+      if (target.role?.id === 'RON_WEASLEY') {
+        updateState({
+          ...curState,
+          skillStates: { 
+            ...curState.skillStates, 
+            [stateKey]: true,
+            [inspectKey]: 'RON_WEASLEY'
+          },
+          logs: [...curState.logs, `Hệ thống: Pettigrew đã bí mật đánh hơi ${target.name}.`]
+        });
+        return `🐀 KẾT QUẢ ĐÁNH HƠI: ĐÍCH DANH RON WEASLEY! Mùi hương 12 năm sống chung trong túi áo gia đình Weasley (Cậu chủ cũ)!`;
+      }
+
+      if (target.role?.id === 'SEVERUS_SNAPE') {
+        updateState({
+          ...curState,
+          skillStates: { 
+            ...curState.skillStates, 
+            [stateKey]: true,
+            [inspectKey]: 'NORMAL'
+          },
+          logs: [...curState.logs, `Hệ thống: Pettigrew đã cố gắng đánh hơi ${target.name}.`]
+        });
+        return `🛡️ KẾT QUẢ ĐÁNH HƠI: Severus Snape — Bế Quan Bí Thuật chặn đứng khứu giác! Không thể phát hiện dấu vết đặc biệt.`;
+      }
+
+      // Kiểm tra xem mục tiêu có phải nhân vật đặc biệt (khác POTTER_FAKE)
+      const isSpecial = target.role.id !== 'POTTER_FAKE';
 
       updateState({
         ...curState,
@@ -777,13 +844,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           [stateKey]: true,
           [inspectKey]: isSpecial ? 'SPECIAL' : 'NORMAL'
         },
-        logs: [...curState.logs, `Hệ thống: Pettigrew đã bí mật do thám ${target.name}.`]
+        logs: [...curState.logs, `Hệ thống: Pettigrew đã bí mật đánh hơi ${target.name}.`]
       });
 
       if (isSpecial) {
-        return `✓ KẾT QUẢ DO THÁM: ${target.name} LÀ một Nhân Vật Đặc Biệt của Hội Phượng Hoàng!`;
+        return `✨ KẾT QUẢ ĐÁNH HƠI: ${target.name} LÀ một Nhân Vật Đặc Biệt của Hội Phượng Hoàng!`;
       } else {
-        return `✗ KẾT QUẢ DO THÁM: ${target.name} KHÔNG PHẢI là Nhân Vật Đặc Biệt (Chỉ là Bản Sao Potter / Thành viên thông thường)!`;
+        return `✗ KẾT QUẢ ĐÁNH HƠI: ${target.name} KHÔNG PHẢI là Nhân Vật Đặc Biệt (Chỉ là Bản Sao Potter / Thành viên thông thường)!`;
       }
     }
 
@@ -2061,6 +2128,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        const isPettigrewSilenced = Boolean(gameState.skillStates[`${playerId}_VOTE_SILENCED_R${gameState.round}`]);
+        if (isPettigrewSilenced) {
+          summary.push(`${voter.name} đang lẩn trốn dưới hình dạng chuột cống nên không thể bỏ phiếu hôm nay!`);
+          return;
+        }
+
         const normalizedActionName = action.actionName.toLowerCase().trim();
         const isVoteAction = normalizedActionName === 'biểu quyết tước đũa' || normalizedActionName === 'bỏ phiếu treo cổ';
         if (isVoteAction) {
@@ -2088,35 +2161,42 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         summary.push(`Có sự hòa phiếu (cao nhất ${maxVotes} phiếu). Không ai bị tước đũa phép!`);
       } else {
         const target = gameState.players.find(p => p.id === topTargetId);
-        summary.push(`Với ${maxVotes} phiếu, ${target?.name} đã trúng Bùa Tước Khí Giới (Expelliarmus) và bị loại khỏi trận không chiến!`);
-        
-        if (target?.role?.id === 'BELLATRIX_LESTRANGE') {
-          summary.push(`CẢNH BÁO: Bellatrix đã chết! Đêm nay Voldemort được quyền giết 2 người (Cơn Thịnh Nộ Bellatrix).`);
-          newSkillStates[`voldemort_double_kill_R${gameState.round + 1}`] = true;
-        } else if (target?.role?.id === 'LUCIUS_MALFOY') {
-          summary.push(`CẢNH BÁO: Lucius đã chết! Đêm nay Voldemort bị phong ấn ma pháp (Lời Nguyền Lucius Malfoy).`);
-          newSkillStates[`voldemort_silenced_R${gameState.round + 1}`] = true;
-        } else if (target?.role?.id === 'NYMPHADORA_TONKS') {
-          if (target.name.includes('(Bot)')) {
-            const morphCandidates = gameState.players.filter(p => p.id !== target.id && !p.isGM && p.role);
-            if (morphCandidates.length > 0) {
-              const morphTarget = morphCandidates[Math.floor(Math.random() * morphCandidates.length)];
-              summary.push(`Trước khi chết, Tonks (Bot) đã sao chép thân phận của ${morphTarget.name} và tiếp tục chiến đấu!`);
-              resolvedPlayers = resolvedPlayers.map(p => p.id === target.id ? { ...p, role: morphTarget.role } : p);
-            } else {
-              deadPlayers.push(topTargetId);
-            }
-          } else {
-            needsInterrupt = {
-              playerId: target.id,
-              type: 'TONKS_MORPH' as const,
-              reason: 'Bạn đã chết. Hãy chọn 1 người để biến hình kế thừa!'
-            };
-          }
-        }
 
-        if (!needsInterrupt && !deadPlayers.includes(topTargetId)) {
-          deadPlayers.push(topTargetId);
+        if (target?.role?.id === 'PETER_PETTIGREW' && !gameState.skillStates[`${target.id}_RAT_ESCAPED`]) {
+          summary.push(`🐀 HÓA THÚ ĐÀO TẨU! Khi bùa Expelliarmus giáng xuống, Peter Pettigrew hoảng loạn tự cắt một ngón tay, kích nổ khói mù và hóa thành chuột cống chui tọt vào bóng tối tẩu thoát! Đuôi Trùn thoát chết ngoạn mục nhưng bị cấm bỏ phiếu ban ngày ở vòng kế tiếp!`);
+          newSkillStates[`${target.id}_RAT_ESCAPED`] = true;
+          newSkillStates[`${target.id}_VOTE_SILENCED_R${gameState.round + 1}`] = true;
+        } else {
+          summary.push(`Với ${maxVotes} phiếu, ${target?.name} đã trúng Bùa Tước Khí Giới (Expelliarmus) và bị loại khỏi trận không chiến!`);
+          
+          if (target?.role?.id === 'BELLATRIX_LESTRANGE') {
+            summary.push(`CẢNH BÁO: Bellatrix đã chết! Đêm nay Voldemort được quyền giết 2 người (Cơn Thịnh Nộ Bellatrix).`);
+            newSkillStates[`voldemort_double_kill_R${gameState.round + 1}`] = true;
+          } else if (target?.role?.id === 'LUCIUS_MALFOY') {
+            summary.push(`CẢNH BÁO: Lucius đã chết! Đêm nay Voldemort bị phong ấn ma pháp (Lời Nguyền Lucius Malfoy).`);
+            newSkillStates[`voldemort_silenced_R${gameState.round + 1}`] = true;
+          } else if (target?.role?.id === 'NYMPHADORA_TONKS') {
+            if (target.name.includes('(Bot)')) {
+              const morphCandidates = gameState.players.filter(p => p.id !== target.id && !p.isGM && p.role);
+              if (morphCandidates.length > 0) {
+                const morphTarget = morphCandidates[Math.floor(Math.random() * morphCandidates.length)];
+                summary.push(`Trước khi chết, Tonks (Bot) đã sao chép thân phận của ${morphTarget.name} và tiếp tục chiến đấu!`);
+                resolvedPlayers = resolvedPlayers.map(p => p.id === target.id ? { ...p, role: morphTarget.role } : p);
+              } else {
+                deadPlayers.push(topTargetId);
+              }
+            } else {
+              needsInterrupt = {
+                playerId: target.id,
+                type: 'TONKS_MORPH' as const,
+                reason: 'Bạn đã chết. Hãy chọn 1 người để biến hình kế thừa!'
+              };
+            }
+          }
+
+          if (!needsInterrupt && !deadPlayers.includes(topTargetId)) {
+            deadPlayers.push(topTargetId);
+          }
         }
       }
       
@@ -2124,8 +2204,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         deadPlayers = processDominoEffect(gameState.players, deadPlayers, summary);
       }
     } else {
-      // Ban Đêm (NIGHT): 4T Ám sát, Dumbledore bảo vệ, Kingsley phản công, Hộ tống & Vật phẩm
+      // Ban Đêm (NIGHT): 4T Ám sát, Dumbledore bảo vệ, Snape bọc lót, Kingsley phản công, Hộ tống & Vật phẩm
       let shieldTargetId: string | null = null;
+      let snapeShieldTargetId: string | null = null;
       let isKingsleyActive: boolean = false;
       
       const killVoteCounts: Record<string, number> = {};
@@ -2135,12 +2216,21 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         const player = gameState.players.find(p => p.id === playerId);
         if (!player || player.status === 'DEAD' || player.isGM) return;
 
+        const isSectumSilenced = Boolean(gameState.skillStates[`${playerId}_SECTUMSEMPRA_SILENCED_R${gameState.round}`]);
+        if (isSectumSilenced && action.actionName !== 'NONE') {
+          summary.push(`${player.name} bị thương mất một bên tai do bùa lạc Sectumsempra nên không thể thi triển kỹ năng đêm nay!`);
+          return;
+        }
+
         const target = action.targetId === 'ALL' ? null : gameState.players.find(p => p.id === action.targetId);
 
         if (isProtectAction(action.actionName) && player.role?.id === 'ALBUS_DUMBLEDORE') {
           shieldTargetId = action.targetId;
           summary.push(`Cụ Dumbledore đã giăng màn bảo vệ lên ${target?.name}.`);
           newSkillStates[`DUMBLEDORE_SHIELDED_R${gameState.round}`] = shieldTargetId;
+        } else if (isSectumsempraAction(action.actionName) && player.role?.id === 'SEVERUS_SNAPE') {
+          snapeShieldTargetId = action.targetId;
+          summary.push(`Giáo sư Severus Snape đã âm thầm giương đũa niệm Sectumsempra bọc lót cho ${target?.name}.`);
         } else if (isHagridEscortAction(action.actionName) && player.role?.id === 'RUBEUS_HAGRID') {
           summary.push(`Bác Hagrid đã đưa ${target?.name} lên chiếc mô-tô bay hộ tống!`);
         } else if (isKingsleyAction(action.actionName) && player.role?.id === 'KINGSLEY_SHACKLEBOLT') {
@@ -2226,6 +2316,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           
           if (deathEaterTargetId === shieldTargetId) {
             summary.push(`Tử Thần Thực Tử tấn công ${victim.name}, nhưng đã bị Màn chắn Dumbledore chặn đứng hoàn toàn!`);
+          } else if (deathEaterTargetId === snapeShieldTargetId) {
+            summary.push(`⚔️ SECTUMSEMPRA CAN THIỆP! Trong bóng đêm, bùa chém của Severus Snape đã rạch nát đòn tấn công của Tử Thần Thực Tử, cứu sống ${victim.name} trong gang tấc!`);
           } else {
             let escortShielded = false;
             let ronShielded = false;
@@ -2380,6 +2472,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       } else {
         if (!isSilenced) {
           summary.push("Tử Thần Thực Tử không thống nhất được mục tiêu tấn công hoặc không ra đòn!");
+        }
+      }
+
+      // Check Snape's Sectumsempra collateral damage (stray spell)
+      if (snapeShieldTargetId && snapeShieldTargetId !== 'NONE' && !targetsToProcess.includes(snapeShieldTargetId)) {
+        const strayVictim = gameState.players.find(p => p.id === snapeShieldTargetId && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
+        if (strayVictim) {
+          summary.push(`🩸 BÙA LẠC SECTUMSEMPRA: Do bay tốc độ cao trong đêm tối, bùa chú của Snape đã vô tình cắt đứt tai và làm bị thương ${strayVictim.name} (như George Weasley)! Mục tiêu bị phong ấn kỹ năng ở vòng kế tiếp!`);
+          newSkillStates[`${strayVictim.id}_SECTUMSEMPRA_SILENCED_R${gameState.round + 1}`] = true;
         }
       }
 

@@ -52,6 +52,10 @@ const isKingsleyAction = (actionName: string): boolean => {
   const n = normalizeAction(actionName);
   return n === 'chỉ huy ứng cứu' || n === 'ứng cứu' || n === 'cứu sống' || n === 'chỉ huy phản công' || n === 'kingsley kích hoạt';
 };
+const isSectumsempraAction = (actionName: string): boolean => {
+  const n = normalizeAction(actionName);
+  return n.includes('sectumsempra') || n.includes('bọc lót');
+};
 
 export function PlayerScreen() {
   const { gameState, currentPlayerId, playerAction, executeInstantSkill, resolveInterrupt, skillToast, clearSkillToast, consumeWeasleyItem } = useGame();
@@ -244,7 +248,7 @@ export function PlayerScreen() {
   const isDead = me.status === 'DEAD';
 
   const hasNightSkill = me.role?.faction === 'DEATH_EATERS' || 
-    ['ALBUS_DUMBLEDORE', 'HERMIONE_GRANGER', 'REMUS_LUPIN', 'KINGSLEY_SHACKLEBOLT', 'PETER_PETTIGREW', 'FENRIR_GREYBACK'].includes(me.role?.id || '');
+    ['ALBUS_DUMBLEDORE', 'SEVERUS_SNAPE', 'HERMIONE_GRANGER', 'REMUS_LUPIN', 'KINGSLEY_SHACKLEBOLT', 'PETER_PETTIGREW', 'FENRIR_GREYBACK'].includes(me.role?.id || '');
 
   const isSilenced = Boolean(gameState.skillStates[`voldemort_silenced_R${gameState.round}`]);
   const isDoubleKill = Boolean(gameState.skillStates[`voldemort_double_kill_R${gameState.round}`]);
@@ -361,16 +365,16 @@ export function PlayerScreen() {
 
         if (me.role?.id === 'PETER_PETTIGREW') {
           return {
-            title: 'Peter Pettigrew · Người Hầu Cận Voldemort',
-            badge: 'Do Thám Hắc Ám',
+            title: 'Peter Pettigrew · Đánh Hơi & Món Nợ Mạng',
+            badge: 'Khứu Giác Chuột Scabbers',
             badgeVariant: 'emerald' as const,
             alert: undefined as string | undefined,
             steps: [
-              { num: '1', title: 'Do thám nhân vật đặc biệt', desc: 'Chọn 1 người chơi phe Hội Phượng Hoàng rồi bấm "Thi Triển Soi Đặc Biệt" để xem họ có phải nhân vật đặc biệt (bất kì loại nào) hay không.' },
-              { num: '2', title: 'Quyền năng Ám Sát', desc: 'Sau khi do thám, bạn vẫn có toàn quyền dồn đòn ám sát (Avada Kedavra) cùng Voldemort và phe Tử Thần Thực Tử.' }
+              { num: '1', title: 'Đánh hơi nhà Hang Sóc', desc: 'Chọn 1 người phe Hội Phượng Hoàng rồi bấm "Thi Triển Đánh Hơi" để nhận diện đích danh Harry Potter thật hoặc Ron Weasley.' },
+              { num: '2', title: 'Món Nợ Mạng (Life Debt)', desc: 'Bạn toàn quyền bỏ phiếu giết cùng Voldemort, NHƯNG Bàn Tay Bạc sẽ co giật không thể tự tay ám sát Harry Potter thật.' }
             ],
-            tip: 'Mỗi đêm trước khi giết người, hãy do thám để vạch mặt những ai là nhân vật đặc biệt (có thể là Harry thật hoặc các cột trụ của Hội), loại trừ các Bản Sao thường dân!',
-            statusText: myAction ? `✓ Đã lưu mục tiêu: [${myVotedTarget?.name}]` : 'Chọn mục tiêu bên dưới để do thám hoặc dồn đòn ám sát',
+            tip: 'Nếu bị vote trục xuất ban ngày, bạn sẽ tự cắt 1 ngón tay hóa chuột đào tẩu thoát chết lần đầu tiên! Hãy tận dụng khứu giác để chỉ điểm Harry thật cho Voldemort!',
+            statusText: myAction ? `✓ Đã lưu mục tiêu: [${myVotedTarget?.name}]` : 'Chọn mục tiêu bên dưới để đánh hơi hoặc dồn đòn ám sát',
             statusType: myAction ? 'success' as const : 'info' as const,
           };
         }
@@ -417,6 +421,26 @@ export function PlayerScreen() {
       }
 
       // Order of Phoenix with Active Night Skills
+      if (me.role?.id === 'SEVERUS_SNAPE') {
+        return {
+          title: 'Severus Snape · Bọc Lót Sectumsempra',
+          badge: 'Bế Quan Bí Thuật · Điệp Viên Hai Mang',
+          badgeVariant: 'purple' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Chọn người bọc lót', desc: 'Chọn 1 người chơi bạn nghi ngờ sắp bị Tử Thần Thực Tử tấn công đêm nay.' },
+            { num: '2', title: 'Niệm Sectumsempra', desc: 'Bấm nút "Bọc Lót Sectumsempra" bên dưới để giương đũa yểm trợ trong bóng tối.' }
+          ],
+          tip: 'Nếu mục tiêu bị TTTT tấn công: Bạn chém đứt đòn ám sát cứu sống họ! Nhưng nếu họ KHÔNG bị tấn công: Bùa lạc sẽ cắt đứt tai làm họ bị phong ấn kỹ năng vòng sau (như George Weasley)!',
+          statusText: myAction && isSectumsempraAction(myAction.actionName)
+            ? `✓ Đang bọc lót Sectumsempra cho: [${myVotedTarget?.name}]`
+            : effectiveTargetPlayer
+              ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Bấm nút "Bọc Lót Sectumsempra" bên dưới!`
+              : 'Chọn 1 người chơi để bọc lót Sectumsempra trong đêm',
+          statusType: myAction && isSectumsempraAction(myAction.actionName) ? 'success' as const : effectiveTargetPlayer ? 'warning' as const : 'info' as const,
+        };
+      }
+
       if (me.role?.id === 'ALBUS_DUMBLEDORE') {
         return {
           title: 'Albus Dumbledore · Phù Phép Bảo Vệ (Protego)',
@@ -870,37 +894,47 @@ export function PlayerScreen() {
             </div>
           )}
 
-          {/* Peter Pettigrew Spy Journal (Do Thám Nhân Vật Đặc Biệt) */}
+          {/* Peter Pettigrew Spy Journal (Đánh Hơi Nhà Hang Sóc) */}
           {me.role?.id === 'PETER_PETTIGREW' && (
             <div className="rounded-xl border border-emerald-600/60 bg-[#071911] p-3.5 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
               <div className="flex items-center gap-2 text-emerald-300 font-title font-bold text-sm mb-2 border-b border-emerald-900/60 pb-1.5">
                 <Target className="w-4 h-4 text-emerald-400 animate-pulse" />
-                <span>Sổ Tay Do Thám Đuôi Trùn</span>
+                <span>Khứu Giác Chuột Scabbers (Đánh Hơi)</span>
               </div>
               <p className="text-[11px] text-emerald-200/80 font-lora italic mb-2.5 leading-relaxed">
-                Người hầu cận của Voldemort: Mỗi đêm trước khi giết, bạn có thể soi 1 người phe Hội xem có phải là nhân vật đặc biệt (bất kì loại nào) hay không. Bạn vẫn giữ toàn quyền ám sát!
+                12 năm sống ở Nhà Hang Sóc: Bạn nhận diện đích danh Harry Potter thật và Ron Weasley! Tuy nhiên, do mang Món Nợ Mạng (Life Debt), bạn không thể tự tay ám sát Harry Potter.
               </p>
               <div className="space-y-1.5">
                 {gameState.players
                   .filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`])
                   .map((insp, idx) => {
                     const status = gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${insp.id}`];
+                    const isHarry = status === 'HARRY_POTTER';
+                    const isRon = status === 'RON_WEASLEY';
                     const isSpec = status === 'SPECIAL';
                     return (
                       <div key={insp.id ? `pettigrew-insp-item-${insp.id}` : `pettigrew-insp-item-${idx}`} className="flex items-center justify-between text-xs font-mono text-emerald-200 bg-emerald-950/40 px-2 py-1.5 rounded-lg border border-emerald-800/40">
                         <span className="flex items-center gap-1.5">
-                          <span className={`w-2 h-2 rounded-full ${insp.status === 'DEAD' ? 'bg-red-500' : isSpec ? 'bg-amber-400 animate-pulse' : 'bg-gray-400'}`} />
+                          <span className={`w-2 h-2 rounded-full ${insp.status === 'DEAD' ? 'bg-red-500' : isHarry ? 'bg-rose-500 animate-pulse' : isRon ? 'bg-orange-400' : isSpec ? 'bg-amber-400 animate-pulse' : 'bg-gray-400'}`} />
                           <span className={insp.status === 'DEAD' ? 'line-through text-emerald-600' : 'font-serif font-bold'}>{insp.name}</span>
                         </span>
-                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${isSpec ? 'text-amber-300 bg-amber-950/80 border-amber-500/50' : 'text-gray-400 bg-gray-900/80 border-gray-700'}`}>
-                          {isSpec ? '✨ Nhân Vật Đặc Biệt' : '👤 Bản Sao / Thường'}
+                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
+                          isHarry 
+                            ? 'text-rose-200 bg-rose-950/90 border-rose-500 font-bold'
+                            : isRon 
+                              ? 'text-orange-200 bg-orange-950/90 border-orange-500 font-bold'
+                              : isSpec 
+                                ? 'text-amber-300 bg-amber-950/80 border-amber-500/50' 
+                                : 'text-gray-400 bg-gray-900/80 border-gray-700'
+                        }`}>
+                          {isHarry ? '⚡ Harry Thật (Nợ Mạng)' : isRon ? '🐀 Ron Weasley' : isSpec ? '✨ Đặc Biệt' : '👤 Bản Sao / Thường'}
                         </span>
                       </div>
                     );
                   })}
                 {gameState.players.filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`]).length === 0 && (
                   <p className="text-[11px] text-emerald-400/60 font-lora italic">
-                    Chưa do thám ai. Đêm nay hãy chọn 1 người phe Hội rồi bấm &quot;Thi Triển Soi Đặc Biệt&quot;!
+                    Chưa đánh hơi ai. Đêm nay hãy chọn 1 người phe Hội rồi bấm &quot;Thi Triển Đánh Hơi&quot;!
                   </p>
                 )}
               </div>
@@ -1174,30 +1208,36 @@ export function PlayerScreen() {
                 <div className="mt-2 p-1.5 rounded-lg bg-[#071911] border border-emerald-600/60 text-[10px]">
                   <div className="flex items-center gap-1 text-emerald-300 font-mono font-bold text-[9px] uppercase mb-1">
                     <Target className="w-2.5 h-2.5 text-emerald-400" />
-                    <span>Đã Do Thám ({gameState.players.filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`]).length}):</span>
+                    <span>Đã Đánh Hơi ({gameState.players.filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`]).length}):</span>
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {gameState.players
                       .filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`])
                       .map((insp, idx) => {
                         const status = gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${insp.id}`];
+                        const isHarry = status === 'HARRY_POTTER';
+                        const isRon = status === 'RON_WEASLEY';
                         const isSpec = status === 'SPECIAL';
                         return (
                           <span
                             key={`mobile-pettigrew-insp-${insp.id || idx}`}
                             className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono ${
-                              isSpec
-                                ? 'bg-amber-950 text-amber-200 border border-amber-600'
-                                : 'bg-gray-900 text-gray-400 border border-gray-700'
+                              isHarry
+                                ? 'bg-rose-950 text-rose-200 border border-rose-600 font-bold'
+                                : isRon
+                                  ? 'bg-orange-950 text-orange-200 border border-orange-600 font-bold'
+                                  : isSpec
+                                    ? 'bg-amber-950 text-amber-200 border border-amber-600'
+                                    : 'bg-gray-900 text-gray-400 border border-gray-700'
                             }`}
                           >
-                            {insp.name}: {isSpec ? '✨ Đặc Biệt' : 'Bản Sao'}
+                            {insp.name}: {isHarry ? '⚡ Harry Thật' : isRon ? '🐀 Ron' : isSpec ? '✨ Đặc Biệt' : 'Bản Sao'}
                           </span>
                         );
                       })}
                     {gameState.players.filter(p => !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX' && gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`]).length === 0 && (
                       <span className="text-[9px] text-emerald-400/60 italic font-lora">
-                        Chưa do thám ai đêm nay!
+                        Chưa đánh hơi ai đêm nay!
                       </span>
                     )}
                   </div>
@@ -1697,16 +1737,28 @@ export function PlayerScreen() {
                               Nhân Vật Đặc Biệt (Ẩn Phe)
                             </span>
                           )}
+                          {pettigrewInspectStatus === 'HARRY_POTTER' && (
+                            <span className="text-[9px] font-mono font-black text-rose-300 bg-rose-950/95 px-2 py-0.5 rounded border border-rose-500/70 flex items-center gap-1 animate-pulse">
+                              <Target className="w-2.5 h-2.5 text-rose-400" />
+                              ⚡ Đích Danh: Harry Potter Thật! (Nợ Mạng ⚠️)
+                            </span>
+                          )}
+                          {pettigrewInspectStatus === 'RON_WEASLEY' && (
+                            <span className="text-[9px] font-mono font-bold text-orange-300 bg-orange-950/95 px-2 py-0.5 rounded border border-orange-500/70 flex items-center gap-1">
+                              <Target className="w-2.5 h-2.5 text-orange-400" />
+                              🐀 Đích Danh: Ron Weasley (Cậu chủ cũ)
+                            </span>
+                          )}
                           {pettigrewInspectStatus === 'SPECIAL' && (
                             <span className="text-[9px] font-mono font-bold text-amber-300 bg-amber-950/95 px-2 py-0.5 rounded border border-amber-500/70 flex items-center gap-1">
                               <Target className="w-2.5 h-2.5 text-amber-400" />
-                              Do Thám: Nhân Vật Đặc Biệt ✨
+                              Đánh Hơi: Nhân Vật Đặc Biệt ✨
                             </span>
                           )}
                           {pettigrewInspectStatus === 'NORMAL' && (
                             <span className="text-[9px] font-mono text-gray-400 bg-gray-900/95 px-2 py-0.5 rounded border border-gray-700 flex items-center gap-1">
                               <Target className="w-2.5 h-2.5 text-gray-500" />
-                              Do Thám: Bản Sao / Thường Dân
+                              Đánh Hơi: Bản Sao / Thường Dân
                             </span>
                           )}
                           {isPInjured && (
@@ -1901,7 +1953,7 @@ export function PlayerScreen() {
                   (() => {
                 let skillName: string | null = null;
                 if (me.role?.id === 'HERMIONE_GRANGER') skillName = 'Soi Danh Tính';
-                if (me.role?.id === 'PETER_PETTIGREW') skillName = 'Soi Đặc Biệt';
+                if (me.role?.id === 'PETER_PETTIGREW') skillName = 'Đánh Hơi';
                 if (me.role?.id === 'REMUS_LUPIN') skillName = 'Hồi Sinh';
                 if (me.role?.id === 'FENRIR_GREYBACK') skillName = 'Cắn';
 
@@ -1913,12 +1965,26 @@ export function PlayerScreen() {
 
                 // Determine if current skill is on cooldown
                 const isSkillOnCooldown = (skillName === 'Soi Danh Tính' && hermioneUsed) ||
-                  ((skillName === 'Soi Đặc Biệt' || skillName === 'Soi Phe') && pettigrewUsed) ||
+                  ((skillName === 'Đánh Hơi' || skillName === 'Soi Đặc Biệt' || skillName === 'Soi Phe') && pettigrewUsed) ||
                   (skillName === 'Hồi Sinh' && lupinUsed) ||
                   (skillName === 'Cắn' && fenrirUsed);
 
                 return (
                   <div className="space-y-3">
+                    {Boolean(gameState.skillStates[`${me.id}_SECTUMSEMPRA_SILENCED_R${gameState.round}`]) && (
+                      <div className="p-3 bg-red-950/90 border border-red-700 rounded-xl text-xs text-red-200 font-serif flex items-center gap-2">
+                        <AlertTriangle size={16} className="text-red-400 shrink-0" />
+                        <span><strong>Bùa Lạc Sectumsempra:</strong> Bạn đã bị trúng bùa lạc trong đêm tối (mất một bên tai như George Weasley)! Bạn bị phong ấn kỹ năng trong vòng này!</span>
+                      </div>
+                    )}
+
+                    {Boolean(gameState.skillStates[`${me.id}_VOTE_SILENCED_R${gameState.round}`]) && (
+                      <div className="p-3 bg-amber-950/90 border border-amber-600 rounded-xl text-xs text-amber-200 font-serif flex items-center gap-2">
+                        <AlertTriangle size={16} className="text-amber-400 shrink-0" />
+                        <span><strong>Hóa Thú Đào Tẩu:</strong> Bạn đang lẩn trốn dưới hình dạng chuột cống Scabbers (mất một ngón tay)! Bạn bị cấm bỏ phiếu ban ngày vòng này!</span>
+                      </div>
+                    )}
+
                     {me.role?.faction === 'DEATH_EATERS' && isSilenced && (
                       <div className="p-3 bg-red-950/90 border border-red-700 rounded-xl text-xs text-red-200 font-serif flex items-center gap-2">
                         <AlertTriangle size={16} className="text-red-400 shrink-0" />
@@ -1957,8 +2023,8 @@ export function PlayerScreen() {
                             <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
                               {skillName === 'Soi Danh Tính'
                                 ? 'Hỏi Merlin để biết chính xác thẻ bài thật của người này'
-                                : skillName === 'Soi Đặc Biệt' || skillName === 'Soi Phe'
-                                  ? 'Do thám xem người này có phải là Nhân Vật Đặc Biệt của phe Hội hay không'
+                                : skillName === 'Đánh Hơi' || skillName === 'Soi Đặc Biệt' || skillName === 'Soi Phe'
+                                  ? 'Đánh hơi nhận diện đích danh Harry/Ron hoặc nhân vật đặc biệt'
                                   : skillName === 'Hồi Sinh'
                                     ? 'Cứu sống lại 1 đồng đội đã tử trận (1 lần duy nhất)'
                                     : skillName === 'Cắn'
@@ -1974,6 +2040,11 @@ export function PlayerScreen() {
                           <button
                             onClick={() => {
                               if (effectiveTargetId) {
+                                if (me.role?.id === 'PETER_PETTIGREW' && effectiveTargetPlayer?.role?.id === 'HARRY_POTTER') {
+                                  setToastMessage('⚠️ BÀN TAY BẠC PHẢN PHỆ! Do Món Nợ Sinh Mệnh với Harry Potter ở Lều Hét, bàn tay của bạn bị co giật và không thể giương đũa ám sát Kẻ Được Chọn! Hãy để Voldemort hoặc đồng minh ra tay!');
+                                  setTimeout(() => setToastMessage(null), 5000);
+                                  return;
+                                }
                                 playerAction('giết', effectiveTargetId);
                                 setSelectedTarget(effectiveTargetId);
                                 const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
@@ -2073,6 +2144,44 @@ export function PlayerScreen() {
                             </span>
                             <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
                               Dựng kết giới cứu sống mục tiêu nếu phe ác tấn công đêm nay
+                            </span>
+                          </div>
+                        </button>
+                      )}
+
+                      {me.role?.id === 'SEVERUS_SNAPE' && (
+                        <button
+                          onClick={() => {
+                            if (!effectiveTargetId) return;
+
+                            if (effectiveTargetId === me.id) {
+                              setToastMessage('⚠️ Snape không thể tự bọc lót cho chính mình! Hãy chọn 1 người chơi khác.');
+                              setTimeout(() => setToastMessage(null), 3500);
+                              return;
+                            }
+
+                            playerAction('bọc lót sectumsempra', effectiveTargetId);
+                            setSelectedTarget(effectiveTargetId);
+                            const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
+                            setToastMessage(`✓ Đã giương đũa niệm Sectumsempra bọc lót cho: ${tName}!`);
+                            setTimeout(() => setToastMessage(null), 3500);
+                          }}
+                          disabled={!effectiveTargetId || isDead || effectiveTargetId === me.id}
+                          className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-900/90 via-[#2a0e3f] to-purple-950 hover:from-purple-800 hover:to-purple-900 border-2 border-purple-400/90 flex items-center justify-between sm:justify-start gap-3 shadow-lg transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
+                        >
+                          <div className="p-2 rounded-lg bg-black/40 border border-purple-400/50 text-purple-300 shrink-0">
+                            <Sparkles size={20} className="text-purple-300 animate-pulse" />
+                          </div>
+                          <div className="flex flex-col text-left min-w-0">
+                            <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-purple-200 truncate">
+                              {myAction?.targetId === effectiveTargetId && (myAction?.actionName || '').toLowerCase().includes('sectumsempra')
+                                ? `✓ Đang Bọc Lót Sectumsempra (${effectiveTargetPlayer?.name})`
+                                : (myAction?.actionName || '').toLowerCase().includes('sectumsempra')
+                                  ? `🔄 Đổi Bọc Lót Sang: ${effectiveTargetPlayer?.name}`
+                                  : `Bọc Lót Sectumsempra ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
+                            </span>
+                            <span className="text-[10px] sm:text-[11px] font-lora text-purple-200/80 font-normal truncate">
+                              Bị TTTT tấn công: Cứu sống! Không bị tấn công: Bùa lạc phong ấn kỹ năng vòng sau!
                             </span>
                           </div>
                         </button>

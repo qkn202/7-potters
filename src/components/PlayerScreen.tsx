@@ -30,7 +30,8 @@ import {
   Eye,
   X,
   Feather,
-  Clock
+  Clock,
+  LogOut
 } from 'lucide-react';
 import { useGame } from '@/lib/GameContext';
 import { CharacterCard, CardInspectorModal } from './CharacterCard';
@@ -99,9 +100,12 @@ export function PlayerScreen() {
     calculateResolution,
     applyResolution,
     roomCode,
-    isHost
+    isHost,
+    leaveGame,
+    resetGame
   } = useGame();
 
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isDeckOpen, setIsDeckOpen] = useState(false);
@@ -278,7 +282,28 @@ export function PlayerScreen() {
               : '💀 Rất tiếc! Lực lượng của bạn đã thất bại trong trận không chiến! 💀'}
           </p>
 
-          <p className="text-xs font-mono text-[#ebdcb0]/60">
+          {/* Action Buttons: Exit Game & Play Again */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
+            <button
+              onClick={() => leaveGame()}
+              className="w-full sm:w-auto px-7 py-3 rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 hover:brightness-110 active:scale-95 text-white font-serif font-black text-sm tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(239,68,68,0.4)] cursor-pointer transition-all uppercase"
+            >
+              <LogOut size={16} />
+              <span>THOÁT GAME (VỀ TRANG CHỦ)</span>
+            </button>
+
+            {canAdvanceTurn && (
+              <button
+                onClick={() => resetGame()}
+                className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-amber-400/40 text-amber-300 font-serif font-bold text-sm tracking-wider flex items-center justify-center gap-2 active:scale-95 cursor-pointer transition-all uppercase"
+              >
+                <Sparkles size={16} />
+                <span>CHƠI VÁN MỚI</span>
+              </button>
+            )}
+          </div>
+
+          <p className="text-xs font-mono text-[#ebdcb0]/60 mt-4">
             Merlin (Quản Trò) có thể cài đặt lại ván cờ từ bảng điều khiển.
           </p>
         </motion.div>
@@ -455,6 +480,15 @@ export function PlayerScreen() {
             <span>Open</span>
             <ChevronDown size={11} />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-sm bg-[#10b981] shadow-[0_0_6px_#10b981]" />
+          </button>
+
+          {/* Exit Game Button */}
+          <button
+            onClick={() => setConfirmLeave(true)}
+            className="w-7 h-7 rounded-xl bg-red-950/70 hover:bg-red-900 border border-red-500/40 text-red-400 hover:text-red-200 flex items-center justify-center cursor-pointer shadow-sm active:scale-95 transition-all"
+            title="Thoát Game / Rời Trận"
+          >
+            <LogOut size={13} />
           </button>
         </div>
       </div>
@@ -1021,6 +1055,20 @@ export function PlayerScreen() {
                   </div>
                 ))}
               </div>
+
+              {/* Thoát Game / Rời Trận Đấu */}
+              <div className="pt-3 mt-3 border-t border-slate-800">
+                <button
+                  onClick={() => {
+                    setIsInventoryOpen(false);
+                    setConfirmLeave(true);
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-950/80 via-red-900/60 to-red-950/80 hover:from-red-900/90 hover:to-red-800/90 border border-red-500/40 text-red-200 font-cinzel font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
+                >
+                  <LogOut size={14} className="text-red-400" />
+                  <span>Rời Trận Đấu / Thoát Game</span>
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -1160,6 +1208,65 @@ export function PlayerScreen() {
         isOpen={inspectSelf}
         onClose={() => setInspectSelf(false)}
       />
+
+      {/* ============================================================== */}
+      {/* CONFIRM LEAVE MODAL                                            */}
+      {/* ============================================================== */}
+      <AnimatePresence>
+        {confirmLeave && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setConfirmLeave(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="arcane-card-glass rounded-3xl p-6 text-center max-w-sm w-full space-y-4 border border-red-500/50 shadow-2xl relative overflow-hidden"
+            >
+              <CardCornerFlourish className="absolute top-2.5 left-2.5 w-6 h-6 text-red-500/40 pointer-events-none" />
+              <CardCornerFlourish className="absolute top-2.5 right-2.5 w-6 h-6 text-red-500/40 -scale-x-100 pointer-events-none" />
+
+              <div className="w-12 h-12 rounded-full bg-red-950/80 border border-red-700 text-red-400 flex items-center justify-center mx-auto shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                <LogOut size={22} className="ml-0.5" />
+              </div>
+
+              <div>
+                <h3 className="font-cinzel font-black text-lg text-red-300 tracking-wide">
+                  THOÁT GAME?
+                </h3>
+                <p className="text-xs text-slate-300 font-sans mt-1.5 leading-relaxed">
+                  Bạn có chắc chắn muốn rời khỏi trận chiến Bảy Potter? Bạn sẽ ngắt kết nối và quay trở về trang chủ.
+                </p>
+              </div>
+
+              <div className="flex gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfirmLeave(false);
+                    leaveGame();
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 active:scale-95 text-white font-cinzel font-black text-xs tracking-wider cursor-pointer shadow-lg transition-all"
+                >
+                  XÁC NHẬN THOÁT
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmLeave(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-200 font-cinzel font-bold text-xs cursor-pointer transition-all"
+                >
+                  Ở LẠI
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

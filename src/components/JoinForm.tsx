@@ -16,7 +16,9 @@ import {
   LogOut,
   Castle,
   UserCircle2,
-  ChevronRight
+  ChevronRight,
+  Crown,
+  Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -50,6 +52,7 @@ export function JoinForm() {
   
   const [mode, setMode] = useState<JoinMode>('join');
   const [roomCodeInput, setRoomCodeInput] = useState('');
+  const [isGM, setIsGM] = useState(false);
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -164,7 +167,7 @@ export function JoinForm() {
         finalName = currentUserProfile.username.trim();
         extraData = {
           house: currentUserProfile.house,
-          userTag: currentUserProfile.userTag,
+          userTag: isGM ? 'Quản Trò' : currentUserProfile.userTag,
           hpvnUid: currentUserProfile.uid,
         };
       } else if (authTab === 'hpvn') {
@@ -182,23 +185,23 @@ export function JoinForm() {
         finalName = profile?.username || user.displayName || account;
         extraData = {
           house: profile?.house,
-          userTag: profile?.userTag,
+          userTag: isGM ? 'Quản Trò' : profile?.userTag,
           hpvnUid: user.uid,
         };
       } else {
-        finalName = guestName.trim() || 'Phù Thủy Ẩn Danh';
+        finalName = guestName.trim() || (isGM ? 'Merlin' : 'Phù Thủy Ẩn Danh');
         extraData = {
           house: guestHouse,
-          userTag: 'Tân Binh',
+          userTag: isGM ? 'Quản Trò' : 'Tân Binh',
         };
       }
 
       if (mode === 'create') {
-        await createRoom(finalName, false, extraData);
+        await createRoom(finalName, isGM, extraData);
       } else if (mode === 'join') {
         await joinRoom(cleanCode, finalName, false, extraData);
       } else {
-        joinGame(finalName, false, extraData);
+        joinGame(finalName, isGM, extraData);
       }
     } catch (err: any) {
       let msg = err?.message || 'Lỗi kết nối. Thử lại!';
@@ -402,7 +405,7 @@ export function JoinForm() {
                       value={guestName}
                       onChange={(e) => setGuestName(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-slate-950/90 border border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-slate-100 placeholder:text-slate-500 text-xs font-sans transition-all"
-                      placeholder="Tên phù thủy của bạn..."
+                      placeholder={isGM ? "Merlin (Quản Trò)..." : "Tên phù thủy của bạn..."}
                     />
                     <User size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                   </div>
@@ -447,6 +450,52 @@ export function JoinForm() {
             </div>
           )}
 
+          {/* GM Role Toggle Card (Chỉ hiển thị khi Tạo Phòng hoặc Giả Lập) */}
+          {mode !== 'join' && (
+            <div
+              onClick={() => {
+                const nextGM = !isGM;
+                setIsGM(nextGM);
+                if (nextGM && !guestName.trim()) {
+                  setGuestName('Merlin');
+                } else if (!nextGM && guestName === 'Merlin') {
+                  setGuestName('');
+                }
+              }}
+              className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between select-none ${
+                isGM
+                  ? 'bg-amber-950/40 border-amber-400/80 shadow-[0_0_15px_rgba(245,197,66,0.25)]'
+                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 ${
+                  isGM
+                    ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 border-amber-200'
+                    : 'bg-slate-900 border-slate-700 text-slate-400'
+                }`}>
+                  <Crown size={16} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className={`block font-serif font-bold text-xs sm:text-sm ${isGM ? 'text-amber-300' : 'text-slate-200'}`}>
+                    Vai trò Quản trò (Merlin)
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-sans block truncate">
+                    {isGM ? 'Có quyền điều phối trận cờ & tính toán ma pháp' : 'Người chơi tham gia bay hộ tống nhận thẻ bài'}
+                  </span>
+                </div>
+              </div>
+
+              <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-colors shrink-0 ${
+                isGM 
+                  ? 'bg-amber-500 border-amber-400 text-slate-950 shadow-[0_0_8px_rgba(245,197,66,0.5)]' 
+                  : 'bg-slate-950 border-slate-700'
+              }`}>
+                {isGM && <Check size={14} className="stroke-[3]" />}
+              </div>
+            </div>
+          )}
+
           {/* SUBMIT BUTTON */}
           <button
             type="submit"
@@ -459,8 +508,11 @@ export function JoinForm() {
                 <span>Đang kết nối...</span>
               </>
             ) : (
-              <span>
-                {mode === 'join' ? 'VÀO PHÒNG CHIẾN ĐẤU' : mode === 'create' ? 'KHỞI TẠO PHÒNG MỚI' : 'VÀO GIẢ LẬP'}
+              <span className="flex items-center gap-1.5">
+                <Sparkles size={15} />
+                {mode === 'join' && 'VÀO PHÒNG CHIẾN ĐẤU'}
+                {mode === 'create' && (isGM ? 'THIẾT LẬP BÀN MERLIN' : 'KHỞI TẠO PHÒNG MỚI')}
+                {mode === 'mock' && (isGM ? 'VÀO BÀN MERLIN (QUẢN TRÒ)' : 'VÀO GIẢ LẬP')}
               </span>
             )}
           </button>

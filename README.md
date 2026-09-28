@@ -40,7 +40,7 @@ Trò chơi bao gồm **21 thẻ bài nhân vật** được chế tác thủ cô
 5. **Severus Snape (Bậc Thầy Bế Quan Bí Thuật · Điệp Viên Hai Mang):** 
    - **Kỹ năng Đêm Chủ Động — `Bọc Lót Sectumsempra`:** Chọn bảo vệ 1 người trong đêm. Nếu mục tiêu bị Tử Thần Thực Tử tấn công, nhát chém Sectumsempra của Snape sẽ can thiệp rạch nát đòn ám sát, cứu sống mục tiêu! Nhưng nếu mục tiêu *không* bị tấn công, bùa lạc sẽ sượt qua tai khiến mục tiêu bị câm lặng kỹ năng ở vòng kế tiếp.
    - **Nội tại — `Bế Quan Bí Thuật` (Occlumency):** Tâm trí bất khả xâm phạm — miễn nhiễm hoàn toàn trước bùa soi của Hermione ("Tâm Trí Bất Khả Xâm Phạm") và đánh lừa khứu giác của Peter Pettigrew.
-6. **Remus Lupin (Người Sói Hào Hiệp):** Sở hữu 1 bình thuốc hồi sinh duy nhất trong trận để cứu sống 1 đồng đội vừa ngã xuống ban ngày.
+6. **Remus Lupin (Người Sói Hào Hiệp · Moony):** Sở hữu 1 bình Thuốc Hồi Sinh độc dược quý giá (1 lần duy nhất trong toàn trận). Vào ban đêm, Lupin có thể âm thầm chọn 1 đồng đội đã ngã xuống (bị trục xuất ban ngày hoặc bị ám sát trong đêm) để hồi sinh. Hành động diễn ra hoàn toàn bí mật trong đêm (phe Tử Thần Thực Tử không biết trước), và mục tiêu sẽ chính thức sống lại vào rạng sáng hôm sau trong Báo Cáo Tuyệt Mật của Quản Trò Merlin.
 7. **Alastor "Mắt Điên" Moody (Thần Sáng Khét Tiếng):** Sở hữu 1 phát đạn Avada Kedavra vào ban đêm. Nếu bắn nhầm đồng minh Hội Phượng Hoàng, Moody sẽ tự vẫn vì ân hận.
 8. **Rubeus Hagrid (Người Lai Khổng Lồ):** Thể lực phi thường, phải bị tấn công 2 lần mới tử trận.
 9. **Arthur, Fred & George Weasley (Gia Tộc Weasley):** Liên kết ruột thịt sâu sắc — nếu 1 trong 3 người bị giết, 2 người còn lại sẽ chết theo (*Hiệu ứng Domino Weasley*).
@@ -190,6 +190,14 @@ Khắc phục triệt để hiện tượng người chơi bị bắt làm Tử 
 - **Tia Lửa Vàng CHỈ cứu Harry Potter:** Kỹ năng chỉ kích hoạt khi bản thân Harry Potter là nạn nhân trực tiếp của đòn tấn công trong đêm. Khi Harry đóng vai trò người bay hộ tống cho người khác, Tia Lửa Vàng **không** kích hoạt (áp dụng luật hy sinh của người hộ tống thông thường).
 - **Không Silence Chúa Tể Voldemort:** Bỏ hiệu ứng câm lặng (silence) lên Voldemort ở đêm tiếp theo.
 - **Voldemort vẫn có thể kill người khác đêm đó:** Trong đêm ám sát kép (Double Kill từ Bellatrix hoặc Vòng vây Phục kích ở phòng lớn), nếu Harry được Tia Lửa Vàng che chở, Voldemort vẫn tiêu diệt mục tiêu còn lại bình thường trong cùng đêm.
+
+### 🐺 15. Chuẩn Hóa Cơ Chế Thuốc Hồi Sinh Remus Lupin (Secret Night Action & Dawn Resurrection)
+- **Vấn đề đã khắc phục:** Trước đây, kỹ năng của Lupin được xếp vào nhóm kỹ năng tức thời (Instant Skill), dẫn đến việc người chơi sống lại ngay giữa đêm, làm rò rỉ thông tin sớm trong nhật ký (logs) cho phe Tử Thần Thực Tử, đồng thời gây lỗi đảo lộn thứ tự thông báo (người chơi bị treo cổ ban ngày xong tự dưng có log sống lại ngay trong đêm trước khi kết thúc phase).
+- **Cơ chế chuẩn hóa mới:**
+  - Chuyển Thuốc Hồi Sinh thành **Hành Động Ban Đêm bí mật** (`pendingActions` với action `hồi sinh`).
+  - Lupin chọn 1 đồng đội đã ngã xuống (hoặc cứu người bị ám sát trong đêm) và gửi lệnh ngầm. Phe Tử Thần Thực Tử hoàn toàn không hay biết mục tiêu được hồi sinh.
+  - Tại thời điểm phân giải rạng sáng (`calculateResolution` & `applyResolution`), nếu Lupin còn sống và không bị phong ấn, mục tiêu sẽ chính thức sống lại (`revivedPlayers`) với thông báo phép màu trang trọng trên Bảng Vàng Merlin.
+  - Ngăn ngừa hoàn toàn lỗi đảo lộn thứ tự log và hiện tượng mâu thuẫn trạng thái sống/chết.
 
 ---
 

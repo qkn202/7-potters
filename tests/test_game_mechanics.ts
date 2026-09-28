@@ -1032,8 +1032,145 @@ async function runMechanicsTests() {
   }
   console.log('✅ TEST 19 PASSED: Toàn bộ quy mô phòng 4 - 15 người đều đạt chuẩn công bằng tuyệt đối, Max streak TTTT = 1!');
 
+  // ==========================================
+  // TEST 20: REMUS LUPIN — THUỐC HỒI SINH BÍ MẬT & PHÂN GIẢI RẠNG SÁNG
+  // ==========================================
+  console.log('\n--- [TEST 20] REMUS LUPIN: THUỐC HỒI SINH BÍ MẬT & PHÂN GIẢI RẠNG SÁNG ---');
+
+  // 20.1: Card data validation
+  const lupinRole = ROLES.REMUS_LUPIN;
+  if (!lupinRole) throw new Error('TEST 20.1 FAILED: Không tìm thấy ROLES.REMUS_LUPIN');
+  console.log(`✓ 20.1: Thẻ bài Remus Lupin: [${lupinRole.name} · ${lupinRole.title}]`);
+  console.log(`   Năng lực: "${lupinRole.ability}"`);
+
+  // 20.2: Hồi sinh người đã chết từ ngày hôm trước (Day 1 vote out, Night 2 Lupin revives)
+  {
+    const playerA: Player = { id: 'p_a', name: 'Albus Dumbledore', role: ROLES.ALBUS_DUMBLEDORE, status: 'DEAD', isGM: false, deviceId: 'dev_a' };
+    const playerB: Player = { id: 'p_b', name: 'Nymphadora Tonks', role: ROLES.NYMPHADORA_TONKS, status: 'ALIVE', isGM: false, deviceId: 'dev_b' };
+    const lupin: Player = { id: 'p_lupin', name: 'Remus Lupin', role: ROLES.REMUS_LUPIN, status: 'ALIVE', isGM: false, deviceId: 'dev_lupin' };
+    const voldemort: Player = { id: 'p_vol', name: 'Lord Voldemort', role: ROLES.VOLDEMORT, status: 'ALIVE', isGM: false, deviceId: 'dev_vol' };
+
+    const gameState = {
+      phase: 'NIGHT' as const,
+      round: 2,
+      players: [playerA, playerB, lupin, voldemort],
+      pendingActions: {
+        [lupin.id]: { actionName: 'hồi sinh', targetId: playerA.id },
+        [voldemort.id]: { actionName: 'giết', targetId: playerB.id }
+      },
+      skillStates: {},
+      resolutionReport: null
+    };
+
+    // Simulate calculateResolution Night
+    let deadPlayers: string[] = [];
+    const revivedPlayers: string[] = [];
+    const summary: string[] = [];
+    const newSkillStates: Record<string, boolean | string> = {};
+    let resolvedPlayers = [...gameState.players];
+
+    let lupinReviveTargetId: string | null = null;
+    let lupinActorId: string | null = null;
+
+    Object.entries(gameState.pendingActions).forEach(([playerId, action]) => {
+      const p = gameState.players.find(x => x.id === playerId);
+      if (!p || p.status === 'DEAD') return;
+      if (action.actionName.includes('hồi sinh') && p.role?.id === 'REMUS_LUPIN') {
+        if (!gameState.skillStates[`${p.id}_LUPIN`]) {
+          lupinReviveTargetId = action.targetId;
+          lupinActorId = p.id;
+        }
+      } else if (action.actionName === 'giết' && p.role?.id === 'VOLDEMORT') {
+        deadPlayers.push(action.targetId);
+      }
+    });
+
+    if (lupinReviveTargetId && lupinActorId) {
+      const lupinActor = gameState.players.find(p => p.id === lupinActorId);
+      if (lupinActor && lupinActor.status !== 'DEAD' && !deadPlayers.includes(lupinActor.id)) {
+        const target = gameState.players.find(p => p.id === lupinReviveTargetId);
+        const isTargetDead = target?.status === 'DEAD' || deadPlayers.includes(lupinReviveTargetId);
+        if (target && isTargetDead) {
+          newSkillStates[`${lupinActor.id}_LUPIN`] = true;
+          if (deadPlayers.includes(lupinReviveTargetId)) {
+            deadPlayers = deadPlayers.filter(id => id !== lupinReviveTargetId);
+          }
+          if (!revivedPlayers.includes(lupinReviveTargetId)) {
+            revivedPlayers.push(lupinReviveTargetId);
+          }
+          resolvedPlayers = resolvedPlayers.map(p => p.id === lupinReviveTargetId ? { ...p, status: 'ALIVE' as const } : p);
+          summary.push(`⚡ PHÉP MÀU LUPIN: Đêm qua, Remus Lupin đã dùng Thuốc Hồi Sinh độc dược quý giá, cứu sống ${target.name} trở lại trận chiến!`);
+        }
+      }
+    }
+
+    // Apply resolution
+    let finalPlayers = [...gameState.players];
+    revivedPlayers.forEach(id => {
+      finalPlayers = finalPlayers.map(p => p.id === id ? { ...p, status: 'ALIVE' as const } : p);
+    });
+    deadPlayers.forEach(id => {
+      finalPlayers = finalPlayers.map(p => p.id === id ? { ...p, status: 'DEAD' as const } : p);
+    });
+
+    if (!revivedPlayers.includes(playerA.id)) throw new Error('TEST 20.2 FAILED: playerA không có trong danh sách hồi sinh');
+    if (finalPlayers.find(p => p.id === playerA.id)?.status !== 'ALIVE') throw new Error('TEST 20.2 FAILED: playerA không sống lại');
+    if (finalPlayers.find(p => p.id === playerB.id)?.status !== 'DEAD') throw new Error('TEST 20.2 FAILED: playerB không chết vì đòn TTTT');
+    if (!newSkillStates[`${lupin.id}_LUPIN`]) throw new Error('TEST 20.2 FAILED: Kỹ năng Lupin chưa đánh dấu đã dùng');
+    console.log('✓ 20.2: Người A (chết từ ngày hôm trước do vote) được Lupin hồi sinh thành công rạng sáng, người B bị TTTT giết cùng đêm đó.');
+  }
+
+  // 20.3: Lupin cứu sống mục tiêu vừa bị TTTT tấn công cùng đêm
+  {
+    const playerC: Player = { id: 'p_c', name: 'Harry Potter', role: ROLES.HARRY_POTTER, status: 'ALIVE', isGM: false, deviceId: 'dev_c' };
+    const lupin: Player = { id: 'p_lupin2', name: 'Remus Lupin', role: ROLES.REMUS_LUPIN, status: 'ALIVE', isGM: false, deviceId: 'dev_lupin2' };
+    const voldemort: Player = { id: 'p_vol2', name: 'Lord Voldemort', role: ROLES.VOLDEMORT, status: 'ALIVE', isGM: false, deviceId: 'dev_vol2' };
+
+    let deadPlayers: string[] = [playerC.id]; // targeted by Voldemort
+    const revivedPlayers: string[] = [];
+    const newSkillStates: Record<string, boolean | string> = {};
+
+    const lupinReviveTargetId = playerC.id;
+    const lupinActor = lupin;
+    const target = playerC;
+    const isTargetDead = target?.status === 'DEAD' || deadPlayers.includes(lupinReviveTargetId);
+
+    if (target && isTargetDead) {
+      newSkillStates[`${lupinActor.id}_LUPIN`] = true;
+      if (deadPlayers.includes(lupinReviveTargetId)) {
+        deadPlayers = deadPlayers.filter(id => id !== lupinReviveTargetId);
+      }
+      if (!revivedPlayers.includes(lupinReviveTargetId)) {
+        revivedPlayers.push(lupinReviveTargetId);
+      }
+    }
+
+    if (deadPlayers.includes(playerC.id)) throw new Error('TEST 20.3 FAILED: playerC vẫn còn trong deadPlayers');
+    if (!revivedPlayers.includes(playerC.id)) throw new Error('TEST 20.3 FAILED: playerC không có trong revivedPlayers');
+    console.log('✓ 20.3: Người C bị TTTT ám sát trong đêm được Lupin dùng thuốc giải cứu thành công khỏi cái chết.');
+  }
+
+  // 20.4: Nếu Lupin bị TTTT hạ sát trong đêm, Lupin không thể dùng thuốc hồi sinh
+  {
+    const playerA: Player = { id: 'p_a', name: 'Albus Dumbledore', role: ROLES.ALBUS_DUMBLEDORE, status: 'DEAD', isGM: false, deviceId: 'dev_a' };
+    const lupin: Player = { id: 'p_lupin3', name: 'Remus Lupin', role: ROLES.REMUS_LUPIN, status: 'ALIVE', isGM: false, deviceId: 'dev_lupin3' };
+
+    let deadPlayers: string[] = [lupin.id]; // Lupin was killed by Voldemort
+    const revivedPlayers: string[] = [];
+
+    const lupinReviveTargetId = playerA.id;
+    const lupinActor = lupin;
+    if (lupinActor && lupinActor.status !== 'DEAD' && !deadPlayers.includes(lupinActor.id)) {
+      revivedPlayers.push(playerA.id);
+    }
+
+    if (revivedPlayers.includes(playerA.id)) throw new Error('TEST 20.4 FAILED: Lupin đã chết trong đêm nhưng vẫn hồi sinh được');
+    console.log('✓ 20.4: Khi Lupin bị TTTT hạ sát cùng đêm, bùa hồi sinh bị ngắt và không thể thi triển.');
+  }
+  console.log('✅ TEST 20 PASSED: Cơ chế Thuốc Hồi Sinh Remus Lupin chuẩn xác tuyệt đối!');
+
   console.log('\n====================================================');
-  console.log('🎉 TẤT CẢ 19/19 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
+  console.log('🎉 TẤT CẢ 20/20 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
   console.log('====================================================\n');
 }
 

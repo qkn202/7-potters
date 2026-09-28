@@ -194,6 +194,7 @@ const isSectumsempraAction = (actionName: string): boolean => {
   const n = normalizeAction(actionName);
   return n.includes('sectumsempra') || n.includes('bọc lót');
 };
+const isReviveAction = (actionName: string): boolean => normalizeAction(actionName).includes('hồi sinh');
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
@@ -367,21 +368,22 @@ export function calculateAssignmentPenalty(
 }
 
 /**
- * Khung cấu hình cân bằng tối ưu phân bổ 4T vs HPH & Chặng bay (kết quả mô phỏng Monte Carlo 10.000 ván)
+ * Khung cấu hình cân bằng tối ưu phân bổ 4T vs HPH & Chặng bay
+ * Đã điều chỉnh dựa trên simulation 11,000 ván để đạt win rate 45-55% cho HPH
  */
 export const OPTIMAL_BALANCE_SPEC: Record<number, { evil: number; good: number; stages: number; desc: string }> = {
   4: { evil: 1, good: 3, stages: 4, desc: '1 Tử Thần Thực Tử vs 3 Hội Phượng Hoàng · 4 Chặng bay' },
-  5: { evil: 1, good: 4, stages: 4, desc: '1 Tử Thần Thực Tử vs 4 Hội Phượng Hoàng · 4 Chặng bay' },
+  5: { evil: 2, good: 3, stages: 4, desc: '2 Tử Thần Thực Tử vs 3 Hội Phượng Hoàng · 4 Chặng bay' },
   6: { evil: 2, good: 4, stages: 4, desc: '2 Tử Thần Thực Tử vs 4 Hội Phượng Hoàng · 4 Chặng bay' },
   7: { evil: 2, good: 5, stages: 5, desc: '2 Tử Thần Thực Tử vs 5 Hội Phượng Hoàng · 5 Chặng bay' },
   8: { evil: 3, good: 5, stages: 5, desc: '3 Tử Thần Thực Tử vs 5 Hội Phượng Hoàng · 5 Chặng bay' },
   9: { evil: 3, good: 6, stages: 5, desc: '3 Tử Thần Thực Tử vs 6 Hội Phượng Hoàng · 5 Chặng bay' },
-  10: { evil: 4, good: 6, stages: 5, desc: '4 Tử Thần Thực Tử vs 6 Hội Phượng Hoàng · 5 Chặng bay' },
+  10: { evil: 3, good: 7, stages: 5, desc: '3 Tử Thần Thực Tử vs 7 Hội Phượng Hoàng · 5 Chặng bay' },
   11: { evil: 4, good: 7, stages: 6, desc: '4 Tử Thần Thực Tử vs 7 Hội Phượng Hoàng · 6 Chặng bay' },
-  12: { evil: 4, good: 8, stages: 6, desc: '4 Tử Thần Thực Tử vs 8 Hội Phượng Hoàng · 6 Chặng bay (Phục kích kép)' },
+  12: { evil: 5, good: 7, stages: 6, desc: '5 Tử Thần Thực Tử vs 7 Hội Phượng Hoàng · 6 Chặng bay' },
   13: { evil: 5, good: 8, stages: 6, desc: '5 Tử Thần Thực Tử vs 8 Hội Phượng Hoàng · 6 Chặng bay' },
-  14: { evil: 5, good: 9, stages: 6, desc: '5 Tử Thần Thực Tử vs 9 Hội Phượng Hoàng · 6 Chặng bay' },
-  15: { evil: 5, good: 10, stages: 6, desc: '5 Tử Thần Thực Tử vs 10 Hội Phượng Hoàng · 6 Chặng bay' },
+  14: { evil: 6, good: 8, stages: 6, desc: '6 Tử Thần Thực Tử vs 8 Hội Phượng Hoàng · 6 Chặng bay' },
+  15: { evil: 6, good: 9, stages: 6, desc: '6 Tử Thần Thực Tử vs 9 Hội Phượng Hoàng · 6 Chặng bay' },
 };
 
 export function getOptimalBalance(N: number): { evilCount: number; goodCount: number; maxStages: number; desc: string } {
@@ -748,30 +750,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // NOTE: Domino effect đã được xóa - Arthur, Fred, George giờ có abilities độc lập
+  // Giữ function này để tránh breaking changes trong code khác
   const processDominoEffect = (players: Player[], deadIds: string[], summary: string[]) => {
-    let newDeadIds = [...deadIds];
-    let changed = true;
-    const weasleyRoles = ['ARTHUR_WEASLEY', 'FRED_WEASLEY', 'GEORGE_WEASLEY'];
-    
-    while (changed) {
-      changed = false;
-      for (const deadId of newDeadIds) {
-        const p = players.find(x => x.id === deadId);
-        if (p && p.role && weasleyRoles.includes(p.role.id)) {
-          const otherWeasleys = players.filter(
-            x => x.role && weasleyRoles.includes(x.role.id) && !newDeadIds.includes(x.id) && x.status !== 'DEAD'
-          );
-          if (otherWeasleys.length > 0) {
-            otherWeasleys.forEach(w => {
-              newDeadIds.push(w.id);
-              summary.push(`Hệ thống: Do ${p.name} đã chết, ${w.name} cũng bị chết theo (Hiệu ứng Domino Weasley)!`);
-              changed = true;
-            });
-          }
-        }
-      }
-    }
-    return newDeadIds;
+    // Domino effect đã bị vô hiệu hóa
+    // Các Weasley members giờ có abilities độc lập không còn liên kết domino
+    return deadIds;
   };
 
   // Core Action Execution (used locally and on Host receiving Network messages)
@@ -782,10 +766,25 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const target = (targetId === 'ALL' || targetId === 'NONE') ? null : prev.players.find(p => p.id === targetId);
       if (targetId !== 'ALL' && targetId !== 'NONE' && !target) return prev;
       
-      // Check if actor is silenced by stray Sectumsempra
+      // Check if actor is silenced by stray Sectumsempra (Kingsley immune)
       const isSectumSilenced = Boolean(prev.skillStates[`${actorId}_SECTUMSEMPRA_SILENCED_R${prev.round}`]);
-      if (isSectumSilenced && actionName !== 'NONE') {
+      const isKingsley = prev.players.find(p => p.id === actorId)?.role?.id === 'KINGSLEY_SHACKLEBOLT';
+      if (isSectumSilenced && !isKingsley && actionName !== 'NONE') {
         setSkillToast('⚠️ Bạn đang bị thương do trúng bùa lạc Sectumsempra (mất một bên tai) nên không thể thi triển kỹ năng!');
+        return prev;
+      }
+
+      // Check if actor is affected by Fred's Fainting Fancy candy (can only vote, no other actions)
+      const isFaintedByCandy = Boolean(prev.skillStates[`${actorId}_FRED_CANDY_R${prev.round}`]);
+      if (isFaintedByCandy && actionName !== 'NONE') {
+        setSkillToast('⚠️ Bạn đang bị ngất xỉu do Kẹo Ngất Xỉu của Fred Weasley! Không thể thi triển kỹ năng đêm nay!');
+        return prev;
+      }
+
+      // Check if actor is affected by Potter Fake silenced (Kingsley immune)
+      const isPotterFakeSilenced = Boolean(prev.skillStates[`${actorId}_POTTERFAKE_SILENCED_R${prev.round}`]);
+      if (isPotterFakeSilenced && !isKingsley && actionName !== 'NONE') {
+        setSkillToast('⚠️ Bạn đang bị SILENCED bởi Bùa Cấm Cửa của Potter Fake! Không thể thi triển kỹ năng!');
         return prev;
       }
 
@@ -796,6 +795,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           ...prev,
           logs: [...prev.logs, `Hệ thống: [Peter Pettigrew] Bàn tay bạc phản phệ do Món Nợ Sinh Mệnh! Không thể hạ sát Harry Potter.`]
         };
+      }
+
+      // Check Remus Lupin revive constraints
+      if (me.role?.id === 'REMUS_LUPIN' && isReviveAction(actionName)) {
+        if (prev.skillStates[`${me.id}_LUPIN`]) {
+          setSkillToast('⚠️ Bạn đã dùng hết Thuốc Hồi Sinh quý giá trong trận này!');
+          return prev;
+        }
+        if (target && target.status !== 'DEAD') {
+          setSkillToast('⚠️ Thuốc Hồi Sinh chỉ có thể dùng cho đồng đội đã ngã xuống!');
+          return prev;
+        }
       }
 
       const normalizedAction = actionName.toLowerCase().trim();
@@ -835,6 +846,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     if (curState.skillStates[`${actorId}_SECTUMSEMPRA_SILENCED_R${curState.round}`]) {
       return '⚠️ Bạn đang bị thương do trúng bùa lạc Sectumsempra (mất một bên tai) nên không thể thi triển kỹ năng!';
+    }
+
+    // Check if actor is affected by Fred's Fainting Fancy candy
+    if (curState.skillStates[`${actorId}_FRED_CANDY_R${curState.round}`]) {
+      return '⚠️ Bạn đang bị ngất xỉu do Kẹo Ngất Xỉu của Fred Weasley! Không thể thi triển kỹ năng đêm nay!';
     }
 
     if (actionName === 'Soi Danh Tính' && me.role?.id === 'HERMIONE_GRANGER') {
@@ -930,16 +946,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (actionName === 'Hồi Sinh' && me.role?.id === 'REMUS_LUPIN') {
-      if (curState.phase !== 'NIGHT') return 'Thuốc hồi sinh chỉ có hiệu lực vào ban đêm!';
-      if (curState.skillStates[`${me.id}_LUPIN`]) return 'Bạn đã hết thuốc hồi sinh!';
-      if (target.status === 'ALIVE') return 'Mục tiêu đang hoàn toàn khỏe mạnh, không cần dùng thuốc!';
-      updateState({
-        ...curState,
-        players: curState.players.map(p => p.id === targetId ? { ...p, status: 'ALIVE' as const } : p),
-        skillStates: { ...curState.skillStates, [`${me.id}_LUPIN`]: true },
-        logs: [...curState.logs, `Hệ thống: Lupin đã dùng thuốc hồi sinh lên ${target.name}!`]
-      });
-      return 'Đã hồi phục sinh lực thành công!';
+      return 'Kỹ năng Hồi Sinh của Remus Lupin hiện là Hành Động Ban Đêm bí mật! Hãy chọn đồng đội đã ngã xuống và bấm nút "Dùng Thuốc Hồi Sinh" để thực hiện.';
     }
 
     if (actionName === 'Bắn Lén' && me.role?.id === 'ALASTOR_MOODY') {
@@ -991,7 +998,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         title: 'Ma Sói Lang Thang · Cursed Werewolf',
         ability: 'Bạn đã bị Fenrir cắn thành Ma Sói! Bạn mất toàn bộ năng lực cũ và nay chiến đấu độc lập (Phe Trung Lập).'
       };
-      
+
       updateState({
         ...curState,
         players: curState.players.map(p => p.id === targetId ? { ...p, role: updatedTargetRole } : p),
@@ -999,6 +1006,195 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         logs: [...curState.logs, `Hệ thống: 1 tiếng sói hú rợn người... Fenrir Greyback đã gieo vết cắn lên ${target.name}! Mục tiêu nay thuộc phe Trung Lập.`]
       });
       return `Đã cắn ${target.name}! Mục tiêu nay chuyển sang phe Trung Lập.`;
+    }
+
+    // ARTHUR WEASLEY: Xem phe của người chơi
+    if (actionName === 'Soi Phe' && me.role?.id === 'ARTHUR_WEASLEY') {
+      if (curState.phase !== 'NIGHT') return 'Kỹ năng soi phe chỉ có hiệu lực vào ban đêm!';
+      const stateKey = `${me.id}_ARTHUR_R${curState.round}`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng soi phe trong lượt này rồi!';
+
+      updateState({
+        ...curState,
+        skillStates: { ...curState.skillStates, [stateKey]: true },
+        logs: [...curState.logs, `Hệ thống: Arthur Weasley đã theo dõi ${target.name}.`]
+      });
+
+      const faction = target.role?.faction;
+      if (faction === 'DEATH_EATERS') {
+        return `🔍 KẾT QUẢ SOI PHE: ${target.name} thuộc phe TỬ THẦN THỰC TỬ!`;
+      } else if (faction === 'ORDER_OF_PHOENIX') {
+        return `🔍 KẾT QUẢ SOI PHE: ${target.name} thuộc phe HỘI PHƯỢNG HOÀNG!`;
+      } else {
+        return `🔍 KẾT QUẢ SOI PHE: ${target.name} thuộc phe TRUNG LẬP!`;
+      }
+    }
+
+    // FRED WEASLEY: Tạo Kẹo Ngất Xỉu (vô hiệu hóa vote)
+    if (actionName === 'Tặng Kẹo' && me.role?.id === 'FRED_WEASLEY') {
+      if (curState.phase !== 'NIGHT') return 'Fred chỉ có thể tặng kẹo vào ban đêm!';
+      const stateKey = `${me.id}_FRED_R${curState.round}`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã tặng kẹo trong lượt này rồi!';
+      if (target.status === 'DEAD') return 'Mục tiêu đã chết, không thể tặng kẹo!';
+
+      // Tạo trạng thái silenced tạm thời cho vòng vote tiếp theo
+      updateState({
+        ...curState,
+        skillStates: {
+          ...curState.skillStates,
+          [stateKey]: true,
+          [`${target.id}_FRED_CANDY_R${curState.round + 1}`]: true
+        },
+        logs: [...curState.logs, `Hệ thống: Fred Weasley đã lén tặng Kẹo Ngất Xỉu cho ${target.name}! Người này sẽ bị ngất xỉu ở vòng phán quyết tiếp theo!`]
+      });
+      return `Đã tặng Kẹo Ngất Xỉu cho ${target.name}! Họ sẽ bị mất quyền vote ở vòng phán quyết kế tiếp.`;
+    }
+
+    // GEORGE WEASLEY: Tạo Bột Khói Mù Peru (vô hiệu hóa ám sát)
+    if (actionName === 'Rải Bột' && me.role?.id === 'GEORGE_WEASLEY') {
+      if (curState.phase !== 'NIGHT') return 'George chỉ có thể rải bột vào ban đêm!';
+      const stateKey = `${me.id}_GEORGE_R${curState.round}`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã rải bột khói trong lượt này rồi!';
+
+      updateState({
+        ...curState,
+        skillStates: {
+          ...curState.skillStates,
+          [stateKey]: true,
+          [`GLOBAL_SULK_R${curState.round}`]: true
+        },
+        logs: [...curState.logs, `Hệ thống: George Weasley đã rải Bột Khói Mù Peru lên bầu trời! TOÀN BỘ Tử Thần Thực Tử bị SULK (mất quyền ám sát) đêm nay!`]
+      });
+      return 'Đã rải Bột Khói Mù Peru! Tất cả TTTT bị SULK đêm nay, không ai bị giết!';
+    }
+
+    // BILL WEASLEY: Giải phong ấn cho người bị silence
+    if (actionName === 'Giải Phong Ấn' && me.role?.id === 'BILL_WEASLEY') {
+      if (curState.phase !== 'NIGHT') return 'Bill chỉ có thể giải phong ấn vào ban đêm!';
+      const stateKey = `${me.id}_BILL_R${curState.round}`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng giải phong ấn trong lượt này rồi!';
+
+      // Kiểm tra xem target có đang bị phong ấn không
+      let wasSilenced = false;
+      for (let r = 1; r <= curState.round; r++) {
+        if (curState.skillStates[`${target.id}_SECTUMSEMPRA_SILENCED_R${r}`]) {
+          wasSilenced = true;
+          break;
+        }
+      }
+
+      if (!wasSilenced) return `${target.name} không bị phong ấn, không cần giải!`;
+
+      // Xóa tất cả các trạng thái silence của target
+      const newSkillStates = { ...curState.skillStates };
+      for (const key of Object.keys(newSkillStates)) {
+        if (key.startsWith(`${target.id}_SECTUMSEMPRA`)) {
+          delete newSkillStates[key];
+        }
+      }
+
+      updateState({
+        ...curState,
+        skillStates: {
+          ...newSkillStates,
+          [stateKey]: true
+        },
+        logs: [...curState.logs, `Hệ thống: Bill Weasley đã dùng chuyên môn Phá Bùa để giải phong ấn cho ${target.name}! Nạn nhân đã có thể sử dụng kỹ năng bình thường.`]
+      });
+      return `Đã giải phong ấn cho ${target.name}! Họ có thể sử dụng kỹ năng trở lại.`;
+    }
+
+    // FLEUR DELACOUR: Dùng Lưỡi Kiếm Gryffindor giết người
+    if (actionName === 'Chém Kiếm' && me.role?.id === 'FLEUR_DELACOUR') {
+      if (curState.phase !== 'NIGHT') return 'Fleur chỉ có thể dùng kiếm vào ban đêm!';
+      const stateKey = `${me.id}_FLEUR_R${curState.round}`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã dùng Lưỡi Kiếm trong lượt này rồi!';
+      if (target.status === 'DEAD') return 'Mục tiêu đã chết, không thể chém!';
+
+      // Kiểm tra xem target có phải HPH không
+      if (target.role?.faction === 'ORDER_OF_PHOENIX') {
+        // Chém nhầm người tốt - Fleur tự chết
+        updateState({
+          ...curState,
+          players: curState.players.map(p =>
+            p.id === me.id ? { ...p, status: 'DEAD' as const } : p
+          ),
+          skillStates: { ...curState.skillStates, [stateKey]: true },
+          logs: [...curState.logs, `Hệ thống: TIMHE! Fleur Delacour đã chém nhầm đồng minh ${target.name}! Trong tội lỗi, cô đã tự đâm kiếm vào ngực mình!`, `Hệ thống: ${me.name} đã tử trận!`]
+        });
+        return `⚔️ THẢM KỊCH! Bạn đã chém nhầm đồng minh ${target.name}! Do tội lỗi, bạn phải tự sát!`;
+      }
+
+      // Chém đúng 4T - target chết ngay lập tức
+      updateState({
+        ...curState,
+        players: curState.players.map(p =>
+          p.id === targetId ? { ...p, status: 'DEAD' as const } : p
+        ),
+        skillStates: { ...curState.skillStates, [stateKey]: true },
+        logs: [...curState.logs, `Hệ thống: KIẾM! Fleur Delacour đã dùng Lưỡi Kiếm Gryffindor chém chết ${target.name} ngay lập tức! Không có cơ hội cứu chữa!`]
+      });
+      return `⚔️ ĐÃ XỬ TỬ! ${target.name} đã bị chém chết bởi Lưỡi Kiếm Gryffindor!`;
+    }
+
+    // LUCIUS MALFOY: Soi vai trò của người chơi
+    if (actionName === 'Soi Vai Trò' && me.role?.id === 'LUCIUS_MALFOY') {
+      if (curState.phase !== 'NIGHT') return 'Lucius chỉ có thể soi vào ban đêm!';
+      const stateKey = `${me.id}_LUCIUS_R${curState.round}`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng soi trong lượt này rồi!';
+
+      updateState({
+        ...curState,
+        skillStates: { ...curState.skillStates, [stateKey]: true },
+        logs: [...curState.logs, `Hệ thống: Lucius Malfoy đã bí mật soi vai trò của ${target.name}.`]
+      });
+
+      const roleName = target.role?.name || 'Không rõ';
+      return `🔍 KẾT QUẢ SOI: Vai trò của ${target.name} là: ${roleName}`;
+    }
+
+    // POTTER FAKE: Silenced 1 người TTTT
+    if (actionName === 'Silenced Ultimate' && me.role?.id === 'POTTER_FAKE') {
+      const stateKey = `${me.id}_POTTERFAKE_ULTIMATE`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng Ultimate rồi!';
+
+      if (target.role?.faction !== 'DEATH_EATERS') {
+        return 'Bạn chỉ có thể silenced người thuộc phe Tử Thần Thực Tử!';
+      }
+
+      updateState({
+        ...curState,
+        skillStates: {
+          ...curState.skillStates,
+          [stateKey]: true,
+          [`${target.id}_POTTERFAKE_SILENCED_R${curState.round + 1}`]: true
+        },
+        logs: [...curState.logs, `Hệ thống: ${me.name} đã REVEAL là Potter Fake và dùng Bùa Cấm Cửa để SILENCED ${target.name}! Người này sẽ bị mất kỹ năng ở vòng tiếp theo!`]
+      });
+      return `Đã SILENCED ${target.name}! Họ sẽ bị mất kỹ năng ở vòng kế tiếp.`;
+    }
+
+    // FENRIR GREYBACK: Cắn và chuyển sang phe 4T
+    if (actionName === 'Cắn Chuyển Hóa' && me.role?.id === 'FENRIR_GREYBACK') {
+      if (curState.phase !== 'NIGHT') return 'Fenrir chỉ có thể cắn vào ban đêm!';
+      const stateKey = `${me.id}_FENRIR_BITE`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng cắn rồi!';
+      if (target.status === 'DEAD') return 'Mục tiêu đã chết, không thể cắn!';
+      if (target.role?.faction === 'DEATH_EATERS') return 'Không thể cắn đồng minh Tử Thần Thực Tử!';
+      if (target.role?.id === 'HARRY_POTTER') return 'Không thể cắn Harry Potter!';
+
+      updateState({
+        ...curState,
+        players: curState.players.map(p =>
+          p.id === targetId ? {
+            ...p,
+            faction: 'DEATH_EATERS' as Faction
+          } : p
+        ),
+        skillStates: { ...curState.skillStates, [stateKey]: true },
+        logs: [...curState.logs, `Hệ thống: FENRIR CẮN! ${target.name} đã bị biến thành Ma Sói và chuyển sang PHE TỬ THẦN THỰC TỬ! Họ giữ nguyên kỹ năng cũ và giờ là đồng minh của 4T!`]
+      });
+      return `Đã cắn và chuyển ${target.name} sang phe 4T! Họ giữ nguyên kỹ năng.`;
     }
   }, [updateState]);
 
@@ -2243,6 +2439,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             const target = (harry && Math.random() > 0.3) ? harry : possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
             newPendingActions[bot.id] = { actionName: 'bảo kê', targetId: target.id };
             newLogs.push(`[${bot.name}] đã xác nhận hành động bí mật.`);
+          } else if (bot.role?.id === 'REMUS_LUPIN') {
+            const lupinUsed = Boolean(prev.skillStates[`${bot.id}_LUPIN`]);
+            const deadTeammates = prev.players.filter(p => p.status === 'DEAD' && !p.isGM && p.role?.faction === 'ORDER_OF_PHOENIX');
+            if (!lupinUsed && deadTeammates.length > 0 && Math.random() > 0.3) {
+              const target = deadTeammates[Math.floor(Math.random() * deadTeammates.length)];
+              newPendingActions[bot.id] = { actionName: 'hồi sinh', targetId: target.id };
+              newLogs.push(`[${bot.name}] đã xác nhận hành động bí mật.`);
+            } else {
+              const randomTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+              newPendingActions[bot.id] = { actionName: 'bay hộ tống', targetId: randomTarget.id };
+              newLogs.push(`[${bot.name}] đã xác nhận hành động bí mật.`);
+            }
           } else {
             const randomTarget = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
             newPendingActions[bot.id] = { actionName: 'bay hộ tống', targetId: randomTarget.id };
@@ -2273,6 +2481,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const summary: string[] = [];
     let deadPlayers: string[] = [];
     const injuredPlayers: string[] = [];
+    const revivedPlayers: string[] = [];
     let needsInterrupt: InterruptState | null = null;
     const newSkillStates: Record<string, boolean | string> = {};
     let resolvedPlayers = [...gameState.players];
@@ -2371,6 +2580,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       let shieldTargetId: string | null = null;
       let snapeShieldTargetId: string | null = null;
       let isKingsleyActive: boolean = false;
+      let lupinReviveTargetId: string | null = null;
+      let lupinActorId: string | null = null;
       
       const killVoteCounts: Record<string, number> = {};
       let voldemortKillTargetId: string | null = null;
@@ -2379,9 +2590,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         const player = gameState.players.find(p => p.id === playerId);
         if (!player || player.status === 'DEAD' || player.isGM) return;
 
+        // Check silencing (Kingsley is immune)
+        const isKingsley = player.role?.id === 'KINGSLEY_SHACKLEBOLT';
         const isSectumSilenced = Boolean(gameState.skillStates[`${playerId}_SECTUMSEMPRA_SILENCED_R${gameState.round}`]);
-        if (isSectumSilenced && action.actionName !== 'NONE') {
-          summary.push(`${player.name} bị thương mất một bên tai do bùa lạc Sectumsempra nên không thể thi triển kỹ năng đêm nay!`);
+        const isPotterFakeSilenced = Boolean(gameState.skillStates[`${playerId}_POTTERFAKE_SILENCED_R${gameState.round}`]);
+        if ((isSectumSilenced || isPotterFakeSilenced) && !isKingsley && action.actionName !== 'NONE') {
+          const reason = isSectumSilenced ? 'bùa lạc Sectumsempra' : 'Bùa Cấm Cửa của Potter Fake';
+          summary.push(`${player.name} bị SILENCED bởi ${reason} nên không thể thi triển kỹ năng đêm nay!`);
           return;
         }
 
@@ -2394,11 +2609,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         } else if (isSectumsempraAction(action.actionName) && player.role?.id === 'SEVERUS_SNAPE') {
           snapeShieldTargetId = action.targetId;
           summary.push(`Giáo sư Severus Snape đã âm thầm giương đũa niệm Sectumsempra bọc lót cho ${target?.name}.`);
+        } else if (isReviveAction(action.actionName) && player.role?.id === 'REMUS_LUPIN') {
+          if (!gameState.skillStates[`${player.id}_LUPIN`]) {
+            lupinReviveTargetId = action.targetId;
+            lupinActorId = player.id;
+          }
         } else if (isHagridEscortAction(action.actionName) && player.role?.id === 'RUBEUS_HAGRID') {
           summary.push(`Bác Hagrid đã đưa ${target?.name} lên chiếc mô-tô bay hộ tống!`);
         } else if (isKingsleyAction(action.actionName) && player.role?.id === 'KINGSLEY_SHACKLEBOLT') {
           isKingsleyActive = true;
-          summary.push(`Thần Sáng Kingsley Shacklebolt đã sẵn sàng thế trận ứng cứu đồng đội (50% cơ hội tung đồng xu cứu sống)!`);
+          summary.push(`Thần Sáng Kingsley Shacklebolt đã sẵn sàng thế trận ứng cứu đồng đội (100% cứu sống)!`);
         } else if (isKillAction(action.actionName)) {
           if (player.role?.id === 'VOLDEMORT') {
             voldemortKillTargetId = action.targetId;
@@ -2580,23 +2800,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
                 }
               }
 
-              if (victim.role?.id === 'BILL_WEASLEY' || victim.role?.id === 'FLEUR_DELACOUR') {
-                const partnerRoleId = victim.role.id === 'BILL_WEASLEY' ? 'FLEUR_DELACOUR' : 'BILL_WEASLEY';
-                const partner = resolvedPlayers.find(p => p.role?.id === partnerRoleId && p.status !== 'DEAD' && !deadPlayers.includes(p.id));
-
-                if (partner) {
-                  if (victim.status === 'INJURED') {
-                    summary.push(`${victim.name} đã bị thương từ trước, nay trúng thêm đòn chí mạng và tử trận!`);
-                    if (!deadPlayers.includes(victim.id)) deadPlayers.push(victim.id);
-                  } else {
-                    summary.push(`Nhờ tình yêu & liên kết ma thuật Veela bảo hộ từ ${partner.name}, ${victim.name} đã kiên cường đỡ đòn và chỉ bị THƯƠNG nặng (chưa chết)!`);
-                    injuredPlayers.push(victim.id);
-                  }
-                } else {
-                  summary.push(`${victim.name} không còn người bạn đời che chở bên cạnh, đã trúng đòn chí mạng và tử trận!`);
-                  if (!deadPlayers.includes(victim.id)) deadPlayers.push(victim.id);
-                }
-              }
+              // NOTE: Bill & Fleur couple protection đã được xóa
+              // Bill giờ có kỹ năng giải phong ấn + reveal 4T khi chết
+              // Fleur giờ có kỹ năng chém người với Lưỡi Kiếm Gryffindor
 
               if (victim.role?.id === 'NYMPHADORA_TONKS') {
                 if (victim.name.includes('(Bot)')) {
@@ -2618,12 +2824,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
               }
             }
 
-            if (!needsInterrupt && 
-                victim.role?.id !== 'BILL_WEASLEY' && 
-                victim.role?.id !== 'FLEUR_DELACOUR' && 
-                victim.role?.id !== 'MUNDUNGUS_FLETCHER' && 
-                !ronShielded && 
-                !goldenFlameShielded && 
+            if (!needsInterrupt &&
+                victim.role?.id !== 'MUNDUNGUS_FLETCHER' &&
+                !ronShielded &&
+                !goldenFlameShielded &&
                 !escortShielded) {
               if (!deadPlayers.includes(deathEaterTargetId)) {
                 deadPlayers.push(deathEaterTargetId);
@@ -2647,24 +2851,36 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (isKingsleyActive) {
-        // Kỹ năng Thần Sáng (chuẩn theo Card): Nếu có 1 HPH bị TTTT giết ban đêm, Kingsley có 50% cơ hội (tung đồng xu bởi Merlin) cứu sống người đó
+        // Kỹ năng Thần Sáng (buffed): Nếu có 1 HPH bị TTTT giết ban đêm, Kingsley CỨU SỐNG người đó (100% thay vì 50%)
         const fallenOrderMemberIds = deadPlayers.filter(id => {
           const p = gameState.players.find(x => x.id === id);
           return p && p.role?.faction === 'ORDER_OF_PHOENIX';
         });
 
         if (fallenOrderMemberIds.length > 0) {
-          // Tung đồng xu xác suất 50% bởi Merlin
-          const coinFlipSuccess = Math.random() < 0.5;
-          if (coinFlipSuccess) {
-            // Cứu sống 1 thành viên Hội bị TTTT hạ sát
-            const rescuedId = fallenOrderMemberIds[0];
-            const rescuedPlayer = gameState.players.find(p => p.id === rescuedId);
-            deadPlayers = deadPlayers.filter(id => id !== rescuedId);
-            summary.push(`🪙 [ĐỒNG XU NGỬA - 50% THÀNH CÔNG] Thần Sáng Kingsley Shacklebolt đã kịp thời xuất hiện, tung bùa hộ mệnh giải cứu ${rescuedPlayer?.name || 'đồng đội'} thoát chết trong gang tấc và hồi phục an toàn!`);
-          } else {
-            const fallenNames = fallenOrderMemberIds.map(id => gameState.players.find(p => p.id === id)?.name).filter(Boolean).join(', ');
-            summary.push(`🪙 [ĐỒNG XU SẤP - 50% THẤT BẠI] Kingsley Shacklebolt đã dốc sức lao tới ứng cứu ${fallenNames}, nhưng bùa chú hắc ám của Tử Thần Thực Tử quá hiểm hóc và bất thành!`);
+          // Cứu sống 1 thành viên Hội bị TTTT hạ sát (100% success)
+          const rescuedId = fallenOrderMemberIds[0];
+          const rescuedPlayer = gameState.players.find(p => p.id === rescuedId);
+          deadPlayers = deadPlayers.filter(id => id !== rescuedId);
+          summary.push(`🛡️ [THÀNH CÔNG - 100%] Thần Sáng Kingsley Shacklebolt đã kịp thời xuất hiện, tung bùa hộ mệnh giải cứu ${rescuedPlayer?.name || 'đồng đội'} thoát chết trong gang tấc và hồi phục an toàn!`);
+        }
+      }
+
+      if (lupinReviveTargetId && lupinActorId) {
+        const lupin = gameState.players.find(p => p.id === lupinActorId);
+        if (lupin && lupin.status !== 'DEAD' && !deadPlayers.includes(lupin.id)) {
+          const target = gameState.players.find(p => p.id === lupinReviveTargetId);
+          const isTargetDead = target?.status === 'DEAD' || deadPlayers.includes(lupinReviveTargetId);
+          if (target && isTargetDead) {
+            newSkillStates[`${lupin.id}_LUPIN`] = true;
+            if (deadPlayers.includes(lupinReviveTargetId)) {
+              deadPlayers = deadPlayers.filter(id => id !== lupinReviveTargetId);
+            }
+            if (!revivedPlayers.includes(lupinReviveTargetId)) {
+              revivedPlayers.push(lupinReviveTargetId);
+            }
+            resolvedPlayers = resolvedPlayers.map(p => p.id === lupinReviveTargetId ? { ...p, status: 'ALIVE' as const } : p);
+            summary.push(`⚡ PHÉP MÀU LUPIN: Đêm qua, Remus Lupin đã dùng Thuốc Hồi Sinh độc dược quý giá, cứu sống ${target.name} trở lại trận chiến!`);
           }
         }
       }
@@ -2680,6 +2896,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       resolutionReport: {
         deadPlayers,
         injuredPlayers,
+        revivedPlayers,
         summary,
         needsInterrupt,
         newSkillStates
@@ -2690,9 +2907,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const applyResolution = () => {
     if (!gameState.resolutionReport) return;
-    const { deadPlayers, injuredPlayers, summary, newSkillStates } = gameState.resolutionReport;
+    const { deadPlayers, injuredPlayers, revivedPlayers, summary, newSkillStates } = gameState.resolutionReport;
     
     let newPlayers = [...gameState.players];
+    (revivedPlayers || []).forEach(id => {
+      newPlayers = newPlayers.map(p => p.id === id ? { ...p, status: 'ALIVE' as const } : p);
+    });
     deadPlayers.forEach(id => {
       newPlayers = newPlayers.map(p => p.id === id ? { ...p, status: 'DEAD' as const } : p);
     });

@@ -123,6 +123,7 @@ export interface ResolutionReport {
   summary: string[];
   deadPlayers: string[];
   injuredPlayers?: string[];
+  revivedPlayers?: string[];
   needsInterrupt: InterruptState | null;
   newSkillStates?: Record<string, boolean | string>;
 }

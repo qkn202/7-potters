@@ -56,6 +56,7 @@ const isSectumsempraAction = (actionName: string): boolean => {
   const n = normalizeAction(actionName);
   return n.includes('sectumsempra') || n.includes('bọc lót');
 };
+const isReviveAction = (actionName: string): boolean => normalizeAction(actionName).includes('hồi sinh');
 
 export function PlayerScreen() {
   const { gameState, currentPlayerId, playerAction, executeInstantSkill, resolveInterrupt, skillToast, clearSkillToast, consumeWeasleyItem } = useGame();
@@ -481,17 +482,17 @@ export function PlayerScreen() {
 
       if (me.role?.id === 'REMUS_LUPIN') {
         return {
-          title: 'Remus Lupin · Bùa Chú Hồi Sinh',
-          badge: 'Cứu Viện Khẩn Cấp',
+          title: 'Remus Lupin · Thuốc Hồi Sinh Bí Mật',
+          badge: 'Độc Dược Hồi Sinh',
           badgeVariant: 'amber' as const,
           alert: undefined as string | undefined,
           steps: [
-            { num: '1', title: 'Chọn đồng đội ngã xuống', desc: 'Nếu có đồng đội đã tử trận (màu đỏ), hãy nhấp chọn người đó trong danh sách.' },
-            { num: '2', title: 'Hồi sinh', desc: 'Bấm nút "Thi Triển Hồi Sinh" để cứu họ trở lại trận chiến (1 lần duy nhất trong toàn trận).' }
+            { num: '1', title: 'Chọn đồng đội ngã xuống', desc: 'Nhấp chọn người chơi đã tử trận (màu đỏ) trong danh sách để hồi sinh.' },
+            { num: '2', title: 'Đăng ký Hồi Sinh', desc: 'Bấm nút "Dùng Thuốc Hồi Sinh" để ban phát độc dược bí mật trong đêm (1 lần duy nhất trong toàn trận).' }
           ],
-          tip: 'Hãy để dành hồi sinh cho các nhân vật nòng cốt như Dumbledore, Moody, Kingsley hoặc người hộ tống.',
+          tip: 'Hành động diễn ra hoàn toàn bí mật trong đêm. Đến rạng sáng mai, người được chọn sẽ chính thức sống lại trong báo cáo của Merlin!',
           statusText: effectiveTargetPlayer 
-            ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Bấm nút "Thi Triển Hồi Sinh" bên dưới!`
+            ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Bấm nút "Dùng Thuốc Hồi Sinh" bên dưới!`
             : 'Chọn 1 đồng đội đã ngã xuống để hồi sinh',
           statusType: effectiveTargetPlayer ? 'warning' as const : 'info' as const,
         };
@@ -1954,19 +1955,16 @@ export function PlayerScreen() {
                 let skillName: string | null = null;
                 if (me.role?.id === 'HERMIONE_GRANGER') skillName = 'Soi Danh Tính';
                 if (me.role?.id === 'PETER_PETTIGREW') skillName = 'Đánh Hơi';
-                if (me.role?.id === 'REMUS_LUPIN') skillName = 'Hồi Sinh';
                 if (me.role?.id === 'FENRIR_GREYBACK') skillName = 'Cắn';
 
                 // Check skill cooldowns
                 const hermioneUsed = Boolean(gameState.skillStates[`${me.id}_HERMIONE_R${gameState.round}`]);
                 const pettigrewUsed = Boolean(gameState.skillStates[`${me.id}_PETTIGREW_R${gameState.round}`]);
-                const lupinUsed = Boolean(gameState.skillStates[`${me.id}_LUPIN`]);
                 const fenrirUsed = Boolean(gameState.skillStates[`${me.id}_FENRIR`]);
 
                 // Determine if current skill is on cooldown
                 const isSkillOnCooldown = (skillName === 'Soi Danh Tính' && hermioneUsed) ||
                   ((skillName === 'Đánh Hơi' || skillName === 'Soi Đặc Biệt' || skillName === 'Soi Phe') && pettigrewUsed) ||
-                  (skillName === 'Hồi Sinh' && lupinUsed) ||
                   (skillName === 'Cắn' && fenrirUsed);
 
                 return (
@@ -2208,6 +2206,55 @@ export function PlayerScreen() {
                             </span>
                             <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
                               Sẵn sàng thế trận: 50% tung đồng xu cứu sống 1 thành viên Hội bị ám sát
+                            </span>
+                          </div>
+                        </button>
+                      )}
+
+                      {me.role?.id === 'REMUS_LUPIN' && (
+                        <button
+                          onClick={() => {
+                            if (!effectiveTargetId) return;
+                            const target = gameState.players.find(p => p.id === effectiveTargetId);
+                            if (target && target.status !== 'DEAD') {
+                              setToastMessage('⚠️ Thuốc Hồi Sinh chỉ có thể dùng cho đồng đội đã ngã xuống!');
+                              setTimeout(() => setToastMessage(null), 3500);
+                              return;
+                            }
+                            if (gameState.skillStates[`${me.id}_LUPIN`]) {
+                              setToastMessage('⚠️ Bạn đã dùng hết Thuốc Hồi Sinh quý giá trong trận này!');
+                              setTimeout(() => setToastMessage(null), 3500);
+                              return;
+                            }
+
+                            playerAction('hồi sinh', effectiveTargetId);
+                            setSelectedTarget(effectiveTargetId);
+                            const tName = target?.name;
+                            setToastMessage(`✓ Đã lưu lựa chọn Hồi Sinh cho: ${tName}! Rạng sáng mai họ sẽ sống lại.`);
+                            setTimeout(() => setToastMessage(null), 3500);
+                          }}
+                          disabled={!effectiveTargetId || isDead || Boolean(gameState.skillStates[`${me.id}_LUPIN`])}
+                          className={`flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-800/90 via-[#0d3822] to-teal-950 hover:from-emerald-700 hover:to-teal-900 border-2 border-emerald-400/90 flex items-center justify-between sm:justify-start gap-3 shadow-lg transition-all active:scale-95 disabled:opacity-40 cursor-pointer ${
+                            Boolean(gameState.skillStates[`${me.id}_LUPIN`]) ? 'opacity-40 cursor-not-allowed' : ''
+                          }`}
+                        >
+                          <div className="p-2 rounded-lg bg-black/40 border border-emerald-400/50 text-emerald-300 shrink-0">
+                            <Sparkles size={20} className="text-emerald-300 animate-pulse" />
+                          </div>
+                          <div className="flex flex-col text-left min-w-0">
+                            <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-emerald-200 truncate">
+                              {Boolean(gameState.skillStates[`${me.id}_LUPIN`])
+                                ? 'Đã Hết Thuốc Hồi Sinh (1 Lần)'
+                                : myAction?.targetId === effectiveTargetId && isReviveAction(myAction?.actionName || '')
+                                  ? `✓ Đã Chọn Hồi Sinh (${effectiveTargetPlayer?.name})`
+                                  : isReviveAction(myAction?.actionName || '')
+                                    ? `🔄 Đổi Hồi Sinh Sang: ${effectiveTargetPlayer?.name}`
+                                    : `Dùng Thuốc Hồi Sinh ${effectiveTargetPlayer ? `(${effectiveTargetPlayer.name})` : ''}`}
+                            </span>
+                            <span className="text-[10px] sm:text-[11px] font-lora text-emerald-200/80 font-normal truncate">
+                              {Boolean(gameState.skillStates[`${me.id}_LUPIN`])
+                                ? 'Đã sử dụng độc dược hồi sinh duy nhất'
+                                : 'Hồi sinh bí mật trong đêm, công bố rạng sáng'}
                             </span>
                           </div>
                         </button>

@@ -314,70 +314,31 @@ export function PlayerScreen() {
   });
 
   // Dynamic 1-Line Mission Prompt (Replaces 4-Tier Coaching Text Wall)
+  // Dynamic Concise Mobile Mission Prompt (Minimal text, maximum clarity)
   const getMissionPrompt = () => {
-    if (isDead) {
-      return '💀 Bạn đã tử trận trong không chiến. Hãy quan sát và đàm đạo trên Mạng Floo!';
-    }
+    if (isDead) return '💀 Bạn đã tử trận';
     if (isDay) {
-      if (myAction) {
-        return `✓ Đã biểu quyết Tước Đũa cho [${myVotedTarget?.name}]. Bạn có thể chọn người khác để đổi phiếu.`;
-      }
-      return '☀️ Phiên Phán Quyết: Chạm chọn 1 kẻ khả nghi để Biểu Quyết Tước Đũa!';
+      if (myAction) return `✓ Đã chọn: ${myVotedTarget?.name}`;
+      return '☀️ Chọn mục tiêu để Tước Đũa';
     }
     // Night Phase
     if (isDeathEater) {
-      if (isSilenced) {
-        return '🔇 Đòn ám sát của Tử Thần Thực Tử đang bị phong ấn ma pháp đêm nay!';
-      }
-      if (myAction?.targetId === 'NONE') {
-        return '🕊️ Đã chọn Án Binh Bất Động đêm nay (không ám sát ai).';
-      }
-      if (myAction) {
-        return `✓ Đã nhắm ám sát [${myVotedTarget?.name}]. Có thể đổi mục tiêu hoặc chọn Án Binh.`;
-      }
-      return me.role?.id === 'VOLDEMORT'
-        ? '🌙 Đêm 2: Chọn 1 mục tiêu để Ám Sát hoặc bấm "Án Binh" để thăm dò!'
-        : '🌙 Đêm 2: Chọn mục tiêu dồn đòn ám sát cùng Chúa Tể Voldemort!';
+      if (isSilenced) return '🔇 Đòn ám sát bị phong ấn!';
+      if (myAction?.targetId === 'NONE') return '🕊️ Đã chọn Án Binh';
+      if (myAction) return `✓ Đã nhắm: ${myVotedTarget?.name}`;
+      return me.role?.id === 'VOLDEMORT' ? '🌙 Chọn mục tiêu Ám Sát' : '🌙 Dồn lực Ám Sát cùng Chúa Tể';
     }
-    if (me.role?.id === 'HARRY_POTTER') {
-      return myAction
-        ? `✓ Đang Bay Hộ Tống cùng [${myVotedTarget?.name}].`
-        : '🌙 Ban Đêm: Chọn 1 đồng đội để Bay Hộ Tống hoặc ẩn mình bảo toàn mạng!';
-    }
-    if (me.role?.id === 'HERMIONE_GRANGER') {
-      return '🌙 Ban Đêm: Chạm chọn 1 phù thủy để thi triển bùa Soi Danh Tính thật!';
-    }
-    if (me.role?.id === 'ALBUS_DUMBLEDORE') {
-      return '🌙 Ban Đêm: Chọn 1 đồng đội để dựng Khiên Bảo Vệ (Protego) khỏi ám sát!';
-    }
-    if (me.role?.id === 'SEVERUS_SNAPE') {
-      return '🌙 Ban Đêm: Chọn 1 người để bọc lót Sectumsempra (cứu nếu bị tấn công)!';
-    }
-    if (me.role?.id === 'REMUS_LUPIN') {
-      return '🌙 Ban Đêm: Dùng Thuốc Hồi Sinh cho 1 đồng đội đã ngã xuống (sống lại rạng sáng)!';
-    }
-    if (me.role?.id === 'KINGSLEY_SHACKLEBOLT') {
-      return '🌙 Ban Đêm: Bấm nút "Chỉ Huy Ứng Cứu" để giăng lưới cứu đồng đội bị ám sát!';
-    }
-    if (me.role?.id === 'MINERVA_MCGONAGALL') {
-      return '🌙 Ban Đêm: Chọn 1 đồng minh để hóa hình mèo vằn bọc lót bảo vệ!';
-    }
-    if (me.role?.id === 'NEVILLE_LONGBOTTOM') {
-      return '🌙 Ban Đêm: Dùng Lưỡi Kiếm Gryffindor thức tỉnh & giải trừ câm lặng cho đồng đội!';
-    }
-    if (me.role?.id === 'DRACO_MALFOY') {
-      return '🎭 Ban Đêm: Quan sát lằn ranh thiện ác, chọn 1 người để Bay Hộ Tống hoặc ẩn mình!';
-    }
-    if (me.role?.id === 'DOLORES_UMBRIDGE') {
-      return '📜 Ban Đêm: Chọn 1 phù thủy để ban hành Sắc Lệnh Giáo Dục cấm đoán!';
-    }
-    if (me.role?.id === 'JESTER') {
-      return '🃏 Kẻ Hề: Ban đêm ẩn mình, ban ngày hãy kích động mọi người biểu quyết Tước Đũa bạn!';
-    }
-    if (myAction) {
-      return `✓ Đang Bay Hộ Tống cùng [${myVotedTarget?.name}].`;
-    }
-    return '🌙 Ban Đêm: Chọn 1 đồng đội để sát cánh Bay Hộ Tống né đòn bùa chú!';
+    if (me.role?.id === 'HERMIONE_GRANGER') return '🌙 Chọn phù thủy để Soi Danh Tính';
+    if (me.role?.id === 'ALBUS_DUMBLEDORE') return '🌙 Chọn đồng đội để Dựng Khiên';
+    if (me.role?.id === 'SEVERUS_SNAPE') return '🌙 Chọn người để Bọc Lót Sectumsempra';
+    if (me.role?.id === 'REMUS_LUPIN') return '🌙 Chọn đồng đội để Hồi Sinh';
+    if (me.role?.id === 'KINGSLEY_SHACKLEBOLT') return '🌙 Kích hoạt lưới Ứng Cứu';
+    if (me.role?.id === 'MINERVA_MCGONAGALL') return '🌙 Chọn đồng minh để Hóa Mèo Bọc Lót';
+    if (me.role?.id === 'NEVILLE_LONGBOTTOM') return '🌙 Chọn đồng đội để Thức Tỉnh';
+    if (me.role?.id === 'DOLORES_UMBRIDGE') return '🌙 Chọn phù thủy để Ban Sắc Lệnh';
+    if (me.role?.id === 'JESTER') return '🃏 Ẩn mình ban đêm';
+    if (myAction) return `✓ Đang Hộ Tống: ${myVotedTarget?.name}`;
+    return '🌙 Chọn đồng đội để Bay Hộ Tống';
   };
 
   // Skill definitions and cooldown checks for night
@@ -999,41 +960,41 @@ export function PlayerScreen() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="bg-gradient-to-b from-[#1c1208] to-[#0e0703] border-t-2 border-amber-500/50 rounded-t-3xl p-5 max-w-lg mx-auto w-full shadow-2xl"
+              className="bg-gradient-to-b from-[#0f172a] via-[#0a0f1d] to-[#050811] border-t border-amber-400/40 rounded-t-3xl p-5 max-w-lg mx-auto w-full shadow-2xl backdrop-blur-xl"
               onClick={e => e.stopPropagation()}
             >
               <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
               
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-amber-500/20">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-amber-400/20">
                 <div className="flex items-center gap-2">
                   <Package size={20} className="text-amber-400" />
-                  <h3 className="font-serif font-black text-base text-[#ffd88f]">
-                    Bảo Bối Tiệm Phù Thủy Weasley
+                  <h3 className="font-cinzel font-black text-base text-amber-300">
+                    Bảo Bối Weasley
                   </h3>
                 </div>
-                <button onClick={() => setIsInventoryOpen(false)} className="text-zinc-400 hover:text-white p-1">
+                <button onClick={() => setIsInventoryOpen(false)} className="text-slate-400 hover:text-white p-1">
                   <X size={18} />
                 </button>
               </div>
 
-              <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+              <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
                 {weasleyItems.map(item => (
                   <div 
                     key={item.id}
                     className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
                       item.count > 0 
-                        ? 'bg-black/50 border-amber-500/40 hover:border-amber-400' 
-                        : 'bg-black/20 border-white/5 opacity-40'
+                        ? 'bg-slate-900/80 border-amber-400/30 hover:border-amber-400/60' 
+                        : 'bg-slate-950/40 border-slate-800 opacity-40'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-serif font-bold text-sm text-[#ffd88f]">{item.name}</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                        <span className="font-cinzel font-bold text-sm text-amber-300">{item.name}</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">
                           {item.count}/{item.maxCount}
                         </span>
                       </div>
-                      <p className="text-xs text-zinc-300 font-serif mt-0.5 leading-relaxed">
+                      <p className="text-xs text-slate-300 font-sans mt-0.5 leading-relaxed">
                         {item.description}
                       </p>
                     </div>
@@ -1053,9 +1014,9 @@ export function PlayerScreen() {
                         setIsInventoryOpen(false);
                       }}
                       disabled={isDead || item.count <= 0}
-                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 text-black font-serif font-black text-xs disabled:opacity-40 shrink-0"
+                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:brightness-110 active:scale-95 text-slate-950 font-cinzel font-black text-xs disabled:opacity-40 shrink-0 cursor-pointer shadow-md"
                     >
-                      Dùng Ngay
+                      Dùng
                     </button>
                   </div>
                 ))}
@@ -1082,33 +1043,33 @@ export function PlayerScreen() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="bg-gradient-to-b from-[#140b05] to-black border-t-2 border-amber-500/40 rounded-t-3xl p-5 max-w-lg mx-auto w-full shadow-2xl h-[70vh] flex flex-col"
+              className="bg-gradient-to-b from-[#0f172a] via-[#0a0f1d] to-[#050811] border-t border-amber-400/40 rounded-t-3xl p-5 max-w-lg mx-auto w-full shadow-2xl h-[70vh] flex flex-col backdrop-blur-xl"
               onClick={e => e.stopPropagation()}
             >
               <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
               
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-amber-500/20">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-amber-400/20">
                 <div className="flex items-center gap-2">
                   <ScrollText size={20} className="text-amber-400" />
-                  <h3 className="font-serif font-black text-base text-[#ffd88f]">
-                    Biên Niên Sử Chiến Trường ({gameState.logs.length})
+                  <h3 className="font-cinzel font-black text-base text-amber-300">
+                    Nhật Ký Chiến Trường ({gameState.logs.length})
                   </h3>
                 </div>
-                <button onClick={() => setIsLogOpen(false)} className="text-zinc-400 hover:text-white p-1">
+                <button onClick={() => setIsLogOpen(false)} className="text-slate-400 hover:text-white p-1">
                   <X size={18} />
                 </button>
               </div>
 
               <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
                 {gameState.logs.length === 0 ? (
-                  <p className="text-xs text-zinc-500 font-serif italic py-8 text-center">
-                    Chưa có hành động nào được ghi nhận trên bầu trời.
+                  <p className="text-xs text-slate-500 font-sans italic py-8 text-center">
+                    Chưa có hành động nào được ghi nhận.
                   </p>
                 ) : (
                   gameState.logs.map((log, idx) => (
                     <div 
                       key={`player-log-${idx}`}
-                      className="text-xs p-3 rounded-xl bg-black/60 border border-white/10 text-zinc-200 font-serif leading-relaxed"
+                      className="text-xs p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-200 font-sans leading-relaxed"
                     >
                       {log}
                     </div>

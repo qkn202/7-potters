@@ -86,57 +86,65 @@ body {
   font-family: "Cinzel Decorative", var(--font-playfair), Georgia, serif;
 }
 
-/* ================= HPVN & FLOO AUTHENTIC THEME CLASSES ================= */
+/* ================= HPVN & FLOO AUTHENTIC THEME CLASSES (MIDNIGHT CELESTIAL & GILDED GOLD) ================= */
 
-/* The signature HPVN Shoutbox / Header Bar */
+/* The signature HPVN Header Bar */
 .hpvn-header-banner {
-  background: linear-gradient(180deg, #5c3f1f 0%, #2b170c 100%);
-  border-top: 1px solid #ebdcb0;
-  border-bottom: 2.5px double #bd8436;
+  background: linear-gradient(180deg, rgba(14, 24, 40, 0.95) 0%, rgba(8, 14, 25, 0.98) 100%);
+  border-top: 1px solid rgba(254, 240, 138, 0.35);
+  border-bottom: 2px solid rgba(212, 175, 55, 0.6);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
 }
 
-/* The signature HPVN Wood Carved Panel */
+/* The signature Midnight Slate Glass Panels */
 .hpvn-panel {
-  background: linear-gradient(175deg, #24150c 0%, #1a0e07 60%, #120803 100%);
-  border: 1.5px solid #7a5229;
+  background: linear-gradient(175deg, rgba(13, 22, 36, 0.96) 0%, rgba(7, 12, 22, 0.98) 100%);
+  border: 1.5px solid rgba(45, 75, 115, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
 .hpvn-panel-gold {
-  background: linear-gradient(175deg, #28180e 0%, #1c1008 60%, #140a04 100%);
-  border: 2px solid #bd8436;
+  background: linear-gradient(175deg, rgba(15, 25, 42, 0.96) 0%, rgba(8, 14, 25, 0.98) 100%);
+  border: 2px solid #d4af37;
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.2), 0 15px 40px rgba(0, 0, 0, 0.9);
 }
 
 .hpvn-panel-emerald {
-  background: linear-gradient(175deg, #0f261c 0%, #091711 60%, #050d0a 100%);
+  background: linear-gradient(175deg, rgba(7, 30, 22, 0.96) 0%, rgba(4, 18, 13, 0.98) 100%);
   border: 2px solid #10b981;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2), 0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
 .hpvn-panel-crimson {
-  background: linear-gradient(175deg, #2c0e0e 0%, #1c0808 60%, #0f0404 100%);
+  background: linear-gradient(175deg, rgba(38, 12, 12, 0.96) 0%, rgba(20, 6, 6, 0.98) 100%);
   border: 2px solid #dc2626;
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.2), 0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
 /* Aged Parchment */
 .hpvn-parchment {
   background: #f7efdc;
-  color: #2c1a0e;
-  border: 1.5px solid #8c622e;
+  color: #1a1a2e;
+  border: 1.5px solid #d4af37;
 }
 
-/* Button variants matching HPVN & Floo */
+/* Button variants matching Midnight & Gilded Gold */
 .hpvn-btn-gold {
-  background: linear-gradient(180deg, #7a5229 0%, #462c14 100%);
-  border-top: 1px solid #ebdcb0;
-  border-bottom: 2px solid #281708;
-  border-left: 1px solid #8c622e;
-  border-right: 1px solid #8c622e;
-  color: #ffd88f;
+  background: linear-gradient(180deg, #fef08a 0%, #d4af37 40%, #854d0e 100%);
+  border-top: 1px solid #fffbeb;
+  border-bottom: 2px solid #3d2403;
+  border-left: 1px solid #b45309;
+  border-right: 1px solid #b45309;
+  color: #0b1320;
+  font-weight: 800;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
 }
 
 .hpvn-btn-gold:hover {
-  background: linear-gradient(180deg, #8c622e 0%, #5c3919 100%);
-  color: #fff4d1;
+  background: linear-gradient(180deg, #ffffff 0%, #fef08a 40%, #b45309 100%);
+  color: #050a14;
+  box-shadow: 0 0 15px rgba(254, 240, 138, 0.6);
 }
 
 .hpvn-btn-floo {
@@ -215,37 +223,41 @@ body {
   animation: pulse-glow-phoenix 2.2s infinite;
 }
 
-/* ================= ZERO SHADOW SYSTEM ================= */
-/* User requirement: Remove all shadow effects in design UI/UX */
-*, *::before, *::after {
-  box-shadow: none !important;
-  text-shadow: none !important;
-  --tw-shadow: 0 0 #0000 !important;
-  --tw-shadow-colored: 0 0 #0000 !important;
+/* ================= UNIFIED ARCANE LIGHTING & UTILITIES ================= */
+.arcane-glow-gold {
+  box-shadow: 0 0 20px rgba(245, 197, 66, 0.25), inset 0 0 12px rgba(245, 197, 66, 0.15);
 }
 
-[class*="drop-shadow"] {
-  filter: none !important;
+.arcane-glow-cyan {
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.25), inset 0 0 12px rgba(56, 189, 248, 0.15);
 }
 
-/* Custom Boardgame Scrollbar */
+.arcane-card-glass {
+  background: linear-gradient(180deg, rgba(16, 24, 40, 0.85) 0%, rgba(8, 14, 25, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(245, 197, 66, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* Custom Sleek Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(18, 9, 4, 0.8);
+  background: rgba(8, 14, 25, 0.8);
   border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #7a5229;
+  background: rgba(212, 175, 55, 0.4);
   border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #bd8436;
+  background: rgba(245, 197, 66, 0.8);
 }
 
 /* Hide scrollbars for horizontal chip bars */

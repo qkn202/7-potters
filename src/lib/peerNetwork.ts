@@ -13,6 +13,7 @@ export class SevenPottersNetwork {
   private hostDisconnectedAt: number | null = null;
   private hostDisconnectTimer: any = null;
   private heartbeatInterval: any = null;
+  public lastMessageReceivedAt: number = Date.now();
 
   public onMessageReceived?: (msg: NetworkMessage) => void;
   public onConnectionStatusChange?: (status: 'CONNECTING' | 'CONNECTED' | 'DISCONNECTED' | 'ERROR', errorMsg?: string) => void;
@@ -34,8 +35,11 @@ export class SevenPottersNetwork {
   public isSocketHealthy(): boolean {
     if (!this.channel) return false;
     const isJoined = this.channel.state === 'joined';
-    const isSocketConnected = (this.supabase as any)?.realtime?.isConnected?.() ?? true;
-    return isJoined && isSocketConnected;
+    const realtime = (this.supabase as any)?.realtime;
+    // Check underlying WebSocket readyState (1 = WebSocket.OPEN)
+    const isSocketOpen = realtime?.conn ? realtime.conn.readyState === 1 : true;
+    const isSocketConnected = typeof realtime?.isConnected === 'function' ? realtime.isConnected() : true;
+    return isJoined && isSocketOpen && isSocketConnected;
   }
 
   private checkIsHostInPresence(): boolean {
@@ -362,7 +366,7 @@ export class SevenPottersNetwork {
     }
   }
 
-  public async reconnectClient(roomCode: string, player: Player): Promise<boolean> {
+  public async reconnectClient(roomCode: string, player: Player, force: boolean = false): Promise<boolean> {
     if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
       return false;
     }
@@ -370,9 +374,9 @@ export class SevenPottersNetwork {
     this.roomCode = roomCode.toUpperCase();
     this.myPlayerId = player.id;
 
-    console.log('[7-Potters Client] Reconnecting client to room:', this.roomCode);
+    console.log('[7-Potters Client] Reconnecting client to room:', this.roomCode, { force });
 
-    if (this.channel && this.channel.state === 'joined' && this.isSocketHealthy()) {
+    if (!force && this.channel && this.channel.state === 'joined' && this.isSocketHealthy()) {
       this.channel.track({
         id: this.myPlayerId,
         name: player.name,
@@ -381,7 +385,7 @@ export class SevenPottersNetwork {
         onlineAt: Date.now(),
       }).catch(() => {});
 
-      this.sendToHost({
+      await this.sendToHost({
         type: 'JOIN_REQUEST',
         senderId: this.myPlayerId,
         payload: player,
@@ -407,68 +411,107 @@ export class SevenPottersNetwork {
     this.broadcast(msg);
   }
 
-  public sendToHost(msg: NetworkMessage): void {
-    this.broadcast(msg);
+  public async sendToHost(msg: NetworkMessage): Promise<boolean> {
+    return this.broadcast(msg);
   }
 
-  public sendAction(actionName: string, targetId: string): void {
-    this.sendToHost({
+  public async sendAction(actionName: string, targetId: string): Promise<boolean> {
+    return this.sendToHost({
       type: 'ACTION_SUBMIT',
       senderId: this.myPlayerId,
       payload: { actionName, targetId },
     });
   }
 
-  public sendInstantSkill(actionName: string, targetId: string): void {
-    this.sendToHost({
+  public async sendActionRejected(targetId: string, reason: string): Promise<boolean> {
+    return this.sendToHost({
+      type: 'ACTION_REJECTED',
+      senderId: this.myPlayerId,
+      payload: { targetId, reason },
+    });
+  }
+
+  public async requestStateSync(): Promise<boolean> {
+    return this.sendToHost({
+      type: 'REQUEST_STATE_SYNC',
+      senderId: this.myPlayerId,
+      payload: {},
+    });
+  }
+
+  public async sendInstantSkill(actionName: string, targetId: string): Promise<boolean> {
+    return this.sendToHost({
       type: 'INSTANT_SKILL_SUBMIT',
       senderId: this.myPlayerId,
       payload: { actionName, targetId },
     });
   }
 
-  public sendInterruptChoice(choiceId: string): void {
-    this.sendToHost({
+  public async sendInterruptChoice(choiceId: string): Promise<boolean> {
+    return this.sendToHost({
       type: 'INTERRUPT_CHOICE_SUBMIT',
       senderId: this.myPlayerId,
       payload: { choiceId },
     });
   }
 
-  public sendPlayerLeft(): void {
-    this.sendToHost({
+  public async sendPlayerLeft(): Promise<boolean> {
+    return this.sendToHost({
       type: 'PLAYER_LEFT',
       senderId: this.myPlayerId,
       payload: { playerId: this.myPlayerId },
     });
   }
 
-  public sendKickPlayer(targetId: string): void {
-    this.broadcast({
+  public async sendKickPlayer(targetId: string): Promise<boolean> {
+    return this.broadcast({
       type: 'KICK_PLAYER',
       senderId: this.myPlayerId,
       payload: { targetId },
     });
   }
 
-  public sendWeasleyItem(itemId: string, targetId?: string): void {
-    this.sendToHost({
+  public async sendWeasleyItem(itemId: string, targetId?: string): Promise<boolean> {
+    return this.sendToHost({
       type: 'USE_WEASLEY_ITEM',
       senderId: this.myPlayerId,
       payload: { itemId, targetId },
     });
   }
 
-  public broadcast(msg: NetworkMessage): void {
-    if (!this.channel) return;
-    this.channel.send({
-      type: 'broadcast',
-      event: 'game_message',
-      payload: msg,
-    });
+  public async broadcast(msg: NetworkMessage): Promise<boolean> {
+    if (!this.channel) {
+      console.warn('[7-Potters] Broadcast failed: channel is null for', msg.type);
+      return false;
+    }
+    try {
+      const res = await this.channel.send({
+        type: 'broadcast',
+        event: 'game_message',
+        payload: msg,
+      });
+      if (res === 'ok') {
+        return true;
+      }
+      console.warn(`[7-Potters] Broadcast returned status "${res}" for ${msg.type}. Retrying once in 200ms...`);
+      await new Promise(r => setTimeout(r, 200));
+      if (this.channel) {
+        const retryRes = await this.channel.send({
+          type: 'broadcast',
+          event: 'game_message',
+          payload: msg,
+        });
+        return retryRes === 'ok';
+      }
+      return false;
+    } catch (err) {
+      console.error(`[7-Potters] Broadcast exception for ${msg.type}:`, err);
+      return false;
+    }
   }
 
   private handleIncomingMessage(msg: NetworkMessage) {
+    this.lastMessageReceivedAt = Date.now();
     if (msg?.type === 'PING') {
       if (this.hostDisconnectTimer) {
         clearTimeout(this.hostDisconnectTimer);

@@ -928,6 +928,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   // Lobby presence eviction timers: 10s grace period for presence drop in LOBBY
   const evictionTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
+  // Player ID alias map for seamless reconnects and target resolution
+  const idAliasMapRef = useRef<Record<string, string>>({});
 
   const sanitizePlayers = (players: any[]): Player[] => {
     if (!Array.isArray(players)) return [];
@@ -983,10 +985,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   // Core Action Execution (used locally and on Host receiving Network messages)
   const executePlayerActionCore = useCallback((actorId: string, actionName: string, targetId: string) => {
     updateState(prev => {
-      const me = prev.players.find(p => p.id === actorId);
+      const effectiveActorId = idAliasMapRef.current[actorId] || actorId;
+      const me = prev.players.find(p => p.id === effectiveActorId || p.id === actorId);
       if (!me || me.status === 'DEAD' || me.isGM) return prev;
-      const target = (targetId === 'ALL' || targetId === 'NONE') ? null : prev.players.find(p => p.id === targetId);
-      if (targetId !== 'ALL' && targetId !== 'NONE' && !target) return prev;
+
+      const effectiveTargetId = (targetId === 'ALL' || targetId === 'NONE') 
+        ? targetId 
+        : (idAliasMapRef.current[targetId] || targetId);
+      const target = (effectiveTargetId === 'ALL' || effectiveTargetId === 'NONE') 
+        ? null 
+        : prev.players.find(p => p.id === effectiveTargetId || p.id === targetId);
+      if (effectiveTargetId !== 'ALL' && effectiveTargetId !== 'NONE' && !target) return prev;
       
       // Check if actor is silenced by stray Sectumsempra (Kingsley immune)
       const isSectumSilenced = Boolean(prev.skillStates[`${actorId}_SECTUMSEMPRA_SILENCED_R${prev.round}`]);
@@ -1085,7 +1094,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ...prev,
         pendingActions: {
           ...prev.pendingActions,
-          [me.id]: { actionName, targetId }
+          [me.id]: { actionName: normalizedAction, targetId: effectiveTargetId }
         },
         escortPairs: newEscortPairs,
         logs: [...prev.logs, logMessage],
@@ -1097,8 +1106,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const executeInstantSkillCore = useCallback((actorId: string, actionName: string, targetId: string): string | void => {
     const curState = stateRef.current;
     if (curState.phase === 'END') return 'Trò chơi đã kết thúc!';
-    const me = curState.players.find(p => p.id === actorId);
-    const target = curState.players.find(p => p.id === targetId);
+    const effectiveActorId = idAliasMapRef.current[actorId] || actorId;
+    const me = curState.players.find(p => p.id === effectiveActorId || p.id === actorId);
+    const effectiveTargetId = idAliasMapRef.current[targetId] || targetId;
+    const target = curState.players.find(p => p.id === effectiveTargetId || p.id === targetId);
     if (!me || !target) return;
     if (me.status === 'DEAD') return 'Bạn đã tử trận, không thể sử dụng kỹ năng!';
 
@@ -1671,6 +1682,34 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
                 previousRoleId: reqPlayer.previousRoleId || oldP.previousRoleId,
               };
               logMsg = `Hệ thống: ${reqPlayer.name} đã kết nối lại vào phòng.`;
+
+              const nextPending = { ...prev.pendingActions };
+              if (oldP.id !== reqPlayer.id) {
+                idAliasMapRef.current[oldP.id] = reqPlayer.id;
+
+                if (nextPending[oldP.id]) {
+                  nextPending[reqPlayer.id] = nextPending[oldP.id];
+                  delete nextPending[oldP.id];
+                }
+
+                Object.keys(nextPending).forEach(actorKey => {
+                  if (nextPending[actorKey].targetId === oldP.id) {
+                    nextPending[actorKey] = {
+                      ...nextPending[actorKey],
+                      targetId: reqPlayer.id,
+                    };
+                  }
+                });
+              }
+
+              return {
+                ...prev,
+                players: nextPlayers,
+                pendingActions: nextPending,
+                roleHistory: nextRoleHistory,
+                previousRoleMap: nextPreviousRoleMap,
+                logs: [...prev.logs, logMsg],
+              };
             } else {
               // New player
               nextPlayers.push(reqPlayer);
@@ -1694,7 +1733,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           const { actionName, targetId } = msg.payload || {};
           if (actionName && targetId) {
             const skillResult = executeInstantSkillCore(msg.senderId, actionName, targetId);
-            if (skillResult && netRef.current) {
+            if (skillResult && netRef.current && isHostRef.current) {
               netRef.current.broadcast({
                 type: 'INSTANT_SKILL_RESULT',
                 senderId: netRef.current.myPlayerId,
@@ -1714,7 +1753,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           const { itemId, targetId } = msg.payload || {};
           if (itemId) {
             const itemResult = executeWeasleyItemCore(msg.senderId, itemId, targetId);
-            if (itemResult && netRef.current) {
+            if (itemResult && netRef.current && isHostRef.current) {
               netRef.current.broadcast({
                 type: 'INSTANT_SKILL_RESULT',
                 senderId: netRef.current.myPlayerId,
@@ -1753,6 +1792,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
               logs: [...prev.logs, `Hệ thống: ${target.name} đã ngắt kết nối.`],
             };
           });
+        } else if (msg.type === 'REQUEST_STATE_SYNC') {
+          // Client requests full state sync (e.g., after reconnection)
+          if (isHostRef.current && netRef.current) {
+            netRef.current.broadcastRoomState(stateRef.current);
+          }
         }
       } else {
         // CLIENT MESSAGE HANDLING
@@ -1816,6 +1860,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         } else if (msg.type === 'HOST_RECONNECTED') {
           setHostDisconnectedAt(null);
           setDisconnectCountdown(null);
+          // Request full state sync after host reconnection
+          if (netRef.current) {
+            netRef.current.requestStateSync();
+          }
+        } else if (msg.type === 'ACTION_REJECTED') {
+          // Server rejected an action, show reason to player
+          const { reason, targetId } = msg.payload || {};
+          if (reason) {
+            setSkillToast(`⚠️ ${reason}`);
+          }
         }
       }
     };
@@ -1951,10 +2005,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           net.broadcastRoomState(stateRef.current);
         } else {
           const isHealthy = net.isSocketHealthy();
-          if (!isHealthy) {
-            console.log('[7-Potters Client] Socket unhealthy after resume. Performing full reconnection...');
+          const isRecent = (Date.now() - net.lastMessageReceivedAt) < 25000;
+          if (!isHealthy || !isRecent) {
+            console.log('[7-Potters Client] Socket unhealthy or stale after resume. Performing fresh reconnection...');
             setConnStatus('connecting');
-            const ok = await net.reconnectClient(code, me);
+            const ok = await net.reconnectClient(code, me, true);
             if (ok) {
               setConnStatus('connected');
               setErrorMsg(null);
@@ -1964,12 +2019,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
               setConnStatus('disconnected');
             }
           } else {
-            // Socket still open: request latest state from Host
-            net.sendToHost({
+            // Socket still open: re-announce presence and request latest state from Host
+            await net.sendToHost({
               type: 'JOIN_REQUEST',
               senderId: myId,
               payload: me,
             });
+            net.requestStateSync();
           }
         }
       }
@@ -2765,11 +2821,81 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   /**
    * Player Action: if client in multiplayer, forwards to Host. Otherwise executes locally.
+   * Client-side validation before sending to prevent wasted network calls.
    */
   const playerAction = (actionName: string, targetId: string) => {
+    let me = stateRef.current.players.find(p => p.id === currentPlayerId);
+    if (!me && currentPlayerId) {
+      const savedName = getStorageItem('seven-potters-player-name');
+      const myDeviceId = getOrCreateDeviceId();
+      me = stateRef.current.players.find(p => 
+        (p.deviceId && p.deviceId === myDeviceId) ||
+        (savedName && p.name.trim().toLowerCase() === savedName.trim().toLowerCase())
+      );
+      if (me) {
+        setCurrentPlayerId(me.id);
+        currentPlayerIdRef.current = me.id;
+      }
+    }
+
+    if (!me) {
+      console.warn('[7-Potters] playerAction: Player not found in state', { currentPlayerId, actionName, targetId });
+      setSkillToast('⚠️ Đang đồng bộ thông tin phòng, vui lòng bấm lại sau 1 giây...');
+      if (netRef.current) {
+        netRef.current.requestStateSync();
+      }
+      return;
+    }
+
+    // Client-side validation before sending
+    const isVoteActionCheck = isVoteAction(actionName);
+    const isSilenced = Boolean(stateRef.current.skillStates[`${me.id}_SECTUMSEMPRA_SILENCED_R${stateRef.current.round}`]) ||
+                       Boolean(stateRef.current.skillStates[`${me.id}_FRED_CANDY_R${stateRef.current.round}`]) ||
+                       Boolean(stateRef.current.skillStates[`${me.id}_POTTERFAKE_SILENCED_R${stateRef.current.round}`]);
+    const isKingsley = me.role?.id === 'KINGSLEY_SHACKLEBOLT';
+
+    // Check vote permission
+    if (isVoteActionCheck && isSilenced && !isKingsley) {
+      const reason = stateRef.current.skillStates[`${me.id}_FRED_CANDY_R${stateRef.current.round}`]
+        ? 'Bạn đang ngất xỉu do Kẹo Ngất Xỉu!'
+        : stateRef.current.skillStates[`${me.id}_VOTE_SILENCED_R${stateRef.current.round}`]
+        ? 'Bạn đang bị phong ấn bởi Peter Pettigrew!'
+        : 'Bạn đang bị SILENCED và không thể bỏ phiếu!';
+      setSkillToast(`⚠️ ${reason}`);
+      return;
+    }
+
+    // Check dead
+    if (me.status === 'DEAD') {
+      setSkillToast('⚠️ Bạn đã tử trận, không thể thực hiện hành động!');
+      return;
+    }
+
     if (netRef.current && !isHostRef.current) {
-      // Client: Send action to Host only, Host will execute and broadcast result
-      netRef.current.sendAction(actionName, targetId);
+      // Client: Send action to Host with transmission check and automatic retry
+      setSkillToast('⏳ Đang gửi hành động đến Merlin...');
+      netRef.current.sendAction(actionName, targetId).then(ok => {
+        if (ok) {
+          setSkillToast('⏳ Đang chờ Merlin xác nhận...');
+        } else {
+          setSkillToast('⚠️ Mạng chập chờn! Đang kết nối lại và gửi lại...');
+          if (roomCodeRef.current && me) {
+            netRef.current?.reconnectClient(roomCodeRef.current, me, true).then(reconnected => {
+              if (reconnected && netRef.current) {
+                netRef.current.sendAction(actionName, targetId).then(reOk => {
+                  if (reOk) {
+                    setSkillToast('✓ Đã kết nối lại và gửi hành động thành công!');
+                  } else {
+                    setSkillToast('❌ Không thể gửi hành động. Vui lòng kiểm tra lại mạng 4G/Wifi!');
+                  }
+                });
+              } else {
+                setSkillToast('❌ Mất kết nối tới phòng. Vui lòng kiểm tra lại mạng 4G/Wifi!');
+              }
+            });
+          }
+        }
+      });
       return;
     }
 

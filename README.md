@@ -246,25 +246,35 @@ Khắc phục triệt để hiện tượng người chơi bị bắt làm Tử 
 
 ---
 
-### 🐛 15. Sửa Lỗi Game Logic P0/P1 (Bug Fixes)
+### 🐛 15. Sửa Lỗi Game Logic & Multiplayer (Bug Fixes)
 
-Đã thực hiện audit và sửa các lỗi logic nghiêm trọng trong `GameContext.tsx`:
+Đã thực hiện audit toàn diện và sửa các lỗi trong `GameContext.tsx` và `peerNetwork.ts`.
 
-#### P0 - Lỗi Nghiêm Trọng (Ngay lập tức)
+#### P0 - Lỗi Nghiêm Trọng Game Logic (Ngay lập tức)
 
 | ID | Mô tả | Fix |
 |:---|:---|:---|
 | **P0-1** | George Peru Darkness không hoạt động | Thêm check `GLOBAL_SULK_R${round}` trước kill resolution. George dùng `GLOBAL_SULK` nhưng resolution check `PERUVIAN_DARKNESS` → không khớp |
 | **P0-2** | Fred/George/Bill/Fleur thiếu phase validation | Đã xác nhận: Tất cả 4 nhân vật đã có `if (curState.phase !== 'NIGHT')` validation ✅ |
 
-#### P1 - Lỗi Quan Trọng (Ưu tiên cao)
+#### P1 - Lỗi Quan Trọng Game Logic
 
 | ID | Mô tả | Fix |
 |:---|:---|:---|
 | **P1-1** | Self-target validation: Dumbledore protect self, Snape shield self, Lupin revive self | Thêm validation tại `executePlayerActionCore`, `executeInstantSkillCore`, và `consumeWeasleyItem` |
 | **P1-2** | Vote re-submit không có warning | Thêm toast warning khi đổi phiếu vote |
 | **P1-canVote** | Không enforce `canVote` permission | Thêm validation ngăn silenced/fainted voters bỏ phiếu tại thời điểm submit |
+
+#### P2 - Lỗi Multiplayer Online
+
+| ID | Mô tả | Fix |
+|:---|:---|:---|
 | **P2-1** | Client execute cả cục bộ lẫn gửi Host → double execution | Sửa `playerAction`: Client chỉ gửi đến Host, không execute cục bộ |
+| **P2-2** | Action/vote không sync: Host nhận action nhưng client không cập nhật | Thêm `broadcastRoomState` sau khi Host xử lý action; Dùng `stateRef.current` thay vì `gameState` (tránh stale closure) |
+| **P2-3** | Client không có feedback khi action bị reject | Thêm `ACTION_REJECTED` message type; Client hiển thị toast với lý do reject |
+| **P2-4** | Client không sync lại sau khi Host reconnect | Thêm `REQUEST_STATE_SYNC` message type; Client tự request sync khi nhận `HOST_RECONNECTED` |
+| **P2-5** | Thiếu client-side validation trước khi gửi action | Thêm validation trong `playerAction` để UX tốt hơn, giảm network waste |
+| **P2-6** | INSTANT_SKILL_SUBMIT chỉ broadcast khi thành công | Sửa: Luôn broadcast state sau skill execution (success hay fail) |
 
 ---
 

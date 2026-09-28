@@ -43,6 +43,7 @@ export interface Player {
   abilities: {
     ronSacrificeUsed: boolean;
     goldenFlameUsed: boolean;
+    kingsleySaveUsed: boolean;
     snapeBladeActive: boolean;
     lupinPotionUsed: boolean;
     moodyBulletUsed: boolean;
@@ -131,6 +132,7 @@ export interface HPVNGameSettings {
   enableChaosEvents: boolean;
   darkPactProtection: boolean;
   minRounds: number;
+  isMerlin?: boolean;
 }
 
 export const HPVN_BALANCE: Record<number, { hph: number; fourT: number; neutral: number; minRounds: number }> = {
@@ -613,6 +615,7 @@ export class HPVNGameEngine {
       abilities: {
         ronSacrificeUsed: false,
         goldenFlameUsed: false,
+        kingsleySaveUsed: false,
         snapeBladeActive: false,
         lupinPotionUsed: false,
         moodyBulletUsed: false,
@@ -724,19 +727,20 @@ export class HPVNGameEngine {
     }
   }
 
-  // Process night phase
+  // Process night phase: transitions to CHAOS_EVENT or DEATH_RESOLUTION
   processNightPhase(): void {
-    this.state.phase = 'CHAOS_EVENT';
-    this.addLog('Night actions collected', 'NIGHT');
+    this.addLog('Màn đêm khép lại, các phù thủy thu hồi bùa chú ma thuật.', 'NIGHT');
 
-    // Check for chaos events
     if (this.state.enableChaosEvents) {
-      this.processChaosEvent();
+      this.state.phase = 'CHAOS_EVENT';
+      this.triggerChaosEvent();
+    } else {
+      this.processDeathResolution();
     }
   }
 
-  // Chaos event
-  private processChaosEvent(): void {
+  // Trigger chaos event during CHAOS_EVENT phase
+  triggerChaosEvent(): void {
     const roll = Math.random();
     let cumulative = 0;
 
@@ -744,15 +748,11 @@ export class HPVNGameEngine {
       cumulative += event.probability;
       if (roll < cumulative) {
         this.state.currentEvent = event;
-        this.addLog(`🎲 CHAOS EVENT: ${event.description}`, 'CHAOS_EVENT');
-
-        // Apply event effects
+        this.addLog(`🎲 BIẾN CỐ BẦU TRỜI: ${event.name} - ${event.description}`, 'CHAOS_EVENT');
         this.applyChaosEvent(event);
         break;
       }
     }
-
-    this.state.phase = 'DEATH_RESOLUTION';
   }
 
   private applyChaosEvent(event: ChaosEvent): void {
@@ -765,36 +765,46 @@ export class HPVNGameEngine {
       case 'SHIELD':
         this.state.protectedThisRound.push(randomPlayer.id);
         randomPlayer.isProtected = true;
+        this.addLog(`🛡️ Bùa Hộ Mệnh giáng xuống che chở cho ${randomPlayer.name}!`, 'CHAOS_EVENT');
         break;
       case 'SILENCE':
         randomPlayer.isSilenced = true;
-        this.addLog(`🔇 ${randomPlayer.name} bị nguyền rủa - mất quyền vote!`, 'CHAOS_EVENT');
+        this.addLog(`🔇 ${randomPlayer.name} bị Lời Nguyền Câm Lặng - mất quyền biểu quyết!`, 'CHAOS_EVENT');
         break;
       case 'INFO':
-        // Info effect handled separately
-        this.addLog(`👁️ ${randomPlayer.name} nhận được thị kiến...`, 'CHAOS_EVENT');
+        this.addLog(`👁️ ${randomPlayer.name} nhận được điềm báo thiên nhãn...`, 'CHAOS_EVENT');
         break;
     }
   }
 
   // Death resolution
   processDeathResolution(): void {
+    this.state.phase = 'DEATH_RESOLUTION';
     this.state.deaths = [];
 
-    // Process 4T kill
-    const fourTActions = this.state.nightActions.filter(a => a.actionType === 'KILL');
-    if (fourTActions.length > 0 && !this.state.protectedThisRound.includes(fourTActions[0].targetId || '')) {
-      this.processKill(fourTActions[0].targetId!, 'KILL', fourTActions[0].playerId);
+    // 1. Collect all protection actions from night actions (e.g. Dumbledore, McGonagall)
+    const protectActions = this.state.nightActions.filter(a => a.actionType === 'PROTECT' && a.targetId);
+    for (const pa of protectActions) {
+      if (pa.targetId && !this.state.protectedThisRound.includes(pa.targetId)) {
+        this.state.protectedThisRound.push(pa.targetId);
+        const p = this.state.players.find(x => x.id === pa.targetId);
+        if (p) p.isProtected = true;
+      }
     }
 
-    // Check protected
-    // Check golden flame
-    // Check Ron sacrifice
-    // Check Kingsley save
-    // Check McGonagall seal
+    // 2. Process night kills
+    const fourTActions = this.state.nightActions.filter(a => a.actionType === 'KILL' && a.targetId);
+    if (fourTActions.length > 0) {
+      const primaryKill = fourTActions[0];
+      if (primaryKill.targetId) {
+        this.processKill(primaryKill.targetId, 'KILL', primaryKill.playerId);
+      }
+    } else {
+      this.addLog('🌙 Đêm nay Hogwarts bình yên, không ai bị Tử Thần Thực Tử tấn công.', 'DEATH_RESOLUTION');
+    }
 
     this.updateFactionCounts();
-    this.state.phase = 'GHOST_REVELATION';
+    this.checkWinCondition(false);
   }
 
   private processKill(targetId: string, reason: Death['reason'], killerId: string): void {
@@ -802,15 +812,15 @@ export class HPVNGameEngine {
     if (!target || target.status !== 'ALIVE') return;
 
     // Check protection layers
-    if (target.isProtected) {
-      this.addLog(`🛡️ ${target.name} được bảo vệ!`, 'DEATH_RESOLUTION');
+    if (target.isProtected || this.state.protectedThisRound.includes(target.id)) {
+      this.addLog(`🛡️ ${target.name} đã được bùa hộ thân bảo vệ thành công!`, 'DEATH_RESOLUTION');
       return;
     }
 
     // Check Golden Flame (Harry)
     if (target.role?.id === 'HARRY_POTTER' && !target.abilities.goldenFlameUsed) {
       target.abilities.goldenFlameUsed = true;
-      this.addLog(`🔥 TIA LỬA VÀNG cứu Harry!`, 'DEATH_RESOLUTION');
+      this.addLog(`🔥 TIA LỬA VÀNG bùng cháy dữ dội đẩy lùi lời nguyền, cứu sống Harry Potter!`, 'DEATH_RESOLUTION');
       return;
     }
 
@@ -821,39 +831,52 @@ export class HPVNGameEngine {
         ron.abilities.ronSacrificeUsed = true;
         ron.status = 'DEAD';
         this.state.deaths.push({ playerId: ron.id, reason: 'SACRIFICE', killerId: killerId });
-        this.addLog(`💀 Ron hy sinh thay Harry!`, 'DEATH_RESOLUTION');
+        this.addLog(`💀 Ron Weasley dũng cảm xả thân cứu Harry Potter!`, 'DEATH_RESOLUTION');
+        if (this.state.enableGhostVoting) {
+          ron.status = 'GHOST';
+          this.state.ghosts.push(ron.id);
+        }
+        return; // Harry survives!
       }
     }
 
-    // Check Kingsley save
+    // Check Kingsley save (1 time)
     const kingsley = this.state.players.find(p => p.role?.id === 'KINGSLEY' && p.status === 'ALIVE');
-    if (kingsley && target.faction === 'ORDER_OF_PHOENIX') {
-      this.addLog(`🛡️ Kingsley cứu ${target.name}!`, 'DEATH_RESOLUTION');
+    if (kingsley && !kingsley.abilities.kingsleySaveUsed && target.faction === 'ORDER_OF_PHOENIX') {
+      kingsley.abilities.kingsleySaveUsed = true;
+      this.addLog(`🛡️ Thần Sáng Kingsley Shacklebolt kịp thời giải cứu ${target.name}!`, 'DEATH_RESOLUTION');
       return;
     }
 
     // Check McGonagall seal
     if (target.abilities.mcGonagallSealRounds > 0) {
-      this.addLog(`🔒 ${target.name} bị phong ấn - không thể chết!`, 'DEATH_RESOLUTION');
+      this.addLog(`🔒 ${target.name} đang bị phong ấn ma thuật - đòn tấn công vô hiệu!`, 'DEATH_RESOLUTION');
       return;
     }
 
     // Kill target
     target.status = 'DEAD';
     this.state.deaths.push({ playerId: targetId, reason, killerId });
-    this.addLog(`💀 ${target.name} chết (${reason})`, 'DEATH_RESOLUTION');
+    this.addLog(`💀 ${target.name} đã tử trận (${reason === 'VOTE' ? 'Biểu Quyết Tước Đũa' : 'Lời Nguyền Chết Chóc Ban Đêm'})!`, 'DEATH_RESOLUTION');
 
     // Ghost conversion
     if (this.state.enableGhostVoting) {
       target.status = 'GHOST';
       this.state.ghosts.push(targetId);
+      this.addLog(`👻 Linh hồn ${target.name} hóa thành hồn ma tiếp tục biểu quyết!`, 'DEATH_RESOLUTION');
     }
+  }
+
+  // Ghost phase
+  processGhostPhase(): void {
+    this.state.phase = 'GHOST_REVELATION';
+    this.addLog('👻 Linh hồn các phù thủy đã hy sinh thức tỉnh, chuẩn bị 0.5 quyền biểu quyết.', 'GHOST_REVELATION');
   }
 
   // Vote phase
   processVotePhase(): void {
     this.state.phase = 'VOTE';
-    this.addLog('Day vote begins', 'VOTE');
+    this.addLog('☀️ Hội đồng Hogwarts tập hợp, bắt đầu phiên thảo luận & biểu quyết tước đũa.', 'VOTE');
   }
 
   submitVote(playerId: string, targetId: string): void {
@@ -867,12 +890,28 @@ export class HPVNGameEngine {
     const isGhost = player.status === 'GHOST';
     const votePower = isGhost ? 0.5 : 1;
 
-    this.state.votes.push({
-      playerId,
-      targetId,
-      isGhostVote: isGhost,
-      power: votePower,
-    });
+    // Replace existing vote if any
+    const existingIdx = this.state.votes.findIndex(v => v.playerId === playerId);
+    if (existingIdx >= 0) {
+      const prevVote = this.state.votes[existingIdx];
+      if (prevVote.targetId !== 'NONE') {
+        const prevTarget = this.state.players.find(p => p.id === prevVote.targetId);
+        if (prevTarget) prevTarget.voteCount = Math.max(0, prevTarget.voteCount - prevVote.power);
+      }
+      this.state.votes[existingIdx] = {
+        playerId,
+        targetId,
+        isGhostVote: isGhost,
+        power: votePower,
+      };
+    } else {
+      this.state.votes.push({
+        playerId,
+        targetId,
+        isGhostVote: isGhost,
+        power: votePower,
+      });
+    }
 
     player.hasVoted = true;
 
@@ -906,64 +945,76 @@ export class HPVNGameEngine {
         // Jester win condition
         if (lynched.role?.id === 'JESTER') {
           this.state.winners = ['JESTER'];
-          this.addLog(`🎭 JESTER THẮNG! Bị vote treo cổ!`, 'GAME_OVER');
+          this.addLog(`🎭 KẺ HỀ MA QUÁI THẮNG! Đã dụ dỗ hội đồng tước đũa thành công!`, 'GAME_OVER');
           this.state.phase = 'GAME_OVER';
           return;
         }
 
         // Bellatrix revenge
         if (lynched.role?.id === 'BELLATRIX') {
-          // Extra kill from Voldemort
-          this.addLog(`🗡️ Bellatrix báo thù! Voldemort được +1 kill!`, 'VOTE');
+          this.addLog(`🗡️ Bellatrix gầm thét báo thù trước khi bị trục xuất!`, 'VOTE');
         }
 
         // Process death
         this.processKill(lynchedId, 'VOTE', 'VOTE');
       }
+    } else {
+      this.addLog(`⚖️ Phiên biểu quyết bất phân thắng bại (Phiếu cao nhất: ${maxVotes.toFixed(1)}/${neededVotes}). Không ai bị tước đũa.`, 'VOTE');
     }
 
     this.updateFactionCounts();
-    this.checkWinCondition();
+    this.checkWinCondition(true);
   }
 
-  private checkWinCondition(): void {
+  checkWinCondition(advanceRoundIfUndecided = false): boolean {
     const harry = this.state.players.find(p => p.role?.id === 'HARRY_POTTER');
     const voldemort = this.state.players.find(p => p.role?.id === 'VOLDEMORT');
 
     // Harry dead = 4T wins
-    if (harry?.status === 'DEAD' || harry?.status === 'GHOST') {
+    if (harry && (harry.status === 'DEAD' || harry.status === 'GHOST')) {
       this.state.winners = ['FOUR_T'];
-      this.addLog(`🐍 4T THẮNG! Harry đã chết!`, 'GAME_OVER');
+      this.addLog(`🐍 TỬ THẦN THỰC TỬ THẮNG! Harry Potter đã tử trận!`, 'GAME_OVER');
       this.state.phase = 'GAME_OVER';
-      return;
+      return true;
     }
 
     // Voldemort dead = HPH wins
-    if (voldemort?.status === 'DEAD' || voldemort?.status === 'GHOST') {
+    if (voldemort && (voldemort.status === 'DEAD' || voldemort.status === 'GHOST')) {
       this.state.winners = ['HPH'];
-      this.addLog(`🦅 HPH THẮNG! Voldemort đã bị tiêu diệt!`, 'GAME_OVER');
+      this.addLog(`🦅 HỘI PHƯỢNG HOÀNG THẮNG! Chúa tể Voldemort đã bị tiêu diệt!`, 'GAME_OVER');
       this.state.phase = 'GAME_OVER';
-      return;
+      return true;
+    }
+
+    // All Death Eaters dead = HPH wins
+    if (this.state.fourTAlive === 0) {
+      this.state.winners = ['HPH'];
+      this.addLog(`🦅 HỘI PHƯỢNG HOÀNG THẮNG! Toàn bộ Tử Thần Thực Tử đã bị thanh trừng!`, 'GAME_OVER');
+      this.state.phase = 'GAME_OVER';
+      return true;
     }
 
     // Min rounds reached
     if (this.state.currentRound >= this.state.minRounds) {
       this.state.winners = ['HPH'];
-      this.addLog(`🦅 HPH THẮNG! Harry sống đến Round ${this.state.minRounds}!`, 'GAME_OVER');
+      this.addLog(`🦅 HỘI PHƯỢNG HOÀNG THẮNG! Harry Potter sống sót qua ${this.state.minRounds} vòng đại chiến!`, 'GAME_OVER');
       this.state.phase = 'GAME_OVER';
-      return;
+      return true;
     }
 
     // 4T >= HPH (after round 2)
-    if (this.state.currentRound >= 2 && this.state.fourTAlive >= this.state.hphAlive) {
+    if (this.state.currentRound >= 2 && this.state.fourTAlive >= this.state.hphAlive && this.state.fourTAlive > 0) {
       this.state.winners = ['FOUR_T'];
-      this.addLog(`🐍 4T THẮNG! Số lượng áp đảo!`, 'GAME_OVER');
+      this.addLog(`🐍 TỬ THẦN THỰC TỬ THẮNG! Quân số phe Hắc Ám đã áp đảo hoàn toàn!`, 'GAME_OVER');
       this.state.phase = 'GAME_OVER';
-      return;
+      return true;
     }
 
-    // Continue to next round
-    this.nextRound();
+    // Continue to next round if called from vote phase
+    if (advanceRoundIfUndecided) {
+      this.nextRound();
+    }
+    return false;
   }
 
   private nextRound(): void {

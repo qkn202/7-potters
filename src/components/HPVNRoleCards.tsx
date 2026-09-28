@@ -1,13 +1,26 @@
 /**
  * MOD HPVN - Role Cards Display
- * Hiển thị tất cả thẻ vai trò HPVN
+ * Hiển thị tất cả thẻ vai trò HPVN với phong cách Ma Pháp Hogwarts
  */
 
 'use client';
 
 import React, { useState } from 'react';
 import { HPVN_ROLES, Role } from '@/lib/hpvnGameEngine';
-import { Users, Heart, Skull, Ghost, Crown, Zap, Shield, Eye, Sword, Sparkles, Info } from 'lucide-react';
+import { 
+  Users, 
+  Crown, 
+  Sparkles, 
+  Info,
+  Search,
+  BookOpen
+} from 'lucide-react';
+import { 
+  PhoenixCrest, 
+  DarkMarkCrest, 
+  DeathlyHallowsSymbol, 
+  CardCornerFlourish 
+} from '@/components/ArtAssets';
 
 // ============================================================================
 // TYPES
@@ -68,27 +81,30 @@ function RoleCard({ role, onClick }: { role: Role; onClick?: () => void }) {
       className={`
         relative overflow-hidden rounded-2xl border-2 transition-all duration-300
         ${factionConfig.borderColor}
-        bg-gradient-to-b from-[#180e07] to-[#0c0603] shadow-xl
-        ${onClick ? 'cursor-pointer hover:scale-105 hover:shadow-2xl' : ''}
+        bg-gradient-to-b from-[#1c1008] via-[#140b05] to-[#0d0603]
+        ${onClick ? 'cursor-pointer hover:border-[#ffd88f] hover:scale-[1.02]' : ''}
       `}
       onClick={() => onClick?.()}
     >
+      <CardCornerFlourish className="absolute top-2 left-2 w-5 h-5 text-[#bd8436] pointer-events-none z-10 opacity-70" />
+      <CardCornerFlourish className="absolute top-2 right-2 w-5 h-5 text-[#bd8436] -scale-x-100 pointer-events-none z-10 opacity-70" />
+
       {/* Card Artwork Hero Banner */}
-      <div className="relative w-full h-44 overflow-hidden border-b border-amber-500/30">
+      <div className="relative w-full h-48 overflow-hidden border-b border-[#7a5229]/60 bg-black">
         <img
           src={cardImg}
           alt={role.name}
-          className="w-full h-full object-cover object-top transition-transform duration-500 hover:scale-110"
+          className="w-full h-full object-cover object-top transition-transform duration-500 hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#180e07] via-transparent to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#140b05] via-transparent to-black/30" />
         
         {/* Faction Pill Floating */}
-        <div className={`absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-serif font-black uppercase tracking-wider ${factionConfig.textColor} ${factionConfig.factionBgColor} border ${factionConfig.borderColor}`}>
+        <div className={`absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-serif font-black uppercase tracking-wider ${factionConfig.textColor} ${factionConfig.factionBgColor} border ${factionConfig.borderColor} z-20`}>
           {factionConfig.label}
         </div>
 
         {/* Phase Type Pill */}
-        <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/70 text-amber-300 border border-amber-400/50">
+        <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#120803]/90 text-amber-300 border border-[#7a5229] z-20">
           {role.phaseType === 'NIGHT' ? '🌙 Đêm' : '☀️ Ngày'}
         </div>
       </div>
@@ -96,37 +112,57 @@ function RoleCard({ role, onClick }: { role: Role; onClick?: () => void }) {
       <div className="p-4">
         {/* Title */}
         <div className="mb-2">
-          <h3 className="font-serif font-black text-lg text-[#ffd88f] leading-tight">{role.name}</h3>
-          <p className="text-xs text-amber-200/70 font-lora italic">{role.title}</p>
+          <h3 className="font-title-magical font-bold text-lg text-[#ffd88f] leading-tight flex items-center justify-between">
+            <span>{role.name}</span>
+          </h3>
+          <p className="text-xs text-[#ebdcb0]/70 font-lora italic">{role.title}</p>
         </div>
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1.5 mb-2.5">
-          {role.canVote && <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-zinc-300">🗳️ Vote</span>}
-          {role.canKill && <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-red-950/80 border border-red-700 text-red-300">💀 Kill</span>}
-          {(role as any).canScan && <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-blue-950/80 border border-blue-700 text-blue-300">🔍 Scan</span>}
-          {(role as any).canProtect && <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-950/80 border border-emerald-700 text-emerald-300">🛡️ Protect</span>}
+          {role.canVote && (
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#24150c] border border-[#7a5229] text-[#ffd88f]">
+              🗳️ Vote
+            </span>
+          )}
+          {role.canKill && (
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-red-950/80 border border-red-700 text-red-300">
+              💀 Kill
+            </span>
+          )}
+          {(role as any).canScan && (
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-blue-950/80 border border-blue-700 text-blue-300">
+              🔍 Soi
+            </span>
+          )}
+          {(role as any).canProtect && (
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-950/80 border border-emerald-700 text-emerald-300">
+              🛡️ Bảo Vệ
+            </span>
+          )}
         </div>
 
         {/* Description */}
-        <p className="text-xs text-[#ebdcb0]/90 font-lora mb-3 line-clamp-2 leading-relaxed">{role.description}</p>
+        <p className="text-xs text-[#ebdcb0]/90 font-lora mb-3 line-clamp-2 leading-relaxed">
+          {role.description}
+        </p>
 
         {/* Ability Button & Panel */}
         <button
           onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-          className="text-xs text-amber-400 hover:text-white flex items-center gap-1 font-serif font-bold cursor-pointer"
+          className="text-xs text-amber-400 hover:text-white flex items-center gap-1 font-serif font-bold cursor-pointer transition-colors"
         >
           <Info className="w-3.5 h-3.5" />
           <span>{expanded ? 'Thu gọn bí kíp' : 'Xem năng lực ma thuật →'}</span>
         </button>
 
         {expanded && (
-          <div className="mt-3 pt-3 border-t border-amber-500/20 animate-in fade-in duration-200">
-            <div className="bg-black/60 rounded-xl p-3 border border-amber-500/30">
+          <div className="mt-3 pt-3 border-t border-[#7a5229]/60 animate-in fade-in duration-200">
+            <div className="bg-[#0e0703] rounded-xl p-3 border border-[#bd8436]/60">
               <h4 className="text-[10px] font-serif font-black uppercase text-amber-400 mb-1 flex items-center gap-1">
                 <Sparkles size={11} /> Năng Lực Ma Thuật
               </h4>
-              <p className="text-xs text-zinc-100 font-lora leading-relaxed">{role.ability}</p>
+              <p className="text-xs text-[#ebdcb0] font-lora leading-relaxed">{role.ability}</p>
             </div>
           </div>
         )}
@@ -151,86 +187,130 @@ export default function HPVNRoleCards({ playerCount, onSelectRole }: RoleCardsPr
   // Filter roles
   const filteredRoles = Object.values(HPVN_ROLES).filter(role => {
     const matchesFilter = filter === 'all' || role.faction === filter;
-    const matchesSearch = !search || role.name.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = !search || role.name.toLowerCase().includes(search.toLowerCase()) || role.title.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
   return (
-    <div className="bg-slate-900/50 rounded-xl p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="hpvn-panel-gold rounded-2xl p-4 sm:p-6 relative overflow-hidden">
+      <CardCornerFlourish className="absolute top-2 left-2 w-6 h-6 text-[#bd8436] pointer-events-none" />
+      <CardCornerFlourish className="absolute top-2 right-2 w-6 h-6 text-[#bd8436] -scale-x-100 pointer-events-none" />
+      <CardCornerFlourish className="absolute bottom-2 left-2 w-6 h-6 text-[#bd8436] -scale-y-100 pointer-events-none" />
+      <CardCornerFlourish className="absolute bottom-2 right-2 w-6 h-6 text-[#bd8436] -scale-x-100 -scale-y-100 pointer-events-none" />
+
+      {/* Header & Filter Tabs */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-[#7a5229]/60 pb-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">Thẻ Vai Trò HPVN</h2>
-          <p className="text-sm text-slate-400">Tổng cộng {Object.keys(HPVN_ROLES).length} vai trò</p>
+          <h2 className="font-title-magical font-bold text-xl sm:text-2xl text-[#ffd88f] flex items-center gap-2">
+            <BookOpen size={22} className="text-amber-400" />
+            <span>Thư Viện Thẻ Bài Phù Thủy</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-[#ebdcb0]/80 font-lora italic mt-0.5">
+            Tổng hợp toàn bộ {Object.keys(HPVN_ROLES).length} vai trò ma thuật Hội Phượng Hoàng & Tử Thần Thực Tử
+          </p>
         </div>
-        <div className="flex gap-2">
+
+        {/* Faction Filters */}
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
           <button
             onClick={() => setFilter('all')}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'all' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            className={`px-3 py-1.5 rounded-xl text-xs font-serif font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              filter === 'all'
+                ? 'hpvn-btn-gold text-[#ffd88f] ring-1 ring-[#ffd88f]'
+                : 'bg-[#1a0e07] text-[#ebdcb0]/70 hover:text-white border border-[#7a5229]'
             }`}
           >
-            Tất cả
+            <Sparkles size={13} />
+            <span>Tất Cả ({Object.keys(HPVN_ROLES).length})</span>
           </button>
+          
           <button
             onClick={() => setFilter('ORDER_OF_PHOENIX')}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'ORDER_OF_PHOENIX' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            className={`px-3 py-1.5 rounded-xl text-xs font-serif font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              filter === 'ORDER_OF_PHOENIX'
+                ? 'bg-amber-950 text-amber-300 border-2 border-amber-500 ring-1 ring-amber-400'
+                : 'bg-[#1a0e07] text-amber-200/70 hover:text-amber-200 border border-[#7a5229]'
             }`}
           >
-            HPH
+            <PhoenixCrest className="w-4 h-4 text-amber-400" />
+            <span>Phượng Hoàng ({hphRoles.length})</span>
           </button>
+
           <button
             onClick={() => setFilter('DEATH_EATERS')}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'DEATH_EATERS' ? 'bg-red-600 text-white' : 'bg-slate-700 text-sslate-300 hover:bg-slate-600'
+            className={`px-3 py-1.5 rounded-xl text-xs font-serif font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              filter === 'DEATH_EATERS'
+                ? 'bg-emerald-950 text-emerald-300 border-2 border-emerald-500 ring-1 ring-emerald-400'
+                : 'bg-[#1a0e07] text-emerald-200/70 hover:text-emerald-200 border border-[#7a5229]'
             }`}
           >
-            4T
+            <DarkMarkCrest className="w-4 h-4 text-emerald-400" />
+            <span>Tử Thần ({fourTRoles.length})</span>
           </button>
+
           <button
             onClick={() => setFilter('NEUTRAL')}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'NEUTRAL' ? 'bg-yellow-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            className={`px-3 py-1.5 rounded-xl text-xs font-serif font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              filter === 'NEUTRAL'
+                ? 'bg-purple-950 text-purple-300 border-2 border-purple-500 ring-1 ring-purple-400'
+                : 'bg-[#1a0e07] text-purple-200/70 hover:text-purple-200 border border-[#7a5229]'
             }`}
           >
-            Neutral
+            <DeathlyHallowsSymbol className="w-4 h-4 text-purple-300" />
+            <span>Trung Lập ({neutralRoles.length})</span>
           </button>
         </div>
       </div>
 
-      {/* Search */}
-      <div className="mb-6">
+      {/* Search Input */}
+      <div className="mb-6 relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#bd8436]" />
         <input
           type="text"
-          placeholder="Tìm kiếm vai trò..."
+          placeholder="Tìm kiếm danh tính hoặc chức năng phù thủy (ví dụ: Harry, Neville, Soi, Bọc lót...)..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-500"
+          className="w-full pl-10 pr-4 py-2.5 bg-[#140b05] border-2 border-[#7a5229] rounded-xl text-[#ffd88f] placeholder-[#bd8436]/60 text-xs sm:text-sm font-serif focus:outline-none focus:border-[#ffd88f] transition-all"
         />
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-400 hover:text-white"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-green-900/30 border border-green-700/50 rounded-lg p-4 text-center">
-          <Heart className="w-6 h-6 text-green-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-green-400">{hphRoles.length}</p>
-          <p className="text-xs text-slate-400">Hội Phượng Hoàng</p>
+      {/* Faction Stats Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <div className="bg-[#240e0c]/80 border border-red-800/80 rounded-xl p-3 flex items-center gap-3">
+          <PhoenixCrest className="w-8 h-8 text-amber-400 shrink-0" />
+          <div>
+            <p className="text-xl font-mono font-bold text-amber-300">{hphRoles.length} Nhân vật</p>
+            <p className="text-xs text-red-200 font-serif">Hội Phượng Hoàng</p>
+          </div>
         </div>
-        <div className="bg-red-900/30 border border-red-700/50 rounded-lg p-4 text-center">
-          <Skull className="w-6 h-6 text-red-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-red-400">{fourTRoles.length}</p>
-          <p className="text-xs text-slate-400">Tử Thần Thực Tử</p>
+
+        <div className="bg-[#092217]/80 border border-emerald-800/80 rounded-xl p-3 flex items-center gap-3">
+          <DarkMarkCrest className="w-8 h-8 text-emerald-400 shrink-0" />
+          <div>
+            <p className="text-xl font-mono font-bold text-emerald-300">{fourTRoles.length} Nhân vật</p>
+            <p className="text-xs text-emerald-200 font-serif">Tử Thần Thực Tử</p>
+          </div>
         </div>
-        <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-4 text-center">
-          <Ghost className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-yellow-400">{neutralRoles.length}</p>
-          <p className="text-xs text-slate-400">Neutral</p>
+
+        <div className="bg-[#22102e]/80 border border-purple-800/80 rounded-xl p-3 flex items-center gap-3">
+          <DeathlyHallowsSymbol className="w-8 h-8 text-purple-300 shrink-0" />
+          <div>
+            <p className="text-xl font-mono font-bold text-purple-300">{neutralRoles.length} Nhân vật</p>
+            <p className="text-xs text-purple-200 font-serif">Phe Trung Lập</p>
+          </div>
         </div>
       </div>
 
       {/* Role Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {filteredRoles.map(role => (
           <RoleCard
             key={role.id}
@@ -242,44 +322,14 @@ export default function HPVNRoleCards({ playerCount, onSelectRole }: RoleCardsPr
 
       {/* Empty State */}
       {filteredRoles.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-slate-400">Không tìm thấy vai trò phù hợp</p>
+        <div className="text-center py-12 bg-[#140b05] border border-[#7a5229] rounded-2xl">
+          <p className="text-[#ebdcb0]/60 font-lora italic text-sm">
+            Không tìm thấy phù thủy nào khớp với từ khóa &ldquo;{search}&rdquo;.
+          </p>
         </div>
       )}
     </div>
   );
-}
-
-// ============================================================================
-// ROLE ICON HELPER
-// ============================================================================
-
-function getRoleIcon(roleId: string) {
-  const icons: Record<string, React.ReactNode> = {
-    HARRY_POTTER: <span className="text-lg">⚡</span>,
-    HERMIONE_GRANGER: <span className="text-lg">📚</span>,
-    RON_WESLEY: <span className="text-lg">🦞</span>,
-    DUMBLEDORE: <Crown className="w-6 h-6 text-yellow-400" />,
-    HAGRID: <span className="text-lg">🧍</span>,
-    LUPIN: <span className="text-lg">🌙</span>,
-    TONKS: <span className="text-lg">🔮</span>,
-    MOODY: <Eye className="w-6 h-6 text-blue-400" />,
-    McGONAGALL: <Sparkles className="w-6 h-6 text-red-400" />,
-    NEVILLE: <Shield className="w-6 h-6 text-green-400" />,
-    DRACO: <span className="text-lg">🐍</span>,
-    GEORGE: <span className="text-lg">👯</span>,
-    FRED: <span className="text-lg">👯</span>,
-    SYBILL_TRELAWNEY: <Sparkles className="w-6 h-6 text-purple-400" />,
-    VOLDEMORT: <Skull className="w-6 h-6 text-red-400" />,
-    BELLATRIX: <span className="text-lg">🗡️</span>,
-    LESTRANGE: <Eye className="w-6 h-6 text-red-400" />,
-    WORMTAIL: <span className="text-lg">🐀</span>,
-    DOLORES_UMBRIDGE: <span className="text-lg">🐸</span>,
-    LUCIFUS_MALFORY: <span className="text-lg">🏰</span>,
-    JESTER: <span className="text-lg">🃏</span>,
-    POLYJUICE_POTION: <span className="text-lg">🧪</span>,
-  };
-  return icons[roleId] || <Users className="w-6 h-6 text-slate-400" />;
 }
 
 // ============================================================================
@@ -291,38 +341,38 @@ function getFactionConfig(faction: string) {
     case 'ORDER_OF_PHOENIX':
       return {
         label: 'HỘI PHƯỢNG HOÀNG',
-        borderColor: 'border-green-500/50',
-        bgColor: 'bg-green-900/20',
-        textColor: 'text-green-300',
-        factionBgColor: 'bg-green-800/50',
-        iconBgColor: 'bg-green-800/50',
+        borderColor: 'border-amber-600/70',
+        bgColor: 'bg-amber-950/30',
+        textColor: 'text-amber-300',
+        factionBgColor: 'bg-amber-950/90',
+        iconBgColor: 'bg-amber-900/50',
       };
     case 'DEATH_EATERS':
       return {
         label: 'TỬ THẦN THỰC TỬ',
-        borderColor: 'border-red-500/50',
-        bgColor: 'bg-red-900/20',
-        textColor: 'text-red-300',
-        factionBgColor: 'bg-red-800/50',
-        iconBgColor: 'bg-red-800/50',
+        borderColor: 'border-emerald-600/70',
+        bgColor: 'bg-emerald-950/30',
+        textColor: 'text-emerald-300',
+        factionBgColor: 'bg-emerald-950/90',
+        iconBgColor: 'bg-emerald-900/50',
       };
     case 'NEUTRAL':
       return {
-        label: 'NEUTRAL',
-        borderColor: 'border-yellow-500/50',
-        bgColor: 'bg-yellow-900/20',
-        textColor: 'text-yellow-300',
-        factionBgColor: 'bg-yellow-800/50',
-        iconBgColor: 'bg-yellow-800/50',
+        label: 'TRUNG LẬP',
+        borderColor: 'border-purple-600/70',
+        bgColor: 'bg-purple-950/30',
+        textColor: 'text-purple-300',
+        factionBgColor: 'bg-purple-950/90',
+        iconBgColor: 'bg-purple-900/50',
       };
     default:
       return {
-        label: 'UNKNOWN',
-        borderColor: 'border-slate-500/50',
-        bgColor: 'bg-slate-900/20',
-        textColor: 'text-slate-300',
-        factionBgColor: 'bg-slate-800/50',
-        iconBgColor: 'bg-slate-800/50',
+        label: 'KHÔNG RÕ',
+        borderColor: 'border-[#7a5229]',
+        bgColor: 'bg-[#180e07]',
+        textColor: 'text-[#ebdcb0]',
+        factionBgColor: 'bg-[#24150c]',
+        iconBgColor: 'bg-[#24150c]',
       };
   }
 }

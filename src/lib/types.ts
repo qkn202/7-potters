@@ -145,6 +145,7 @@ export type NetworkMessageType =
   | 'JOIN_REQUEST'
   | 'ROOM_STATE_SYNC'
   | 'ACTION_SUBMIT'
+  | 'ACTION_REJECTED'
   | 'INSTANT_SKILL_SUBMIT'
   | 'INSTANT_SKILL_RESULT'
   | 'INTERRUPT_CHOICE_SUBMIT'
@@ -154,7 +155,8 @@ export type NetworkMessageType =
   | 'PLAYER_LEFT'
   | 'HOST_DISCONNECTED'
   | 'HOST_RECONNECTED'
-  | 'PING';
+  | 'PING'
+  | 'REQUEST_STATE_SYNC';
 
 export interface NetworkMessage {
   type: NetworkMessageType;

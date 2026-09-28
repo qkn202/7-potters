@@ -1925,7 +1925,7 @@ export function PlayerScreen() {
             {isDay ? (
               <button
                 onClick={() => {
-                  playerAction('Biểu quyết Tước Đũa', effectiveTargetId!);
+                  playerAction('biểu quyết tước đũa', effectiveTargetId!);
                   setSelectedTarget(effectiveTargetId);
                   setToastMessage(`✓ Đã lưu phiếu biểu quyết Tước Đũa cho: ${effectiveTargetPlayer.name}!`);
                   setTimeout(() => setToastMessage(null), 3500);

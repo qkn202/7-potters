@@ -29,6 +29,20 @@ import { SkyEventBanner } from './SkyEventBanner';
 import { CardDeckModal } from './CardDeckModal';
 import { Role } from '@/lib/types';
 
+const normalizeAction = (actionName: string): string => (actionName || '').trim().toLowerCase();
+const isVoteAction = (actionName: string): boolean => {
+  const n = normalizeAction(actionName);
+  return n === 'biểu quyết tước đũa' || n === 'bỏ phiếu treo cổ' || n.includes('tước đũa') || n.includes('bỏ phiếu') || n.includes('treo cổ');
+};
+const isKillAction = (actionName: string): boolean => {
+  const n = normalizeAction(actionName);
+  return n === 'giết' || n.includes('ám sát') || n.includes('avada');
+};
+const isEscortAction = (actionName: string): boolean => {
+  const n = normalizeAction(actionName);
+  return n === 'bay hộ tống' || n.includes('hộ tống');
+};
+
 export function GMDashboard() {
   const { 
     gameState, 
@@ -95,18 +109,19 @@ export function GMDashboard() {
   const votedCount = Object.keys(gameState.pendingActions).length;
   const aliveBots = alivePlayers.filter(p => p.isBot || p.name.includes('(Bot)') || p.id.startsWith('bot_'));
 
-  // Tally votes received by each player
+  // Tally votes received by each player (case-insensitive & robust)
   const votesReceived: Record<string, number> = {};
   const killReceived: Record<string, number> = {};
   const escortsReceived: Record<string, number> = {};
   Object.values(gameState.pendingActions).forEach(act => {
-    if (act.actionName === 'Bỏ phiếu Treo Cổ' || act.actionName === 'Biểu quyết Tước Đũa') {
+    if (!act || !act.targetId) return;
+    if (isVoteAction(act.actionName)) {
       votesReceived[act.targetId] = (votesReceived[act.targetId] || 0) + 1;
-    } else if (act.actionName === 'Giết' || act.actionName.toLowerCase() === 'giết') {
-      if (act.targetId && act.targetId !== 'NONE') {
+    } else if (isKillAction(act.actionName)) {
+      if (act.targetId !== 'NONE') {
         killReceived[act.targetId] = (killReceived[act.targetId] || 0) + 1;
       }
-    } else if (act.actionName === 'Bay Hộ Tống') {
+    } else if (isEscortAction(act.actionName)) {
       escortsReceived[act.targetId] = (escortsReceived[act.targetId] || 0) + 1;
     }
   });
@@ -639,11 +654,11 @@ export function GMDashboard() {
                             <span className="text-emerald-300 font-bold flex items-center gap-1 truncate" title={`${pAction.actionName} ➔ ${targetName}`}>
                               <CheckCircle size={12} className="text-emerald-400 flex-shrink-0" />
                               <span className="truncate">
-                                {pAction.actionName === 'Bay Hộ Tống' 
+                                {isEscortAction(pAction.actionName) 
                                   ? `🛡️ Hộ tống: ${targetName}` 
                                   : pAction.targetId === 'NONE'
                                     ? '🚫 Án binh bất động (Không giết)'
-                                    : (pAction.actionName === 'Bỏ phiếu Treo Cổ' || pAction.actionName === 'Biểu quyết Tước Đũa') 
+                                    : isVoteAction(pAction.actionName)
                                       ? `Tước Đũa: ${targetName}` 
                                       : `${pAction.actionName}: ${targetName}`}
                               </span>

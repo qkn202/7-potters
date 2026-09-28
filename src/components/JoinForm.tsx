@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useGame } from '@/lib/GameContext';
 import { 
   Sparkles, 
@@ -281,6 +282,21 @@ export function JoinForm() {
             Cuộc tháo chạy định mệnh từ Privet Drive đến Trang trại Hang Sóc
           </p>
         </div>
+
+        {/* MOD HPVN - Ultimate Edition Promotion Banner */}
+        <Link
+          href="/hpvn"
+          className="block mb-5 p-3 rounded-2xl bg-gradient-to-r from-[#241308] via-[#3a1d0c] to-[#241308] border border-amber-500/60 hover:border-amber-400 transition-all hover:scale-[1.01] shadow-lg group text-center cursor-pointer relative z-10"
+        >
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-serif font-bold text-[#ffd88f]">
+            <Sparkles size={15} className="text-amber-400 animate-pulse shrink-0" />
+            <span>Chế độ mới: <strong className="text-white">MOD HPVN · Ultimate Edition</strong></span>
+            <span className="text-[9px] bg-red-600 text-white font-mono px-1.5 py-0.5 rounded-full uppercase">Mới</span>
+          </div>
+          <p className="text-[11px] sm:text-xs text-[#ebdcb0]/80 font-lora italic mt-1">
+            24 Thẻ Bài Ma Thuật · Ghost Voting (Hồn Ma Bỏ Phiếu) & Chaos Events Hàng Đêm ➔
+          </p>
+        </Link>
 
         {/* Mode Selector Tabs (Create / Join / Mock) */}
         <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#120803] rounded-xl border border-[#7a5229]/60 mb-5 relative z-10">

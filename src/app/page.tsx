@@ -140,6 +140,17 @@ export default function Home() {
             <span className="text-[11px] hidden sm:inline md:hidden">Bí Kíp</span>
           </button>
 
+          {/* MOD HPVN - Ultimate Edition Navigation Button */}
+          <Link
+            href="/hpvn"
+            title="Chuyển sang Chế Độ Chơi: MOD HPVN - Ultimate Edition (Ghost Voting & Chaos Events)"
+            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-gradient-to-r from-amber-600 via-amber-500 to-amber-700 hover:brightness-110 border border-amber-300 text-black text-xs font-serif font-black flex items-center gap-1 cursor-pointer shrink-0 shadow-[0_0_12px_rgba(245,158,11,0.5)] transition-all"
+          >
+            <Sparkles size={13} className="text-black shrink-0 animate-pulse" />
+            <span className="text-[11px] sm:text-xs font-title font-bold">MOD HPVN</span>
+            <span className="text-[9px] bg-red-600 text-white font-mono px-1 py-0.2 rounded-full hidden sm:inline">MỚI</span>
+          </Link>
+
           {/* Exit Game Button */}
           {currentPlayerId && (
             <button

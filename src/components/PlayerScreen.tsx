@@ -316,29 +316,29 @@ export function PlayerScreen() {
   // Dynamic 1-Line Mission Prompt (Replaces 4-Tier Coaching Text Wall)
   // Dynamic Concise Mobile Mission Prompt (Minimal text, maximum clarity)
   const getMissionPrompt = () => {
-    if (isDead) return '💀 Bạn đã tử trận';
+    if (isDead) return 'Bạn đã tử trận';
     if (isDay) {
-      if (myAction) return `✓ Đã chọn: ${myVotedTarget?.name}`;
-      return '☀️ Chọn mục tiêu để Tước Đũa';
+      if (myAction) return `Đã chọn: ${myVotedTarget?.name}`;
+      return 'Chọn mục tiêu để Tước Đũa';
     }
     // Night Phase
     if (isDeathEater) {
-      if (isSilenced) return '🔇 Đòn ám sát bị phong ấn!';
-      if (myAction?.targetId === 'NONE') return '🕊️ Đã chọn Án Binh';
-      if (myAction) return `✓ Đã nhắm: ${myVotedTarget?.name}`;
-      return me.role?.id === 'VOLDEMORT' ? '🌙 Chọn mục tiêu Ám Sát' : '🌙 Dồn lực Ám Sát cùng Chúa Tể';
+      if (isSilenced) return 'Đòn ám sát bị phong ấn!';
+      if (myAction?.targetId === 'NONE') return 'Đã chọn Án Binh';
+      if (myAction) return `Đã nhắm: ${myVotedTarget?.name}`;
+      return me.role?.id === 'VOLDEMORT' ? 'Chọn mục tiêu Ám Sát' : 'Dồn lực Ám Sát cùng Chúa Tể';
     }
-    if (me.role?.id === 'HERMIONE_GRANGER') return '🌙 Chọn phù thủy để Soi Danh Tính';
-    if (me.role?.id === 'ALBUS_DUMBLEDORE') return '🌙 Chọn đồng đội để Dựng Khiên';
-    if (me.role?.id === 'SEVERUS_SNAPE') return '🌙 Chọn người để Bọc Lót Sectumsempra';
-    if (me.role?.id === 'REMUS_LUPIN') return '🌙 Chọn đồng đội để Hồi Sinh';
-    if (me.role?.id === 'KINGSLEY_SHACKLEBOLT') return '🌙 Kích hoạt lưới Ứng Cứu';
-    if (me.role?.id === 'MINERVA_MCGONAGALL') return '🌙 Chọn đồng minh để Hóa Mèo Bọc Lót';
-    if (me.role?.id === 'NEVILLE_LONGBOTTOM') return '🌙 Chọn đồng đội để Thức Tỉnh';
-    if (me.role?.id === 'DOLORES_UMBRIDGE') return '🌙 Chọn phù thủy để Ban Sắc Lệnh';
-    if (me.role?.id === 'JESTER') return '🃏 Ẩn mình ban đêm';
-    if (myAction) return `✓ Đang Hộ Tống: ${myVotedTarget?.name}`;
-    return '🌙 Chọn đồng đội để Bay Hộ Tống';
+    if (me.role?.id === 'HERMIONE_GRANGER') return 'Chọn phù thủy để Soi Danh Tính';
+    if (me.role?.id === 'ALBUS_DUMBLEDORE') return 'Chọn đồng đội để Dựng Khiên';
+    if (me.role?.id === 'SEVERUS_SNAPE') return 'Chọn người để Bọc Lót Sectumsempra';
+    if (me.role?.id === 'REMUS_LUPIN') return 'Chọn đồng đội để Hồi Sinh';
+    if (me.role?.id === 'KINGSLEY_SHACKLEBOLT') return 'Kích hoạt lưới Ứng Cứu';
+    if (me.role?.id === 'MINERVA_MCGONAGALL') return 'Chọn đồng minh để Hóa Mèo Bọc Lót';
+    if (me.role?.id === 'NEVILLE_LONGBOTTOM') return 'Chọn đồng đội để Thức Tỉnh';
+    if (me.role?.id === 'DOLORES_UMBRIDGE') return 'Chọn phù thủy để Ban Sắc Lệnh';
+    if (me.role?.id === 'JESTER') return 'Ẩn mình ban đêm';
+    if (myAction) return `Đang Hộ Tống: ${myVotedTarget?.name}`;
+    return 'Chọn đồng đội để Bay Hộ Tống';
   };
 
   // Skill definitions and cooldown checks for night
@@ -497,7 +497,7 @@ export function PlayerScreen() {
       {/* ============================================================== */}
       {/* ZONE 2: HERO PASSPORT (EXACT MATCH OF USER'S SCREENSHOT)       */}
       {/* ============================================================== */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#0c1524]/95 via-[#111e33]/95 to-[#0c1524]/95 border border-[#1e2f47] p-3 sm:p-3.5 mb-3 shadow-[0_10px_30px_rgba(0,0,0,0.8)] backdrop-blur-md relative overflow-hidden flex items-center justify-between gap-2.5">
+      <div className="arcane-card-glass rounded-2xl p-3 sm:p-3.5 mb-3 border border-amber-400/30 relative overflow-hidden flex items-center justify-between gap-2.5 shadow-xl">
         {/* Subtle ambient golden lighting */}
         <div className="absolute top-0 left-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -526,16 +526,16 @@ export function PlayerScreen() {
 
         {/* Middle: Hero Passport Subtitle + Character Name + Tactical Pill */}
         <div className="flex-1 min-w-0 pr-0.5">
-          <span className="text-[10px] sm:text-[11px] font-serif uppercase tracking-widest text-[#ffd88f]/90 block mb-0.5 font-bold">
+          <span className="text-[10px] sm:text-[11px] font-cinzel uppercase tracking-widest text-amber-300/80 block mb-0.5 font-bold">
             Hero Passport
           </span>
-          <h2 className="font-serif font-black text-lg sm:text-xl text-white tracking-wide truncate leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          <h2 className="font-cinzel font-black text-lg sm:text-xl text-white tracking-wide truncate leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
             {me.role?.name || me.name}
           </h2>
 
           {/* Tactical Prompt Pill */}
-          <div className="mt-1 px-2.5 py-0.5 rounded-full bg-[#14120b]/90 border border-[#b45309]/70 text-[#fef08a] text-[10px] sm:text-[11px] font-serif flex items-center gap-1 shadow-inner max-w-full">
-            <span className="text-amber-400 shrink-0">🌙</span>
+          <div className="mt-1 px-2.5 py-0.5 rounded-full bg-slate-950/80 border border-amber-400/40 text-amber-200 text-[10px] sm:text-[11px] font-sans flex items-center gap-1.5 shadow-inner max-w-full">
+            <span className="text-amber-400 shrink-0 text-xs">{isDay ? '☀️' : '🌙'}</span>
             <span className="truncate">{getMissionPrompt()}</span>
           </div>
         </div>

@@ -104,6 +104,7 @@ export interface GameState {
   weasleyItems: WeasleyItem[];
   logs: string[];
   winner: Faction | null;
+  winReason?: string | null;
   pendingActions: Record<string, { actionName: string, targetId: string }>;
   resolutionReport: ResolutionReport | null;
   skillStates: Record<string, boolean | string>; // Lưu trạng thái dùng skill (VD: 'playerID_LUPIN': true, 'DUMBLEDORE_R1': 'targetId')

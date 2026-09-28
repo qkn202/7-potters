@@ -168,6 +168,7 @@ const DEFAULT_STATE: GameState = {
   weasleyItems: INITIAL_WEASLEY_ITEMS,
   logs: ['Hệ thống: Chào mừng đến với Chiến dịch Bảy Potter!'],
   winner: null,
+  winReason: null,
   pendingActions: {},
   resolutionReport: null,
   skillStates: {},
@@ -232,6 +233,90 @@ export const checkWinCondition = (players: Player[], flightStage?: number, maxSt
   if (deathEaters.length === 0 && hph.length > 0) return 'ORDER_OF_PHOENIX';
   if (deathEaters.length === 0 && hph.length === 0 && neutrals.length > 0) return 'NEUTRAL';
   return null;
+};
+
+export const getWinReason = (
+  winner: Faction,
+  players: Player[],
+  flightStage?: number,
+  maxStages?: number
+): string => {
+  const nonGmPlayers = players.filter(p => !p.isGM);
+  const alivePlayers = nonGmPlayers.filter(p => p.status !== 'DEAD');
+  const deathEaters = alivePlayers.filter(p => p.role?.faction === 'DEATH_EATERS');
+  const others = alivePlayers.filter(p => p.role?.faction !== 'DEATH_EATERS');
+  const hph = alivePlayers.filter(p => p.role?.faction === 'ORDER_OF_PHOENIX');
+  const neutrals = alivePlayers.filter(p => p.role?.faction === 'NEUTRAL');
+  const targetStage = maxStages || 4;
+  const currentStage = flightStage || 1;
+
+  if (winner === 'ORDER_OF_PHOENIX') {
+    const hadVoldemort = nonGmPlayers.some(p => p.role?.id === 'VOLDEMORT');
+    const aliveVoldemort = alivePlayers.find(p => p.role?.id === 'VOLDEMORT');
+    if (hadVoldemort && !aliveVoldemort) {
+      return 'Chúa Tể Voldemort đã bị tiêu diệt! Toàn bộ binh đoàn Tử Thần Thực Tử tan rã trong hỗn loạn, Hội Phượng Hoàng khải hoàn.';
+    }
+
+    const aliveHarry = alivePlayers.find(p => p.role?.id === 'HARRY_POTTER');
+    if (currentStage >= targetStage && aliveHarry) {
+      return `Phi đội đã xuất sắc hộ tống Harry Potter thật hạ cánh an toàn xuống Trang Trại Hang Sóc (The Burrow - Chặng ${targetStage})! Hàng rào bùa chú cổ xưa bảo vệ trọn vẹn Kẻ Được Chọn.`;
+    }
+
+    if (deathEaters.length === 0) {
+      return 'Toàn bộ Tử Thần Thực Tử trên bầu trời đã bị tiêu diệt hoặc tước đũa phép trục xuất! Bầu trời đêm trở lại thanh bình.';
+    }
+
+    return 'Hội Phượng Hoàng đã hoàn thành xuất sắc sứ mệnh bảo vệ thế giới phù thủy!';
+  }
+
+  if (winner === 'DEATH_EATERS') {
+    const hadHarry = nonGmPlayers.some(p => p.role?.id === 'HARRY_POTTER');
+    const aliveHarry = alivePlayers.find(p => p.role?.id === 'HARRY_POTTER');
+    if (hadHarry && !aliveHarry) {
+      return 'Harry Potter thật đã ngã xuống! Kẻ Được Chọn tử trận, phe Tử Thần Thực Tử hoàn toàn thống trị bầu trời!';
+    }
+
+    if (currentStage >= targetStage && !aliveHarry && hadHarry) {
+      return `Đoàn bay đã tới chặng cuối Hang Sóc nhưng Harry Potter thật đã tử trận trước đó! Phe Hắc Ám giành chiến thắng tuyệt đối.`;
+    }
+
+    if (deathEaters.length >= others.length && deathEaters.length > 0) {
+      return `Binh đoàn Tử Thần Thực Tử (${deathEaters.length} người) đã áp đảo hoàn toàn quân số đối kháng (${others.length} người) trên bầu trời! Không ai còn có thể ngăn cản bước tiến của Chúa Tể Hắc Ám.`;
+    }
+
+    return 'Chúa Tể Hắc Ám và phe Tử Thần Thực Tử đã giành thắng lợi tối thượng!';
+  }
+
+  if (winner === 'NEUTRAL') {
+    if (alivePlayers.length === 0) {
+      return 'Cả hai phe Hội Phượng Hoàng và Tử Thần Thực Tử đều đã tử trận trong cuộc không chiến khốc liệt! Không còn ai sống sót trên bầu trời.';
+    }
+
+    if (deathEaters.length === 0 && hph.length === 0 && neutrals.length > 0) {
+      const neutralNames = neutrals.map(p => p.name).join(', ');
+      return `Cả hai phe Ánh Sáng và Bóng Tối đều đã gục ngã! Phe Trung Lập (${neutralNames}) là những người sống sót sau cùng.`;
+    }
+
+    return 'Phe Trung Lập đã đạt được mục tiêu và giành chiến thắng!';
+  }
+
+  return 'Trận chiến đã ngã ngũ!';
+};
+
+export const createEndGameLogs = (
+  winner: Faction,
+  players: Player[],
+  flightStage?: number,
+  maxStages?: number
+): string[] => {
+  const factionName = 
+    winner === 'ORDER_OF_PHOENIX' ? 'HỘI PHƯỢNG HOÀNG' :
+    winner === 'DEATH_EATERS' ? 'TỬ THẦN THỰC TỬ' : 'PHE TRUNG LẬP';
+  const reason = getWinReason(winner, players, flightStage, maxStages);
+  return [
+    `Hệ thống: 🏆 KẾT THÚC TRẬN CHIẾN: Phe [${factionName}] GIÀNH CHIẾN THẮNG!`,
+    `Hệ thống: 📜 Lý do: ${reason}`
+  ];
 };
 
 export const validateWeasleyItemUse = (
@@ -828,6 +913,42 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      // P1-1: Self-target validation for protective/escort skills
+      const normalizedActionLower = actionName.toLowerCase().trim();
+      const isProtectActionCheck = normalizedActionLower.includes('bảo vệ') || normalizedActionLower.includes('protect');
+      const isSnapeShieldCheck = normalizedActionLower.includes('sectumsempra') || normalizedActionLower.includes('bọc lót');
+      const isEscortActionCheck = normalizedActionLower.includes('hộ tống') || normalizedActionLower.includes('escort');
+      const isReviveActionCheck = isReviveAction(actionName);
+
+      if ((isProtectActionCheck || isSnapeShieldCheck || isEscortActionCheck || isReviveActionCheck) && target && target.id === me.id) {
+        setSkillToast('⚠️ Không thể chọn chính mình làm mục tiêu!');
+        return prev;
+      }
+
+      // P1-canVote: Enforce canVote constraint - check if voter is silenced/fainted
+      const isVoteActionCheck = normalizedActionLower.includes('biểu quyết') || normalizedActionLower.includes('bỏ phiếu') || normalizedActionLower.includes('tước đũa') || normalizedActionLower.includes('treo cổ');
+      if (isVoteActionCheck) {
+        const isFainted = Boolean(prev.skillStates[`${me.id}_FRED_CANDY_R${prev.round}`]);
+        const isPettigrewSilenced = Boolean(prev.skillStates[`${me.id}_VOTE_SILENCED_R${prev.round}`]);
+        if (isFainted) {
+          setSkillToast('⚠️ Bạn đang ngất xỉu do Kẹo Ngất Xỉu Cấp Tốc! Không thể bỏ phiếu!');
+          return prev;
+        }
+        if (isPettigrewSilenced) {
+          setSkillToast('⚠️ Bạn đang bị phong ấn bởi Peter Pettigrew! Không thể bỏ phiếu!');
+          return prev;
+        }
+      }
+
+      // P1-2: Vote re-submit warning - check if player already submitted a vote this round
+      const existingAction = prev.pendingActions[me.id];
+      if (isVoteActionCheck && existingAction && existingAction.actionName !== 'NONE' && existingAction.actionName.toLowerCase().includes('biểu quyết')) {
+        // Only warn if the new target is different from the existing one
+        if (existingAction.targetId !== targetId) {
+          setSkillToast('⚠️ Bạn đã bỏ phiếu rồi! Phiếu cũ sẽ bị ghi đè.');
+        }
+      }
+
       const normalizedAction = actionName.toLowerCase().trim();
       const isPublicVote = normalizedAction === 'biểu quyết tước đũa' || normalizedAction === 'bỏ phiếu treo cổ';
       const isEscort = normalizedAction === 'bay hộ tống';
@@ -870,6 +991,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     // Check if actor is affected by Fred's Fainting Fancy candy
     if (curState.skillStates[`${actorId}_FRED_CANDY_R${curState.round}`]) {
       return '⚠️ Bạn đang bị ngất xỉu do Kẹo Ngất Xỉu của Fred Weasley! Không thể thi triển kỹ năng đêm nay!';
+    }
+
+    // P1-1: Self-target validation for instant skills
+    const instantSkillTargetActions = ['Soi Danh Tính', 'Đánh Hơi', 'Soi Đặc Biệt', 'Soi Phe', 'Soi Nhân Vật Đặc Biệt'];
+    if (instantSkillTargetActions.includes(actionName) && target && target.id === me.id) {
+      return '⚠️ Không thể chọn chính mình làm mục tiêu!';
     }
 
     if (actionName === 'Soi Danh Tính' && me.role?.id === 'HERMIONE_GRANGER') {
@@ -988,13 +1115,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         newPlayers = newPlayers.map(p => p.id === id ? { ...p, status: 'DEAD' as const } : p);
       });
 
-      const winner = checkWinCondition(newPlayers);
+      const winner = checkWinCondition(newPlayers, curState.flightStage, curState.maxStages);
+      const winReason = winner ? getWinReason(winner, newPlayers, curState.flightStage, curState.maxStages) : null;
+      const winLogs = winner ? createEndGameLogs(winner, newPlayers, curState.flightStage, curState.maxStages) : [];
       updateState({
         ...curState,
         players: newPlayers,
         skillStates: { ...curState.skillStates, [`${me.id}_MOODY`]: true },
-        logs: [...logs, ...(winner ? [`Hệ thống: Trò chơi kết thúc! Phe ${winner === 'DEATH_EATERS' ? 'Tử Thần Thực Tử' : winner === 'ORDER_OF_PHOENIX' ? 'Hội Phượng Hoàng' : 'Trung Lập'} chiến thắng.`] : [])],
+        logs: [...logs, ...winLogs],
         winner,
+        winReason,
         phase: winner ? 'END' : curState.phase
       });
       return 'Đã khai hỏa Avada Kedavra!';
@@ -2072,7 +2202,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           }
         });
 
-        const winner = prev.phase !== 'LOBBY' ? checkWinCondition(remainingPlayers) : null;
+        const winner = prev.phase !== 'LOBBY' ? checkWinCondition(remainingPlayers, prev.flightStage, prev.maxStages) : null;
+        const winReason = winner ? getWinReason(winner, remainingPlayers, prev.flightStage, prev.maxStages) : null;
+        const winLogs = winner ? createEndGameLogs(winner, remainingPlayers, prev.flightStage, prev.maxStages) : [];
 
         return {
           ...prev,
@@ -2081,9 +2213,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           logs: [
             ...prev.logs, 
             `${target?.name || 'Một người chơi'} đã rời khỏi phòng.`,
-            ...(winner ? [`Hệ thống: Trò chơi kết thúc! Phe ${winner === 'DEATH_EATERS' ? 'Tử Thần Thực Tử' : winner === 'ORDER_OF_PHOENIX' ? 'Hội Phượng Hoàng' : 'Trung Lập'} chiến thắng.`] : [])
+            ...winLogs
           ],
           winner: winner || prev.winner,
+          winReason: winReason || prev.winReason,
           phase: winner ? 'END' : prev.phase
         };
       });
@@ -2315,6 +2448,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
 
       const winner = checkWinCondition(prev.players, newFlightStage, maxS);
+      const winReason = winner ? getWinReason(winner, prev.players, newFlightStage, maxS) : null;
+      const winLogs = winner ? createEndGameLogs(winner, prev.players, newFlightStage, maxS) : [];
 
       return {
         ...prev,
@@ -2325,12 +2460,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         currentSkyEvent: nextSkyEvent,
         escortPairs: {},
         winner,
+        winReason,
         pendingActions: {},
         resolutionReport: null,
         logs: [
           ...prev.logs, 
           logMsg,
-          ...(winner ? [`Hệ thống: 🏆 CHẶNG ${maxS} - HANG SÓC! Phi đội đã an toàn hạ cánh! Phe ${winner === 'ORDER_OF_PHOENIX' ? 'Hội Phượng Hoàng' : 'Tử Thần Thực Tử'} chiến thắng!`] : [])
+          ...winLogs
         ],
       };
     });
@@ -2354,7 +2490,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-      const winner = prev.phase !== 'LOBBY' ? checkWinCondition(remainingPlayers) : null;
+      const winner = prev.phase !== 'LOBBY' ? checkWinCondition(remainingPlayers, prev.flightStage, prev.maxStages) : null;
+      const winReason = winner ? getWinReason(winner, remainingPlayers, prev.flightStage, prev.maxStages) : null;
+      const winLogs = winner ? createEndGameLogs(winner, remainingPlayers, prev.flightStage, prev.maxStages) : [];
 
       return {
         ...prev,
@@ -2363,9 +2501,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         logs: [
           ...prev.logs, 
           `Hệ thống: Merlin đã đuổi ${target.name} khỏi phòng.`,
-          ...(winner ? [`Hệ thống: Trò chơi kết thúc! Phe ${winner === 'DEATH_EATERS' ? 'Tử Thần Thực Tử' : winner === 'ORDER_OF_PHOENIX' ? 'Hội Phượng Hoàng' : 'Trung Lập'} chiến thắng.`] : [])
+          ...winLogs
         ],
         winner: winner || prev.winner,
+        winReason: winReason || prev.winReason,
         phase: winner ? 'END' : prev.phase
       };
     });
@@ -2380,13 +2519,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         p.id === playerId ? { ...p, status: 'DEAD' as const } : p
       );
       
-      const winner = checkWinCondition(newPlayers);
+      const winner = checkWinCondition(newPlayers, prev.flightStage, prev.maxStages);
+      const winReason = winner ? getWinReason(winner, newPlayers, prev.flightStage, prev.maxStages) : null;
+      const winLogs = winner ? createEndGameLogs(winner, newPlayers, prev.flightStage, prev.maxStages) : [];
 
       return {
         ...prev,
         players: newPlayers,
-        logs: [...prev.logs, `Hệ thống: ${target.name} đã ngã xuống!`, ...(winner ? [`Hệ thống: Trò chơi kết thúc! Phe ${winner === 'DEATH_EATERS' ? 'Tử Thần Thực Tử' : winner === 'ORDER_OF_PHOENIX' ? 'Hội Phượng Hoàng' : 'Trung Lập'} chiến thắng.`] : [])],
+        logs: [...prev.logs, `Hệ thống: ${target.name} đã ngã xuống!`, ...winLogs],
         winner,
+        winReason,
         phase: winner ? 'END' : prev.phase
       };
     });
@@ -2465,13 +2607,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
    */
   const playerAction = (actionName: string, targetId: string) => {
     if (netRef.current && !isHostRef.current) {
+      // Client: Send action to Host only, Host will execute and broadcast result
       netRef.current.sendAction(actionName, targetId);
-      if (currentPlayerId) {
-        executePlayerActionCore(currentPlayerId, actionName, targetId);
-      }
       return;
     }
 
+    // Host or solo mode: Execute locally
     if (currentPlayerId) {
       executePlayerActionCore(currentPlayerId, actionName, targetId);
     }
@@ -2571,6 +2712,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             setSkillToast(validation.message);
           }
           return validation.message || 'Không thể sử dụng vật phẩm!';
+        }
+        // P1-1: Self-target validation for Fainting Fancies
+        if (itemId === 'FAINTING_FANCIES' && targetId && targetId === myPlayer.id) {
+          setSkillToast('⚠️ Không thể chọn chính mình để gây ngất xỉu!');
+          return 'Không thể chọn chính mình!';
         }
       }
     }
@@ -2869,9 +3015,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         deathEaterTargetIds.length = 0;
       }
 
-      // Check Peruvian Instant Darkness Powder
+      // P0-1: Check George Weasley Global SULK (Peruvian Darkness Powder)
+      const isGeorgeSulked = Boolean(gameState.skillStates[`GLOBAL_SULK_R${gameState.round}`]);
+      if (isGeorgeSulked) {
+        summary.push("🌑 SULK CỦA GEORGE: Màn đêm Peru từ Bột Khói Mù Weasley bao phủ! Tất cả Tử Thần Thực Tử bị SULK (mất phương hướng), không ai bị ám sát đêm nay!");
+        deathEaterTargetIds.length = 0;
+      }
+
+      // P0-1: Check Weasley Shop Peruvian Darkness Powder (vật phẩm)
       if (gameState.skillStates['PERUVIAN_DARKNESS_ACTIVE']) {
-        summary.push("🌑 BỘT KHÓI MÙ PERU: Màn đêm ma thuật dày đặc bao phủ toàn bộ bầu trời! Đòn ám sát của Tử Thần Thực Tử bị mất phương hướng hoàn toàn và đánh trượt vào khoảng không!");
+        summary.push("🌑 BỘT KHÓI MÙ PERU (TỪ TIỆM WEASLEY): Màn sương ma thuật dày đặc bao phủ toàn bộ bầu trời! Đòn ám sát của Tử Thần Thực Tử bị mất phương hướng hoàn toàn và đánh trượt vào khoảng không!");
         deathEaterTargetIds.length = 0;
       }
 
@@ -3123,6 +3276,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const maxS = gameState.maxStages || 4;
     const nextFlightStage = isNextNight ? Math.min(maxS, (gameState.flightStage || 1) + 1) : (gameState.flightStage || 1);
     const winner = checkWinCondition(newPlayers, nextFlightStage, maxS);
+    const winReason = winner ? getWinReason(winner, newPlayers, nextFlightStage, maxS) : null;
+    const winLogs = winner ? createEndGameLogs(winner, newPlayers, nextFlightStage, maxS) : [];
     const nextRound = winner ? gameState.round : (isNextNight ? gameState.round + 1 : gameState.round);
     const resolutionLogs = summary.map(line => `Hệ thống: ${line}`);
 
@@ -3216,9 +3371,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ...gameState.logs,
         ...resolutionLogs,
         ...flightLog,
-        ...(winner ? [`Hệ thống: 🏆 Trò chơi kết thúc! Phe ${winner === 'DEATH_EATERS' ? 'Tử Thần Thực Tử' : winner === 'ORDER_OF_PHOENIX' ? 'Hội Phượng Hoàng' : 'Trung Lập'} chiến thắng.`] : [])
+        ...winLogs
       ],
       winner,
+      winReason,
       phase: winner ? 'END' : (gameState.phase === 'DAY' ? 'NIGHT' : 'DAY'),
       round: nextRound
     });

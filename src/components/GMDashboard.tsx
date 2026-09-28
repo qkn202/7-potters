@@ -439,6 +439,14 @@ export function GMDashboard() {
                     ? 'PHE TRUNG LẬP THẮNG (HÒA)'
                     : 'HỘI PHƯỢNG HOÀNG THẮNG'}
               </h2>
+              {gameState.winReason && (
+                <div className="p-3.5 rounded-xl bg-black/60 border border-[#bd8436]/50 max-w-lg mx-auto mb-4 text-xs sm:text-sm font-serif text-[#ffd88f] italic shadow-md">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#ebdcb0]/60 block mb-1 font-bold not-italic">
+                    LÝ DO CHIẾN THẮNG:
+                  </span>
+                  <p className="text-[#f5eedb]">{gameState.winReason}</p>
+                </div>
+              )}
               <p className="text-sm text-[#ebdcb0] font-lora">
                 Trận đấu đã khép lại. Merlin có thể bấm &ldquo;Hủy Phòng &amp; Bắt Đầu Lại&rdquo; ở cột bên phải.
               </p>
@@ -678,16 +686,23 @@ export function GMDashboard() {
               ref={logsContainerRef}
               className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar scroll-smooth"
             >
-              {gameState.logs.map((log, idx) => (
-                <motion.div 
-                  key={`gm-log-item-${idx}`}
-                  initial={{ opacity: 0, x: 8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="text-xs p-3 rounded-lg bg-[#140b05] border border-[#5a3a1f] text-[#ebdcb0] font-lora leading-relaxed"
-                >
-                  {log}
-                </motion.div>
-              ))}
+              {gameState.logs.map((log, idx) => {
+                const isWinLog = log.includes('CHIẾN THẮNG') || log.includes('KẾT THÚC TRẬN CHIẾN') || log.includes('Lý do:');
+                return (
+                  <motion.div 
+                    key={`gm-log-item-${idx}`}
+                    initial={{ opacity: 0, x: 8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className={`text-xs p-3 rounded-lg border font-lora leading-relaxed whitespace-pre-line ${
+                      isWinLog
+                        ? 'bg-gradient-to-r from-[#2e1908] via-[#45220c] to-[#2e1908] border-[#ffd88f] text-[#ffd88f] font-bold shadow-[0_0_15px_rgba(255,216,143,0.25)]'
+                        : 'bg-[#140b05] border-[#5a3a1f] text-[#ebdcb0]'
+                    }`}
+                  >
+                    {log}
+                  </motion.div>
+                );
+              })}
               <div ref={logsEndRef} />
             </div>
 

@@ -1,4 +1,4 @@
-import { checkWinCondition, INITIAL_WEASLEY_ITEMS, validateWeasleyItemUse, fisherYatesShuffle, assignRolesFairly } from '../src/lib/GameContext';
+import { checkWinCondition, getWinReason, createEndGameLogs, INITIAL_WEASLEY_ITEMS, validateWeasleyItemUse, fisherYatesShuffle, assignRolesFairly } from '../src/lib/GameContext';
 import { ROLES } from '../src/lib/roles';
 import type { Player, Role } from '../src/lib/types';
 
@@ -1169,8 +1169,88 @@ async function runMechanicsTests() {
   }
   console.log('✅ TEST 20 PASSED: Cơ chế Thuốc Hồi Sinh Remus Lupin chuẩn xác tuyệt đối!');
 
+  // -------------------------------------------------------------
+  // TEST 21: GHI RÕ PHE THẮNG & LÝ DO CHIẾN THẮNG TRONG NHẬT KÝ CHIẾN TRƯỜNG
+  // -------------------------------------------------------------
+  console.log('\n--- [TEST 21] GHI RÕ PHE THẮNG & LÝ DO CHIẾN THẮNG TRONG NHẬT KÝ ---');
+  
+  // 21.1: Voldemort bị tiêu diệt -> HPH thắng + Lý do Voldemort bị tiêu diệt
+  {
+    const testPlayers: Player[] = [
+      createMockPlayer('p1', 'Harry Potter', ROLES.HARRY_POTTER, 'ALIVE'),
+      createMockPlayer('p2', 'Hermione Granger', ROLES.HERMIONE_GRANGER, 'ALIVE'),
+      createMockPlayer('p3', 'Lord Voldemort', ROLES.VOLDEMORT, 'DEAD'),
+      createMockPlayer('p4', 'Bellatrix Lestrange', ROLES.BELLATRIX_LESTRANGE, 'ALIVE'),
+    ];
+    const winner = checkWinCondition(testPlayers, 2, 4);
+    if (winner !== 'ORDER_OF_PHOENIX') throw new Error(`TEST 21.1 FAILED: Expected ORDER_OF_PHOENIX, got ${winner}`);
+    const reason = getWinReason(winner, testPlayers, 2, 4);
+    const logs = createEndGameLogs(winner, testPlayers, 2, 4);
+    if (!reason.includes('Voldemort') || !logs[0].includes('HỘI PHƯỢNG HOÀNG') || !logs[1].includes('Lý do:')) {
+      throw new Error(`TEST 21.1 FAILED: Reason or log format invalid: ${JSON.stringify(logs)}`);
+    }
+    console.log('✓ 21.1 (Voldemort ngã xuống):', logs[0]);
+    console.log('   ', logs[1]);
+  }
+
+  // 21.2: Đoàn bay đến Chặng cuối Hang Sóc & Harry sống -> HPH thắng + Lý do Hang Sóc
+  {
+    const testPlayers: Player[] = [
+      createMockPlayer('p1', 'Harry Potter', ROLES.HARRY_POTTER, 'ALIVE'),
+      createMockPlayer('p2', 'Hermione Granger', ROLES.HERMIONE_GRANGER, 'ALIVE'),
+      createMockPlayer('p3', 'Lord Voldemort', ROLES.VOLDEMORT, 'ALIVE'),
+      createMockPlayer('p4', 'Bellatrix Lestrange', ROLES.BELLATRIX_LESTRANGE, 'ALIVE'),
+    ];
+    const winner = checkWinCondition(testPlayers, 4, 4);
+    if (winner !== 'ORDER_OF_PHOENIX') throw new Error(`TEST 21.2 FAILED: Expected ORDER_OF_PHOENIX, got ${winner}`);
+    const reason = getWinReason(winner, testPlayers, 4, 4);
+    const logs = createEndGameLogs(winner, testPlayers, 4, 4);
+    if (!reason.includes('Hang Sóc') || !logs[0].includes('HỘI PHƯỢNG HOÀNG')) {
+      throw new Error(`TEST 21.2 FAILED: Reason missing Hang Sóc: ${reason}`);
+    }
+    console.log('✓ 21.2 (Hạ cánh Hang Sóc):', logs[0]);
+    console.log('   ', logs[1]);
+  }
+
+  // 21.3: Tử Thần Thực Tử áp đảo quân số -> 4T thắng + Lý do áp đảo
+  {
+    const testPlayers: Player[] = [
+      createMockPlayer('p1', 'Hermione Granger', ROLES.HERMIONE_GRANGER, 'ALIVE'),
+      createMockPlayer('p3', 'Lord Voldemort', ROLES.VOLDEMORT, 'ALIVE'),
+      createMockPlayer('p4', 'Bellatrix Lestrange', ROLES.BELLATRIX_LESTRANGE, 'ALIVE'),
+    ];
+    const winner = checkWinCondition(testPlayers, 2, 4);
+    if (winner !== 'DEATH_EATERS') throw new Error(`TEST 21.3 FAILED: Expected DEATH_EATERS, got ${winner}`);
+    const reason = getWinReason(winner, testPlayers, 2, 4);
+    const logs = createEndGameLogs(winner, testPlayers, 2, 4);
+    if (!reason.includes('áp đảo') || !logs[0].includes('TỬ THẦN THỰC TỬ')) {
+      throw new Error(`TEST 21.3 FAILED: Reason missing áp đảo: ${reason}`);
+    }
+    console.log('✓ 21.3 (Áp đảo quân số):', logs[0]);
+    console.log('   ', logs[1]);
+  }
+
+  // 21.4: Quét sạch Tử Thần Thực Tử -> HPH thắng + Lý do quét sạch
+  {
+    const testPlayers: Player[] = [
+      createMockPlayer('p1', 'Harry Potter', ROLES.HARRY_POTTER, 'ALIVE'),
+      createMockPlayer('p2', 'Hermione Granger', ROLES.HERMIONE_GRANGER, 'ALIVE'),
+      createMockPlayer('p4', 'Bellatrix Lestrange', ROLES.BELLATRIX_LESTRANGE, 'DEAD'),
+    ];
+    const winner = checkWinCondition(testPlayers, 2, 4);
+    if (winner !== 'ORDER_OF_PHOENIX') throw new Error(`TEST 21.4 FAILED: Expected ORDER_OF_PHOENIX, got ${winner}`);
+    const reason = getWinReason(winner, testPlayers, 2, 4);
+    const logs = createEndGameLogs(winner, testPlayers, 2, 4);
+    if (!reason.includes('tiêu diệt') || !logs[0].includes('HỘI PHƯỢNG HOÀNG')) {
+      throw new Error(`TEST 21.4 FAILED: Reason invalid: ${reason}`);
+    }
+    console.log('✓ 21.4 (Quét sạch Tử Thần):', logs[0]);
+    console.log('   ', logs[1]);
+  }
+  console.log('✅ TEST 21 PASSED: Thông tin phe thắng và lý do chiến thắng được ghi nhận chuẩn xác 100% vào Nhật Ký!');
+
   console.log('\n====================================================');
-  console.log('🎉 TẤT CẢ 20/20 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
+  console.log('🎉 TẤT CẢ 21/21 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
   console.log('====================================================\n');
 }
 

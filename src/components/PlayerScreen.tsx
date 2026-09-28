@@ -229,11 +229,20 @@ export function PlayerScreen() {
                 : 'HỘI PHƯỢNG HOÀNG CHIẾN THẮNG'}
           </h2>
 
-          <p className="text-lg sm:text-xl font-lora text-[#f5eedb] mb-8">
+          <p className="text-lg sm:text-xl font-lora text-[#f5eedb] mb-6">
             {isWinner 
               ? '🎉 Vinh quang bất diệt! Phe của bạn đã khải hoàn thắng lợi! 🎉' 
               : '💀 Rất tiếc! Lực lượng của bạn đã thất bại trong trận không chiến! 💀'}
           </p>
+
+          {gameState.winReason && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-black/60 border border-[#bd8436]/60 mb-6 text-sm sm:text-base font-serif text-[#ffd88f] leading-relaxed shadow-lg max-w-lg mx-auto text-left">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[#ebdcb0]/70 block mb-1">
+                📜 LÝ DO CHIẾN THẮNG:
+              </span>
+              <p className="italic text-[#f5eedb]">{gameState.winReason}</p>
+            </div>
+          )}
 
           {/* Action Buttons: Exit Game */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6 mb-4">
@@ -1787,14 +1796,21 @@ export function PlayerScreen() {
                   Chưa có hành động nào được ghi nhận trên bầu trời.
                 </p>
               ) : (
-                gameState.logs.map((log, idx) => (
-                  <div
-                    key={`player-log-entry-${idx}`}
-                    className="text-xs p-3 rounded-lg bg-[#140b05] border border-[#5a3a1f] text-[#ebdcb0] font-lora leading-relaxed"
-                  >
-                    {log}
-                  </div>
-                ))
+                gameState.logs.map((log, idx) => {
+                  const isWinLog = log.includes('CHIẾN THẮNG') || log.includes('KẾT THÚC TRẬN CHIẾN') || log.includes('Lý do:');
+                  return (
+                    <div
+                      key={`player-log-entry-${idx}`}
+                      className={`text-xs p-3 rounded-lg border font-lora leading-relaxed whitespace-pre-line ${
+                        isWinLog
+                          ? 'bg-gradient-to-r from-[#2e1908] via-[#45220c] to-[#2e1908] border-[#ffd88f] text-[#ffd88f] font-bold shadow-[0_0_15px_rgba(255,216,143,0.25)]'
+                          : 'bg-[#140b05] border-[#5a3a1f] text-[#ebdcb0]'
+                      }`}
+                    >
+                      {log}
+                    </div>
+                  );
+                })
               )}
               <div ref={playerLogsEndRef} />
             </div>

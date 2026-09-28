@@ -578,6 +578,8 @@ export function assignRolesFairly(
     ROLES.BILL_WEASLEY,
     ROLES.FLEUR_DELACOUR,
     ROLES.NYMPHADORA_TONKS,
+    ROLES.MINERVA_MCGONAGALL,
+    ROLES.NEVILLE_LONGBOTTOM,
   ];
 
   // GIỚI HẠN: Trong bàn nhỏ (<=6 người), chỉ có tối đa 1 trong 2: Hermione HOẶC Arthur
@@ -1196,6 +1198,70 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         logs: [...curState.logs, `Hệ thống: ${me.name} đã REVEAL là Potter Fake và dùng Bùa Cấm Cửa để SILENCED ${target.name}! Người này sẽ bị mất kỹ năng ở vòng tiếp theo!`]
       });
       return `Đã SILENCED ${target.name}! Họ sẽ bị mất kỹ năng ở vòng kế tiếp.`;
+    }
+
+    // MINERVA MCGONAGALL: Hóa Mèo Bọc Lót
+    if (actionName === 'Hóa Mèo Bọc Lót' && me.role?.id === 'MINERVA_MCGONAGALL') {
+      if (curState.phase !== 'NIGHT') return 'Giáo sư McGonagall chỉ có thể hóa mèo bọc lót vào ban đêm!';
+      const stateKey = `${me.id}_MCGONAGALL_R${curState.round}`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng bọc lót trong lượt này rồi!';
+      if (target.status === 'DEAD') return 'Mục tiêu đã chết, không thể bọc lót!';
+
+      updateState({
+        ...curState,
+        skillStates: {
+          ...curState.skillStates,
+          [stateKey]: true,
+          [`${target.id}_MCGONAGALL_SHIELD_R${curState.round}`]: true
+        },
+        logs: [...curState.logs, `Hệ thống: Giáo sư McGonagall đã hóa hình mèo mướp âm thầm bọc lót bảo vệ cho ${target.name}!`]
+      });
+      return `🐾 Đã hóa hình mèo mướp bọc lót cho ${target.name}! Họ sẽ được che chở khỏi ám sát đêm nay!`;
+    }
+
+    // NEVILLE LONGBOTTOM: Thức Tỉnh (Chém Rắn & Giải Câm Lặng)
+    if (actionName === 'Thức Tỉnh' && me.role?.id === 'NEVILLE_LONGBOTTOM') {
+      if (curState.phase !== 'NIGHT') return 'Neville chỉ có thể thức tỉnh đồng đội vào ban đêm!';
+      const stateKey = `${me.id}_NEVILLE_R${curState.round}`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng thức tỉnh trong lượt này rồi!';
+      if (target.status === 'DEAD') return 'Mục tiêu đã chết, không thể thức tỉnh!';
+
+      // Xóa tất cả các trạng thái silence/candy của target
+      const newSkillStates = { ...curState.skillStates };
+      for (const key of Object.keys(newSkillStates)) {
+        if (key.startsWith(`${target.id}_SECTUMSEMPRA`) || key.startsWith(`${target.id}_FRED_CANDY`) || key.startsWith(`${target.id}_POTTERFAKE_SILENCED`)) {
+          delete newSkillStates[key];
+        }
+      }
+
+      updateState({
+        ...curState,
+        skillStates: {
+          ...newSkillStates,
+          [stateKey]: true
+        },
+        logs: [...curState.logs, `Hệ thống: Neville Longbottom đã rút Thanh Gươm Gryffindor thức tỉnh và bảo vệ tinh thần cho ${target.name}!`]
+      });
+      return `🗡️ Đã dùng Thanh Gươm Gryffindor thức tỉnh ${target.name}! Mọi trạng thái phong ấn đã bị xua tan!`;
+    }
+
+    // DOLORES UMBRIDGE: Ban Sắc Lệnh Giáo Dục
+    if (actionName === 'Ban Sắc Lệnh' && me.role?.id === 'DOLORES_UMBRIDGE') {
+      if (curState.phase !== 'NIGHT') return 'Dolores Umbridge chỉ có thể ban sắc lệnh vào ban đêm!';
+      const stateKey = `${me.id}_UMBRIDGE_R${curState.round}`;
+      if (curState.skillStates[stateKey]) return 'Bạn đã ban hành sắc lệnh trong lượt này rồi!';
+      if (target.status === 'DEAD') return 'Mục tiêu đã chết, không thể ban sắc lệnh!';
+
+      updateState({
+        ...curState,
+        skillStates: {
+          ...curState.skillStates,
+          [stateKey]: true,
+          [`${target.id}_FRED_CANDY_R${curState.round + 1}`]: true
+        },
+        logs: [...curState.logs, `Hệ thống: Dolores Umbridge đã ban hành Sắc Lệnh Giáo Dục cấm đoán ${target.name}! Nạn nhân bị cấm biểu quyết ở ngày tiếp theo!`]
+      });
+      return `📜 Đã ban hành Sắc Lệnh Giáo Dục lên ${target.name}! Họ sẽ bị tước quyền biểu quyết ban ngày tiếp theo!`;
     }
 
   }, [updateState]);
@@ -2760,6 +2826,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             summary.push(`Tử Thần Thực Tử tấn công ${victim.name}, nhưng đã bị Màn chắn Dumbledore chặn đứng hoàn toàn!`);
           } else if (deathEaterTargetId === snapeShieldTargetId) {
             summary.push(`⚔️ SECTUMSEMPRA CAN THIỆP! Trong bóng đêm, bùa chém của Severus Snape đã rạch nát đòn tấn công của Tử Thần Thực Tử, cứu sống ${victim.name} trong gang tấc!`);
+          } else if (gameState.skillStates[`${deathEaterTargetId}_MCGONAGALL_SHIELD_R${gameState.round}`]) {
+            summary.push(`🐾 BỌC LÓT HÓA MÈO! Giáo sư McGonagall đã hóa hình bảo vệ ${victim.name}, giúp mục tiêu né đòn ám sát trong bóng đêm!`);
           } else {
             let escortShielded = false;
             let ronShielded = false;

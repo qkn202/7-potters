@@ -229,6 +229,14 @@ export function CardDeckModal({
                 >
                   <DarkMarkCrest className="w-3.5 h-3.5 shrink-0" /> Tử Thần
                 </button>
+                <button
+                  onClick={() => setSelectedFaction('NEUTRAL')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-serif whitespace-nowrap flex items-center gap-1 transition-colors ${
+                    selectedFaction === 'NEUTRAL' ? 'bg-purple-900/80 text-purple-200 border border-purple-400 font-bold' : 'text-[#ebdcb0]/70 hover:text-purple-300'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 shrink-0" /> Trung Lập
+                </button>
               </div>
             </div>
           </div>

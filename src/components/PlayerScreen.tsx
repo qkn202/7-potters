@@ -75,7 +75,12 @@ const FALLBACK_PORTRAITS = [
   '/cards/fred.jpg',
   '/cards/george.jpg',
   '/cards/tonks.jpg',
-  '/cards/hagrid.jpg'
+  '/cards/hagrid.jpg',
+  '/cards/mcgonagall.jpg',
+  '/cards/neville.jpg',
+  '/cards/draco.jpg',
+  '/cards/dolores.jpg',
+  '/cards/jester.jpg'
 ];
 
 export function PlayerScreen() {
@@ -352,6 +357,21 @@ export function PlayerScreen() {
     if (me.role?.id === 'KINGSLEY_SHACKLEBOLT') {
       return '🌙 Ban Đêm: Bấm nút "Chỉ Huy Ứng Cứu" để giăng lưới cứu đồng đội bị ám sát!';
     }
+    if (me.role?.id === 'MINERVA_MCGONAGALL') {
+      return '🌙 Ban Đêm: Chọn 1 đồng minh để hóa hình mèo vằn bọc lót bảo vệ!';
+    }
+    if (me.role?.id === 'NEVILLE_LONGBOTTOM') {
+      return '🌙 Ban Đêm: Dùng Lưỡi Kiếm Gryffindor thức tỉnh & giải trừ câm lặng cho đồng đội!';
+    }
+    if (me.role?.id === 'DRACO_MALFOY') {
+      return '🎭 Ban Đêm: Quan sát lằn ranh thiện ác, chọn 1 người để Bay Hộ Tống hoặc ẩn mình!';
+    }
+    if (me.role?.id === 'DOLORES_UMBRIDGE') {
+      return '📜 Ban Đêm: Chọn 1 phù thủy để ban hành Sắc Lệnh Giáo Dục cấm đoán!';
+    }
+    if (me.role?.id === 'JESTER') {
+      return '🃏 Kẻ Hề: Ban đêm ẩn mình, ban ngày hãy kích động mọi người biểu quyết Tước Đũa bạn!';
+    }
     if (myAction) {
       return `✓ Đang Bay Hộ Tống cùng [${myVotedTarget?.name}].`;
     }
@@ -370,6 +390,9 @@ export function PlayerScreen() {
   if (me.role?.id === 'FLEUR_DELACOUR') skillName = 'Chém Kiếm';
   if (me.role?.id === 'LUCIUS_MALFOY') skillName = 'Soi Vai Trò';
   if (me.role?.id === 'POTTER_FAKE') skillName = 'Silenced Ultimate';
+  if (me.role?.id === 'MINERVA_MCGONAGALL') skillName = 'Hóa Mèo Bọc Lót';
+  if (me.role?.id === 'NEVILLE_LONGBOTTOM') skillName = 'Thức Tỉnh';
+  if (me.role?.id === 'DOLORES_UMBRIDGE') skillName = 'Ban Sắc Lệnh';
 
   const isGeorge = skillName === 'Rải Bột';
   const isSkillOnCooldown = 

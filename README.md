@@ -3,6 +3,9 @@
 > **Boardgame chiến thuật ẩn vai thời gian thực (Social Deduction & Hidden Role Strategy) dành cho cộng đồng Harry Potter Việt Nam (HPVN).**  
 > Dựa trên chiến dịch lịch sử trong tập 7: *Harry Potter và Bảo bối Tử thần* — Cuộc không chiến trên bầu trời đêm để di tản Harry Potter từ số 4 Privet Drive (Little Whinging, Surrey) về nơi trú ẩn an toàn Trang Trại Hang Sóc (The Burrow).
 
+### 🎮 Chế Độ Chơi Mới: MOD HPVN - Ultimate Edition
+Kết hợp tinh hoa từ Classic & Chaos Mode! 4-20 người chơi, 10-25 phút, Ghost Voting, Chaos Events, Dark Pact Protection. **[Xem chi tiết →](#-7-mod-hpvn---ultimate-edition)**
+
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-7--potters-181717?logo=github)](https://github.com/qkn202/7-potters.git)
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?logo=next.js)](https://nextjs.org/)
@@ -231,7 +234,7 @@ Khắc phục triệt để hiện tượng người chơi bị bắt làm Tử 
 
 ---
 
-## 🛠️ 6. Cài Đặt & Khởi Chạy Dự Án (Developer Guide)
+## 🛠️ 8. Cài Đặt & Khởi Chạy Dự Án (Developer Guide)
 
 ### Triển khai Trực tuyến (Live Production)
 - 🌐 **Website chính thức:** [https://seven-potters.vercel.app](https://seven-potters.vercel.app)
@@ -295,7 +298,129 @@ npm run start
 
 ---
 
-## 📜 7. Bản Quyền & Giấy Phép
+## 🎮 7. MOD HPVN - Ultimate Edition
+
+> **Chế độ chơi hoàn toàn mới kết hợp tinh hoa từ Classic & Chaos Mode!**
+
+MOD HPVN là chế độ chơi được thiết kế mới hoàn toàn, mang đến trải nghiệm social deduction nhanh, hỗn loạn và bất ngờ hơn bao giờ hết.
+
+### 🌟 Đặc Điểm Nổi Bật
+
+| Đặc điểm | Mô tả |
+|:---|:---|
+| **Số người chơi** | 4 - 20 người |
+| **Thời gian** | 10 - 25 phút mỗi ván |
+| **Tốc độ** | Game nhanh, nhiều cái chết, không nhàm chán |
+| **Sự bất ngờ** | Chaos Events mỗi đêm |
+
+### ⚡ 5 Pha Game
+
+```
+🌙 ĐÊM → 🎲 SỰ KIỆN → 💀 GIẢI QUYẾT → 👻 MA HIỂU → 🗳️ BIỂU QUYẾT
+```
+
+1. **🌙 Pha Đêm (Night):** Người chơi thực hiện hành động bí mật: giết, soi, bảo vệ. Timer 20 giây.
+2. **🎲 Pha Sự Kiện (Chaos Event):** Sự kiện ngẫu nhiên xảy ra.
+3. **💀 Pha Giải Quyết (Death Resolution):** Người chết được tiết lộ.
+4. **👻 Pha Ma Hiểu (Ghost Revelation):** Người chết có thể vote (0.5 sức).
+5. **🗳️ Pha Biểu Quyết (Vote):** Bỏ phiếu treo cổ. Timer 30 giây.
+
+### 🎲 Chaos Events
+
+| Sự kiện | Xác suất | Mô tả |
+|:---|:---:|:---|
+| **None** | 50% | Không có gì xảy ra |
+| **Shield** | 20% | Một người được bảo vệ |
+| **Info** | 15% | Tiết lộ thông tin ngẫu nhiên |
+| **Silence** | 15% | Một người bị câm lặng |
+
+### 👻 Ghost Voting
+
+- Người chơi đã chết vẫn có thể vote
+- Sức mạnh vote: **0.5** (thay vì 1.0)
+- Ghosts ảnh hưởng đến kết quả cuối cùng!
+
+### 🛡️ Dark Pact Protection
+
+- Round 1: Tử Thần Thực Tử được bảo vệ bởi Dark Pact
+- Đảm bảo ít nhất **1 4T sống đến Round 2**
+- Game không kết thúc quá sớm!
+
+### 🏆 Điều Kiện Thắng
+
+| Phe | Điều kiện |
+|:---|:---|
+| **🦅 Hội Phượng Hoàng** | Tất cả 4T bị loại HOẶC Harry sống đến Round cuối HOẶC Voldemort bị treo |
+| **🐍 Tử Thần Thực Tử** | HPH ≤ 4T (sau Round tối thiểu) HOẶC Harry chết |
+| **🃏 Jester** | Bị treo cổ bất kỳ lúc nào |
+| **⚖️ Polyjuice** | Sống đến cuối với ≥2 người |
+
+### 📊 Bảng Cân Bằng (MOD HPVN)
+
+| Sĩ số | HPH | 4T | Neutral | Round tối thiểu |
+|:---:|:---:|:---:|:---:|:---:|
+| 4 | 2 | 2 | 0 | 4 |
+| 5 | 2 | 2 | 1 | 4 |
+| 6 | 3 | 2 | 1 | 4 |
+| 7 | 4 | 2 | 1 | 5 |
+| 8 | 4 | 3 | 1 | 5 |
+| 9 | 4 | 3 | 2 | 5 |
+| 10 | 5 | 3 | 2 | 5 |
+| 11 | 5 | 4 | 2 | 6 |
+| 12 | 5 | 4 | 3 | 6 |
+| 13 | 6 | 4 | 3 | 6 |
+| 14 | 6 | 5 | 3 | 6 |
+| 15 | 6 | 5 | 4 | 7 |
+| 16 | 7 | 5 | 4 | 7 |
+| 17 | 7 | 6 | 4 | 7 |
+| 18 | 7 | 6 | 5 | 7 |
+| 19 | 8 | 6 | 5 | 8 |
+| 20 | 8 | 6 | 6 | 8 |
+
+### 🎭 24 Vai Trò (MOD HPVN)
+
+#### 🦅 Hội Phượng Hoàng (15 vai)
+
+1. **Harry Potter** - Kẻ Được Chọn. Target chính, có Golden Flame bảo vệ 1 lần.
+2. **Ron Weasley** - Người Bạn Trung Thành. Tự động chết thay Harry (1 lần).
+3. **Hermione Granger** - Phù Thủy Uyên Bác. Scan vai trò mỗi đêm.
+4. **Dumbledore** - Hiệu Trưởng Vĩ Đại. Bảo vệ 1 người mỗi đêm.
+5. **Snape** - Bậc Thầy Bế Quan. Bọc lót người, cứu hoặc phong ấn.
+6. **Lupin** - Người Sói Hào Hiệp. Thuốc hồi sinh (1 lần).
+7. **Moody** - Thần Sáng Khét Tiếng. Súng bắn 1 người (1 lần).
+8. **Hagrid** - Người Lai Khổng Lồ. Phải bị tấn công 2 lần mới chết.
+9. **Kingsley** - Thần Sáng Hoàng Gia. Miễn nhiễm silence.
+10. **Fred Weasley** - Anh Em Sinh Đôi. Tặng kẹo ngất xỉu.
+11. **George Weasley** - Anh Em Sinh Đôi. Bột khói vô hiệu ám sát (cooldown).
+12. **Bill Weasley** - Phá Bùa Cổ Xưa. Giải phong ấn.
+13. **Tonks** - Phù Thủy Biến Hình. Kế thừa vai trò khi chết.
+14. **Fleur Delacour** - Tình Yêu Veela. Lưỡi kiếm chém chết 4T.
+15. **McGonagall** *(MỚI)* - Hiệu Phó. Biến hình bảo vệ đồng minh.
+16. **Neville** *(MỚI)* - Longbottom. Đánh thức người chơi bị death glare.
+
+#### 🐍 Tử Thần Thực Tử (5 vai)
+
+1. **Voldemort** - Chúa Tể Hắc Ám. Kill 1 người mỗi đêm.
+2. **Bellatrix** - Nữ Tử Thần Cuồng Tín. +1 kill cho Voldy khi bị treo.
+3. **Lucius** - Quý Tộc Xảo Quyệt. Scan vai trò mỗi đêm.
+4. **Pettigrew** - Kẻ Phản Bội. Đánh hơi Harry & Ron.
+5. **Fenrir** - Ma Sói Đồ Tể. Cắn chuyển người sang 4T.
+
+#### ⚖️ Neutral (4 vai)
+
+1. **Draco** *(MỚI)* - Điệp viên hai mang. Tàng hình, có thể reveal bất cứ lúc nào.
+2. **Jester** - Kẻ hề. Thắng nếu bị treo cổ.
+3. **Polyjuice** - Thuốc biến hình. Thắng nếu sống đến cuối với ≥2 người.
+4. **Dolores** *(MỚI)* - Phù Thủy Độc Ác. Quyền lực đêm 1, tấn công ngẫu nhiên.
+
+### 🚀 Cách Truy Cập MOD HPVN
+
+1. Truy cập đường dẫn `/hpvn` trên ứng dụng
+2. Hoặc click nút **"MOD HPVN"** trên header của trang chủ
+
+---
+
+## 📜 9. Bản Quyền & Giấy Phép
 
 - Trò chơi được phát triển phi lợi nhuận bởi cộng đồng hâm mộ **Harry Potter Việt Nam (HPVN)**.
 - Thế giới phù thủy, nhân vật và các thuật ngữ ma thuật thuộc bản quyền của **J.K. Rowling** và **Warner Bros. Entertainment Inc.**

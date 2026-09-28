@@ -163,7 +163,7 @@ export function Lobby() {
             onClick={() => setIsDeckOpen(true)}
             className="hpvn-btn-gold px-3.5 sm:px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-2 cursor-pointer"
           >
-            <BookOpen size={15} /> Xem Sách Bí Kíp 22 Thẻ Bài & Luật Chơi
+            <BookOpen size={15} /> Xem Sách Bí Kíp 27 Thẻ Bài & Luật Chơi
           </button>
 
           <button

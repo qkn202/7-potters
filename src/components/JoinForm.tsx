@@ -283,20 +283,58 @@ export function JoinForm() {
           </p>
         </div>
 
+        {/* HERO CARDS FAN PREVIEW */}
+        <div 
+          onClick={() => setIsDeckOpen(true)}
+          className="relative h-24 my-2 flex items-center justify-center cursor-pointer group select-none relative z-20"
+          title="Chạm để khám phá toàn bộ 27 thẻ bài ma thuật"
+        >
+          {[
+            { img: '/cards/hermione.jpg', rotate: '-16deg', x: '-64px', z: 1 },
+            { img: '/cards/mcgonagall.jpg', rotate: '-8deg', x: '-32px', z: 2 },
+            { img: '/cards/harry.jpg', rotate: '0deg', x: '0px', z: 3, center: true },
+            { img: '/cards/neville.jpg', rotate: '8deg', x: '32px', z: 2 },
+            { img: '/cards/voldemort.jpg', rotate: '16deg', x: '64px', z: 1 },
+          ].map((c, i) => (
+            <div
+              key={i}
+              style={{
+                transform: `translateX(${c.x}) rotate(${c.rotate})`,
+                zIndex: c.z,
+              }}
+              className={`absolute w-14 h-20 rounded-xl overflow-hidden shadow-2xl border-2 transition-transform duration-300 group-hover:scale-105 ${
+                c.center 
+                  ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-amber-950/80 scale-105' 
+                  : 'border-amber-500/40'
+              }`}
+            >
+              <img src={c.img} alt="Card" className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+
         {/* ONE-CLICK INSTANT PLAY BUTTON */}
         <button
           type="button"
           onClick={() => startQuickSoloGame()}
-          className="w-full mb-3.5 py-4 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-serif font-black text-sm sm:text-base tracking-wide flex items-center justify-center gap-2.5 shadow-[0_0_25px_rgba(245,158,11,0.5)] border-2 border-amber-200 transition-all active:scale-95 cursor-pointer relative z-20 group"
+          className="w-full mb-2.5 py-4 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-serif font-black text-sm sm:text-base tracking-wide flex items-center justify-center gap-2.5 shadow-[0_0_25px_rgba(245,158,11,0.5)] border-2 border-amber-200 transition-all active:scale-95 cursor-pointer relative z-20 group"
         >
           <Sparkles size={20} className="text-black animate-pulse" />
           <span>⚡ VÀO CHƠI GAME NGAY (SOLO VỚI BOT)</span>
         </button>
 
-        {/* Quick Instant Solo Subtitle */}
-        <p className="text-center text-xs font-serif text-[#ebdcb0]/80 mb-5 relative z-20 italic">
-          ✨ Nhập vai Harry Potter bay hộ tống cùng 7 đồng đội bot · Khởi động ngay
-        </p>
+        {/* Quick Instant Solo Subtitle & 27 Cards Link */}
+        <div className="flex items-center justify-between gap-2 px-1 mb-4 text-xs font-serif text-[#ebdcb0]/80 relative z-20">
+          <span className="italic text-[11px] truncate">✨ Nhập vai Harry Potter bay hộ tống cùng 7 bot</span>
+          <button
+            type="button"
+            onClick={() => setIsDeckOpen(true)}
+            className="text-amber-400 hover:text-white font-bold flex items-center gap-1 shrink-0 text-[11px] cursor-pointer"
+          >
+            <BookOpen size={13} />
+            <span>27 Thẻ Bài ➔</span>
+          </button>
+        </div>
 
         {/* Mode Selector Tabs (Create / Join / Mock) */}
         <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#120803] rounded-xl border border-[#7a5229]/60 mb-5 relative z-10">
@@ -656,7 +694,7 @@ export function JoinForm() {
             onClick={() => setIsDeckOpen(true)}
             className="flex items-center gap-1.5 text-[#ffd88f] hover:text-[#fff4d1] transition-colors font-serif font-bold cursor-pointer"
           >
-            <BookOpen size={14} /> Sổ tay 22 Thẻ Bài & Luật chơi
+            <BookOpen size={14} /> Sổ tay 27 Thẻ Bài & Luật chơi
           </button>
           <span className="font-mono text-[10px] text-[#ebdcb0]/60">HPVN Multiplayer Engine</span>
         </div>

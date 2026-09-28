@@ -311,5 +311,77 @@ export const ROLES: Record<string, Role> = {
     flavorQuote: '“I like to bite \'em young... makes \'em easier to train.”',
     badge: 'wolf',
     image: '/cards/greyback.jpg'
+  },
+
+  // === THẺ NHÂN VẬT MỞ RỘNG (EXPANSION CHARACTERS) ===
+  MINERVA_MCGONAGALL: {
+    id: 'MINERVA_MCGONAGALL',
+    name: 'Minerva McGonagall',
+    faction: 'ORDER_OF_PHOENIX',
+    title: 'Hiệu Phó Hogwarts · Đạo Diễn Hóa Thú',
+    phaseType: 'NIGHT',
+    cardNumber: '№ 23/27',
+    description: 'Hiệu phó quyền uy của Hogwarts, bậc thầy Biến Hình hóa mèo bảo vệ phi đội.',
+    ability: 'Mỗi ban Đêm, có thể hóa hình thành mèo vằn bí mật bọc lót bảo vệ 1 đồng minh khỏi đòn tấn công của Tử Thần Thực Tử.',
+    tacticalTip: 'Chọn bọc lót cho những đồng đội yếu hoặc chưa được Dumbledore che chắn để tạo thêm một lớp phòng vệ kiên cố cho Hội.',
+    flavorQuote: '“Hogwarts is threatened! Man the boundaries, protect us!”',
+    badge: 'shield',
+    image: '/cards/mcgonagall.jpg'
+  },
+  NEVILLE_LONGBOTTOM: {
+    id: 'NEVILLE_LONGBOTTOM',
+    name: 'Neville Longbottom',
+    faction: 'ORDER_OF_PHOENIX',
+    title: 'Dũng Sĩ Gryffindor · Trảm Xà Kiếm',
+    phaseType: 'NIGHT',
+    cardNumber: '№ 24/27',
+    description: 'Ý chí sắt đá của Gryffindor, vung Lưỡi Kiếm báu chém tan nỗi sợ Hắc Ám.',
+    ability: 'Mỗi ban Đêm, có thể dùng Lưỡi Kiếm Gryffindor thức tỉnh và bảo hộ đồng đội, giải trừ trạng thái ngất xỉu hoặc câm lặng do đối phương gây ra.',
+    tacticalTip: 'Hỗ trợ giải cứu các đồng minh then chốt bị trúng Kẹo Ngất Xỉu hoặc bùa phong ấn để họ có thể tiếp tục hành động.',
+    flavorQuote: '“I’ll join you when hell freezes over! Dumbledore’s Army!”',
+    badge: 'dagger',
+    image: '/cards/neville.jpg'
+  },
+  DRACO_MALFOY: {
+    id: 'DRACO_MALFOY',
+    name: 'Draco Malfoy',
+    faction: 'NEUTRAL',
+    title: 'Thiếu Gia Slytherin · Lằn Ranh Thiện Ác',
+    phaseType: 'SPECIAL',
+    cardNumber: '№ 25/27',
+    description: 'Mang gánh nặng gia tộc Malfoy nhưng tâm can giằng xé giữa bóng tối và ánh sáng.',
+    ability: 'Điệp viên ẩn mình ở lằn ranh hai phe. Có quyền lựa chọn đi theo Hội Phượng Hoàng hoặc Tử Thần Thực Tử tùy theo diễn biến trận đấu.',
+    tacticalTip: 'Quan sát cục diện để quyết định nghiêng về phe nào. Một quyết định đúng lúc có thể xoay chuyển toàn bộ trận chiến!',
+    flavorQuote: '“I haven’t got a choice! I have to do this!”',
+    badge: 'snake',
+    image: '/cards/draco.jpg'
+  },
+  DOLORES_UMBRIDGE: {
+    id: 'DOLORES_UMBRIDGE',
+    name: 'Dolores Umbridge',
+    faction: 'NEUTRAL',
+    title: 'Đại Diện Bộ Pháp Thuật · Sắc Lệnh Giáo Dục',
+    phaseType: 'NIGHT',
+    cardNumber: '№ 26/27',
+    description: 'Nụ cười ngọt ngào giả tạo với những đạo luật hà khắc làm rối loạn bầu trời.',
+    ability: 'Mỗi ban Đêm, có thể ban hành 1 Sắc Lệnh Giáo Dục cấm đoán 1 người chơi sử dụng quyền năng hoặc biểu quyết.',
+    tacticalTip: 'Dùng quyền cấm đoán để kiềm tỏa những kẻ đáng nghi ngờ nhất hoặc những người có sức ảnh hưởng lớn trong phiên thảo luận.',
+    flavorQuote: '“Hem, hem... Progress for the sake of progress must be discouraged.”',
+    badge: 'mask',
+    image: '/cards/dolores.jpg'
+  },
+  JESTER: {
+    id: 'JESTER',
+    name: 'Kẻ Hề Peeves (Jester)',
+    faction: 'NEUTRAL',
+    title: 'Yêu Tinh Quậy Phá · Kẻ Hề Tinh Nghịch',
+    phaseType: 'SPECIAL',
+    cardNumber: '№ 27/27',
+    description: 'Hỗn loạn là niềm vui, không thuộc về ánh sáng lẫn bóng tối.',
+    ability: 'Mục tiêu duy nhất của Kẻ Hề là bị trục xuất hoặc biểu quyết Tước Đũa ban ngày. Nếu bị dân làng vote chết, Kẻ Hề THẮNG NGAY LẬP TỨC!',
+    tacticalTip: 'Hành động kỳ quặc, phát ngôn đáng ngờ và kích động mọi người vote mình để giành chiến thắng bất ngờ!',
+    flavorQuote: '“Oh, Potter, you rotter, oh, what have you done!”',
+    badge: 'sparkles',
+    image: '/cards/jester.jpg'
   }
 };

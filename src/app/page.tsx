@@ -131,11 +131,11 @@ export default function Home() {
           {/* Rulebook / Codex Deck Button */}
           <button
             onClick={() => setIsDeckOpen(true)}
-            title="Xem 22 thẻ bài & luật chơi"
+            title="Xem 27 thẻ bài & luật chơi"
             className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0"
           >
             <BookOpen size={14} className="shrink-0" />
-            <span className="text-[11px] sm:text-xs hidden md:inline">Bí Kíp 22 Thẻ Bài</span>
+            <span className="text-[11px] sm:text-xs hidden md:inline">Bí Kíp 27 Thẻ Bài</span>
             <span className="text-[11px] hidden sm:inline md:hidden">Bí Kíp</span>
           </button>
 

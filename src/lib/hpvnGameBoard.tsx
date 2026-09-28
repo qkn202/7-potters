@@ -98,24 +98,69 @@ export default function HPVNGameBoard({ playerNames, settings, currentPlayerId }
   };
 
   const handlePhaseComplete = () => {
-    switch (gameState?.phase) {
+    const currentPhase = gameState?.phase;
+    switch (currentPhase) {
       case 'NIGHT':
         game.processNightPhase();
         addLog('Kết thúc đêm - Xử lý sự kiện...');
         break;
       case 'CHAOS_EVENT':
-        game.processDeathResolution();
+        // Advance to death resolution if not already handled
         addLog('Xử lý cái chết...');
         break;
       case 'DEATH_RESOLUTION':
-        addLog('Người chết tiết lộ thông tin...');
+        // Advance to ghost revelation
+        if (gameState?.enableGhostVoting) {
+          game.processVotePhase();
+          addLog('Người chết có thể vote...');
+        } else {
+          game.processVotePhase();
+          addLog('Bắt đầu vote...');
+        }
         break;
+      case 'GHOST_REVELATION':
       case 'VOTE':
         game.processVotes();
         addLog('Kiểm tra điều kiện thắng...');
         break;
     }
-    setGameState({ ...game.getState() });
+    const newState = game.getState();
+    setGameState({ ...newState });
+    setTimer(getPhaseTime(newState.phase));
+  };
+
+  // Manual advance for simulation
+  const handleAdvancePhase = () => {
+    const currentPhase = gameState?.phase;
+    switch (currentPhase) {
+      case 'NIGHT':
+        game.processNightPhase();
+        addLog('Kết thúc đêm');
+        break;
+      case 'CHAOS_EVENT':
+        // Skip chaos event for now
+        addLog('Bỏ qua chaos event');
+        break;
+      case 'DEATH_RESOLUTION':
+        if (gameState?.enableGhostVoting) {
+          addLog('Chuyển sang vote');
+        } else {
+          game.processVotePhase();
+          addLog('Bắt đầu vote');
+        }
+        break;
+      case 'GHOST_REVELATION':
+        game.processVotePhase();
+        addLog('Bắt đầu vote');
+        break;
+      case 'VOTE':
+        game.processVotes();
+        addLog('Xử lý vote');
+        break;
+    }
+    const newState = game.getState();
+    setGameState({ ...newState });
+    setTimer(getPhaseTime(newState.phase));
   };
 
   const handleAction = (action: string, targetId?: string) => {
@@ -215,6 +260,17 @@ export default function HPVNGameBoard({ playerNames, settings, currentPlayerId }
           </div>
         </div>
       )}
+
+      {/* Debug/Control Panel */}
+      <div className="bg-slate-900/50 border-b border-slate-700/50 px-4 py-2 flex items-center justify-between">
+        <span className="text-xs text-slate-400">Debug Controls (Simulation Mode)</span>
+        <button
+          onClick={handleAdvancePhase}
+          className="px-3 py-1 bg-purple-600 hover:bg-purple-500 rounded text-xs font-medium"
+        >
+          Advance Phase →
+        </button>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">

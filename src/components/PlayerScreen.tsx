@@ -333,7 +333,7 @@ export function PlayerScreen() {
               className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-95 text-black font-serif font-black text-sm tracking-wider flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(245,158,11,0.5)] cursor-pointer transition-all uppercase"
             >
               <RotateCcw size={16} className="text-black" />
-              <span>TRỞ LẠI PHÒNG (VÁN TIẾP THEO)</span>
+              <span>TRỞ VỀ PHÒNG CHỜ</span>
             </button>
 
             <button

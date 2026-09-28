@@ -542,7 +542,7 @@ export function GMDashboard() {
               )}
 
               <p className="text-sm text-[#ffd88f] font-lora">
-                Trận đấu đã khép lại. Merlin có thể bấm &ldquo;Hủy Phòng &amp; Bắt Đầu Lại&rdquo; ở cột bên phải để chuẩn bị ván mới (bảo lưu phòng &amp; chống chia trùng 4T).
+                Trận đấu đã khép lại. Merlin có thể bấm &ldquo;Trở Về Phòng Chờ&rdquo; ở cột bên phải để chuẩn bị ván mới (bảo lưu phòng &amp; chống chia trùng 4T).
               </p>
             </div>
           )}
@@ -800,12 +800,12 @@ export function GMDashboard() {
               <div ref={logsEndRef} />
             </div>
 
-            {/* Reset / Cancel Game Section */}
+            {/* Reset / Return To Lobby Section */}
             <div className="mt-4 pt-4 border-t border-[#7a5229]/50">
               {confirmReset ? (
                 <div className="bg-red-950/80 border border-red-800 p-4 rounded-xl text-center space-y-3">
                   <p className="text-red-300 text-xs font-lora">
-                    Bạn có chắc muốn hủy diễn biến ván này để chia bài ván mới?
+                    Bạn có chắc muốn trở về phòng chờ để chia bài ván mới?
                   </p>
                   <p className="text-[10px] text-[#ffd88f]/80 font-lora">
                     ✨ Dữ liệu người chơi được bảo lưu — ván sau cam kết 100% không trùng người làm 4T
@@ -816,9 +816,9 @@ export function GMDashboard() {
                         returnToLobby();
                         setConfirmReset(false);
                       }}
-                      className="px-3.5 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded-lg text-xs font-serif font-bold cursor-pointer"
+                      className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-black font-serif font-black rounded-lg text-xs cursor-pointer"
                     >
-                      Xác nhận Hủy &amp; Bắt Đầu Lại
+                      Xác nhận Trở Về Phòng Chờ
                     </button>
                     <button
                       onClick={() => setConfirmReset(false)}
@@ -831,9 +831,9 @@ export function GMDashboard() {
               ) : (
                 <button
                   onClick={() => setConfirmReset(true)}
-                  className="w-full py-2.5 px-4 bg-red-950/60 hover:bg-red-900/60 text-red-300 rounded-xl flex items-center justify-center gap-2 transition-all border border-red-900/60 text-xs font-serif font-bold cursor-pointer"
+                  className="w-full py-2.5 px-4 bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 rounded-xl flex items-center justify-center gap-2 transition-all border border-amber-800/60 text-xs font-serif font-bold cursor-pointer"
                 >
-                  <RefreshCw size={14} /> Hủy Phòng &amp; Bắt Đầu Lại
+                  <RotateCcw size={14} /> Trở Về Phòng Chờ
                 </button>
               )}
             </div>

@@ -39,6 +39,9 @@ export interface Player {
   hasVoted: boolean;
   voteCount: number;
   ghostClue?: string;
+  previousRoleId?: string;
+  previousFaction?: Faction;
+  consecutiveEvil?: number;
   // Role-specific state
   abilities: {
     ronSacrificeUsed: boolean;
@@ -637,37 +640,47 @@ export class HPVNGameEngine {
   }
 
   private assignRoles(players: Player[], balance: typeof HPVN_BALANCE[10]): void {
+    // Reset any previous assignment
+    players.forEach(p => { p.role = null; p.faction = 'ORDER_OF_PHOENIX'; });
+
     // Shuffle players
     const shuffledPlayers = this.shuffle(players);
 
-    // Always include Harry and Ron
-    const harry = shuffledPlayers.find(p => p.name.includes('Harry')) || shuffledPlayers[0];
-    const ron = shuffledPlayers.find(p => p.name.includes('Ron')) || shuffledPlayers[1];
+    // CHỐNG CHIA TRÙNG 4T (ANTI-4T STREAK ENGINE FOR MOD HPVN):
+    // Phân nhóm: người chưa từng làm 4T ván trước (ưu tiên số 1) vs người đã làm 4T ván trước (ưu tiên số 2)
+    const non4TCandidates = shuffledPlayers.filter(p => p.previousFaction !== 'DEATH_EATERS' && (!p.consecutiveEvil || p.consecutiveEvil === 0));
+    const prev4TCandidates = shuffledPlayers.filter(p => p.previousFaction === 'DEATH_EATERS' || (p.consecutiveEvil && p.consecutiveEvil > 0));
 
-    harry.role = HPVN_ROLES.HARRY_POTTER;
-    harry.faction = 'ORDER_OF_PHOENIX';
-    ron.role = HPVN_ROLES.RON_WEASLEY;
-    ron.faction = 'ORDER_OF_PHOENIX';
+    // Tập ứng viên 4T: Luôn lấy người chưa từng làm 4T trước, bảo đảm ván 2 không lặp lại người cũ!
+    const prioritized4T = [...non4TCandidates, ...prev4TCandidates];
 
-    // Assign 4T roles
+    // Assign 4T roles first
     const available4T = this.shuffle(FOURT_POOL);
     let fourTAssigned = 0;
-    for (const player of shuffledPlayers) {
+    for (const player of prioritized4T) {
       if (fourTAssigned >= balance.fourT) break;
-      if (player.role) continue;
-
       player.role = HPVN_ROLES[available4T[fourTAssigned]];
       player.faction = 'DEATH_EATERS';
       fourTAssigned++;
     }
 
+    // Always include Harry and Ron from remaining players
+    const remainingForGood = shuffledPlayers.filter(p => !p.role);
+    const harry = remainingForGood.find(p => p.name.includes('Harry')) || remainingForGood[0];
+    harry.role = HPVN_ROLES.HARRY_POTTER;
+    harry.faction = 'ORDER_OF_PHOENIX';
+
+    const remainingForRon = shuffledPlayers.filter(p => !p.role);
+    const ron = remainingForRon.find(p => p.name.includes('Ron')) || remainingForRon[0];
+    ron.role = HPVN_ROLES.RON_WEASLEY;
+    ron.faction = 'ORDER_OF_PHOENIX';
+
     // Assign Neutral roles
     const availableNeutral = this.shuffle(NEUTRAL_POOL);
     let neutralAssigned = 0;
-    for (const player of shuffledPlayers) {
+    const remainingForNeutral = shuffledPlayers.filter(p => !p.role);
+    for (const player of remainingForNeutral) {
       if (neutralAssigned >= balance.neutral) break;
-      if (player.role) continue;
-
       player.role = HPVN_ROLES[availableNeutral[neutralAssigned]];
       player.faction = 'NEUTRAL';
       neutralAssigned++;
@@ -680,16 +693,78 @@ export class HPVNGameEngine {
       if (hphAssigned >= balance.hph + 2) break;
       if (player.role) continue;
 
-      player.role = HPVN_ROLES[availableHPH[hphAssigned - 2]];
+      const roleId = availableHPH[hphAssigned - 2] || 'POTTER_FAKE';
+      player.role = HPVN_ROLES[roleId] || HPVN_ROLES.POTTER_FAKE;
       player.faction = 'ORDER_OF_PHOENIX';
       hphAssigned++;
     }
 
+    // Any remaining players become Potter Fake
+    for (const player of shuffledPlayers) {
+      if (!player.role) {
+        player.role = HPVN_ROLES.POTTER_FAKE;
+        player.faction = 'ORDER_OF_PHOENIX';
+      }
+    }
+
     // Draco special: fake as Hagrid
-    const draco = this.state.players.find(p => p.role?.id === 'DRACO');
+    const draco = players.find(p => p.role?.id === 'DRACO');
     if (draco) {
       draco.abilities.dracoFaction = 'ORDER_OF_PHOENIX'; // Fake as HPH
     }
+  }
+
+  // Khởi động lại ván chơi mới: Giữ nguyên phòng & danh sách người chơi, lưu data chống lặp 4T
+  resetForNewGame(): void {
+    const balance = HPVN_BALANCE[this.state.maxPlayers];
+    const prevPlayers = this.state.players;
+
+    const resetPlayers: Player[] = prevPlayers.map(p => {
+      const is4T = p.role?.faction === 'DEATH_EATERS' || p.faction === 'DEATH_EATERS';
+      return {
+        ...p,
+        previousRoleId: p.role?.id || p.previousRoleId,
+        previousFaction: is4T ? 'DEATH_EATERS' : (p.role?.faction || p.faction),
+        consecutiveEvil: is4T ? ((p.consecutiveEvil || 0) + 1) : 0,
+        role: null,
+        faction: 'ORDER_OF_PHOENIX' as Faction,
+        status: 'ALIVE' as PlayerStatus,
+        hp: 1,
+        isProtected: false,
+        isSilenced: false,
+        isRevealed: false,
+        hasVoted: false,
+        voteCount: 0,
+        abilities: {
+          ronSacrificeUsed: false,
+          goldenFlameUsed: false,
+          kingsleySaveUsed: false,
+          snapeBladeActive: false,
+          lupinPotionUsed: false,
+          moodyBulletUsed: false,
+          billRevealUsed: false,
+          mcGonagallSealUsed: false,
+          mcGonagallSealTarget: null,
+          mcGonagallSealRounds: 0,
+          dracoScanUsed: false,
+          dracoFaction: null,
+        },
+      };
+    });
+
+    this.assignRoles(resetPlayers, balance);
+    this.state.players = resetPlayers;
+    this.state.currentRound = 1;
+    this.state.phase = 'NIGHT';
+    this.state.currentEvent = null;
+    this.state.nightActions = [];
+    this.state.votes = [];
+    this.state.deaths = [];
+    this.state.protectedThisRound = [];
+    this.state.winners = [];
+    this.state.logs = [];
+    this.updateFactionCounts();
+    this.addLog('Trở lại phòng tác chiến ván mới! Hệ thống đã bảo lưu dữ liệu và chống chia trùng người làm 4T.', 'NIGHT');
   }
 
   private updateFactionCounts(): void {

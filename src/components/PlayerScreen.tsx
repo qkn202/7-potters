@@ -25,6 +25,7 @@ import {
   Target,
   Ban,
   FlaskConical,
+  RotateCcw,
   LogOut
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
@@ -59,7 +60,7 @@ const isSectumsempraAction = (actionName: string): boolean => {
 const isReviveAction = (actionName: string): boolean => normalizeAction(actionName).includes('hồi sinh');
 
 export function PlayerScreen() {
-  const { gameState, currentPlayerId, playerAction, executeInstantSkill, resolveInterrupt, skillToast, clearSkillToast, consumeWeasleyItem, leaveGame } = useGame();
+  const { gameState, currentPlayerId, playerAction, executeInstantSkill, resolveInterrupt, skillToast, clearSkillToast, consumeWeasleyItem, returnToLobby, leaveGame } = useGame();
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isDeckOpen, setIsDeckOpen] = useState(false);
@@ -325,19 +326,27 @@ export function PlayerScreen() {
             </div>
           )}
 
-          {/* Action Buttons: Exit Game */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6 mb-4">
+          {/* Action Buttons: Return To Room Lobby & Next Match */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6 mb-3">
+            <button
+              onClick={() => returnToLobby()}
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-95 text-black font-serif font-black text-sm tracking-wider flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(245,158,11,0.5)] cursor-pointer transition-all uppercase"
+            >
+              <RotateCcw size={16} className="text-black" />
+              <span>TRỞ LẠI PHÒNG (VÁN TIẾP THEO)</span>
+            </button>
+
             <button
               onClick={() => leaveGame()}
-              className="w-full sm:w-auto px-7 py-3 rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 hover:brightness-110 active:scale-95 text-white font-serif font-black text-sm tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(239,68,68,0.4)] cursor-pointer transition-all uppercase"
+              className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-black/40 hover:bg-red-950/60 border border-red-900/50 text-red-300 font-serif font-bold text-xs tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-all"
             >
-              <LogOut size={16} />
-              <span>THOÁT GAME (VỀ TRANG CHỦ)</span>
+              <LogOut size={14} className="text-red-400" />
+              <span>Rời Khỏi Phòng (Về Trang Chủ)</span>
             </button>
           </div>
 
-          <p className="text-xs font-mono text-[#ebdcb0]/60">
-            Merlin (Quản Trò) có thể cài đặt lại ván cờ từ bảng điều khiển.
+          <p className="text-xs font-mono text-[#ffd88f]/80">
+            ✨ Bấm &ldquo;Trở Lại Phòng&rdquo; để giữ nguyên phòng chơi &amp; bảo lưu dữ liệu (chống lặp 4T ở lần chơi thứ 2).
           </p>
         </motion.div>
       </div>

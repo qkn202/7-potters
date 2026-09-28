@@ -30,6 +30,7 @@ export interface GameContextType {
   playerAction: (actionName: string, targetId: string) => void;
   revivePlayer: (playerId: string) => void;
   resetGame: () => void;
+  returnToLobby: () => void;
   calculateResolution: () => void;
   applyResolution: () => void;
   executeInstantSkill: (actionName: string, targetId: string) => string | void;
@@ -659,20 +660,24 @@ export function assignRolesFairly(
   // Tính điểm ưu tiên cho từng người chơi:
   const scored = nonGmPlayers.map(p => {
     const key = getPlayerKey(p);
+    const nameKey = `name_${p.name.trim().toLowerCase()}`;
     
     // Tìm lịch sử từ mergedHistory hoặc từ p.personalHistory (gửi từ client handshake)
-    const existingHist = mergedHistory[key] || p.personalHistory;
+    const existingHist = mergedHistory[key] || mergedHistory[p.id] || mergedHistory[nameKey] || p.personalHistory;
     
     // Kiểm tra xem ván trước người này có là 4T không (theo previousRoleMap, p.previousRoleId, p.role hoặc existingHist)
-    const prevRoleId = prevMap[p.id] || p.previousRoleId || existingHist?.lastRoleId;
+    const prevRoleId = prevMap[p.id] || prevMap[key] || prevMap[nameKey] || p.previousRoleId || existingHist?.lastRoleId;
+    const roleObj = prevRoleId ? (ROLES[prevRoleId] || ROLES[prevRoleId.toUpperCase()]) : null;
+
     const prevWasEvil = 
       existingHist?.lastFaction === 'DEATH_EATERS' ||
       (existingHist?.consecutiveEvil !== undefined && existingHist.consecutiveEvil > 0) ||
-      (prevRoleId && ROLES[prevRoleId]?.faction === 'DEATH_EATERS') || 
+      (p.consecutiveEvil !== undefined && p.consecutiveEvil > 0) ||
+      (roleObj && roleObj.faction === 'DEATH_EATERS') || 
       (p.role?.faction === 'DEATH_EATERS');
 
-    const consecutiveEvil = existingHist 
-      ? (existingHist.consecutiveEvil ?? (prevWasEvil ? 1 : 0))
+    const consecutiveEvil = (existingHist && existingHist.consecutiveEvil !== undefined && existingHist.consecutiveEvil > 0)
+      ? existingHist.consecutiveEvil
       : prevWasEvil ? 1 : (p.consecutiveEvil || 0);
 
     const totalEvil = existingHist?.totalEvil ?? (prevWasEvil ? 1 : 0);
@@ -715,7 +720,7 @@ export function assignRolesFairly(
         totalEvil,
         totalGames,
         lastRoleId: existingHist?.lastRoleId || prevRoleId,
-        lastRoleName: existingHist?.lastRoleName || (prevRoleId ? ROLES[prevRoleId]?.name : undefined),
+        lastRoleName: existingHist?.lastRoleName || roleObj?.name || (prevRoleId ? ROLES[prevRoleId]?.name : undefined),
         lastFaction: existingHist?.lastFaction || (prevWasEvil ? 'DEATH_EATERS' : 'ORDER_OF_PHOENIX'),
         gamesSinceLastEvil,
       } 
@@ -727,6 +732,44 @@ export function assignRolesFairly(
 
   const evilSelected = scored.slice(0, evilCount);
   const goodSelected = scored.slice(evilCount);
+
+  // HARD LOCK AUDIT: Tuyệt đối không cho người đã làm 4T ở ván trước nhận lại 4T ở ván này!
+  if (evilCount < N) {
+    for (let i = 0; i < evilSelected.length; i++) {
+      const candidate = evilSelected[i];
+      const cNameKey = `name_${candidate.player.name.trim().toLowerCase()}`;
+      const cPrevRoleId = prevMap[candidate.player.id] || prevMap[candidate.key] || prevMap[cNameKey] || candidate.player.previousRoleId || candidate.hist.lastRoleId;
+      const cRoleObj = cPrevRoleId ? (ROLES[cPrevRoleId] || ROLES[cPrevRoleId.toUpperCase()]) : null;
+      const wasEvil = 
+        candidate.hist.consecutiveEvil > 0 ||
+        candidate.hist.lastFaction === 'DEATH_EATERS' ||
+        (candidate.player.consecutiveEvil !== undefined && candidate.player.consecutiveEvil > 0) ||
+        (cRoleObj && cRoleObj.faction === 'DEATH_EATERS') ||
+        (candidate.player.role?.faction === 'DEATH_EATERS');
+
+      if (wasEvil) {
+        // Tìm 1 người trong goodSelected mà ván trước KHÔNG làm 4T để hoán đổi
+        const swapIdx = goodSelected.findIndex(g => {
+          const gNameKey = `name_${g.player.name.trim().toLowerCase()}`;
+          const gPrevRoleId = prevMap[g.player.id] || prevMap[g.key] || prevMap[gNameKey] || g.player.previousRoleId || g.hist.lastRoleId;
+          const gRoleObj = gPrevRoleId ? (ROLES[gPrevRoleId] || ROLES[gPrevRoleId.toUpperCase()]) : null;
+          const gWasEvil = 
+            g.hist.consecutiveEvil > 0 ||
+            g.hist.lastFaction === 'DEATH_EATERS' ||
+            (g.player.consecutiveEvil !== undefined && g.player.consecutiveEvil > 0) ||
+            (gRoleObj && gRoleObj.faction === 'DEATH_EATERS') ||
+            (g.player.role?.faction === 'DEATH_EATERS');
+          return !gWasEvil;
+        });
+
+        if (swapIdx >= 0) {
+          const [swapItem] = goodSelected.splice(swapIdx, 1);
+          goodSelected.push(candidate);
+          evilSelected[i] = swapItem;
+        }
+      }
+    }
+  }
 
   // GIAI ĐOẠN 2: CHIA NHÂN VẬT TRONG TỪNG PHE (CHARACTER ASSIGNMENT)
   const assignments: Map<string, Role> = new Map();
@@ -2764,37 +2807,117 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const resetGame = () => {
+  const returnToLobby = () => {
     updateState(prev => {
+      // 1. Snapshot previous roles & update persistent history
       const carriedRoleMap: Record<string, string> = { ...(prev.previousRoleMap || {}) };
       const carriedRoleHistory: Record<string, RoleHistoryEntry> = { ...(prev.roleHistory || {}) };
-      prev.players.forEach(p => {
-        if (p.role) {
-          carriedRoleMap[p.id] = p.role.id;
+
+      // Load any existing history from localStorage
+      try {
+        if (typeof localStorage !== 'undefined') {
+          const raw = localStorage.getItem('seven-potters-role-history');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            Object.assign(carriedRoleHistory, parsed);
+          }
         }
+      } catch (e) {}
+
+      prev.players.forEach(p => {
+        const key = getPlayerKey(p);
+        const nameKey = `name_${p.name.trim().toLowerCase()}`;
+        const currentRole = p.role || (p.previousRoleId ? (ROLES[p.previousRoleId] || ROLES[p.previousRoleId.toUpperCase()]) : null);
+
+        if (currentRole) {
+          carriedRoleMap[p.id] = currentRole.id;
+          carriedRoleMap[key] = currentRole.id;
+          carriedRoleMap[nameKey] = currentRole.id;
+
+          const isEvil = currentRole.faction === 'DEATH_EATERS';
+          const oldHist = carriedRoleHistory[key] || carriedRoleHistory[p.id] || carriedRoleHistory[nameKey] || p.personalHistory || {
+            consecutiveEvil: 0,
+            totalEvil: 0,
+            totalGames: 0,
+            gamesSinceLastEvil: 1,
+          };
+
+          const updatedHist: RoleHistoryEntry = {
+            consecutiveEvil: isEvil ? ((oldHist.consecutiveEvil || 0) + 1) : 0,
+            totalEvil: isEvil ? ((oldHist.totalEvil || 0) + 1) : (oldHist.totalEvil || 0),
+            totalGames: (oldHist.totalGames || 0) + 1,
+            lastRoleId: currentRole.id,
+            lastRoleName: currentRole.name,
+            lastFaction: currentRole.faction,
+            gamesSinceLastEvil: isEvil ? 0 : ((oldHist.gamesSinceLastEvil || 0) + 1),
+          };
+
+          carriedRoleHistory[key] = updatedHist;
+          carriedRoleHistory[p.id] = updatedHist;
+          carriedRoleHistory[nameKey] = updatedHist;
+
+          // If this is the current player, save their personal history directly
+          if (p.id === currentPlayerIdRef.current) {
+            savePersonalHistory(updatedHist);
+          }
+        }
+      });
+
+      // Save full role history to localStorage
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('seven-potters-role-history', JSON.stringify(carriedRoleHistory));
+        }
+      } catch (e) {}
+
+      // 2. Reset player state for next match while preserving persistent tracking
+      const nextPlayers: Player[] = prev.players.map(p => {
+        const key = getPlayerKey(p);
+        const nameKey = `name_${p.name.trim().toLowerCase()}`;
+        const hist = carriedRoleHistory[key] || carriedRoleHistory[p.id] || carriedRoleHistory[nameKey] || p.personalHistory;
+        const prevRoleId = p.role?.id || carriedRoleMap[p.id] || carriedRoleMap[key] || carriedRoleMap[nameKey] || p.previousRoleId;
+
+        return {
+          ...p,
+          role: null, // Ready for new role assignment
+          status: 'ALIVE',
+          previousRoleId: prevRoleId,
+          consecutiveEvil: hist?.consecutiveEvil ?? (p.role?.faction === 'DEATH_EATERS' ? 1 : 0),
+          personalHistory: hist || p.personalHistory,
+        };
       });
 
       return {
         ...DEFAULT_STATE,
+        players: nextPlayers,
+        phase: 'LOBBY',
+        round: 0,
         flightStage: 1,
+        maxStages: prev.maxStages || 4,
         currentSkyEvent: SKY_EVENTS[1],
         escortPairs: {},
         goldenFlameUsed: false,
         weasleyItems: INITIAL_WEASLEY_ITEMS,
         previousRoleMap: carriedRoleMap,
         roleHistory: carriedRoleHistory,
-        players: prev.players.map(p => ({
-          ...p,
-          role: null,
-          status: 'ALIVE',
-          previousRoleId: p.role?.id || p.previousRoleId,
-          consecutiveEvil: p.consecutiveEvil,
-          personalHistory: p.personalHistory,
-        })),
-        logs: ['Hệ thống: Merlin đã reset game. Đang chờ chia lại vai trò mới (chống lặp vai)...'],
+        logs: [
+          'Hệ thống: Toàn bộ phù thủy đã trở lại Sảnh Chờ!',
+          'Hệ thống: 📜 Đã lưu trữ dữ liệu vai trò ván trước. Hệ thống đảm bảo ván thứ 2 không bị chia trùng người làm 4T (Tử Thần Thực Tử)!'
+        ],
+        winner: null,
+        winReason: null,
+        matchEvents: [],
+        matchChronicle: [],
+        pendingActions: {},
+        resolutionReport: null,
+        skillStates: {},
+        interruptState: null,
+        activeFX: null,
       };
     });
   };
+
+  const resetGame = returnToLobby;
 
   const impersonatePlayer = (playerId: string) => {
     if (playerId === '__MERLIN__' || playerId === 'merlin') {
@@ -3743,6 +3866,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       playerAction,
       revivePlayer,
       resetGame,
+      returnToLobby,
       calculateResolution,
       applyResolution,
       executeInstantSkill,

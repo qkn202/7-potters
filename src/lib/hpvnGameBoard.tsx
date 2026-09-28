@@ -60,6 +60,7 @@ interface HPVNGameBoardProps {
   settings: HPVNGameSettings;
   currentPlayerId: string;
   initialIsMerlin?: boolean;
+  onBackToMenu?: () => void;
 }
 
 const ROLE_CARD_IMAGES: Record<string, string> = {
@@ -106,7 +107,8 @@ export default function HPVNGameBoard({
   playerNames, 
   settings, 
   currentPlayerId,
-  initialIsMerlin = false
+  initialIsMerlin = false,
+  onBackToMenu
 }: HPVNGameBoardProps) {
   const isHostMerlinConfig = Boolean(settings.isMerlin || initialIsMerlin);
   
@@ -127,6 +129,16 @@ export default function HPVNGameBoard({
   const [activePerspectiveId, setActivePerspectiveId] = useState<string>(isHostMerlinConfig ? 'MERLIN' : currentPlayerId);
 
   const logsContainerRef = useRef<HTMLDivElement>(null);
+
+  const handlePlayAgain = () => {
+    game.resetForNewGame();
+    const st = game.getState();
+    setGameState({ ...st });
+    setSelectedTarget(null);
+    setShowRoleCard(false);
+    addLog('✨ Đã trở lại phòng tác chiến! Ván cờ mới bắt đầu với dữ liệu bảo lưu chống lặp 4T.');
+    setTimer(getPhaseTime(st.phase));
+  };
 
   // Initialize game
   useEffect(() => {
@@ -1297,6 +1309,8 @@ export default function HPVNGameBoard({
         <HPVNGameOverModal
           winners={gameState.winners}
           players={gameState.players}
+          onPlayAgain={handlePlayAgain}
+          onBackToMenu={onBackToMenu || (() => { window.location.href = '/hpvn'; })}
         />
       )}
     </div>
@@ -1383,7 +1397,17 @@ function HPVNRoleModal({
 // GAME OVER MODAL SUBCOMPONENT
 // ============================================================================
 
-function HPVNGameOverModal({ winners, players }: { winners: string[]; players: Player[] }) {
+function HPVNGameOverModal({ 
+  winners, 
+  players,
+  onPlayAgain,
+  onBackToMenu
+}: { 
+  winners: string[]; 
+  players: Player[];
+  onPlayAgain?: () => void;
+  onBackToMenu?: () => void;
+}) {
   const isPhoenixWin = winners.includes('HPH');
   const isDarkWin = winners.includes('FOUR_T');
   const isJesterWin = winners.includes('JESTER');
@@ -1438,13 +1462,28 @@ function HPVNGameOverModal({ winners, players }: { winners: string[]; players: P
           </div>
         </div>
 
-        <button
-          onClick={() => window.location.reload()}
-          className="w-full py-3.5 hpvn-btn-gold rounded-2xl font-serif font-black text-sm tracking-wide flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95"
-        >
-          <Sparkles size={16} />
-          <span>BẮT ĐẦU VÁN MỚI</span>
-        </button>
+        <div className="flex flex-col gap-2.5">
+          <button
+            onClick={onPlayAgain}
+            className="w-full py-3.5 hpvn-btn-gold rounded-2xl font-serif font-black text-sm tracking-wide flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95"
+          >
+            <RotateCcw size={16} />
+            <span>TRỞ LẠI PHÒNG (VÁN TIẾP THEO)</span>
+          </button>
+
+          {onBackToMenu && (
+            <button
+              onClick={onBackToMenu}
+              className="w-full py-2.5 px-4 bg-black/40 hover:bg-[#2e1908] border border-[#7a5229]/60 text-[#ebdcb0] rounded-xl font-serif text-xs font-bold transition-all cursor-pointer"
+            >
+              Về Menu Chính MOD HPVN
+            </button>
+          )}
+        </div>
+
+        <p className="text-[10px] text-[#ffd88f]/80 font-lora mt-3">
+          ✨ Dữ liệu ván trước được bảo lưu để đảm bảo lần chơi thứ 2 không chia trùng người làm 4T.
+        </p>
       </div>
     </div>
   );

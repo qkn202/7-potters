@@ -495,6 +495,10 @@ export default function HPVNPage() {
         settings={settings}
         currentPlayerId={currentPlayerId}
         initialIsMerlin={isMerlinHost}
+        onBackToMenu={() => {
+          setGameStarted(false);
+          setMode('menu');
+        }}
       />
     );
   }

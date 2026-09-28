@@ -36,7 +36,6 @@ export default function Home() {
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [isFlooOpen, setIsFlooOpen] = useState(false);
   const [isWeasleyCrateOpen, setIsWeasleyCrateOpen] = useState(false);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
 
@@ -232,21 +231,13 @@ export default function Home() {
       </main>
 
       {/* HPVN Floo Footer */}
-      <footer className="py-4 px-4 text-center text-xs text-[#ebdcb0]/70 border-t border-[#7a5229]/60 bg-[#140b05]/90 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto w-full">
+      <footer className="py-4 px-4 text-center text-xs text-[#ebdcb0]/70 border-t border-[#7a5229]/60 bg-[#140b05]/90 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-2">
           <DeathlyHallowsSymbol className="w-4 h-4 text-[#bd8436]" />
           <span className="font-lora">
             HPVN Archive · Trận Chiến Bảy Potter (The Battle of the Seven Potters) · Realtime Multiplayer Edition
           </span>
         </div>
-
-        {/* Force Reset Emergency Button for Tester */}
-        <button 
-          onClick={() => setShowResetConfirm(true)}
-          className="text-[11px] text-red-400/90 hover:text-red-300 bg-red-950/40 hover:bg-red-950/70 px-2.5 py-1 rounded transition-colors border border-red-900/50 flex items-center gap-1 font-mono cursor-pointer"
-        >
-          <RotateCcw size={11} /> Reset dữ liệu thử nghiệm
-        </button>
       </footer>
 
       {/* Global Card Deck Codex Modal */}
@@ -254,66 +245,6 @@ export default function Home() {
         isOpen={isDeckOpen}
         onClose={() => setIsDeckOpen(false)}
       />
-
-      {/* Reset Confirmation In-App Modal */}
-      {showResetConfirm && (
-        <div 
-          onClick={() => setShowResetConfirm(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="hpvn-panel-gold rounded-2xl p-6 max-w-sm w-full text-center border-2 border-[#bd8436] space-y-4 animate-in fade-in zoom-in duration-200"
-          >
-            <div className="w-12 h-12 rounded-full bg-red-950/80 border border-red-800 text-red-400 flex items-center justify-center mx-auto">
-              <AlertTriangle className="w-6 h-6 animate-pulse" />
-            </div>
-            
-            <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] tracking-wide">
-              Khôi Phục Khẩn Cấp
-            </h3>
-
-            <p className="text-xs text-[#ebdcb0] font-lora leading-relaxed">
-              Hành động này sẽ xóa sạch dữ liệu phòng chơi và đặt lại toàn bộ ván cờ về trạng thái ban đầu. Bạn có chắc chắn muốn thực hiện?
-            </p>
-
-            <div className="flex justify-center gap-3 pt-2">
-              <button
-                onClick={() => {
-                  const keys = [
-                    'seven-potters-mock-state',
-                    'seven-potters-session-id',
-                    'seven-potters-room-code',
-                    'seven-potters-is-host',
-                    'seven-potters-player-name',
-                    'seven-potters-is-gm',
-                    'seven-potters-house',
-                    'seven-potters-user-tag',
-                    'seven-potters-hpvn-uid',
-                    'seven-potters-session-timestamp',
-                  ];
-                  keys.forEach(k => {
-                    try {
-                      sessionStorage.removeItem(k);
-                      localStorage.removeItem(k);
-                    } catch {}
-                  });
-                  window.location.reload();
-                }}
-                className="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded-xl text-xs font-serif font-bold transition-colors cursor-pointer"
-              >
-                Xác nhận Reset
-              </button>
-              <button
-                onClick={() => setShowResetConfirm(false)}
-                className="px-4 py-2 bg-[#28180e] hover:bg-[#3a2213] text-[#ebdcb0] rounded-xl text-xs font-serif border border-[#7a5229] transition-colors cursor-pointer"
-              >
-                Hủy bỏ
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Weasleys' Wizard Wheezes Supply Crate Modal */}
       <WeasleyCrateModal 

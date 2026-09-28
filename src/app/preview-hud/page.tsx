@@ -23,9 +23,11 @@ import {
   HelpCircle,
   Clock,
   Compass,
-  Feather
+  Feather,
+  ChevronDown
 } from 'lucide-react';
 import { ROLES } from '@/lib/roles';
+import { ChocolateFrogPentagonCard, HouseCrestShield } from '@/components/ChocolateFrogPentagonCard';
 
 // Mock Players data using real images from public/cards/
 const MOCK_PLAYERS = [
@@ -166,128 +168,133 @@ export default function PreviewHUDPage() {
         </AnimatePresence>
 
         {/* ========================================================== */}
-        {/* ZONE 1: TOP HUD · CHẶNG BAY & THỜI GIAN                    */}
+        {/* ZONE 1: TOP HUD · CHẶNG BAY & THỜI GIAN (EXACT MOCKUP)     */}
         {/* ========================================================== */}
-        <div className="px-4 pt-4 pb-2 border-b border-amber-500/15 bg-black/30 backdrop-blur-md">
-          <div className="flex items-center justify-between">
-            {/* Stage Info */}
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-              <span className="font-serif font-black text-xs tracking-wider text-amber-300 uppercase">
+        <div className="relative px-3 pt-2 pb-2 flex items-center justify-between select-none">
+          {/* Left Side: Glowing Blue Dot + Golden Progress Dash Pills */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.9)] animate-pulse" />
+            <div className="flex items-center gap-1">
+              <span className="w-6 h-1 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]" />
+              <span className="w-4 h-1 rounded-full bg-amber-400/60" />
+              <span className="w-2.5 h-1 rounded-full bg-amber-400/30" />
+            </div>
+          </div>
+
+          {/* Center: Hanging Arch Shield Badge (Chặng 2/4) */}
+          <div className="relative -mt-1">
+            <div className="px-5 py-1.5 rounded-b-2xl bg-gradient-to-b from-[#131d2e] via-[#0d1624] to-[#080d16] border-x border-b-2 border-amber-400/70 shadow-[0_6px_20px_rgba(0,0,0,0.8)] text-center relative z-10 flex flex-col items-center">
+              <span className="font-serif font-black text-sm text-[#ffd88f] tracking-wider drop-shadow-md">
                 Chặng {flightStage}/4
               </span>
-              <span className="text-[11px] text-zinc-400 font-serif">· Tầng Mây Giông</span>
+              <div className="text-[9px] text-amber-400/80 -mt-0.5 leading-none">
+                ✦
+              </div>
             </div>
-
-            {/* Phase Badge */}
-            <div className={`px-2.5 py-1 rounded-full text-[11px] font-serif font-bold flex items-center gap-1.5 border shadow-inner ${
-              phase === 'NIGHT' 
-                ? 'bg-indigo-950/90 text-indigo-200 border-indigo-500/40 shadow-indigo-950/50' 
-                : 'bg-amber-950/90 text-amber-200 border-amber-500/40 shadow-amber-950/50'
-            }`}>
-              {phase === 'NIGHT' ? <Moon size={12} className="text-indigo-400" /> : <Sun size={12} className="text-amber-400" />}
-              <span>{phase === 'NIGHT' ? 'Đêm 2' : 'Ngày 2'}</span>
-              <span className="text-[9px] font-mono text-zinc-400">25s</span>
-            </div>
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-amber-400/70" />
           </div>
 
-          {/* Micro Flight Progress Bar */}
-          <div className="mt-2.5 w-full bg-white/5 h-1.5 rounded-full overflow-hidden flex">
-            <div className="h-full bg-gradient-to-r from-amber-600 via-amber-400 to-amber-200 transition-all duration-500" style={{ width: `${(flightStage / 4) * 100}%` }} />
-          </div>
-        </div>
-
-        {/* ========================================================== */}
-        {/* ZONE 2: COMPACT HERO PASSPORT (THẺ CĂN CƯỚC THU GỌN)      */}
-        {/* ========================================================== */}
-        <div className="px-4 py-3 bg-gradient-to-r from-black/50 via-[#121927]/60 to-black/50 border-b border-white/5">
-          <div className="flex items-center justify-between gap-3">
-            {/* Left: Avatar with Glowing Arcane Halo */}
-            <div className="relative group cursor-pointer" onClick={() => setIsCardModalOpen(true)}>
-              <div className={`w-14 h-14 rounded-2xl p-0.5 border-2 shadow-lg overflow-hidden relative ${
-                isDeathEater 
-                  ? 'border-emerald-500/80 shadow-emerald-950/50' 
-                  : 'border-amber-400/90 shadow-amber-950/50'
-              }`}>
-                <Image 
-                  src={currentRole.image || '/cards/harry.jpg'} 
-                  alt={currentRole.name} 
-                  fill 
-                  className="object-cover rounded-[14px]"
-                  priority
-                />
-              </div>
-              <span className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-black/80 border border-amber-400/60 text-amber-300">
-                <Maximize2 size={10} />
-              </span>
+          {/* Right Side: Night Phase Pill & Pocket Watch + Open Trigger */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#0c1422]/90 border border-amber-500/40 text-[11px] font-serif text-amber-200 shadow-inner">
+              {phase === 'NIGHT' ? <Moon size={11} className="text-cyan-300" /> : <Sun size={11} className="text-amber-400" />}
+              <span className="font-bold">{phase === 'NIGHT' ? 'Đêm 2' : 'Ngày 2'}</span>
             </div>
 
-            {/* Middle: Title, Faction & Key Status */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h2 className="font-serif font-black text-sm text-[#ffd88f] truncate">
-                  {currentRole.name}
-                </h2>
-                {selectedRoleId === 'HARRY_POTTER' && <span title="Kẻ Được Chọn">👑</span>}
-              </div>
-
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className={`text-[10px] font-serif font-bold px-2 py-0.5 rounded-full border ${
-                  isDeathEater 
-                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40' 
-                    : 'bg-amber-950/80 text-amber-300 border-amber-500/40'
-                }`}>
-                  {isDeathEater ? '🐍 Tử Thần Thực Tử' : '🦅 Hội Phượng Hoàng'}
-                </span>
-                
-                {selectedRoleId === 'HARRY_POTTER' && (
-                  <span className="text-[10px] font-mono text-amber-200/90 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30 flex items-center gap-1">
-                    <Sparkles size={10} className="text-amber-400" /> Tia Lửa Vàng
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Right: Info Passport Button */}
             <button
               onClick={() => setIsCardModalOpen(true)}
-              className="py-1.5 px-2.5 rounded-xl bg-black/40 hover:bg-black/70 border border-amber-500/30 text-amber-300/90 hover:text-amber-200 text-[11px] font-serif flex flex-col items-center gap-0.5 transition-all active:scale-95 shadow-md"
-              title="Xem toàn bộ lá bài và câu chuyện"
+              className="p-1 rounded-full bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-black shadow-[0_0_10px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              title="Xem Thẻ Bài"
             >
-              <HelpCircle size={15} />
-              <span className="text-[9px]">Chi tiết</span>
+              <Clock size={13} className="text-black" />
             </button>
-          </div>
 
-          {/* Dynamic 1-Line Mission Bar (Thay thế hoàn toàn Action Coach 4 tầng) */}
-          <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-950/40 via-black/50 to-amber-950/40 border border-amber-500/25 flex items-center gap-2 text-xs font-serif text-amber-200/90 shadow-sm animate-pulse">
-            <span className="text-amber-400 shrink-0">👉</span>
-            <span className="truncate">{getMissionPrompt()}</span>
+            <button
+              onClick={() => setIsInventoryOpen(true)}
+              className="px-2 py-0.5 rounded-lg bg-[#0e1726]/90 hover:bg-[#15233a] border border-[#23354d] text-[11px] font-mono text-cyan-200 flex items-center gap-0.5 cursor-pointer relative shadow"
+              title="Menu"
+            >
+              <span>Open</span>
+              <ChevronDown size={11} />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute -top-0.5 -right-0.5 shadow-[0_0_4px_#34d399]" />
+            </button>
           </div>
         </div>
 
         {/* ========================================================== */}
-        {/* ZONE 3: FLIGHT FORMATION ARENA (ĐẤU TRƯỜNG PHI ĐỘI BẦU TRỜ) */}
+        {/* ZONE 2: HERO PASSPORT (EXACT MATCH OF USER'S SCREENSHOT)   */}
         {/* ========================================================== */}
-        <div className="flex-1 px-3 py-3 overflow-y-auto space-y-2 pb-28">
-          <div className="flex items-center justify-between px-1 mb-1">
-            <span className="text-[11px] font-serif font-black uppercase tracking-wider text-zinc-400 flex items-center gap-1">
-              <Feather size={12} className="text-amber-400" /> Phi Đội Bầu Trời ({MOCK_PLAYERS.length} Phù Thủy)
-            </span>
-            <span className="text-[10px] text-zinc-500 font-mono">Chạm để nhắm mục tiêu</span>
-          </div>
+        <div className="mx-2 mb-3 rounded-2xl bg-gradient-to-r from-[#0b1320]/95 via-[#101b2c]/95 to-[#0b1320]/95 border border-[#1e2a3c] p-3 shadow-2xl backdrop-blur-md relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-28 h-28 bg-amber-500/10 rounded-full blur-xl pointer-events-none" />
 
-          {/* Grid of Players: 2 columns on mobile, tactile cards */}
-          <div className="grid grid-cols-2 gap-2">
-            {MOCK_PLAYERS.map(player => {
+          <div className="flex items-center justify-between gap-2.5 relative z-10">
+            {/* Left: Square Card Portrait with Glowing Gold Rim */}
+            <div 
+              onClick={() => setIsCardModalOpen(true)}
+              className="relative w-16 h-16 rounded-2xl p-0.5 border-2 border-amber-400 ring-2 ring-amber-400/40 shadow-[0_0_15px_rgba(245,158,11,0.35)] shrink-0 bg-black cursor-pointer hover:scale-105 transition-transform overflow-hidden"
+            >
+              <Image 
+                src={currentRole.image || '/cards/harry.jpg'} 
+                alt={currentRole.name} 
+                fill 
+                className="object-cover object-top rounded-[14px]"
+                priority
+              />
+            </div>
+
+            {/* Middle: Hero Passport Subtitle + Character Name + Tactical Pill */}
+            <div className="flex-1 min-w-0 pr-0.5">
+              <span className="text-[10px] font-mono tracking-widest uppercase text-amber-300/90 block mb-0.5 font-bold">
+                Hero Passport
+              </span>
+              <h2 className="font-serif font-black text-lg text-white truncate leading-tight drop-shadow-md">
+                {currentRole.name}
+              </h2>
+
+              <div className="mt-1 px-2.5 py-0.5 rounded-full bg-[#161208]/90 border border-amber-500/50 text-[#ffd88f] text-[10px] font-serif flex items-center gap-1 shadow-sm max-w-full truncate">
+                <span className="text-amber-400 shrink-0">🌙</span>
+                <span className="truncate">{getMissionPrompt()}</span>
+              </div>
+            </div>
+
+            {/* Right: Gryffindor Shield Crest */}
+            <div className="shrink-0 flex items-center justify-center">
+              <HouseCrestShield 
+                house={isDeathEater ? 'SLYTHERIN' : 'GRYFFINDOR'} 
+                className="w-10 h-12 drop-shadow-md" 
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================== */}
+        {/* ZONE 3: FLIGHT FORMATION ARENA (PENTAGONAL FROG CARDS)      */}
+        {/* ========================================================== */}
+        <div className="flex-1 px-2 space-y-2 pb-24 overflow-y-auto">
+          {/* 2-Column Responsive Grid matching user's exact mockup */}
+          <div className="grid grid-cols-2 gap-2.5">
+            {MOCK_PLAYERS.filter(p => p.id !== 'p1').map(player => {
               const isSelected = selectedTargetId === player.id;
               const isDead = player.status === 'DEAD';
-              const isMe = player.id === 'p1';
+
+              let statusBadgeNode: React.ReactNode = null;
+              if (player.isEscorted && !isDead) {
+                statusBadgeNode = (
+                  <span className="px-2 py-0.5 rounded-full bg-[#0a1829] border border-cyan-400 text-cyan-200 text-[10px] font-serif font-bold shadow-[0_0_10px_rgba(34,211,238,0.5)] flex items-center gap-1 shrink-0 animate-pulse">
+                    🛡️ Hộ tống
+                  </span>
+                );
+              }
 
               return (
-                <motion.div
+                <ChocolateFrogPentagonCard
                   key={player.id}
-                  whileTap={!isDead ? { scale: 0.97 } : {}}
+                  image={player.image}
+                  name={player.name}
+                  roleName={player.house}
+                  isSelected={isSelected}
+                  isDead={isDead}
+                  statusBadge={statusBadgeNode}
                   onClick={() => {
                     if (isDead) {
                       showToast('Người này đã ngã xuống trong trận chiến!');
@@ -295,69 +302,7 @@ export default function PreviewHUDPage() {
                     }
                     setSelectedTargetId(player.id);
                   }}
-                  className={`p-2.5 rounded-2xl border transition-all cursor-pointer relative flex flex-col items-center text-center ${
-                    isDead 
-                      ? 'bg-red-950/20 border-red-900/30 opacity-45 cursor-not-allowed' 
-                      : isSelected 
-                        ? 'bg-gradient-to-b from-[#1c2438] to-[#0e1624] border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)] scale-[1.02]' 
-                        : 'bg-black/40 hover:bg-[#121927]/60 border-white/10'
-                  }`}
-                >
-                  {/* Selected Crosshair Indicator */}
-                  {isSelected && (
-                    <span className="absolute top-2 right-2 text-amber-400 animate-spin" style={{ animationDuration: '6s' }}>
-                      <Crosshair size={14} />
-                    </span>
-                  )}
-
-                  {/* Escorted Shield Badge */}
-                  {player.isEscorted && !isDead && (
-                    <span className="absolute top-2 left-2 text-amber-300" title="Đang được bay hộ tống">
-                      <Shield size={14} className="fill-amber-500/30" />
-                    </span>
-                  )}
-
-                  {/* Character Avatar Cutout with Status Border */}
-                  <div className={`w-14 h-14 rounded-full p-0.5 border-2 mb-2 relative ${
-                    isDead 
-                      ? 'border-gray-600 grayscale' 
-                      : isSelected 
-                        ? 'border-amber-400 shadow-md ring-2 ring-amber-400/40' 
-                        : 'border-white/20'
-                  }`}>
-                    <Image 
-                      src={player.image} 
-                      alt={player.name} 
-                      fill 
-                      className="object-cover rounded-full"
-                    />
-                    {isDead && (
-                      <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center text-red-400">
-                        <Skull size={18} />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Player Name */}
-                  <div className="font-serif font-black text-xs text-zinc-200 truncate w-full">
-                    {player.name}
-                  </div>
-
-                  {/* Role or Affiliation Badge */}
-                  <div className="mt-1 flex items-center justify-center gap-1 w-full">
-                    {isDead ? (
-                      <span className="text-[10px] text-red-400 font-mono">Tử trận</span>
-                    ) : isSelected ? (
-                      <span className="text-[10px] text-amber-300 font-mono bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/40 font-bold">
-                        🎯 Đang Nhắm
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-zinc-400 font-serif truncate">
-                        {isMe ? 'Bạn' : 'Phù thủy'} · {player.house}
-                      </span>
-                    )}
-                  </div>
-                </motion.div>
+                />
               );
             })}
           </div>

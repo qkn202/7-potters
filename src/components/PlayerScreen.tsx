@@ -950,242 +950,27 @@ export function PlayerScreen() {
           
 
 
-          {/* 1. Skies of Privet Drive: Target Selection Grid */}
-          <div className="relative rounded-2xl hpvn-panel-gold p-5 overflow-hidden">
-            <CardCornerFlourish className="absolute top-2 left-2 w-5 h-5 text-[#bd8436] pointer-events-none" />
-            <CardCornerFlourish className="absolute top-2 right-2 w-5 h-5 text-[#bd8436] -scale-x-100 pointer-events-none" />
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#7a5229] pb-3 mb-4 gap-2">
-              <div>
-                <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] flex items-center gap-2 tracking-wide">
-                  <Crosshair size={18} className="text-[#bd8436]" />
-                  Mục Tiêu Trên Bầu Trời (Chọn 1 người)
-                </h3>
-                <p className="text-xs text-[#ebdcb0] font-lora">
-                  {isDay ? 'Chọn đối tượng để biểu quyết Tước Đũa (Expelliarmus)' : 'Chọn mục tiêu để áp dụng kỹ năng ban đêm / ám sát / bay hộ tống'}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                {myAction && (
-                  <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/90 px-3 py-1 rounded-full border border-emerald-500/80 flex items-center gap-1.5">
-                    <CheckCircle size={13} className="text-emerald-400" />
-                    Đã lưu: {myAction.targetId === 'NONE' ? 'Án Binh (Không Giết)' : (myVotedTarget?.name || 'Mục tiêu')}
-                  </span>
-                )}
-                {selectedTarget && selectedTarget !== myAction?.targetId && (
-                  <span className="text-xs font-mono font-bold text-[#ffd88f] bg-[#3a2213] px-3 py-1 rounded-full border border-[#ffd88f] flex items-center gap-1.5">
-                    <Crosshair size={13} className="text-[#bd8436]" />
-                    Đang chọn: {effectiveTargetPlayer?.name}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Players Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
-              {gameState.players.filter(p => !p.isGM && p.id !== me.id).map((p, index) => {
-                const isSelected = effectiveTargetId === p.id;
-                const isMyVote = myAction?.targetId === p.id;
-                const isPDead = p.status === 'DEAD';
-                const isPInjured = p.status === 'INJURED';
-                const isFellowDeathEater = me.role?.faction === 'DEATH_EATERS' && p.role?.faction === 'DEATH_EATERS';
-                const isSpecialForSnape = me.role?.id === 'SEVERUS_SNAPE' && 
-                  p.role && 
-                  p.role.id !== 'HARRY_POTTER' && 
-                  p.role.id !== 'VOLDEMORT' && 
-                  p.role.id !== 'POTTER_FAKE';
-                const pettigrewInspectStatus = me.role?.id === 'PETER_PETTIGREW'
-                  ? gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`]
-                  : null;
-                const canSelectDead = isNight && me.role?.id === 'REMUS_LUPIN';
-                const disabled = isPDead && !canSelectDead;
-                const voteCount = isDay ? (voteCountsByTarget[p.id] || 0) : 0;
-                const killCount = isNight && me.role?.faction === 'DEATH_EATERS' ? (killCountsByTarget[p.id] || 0) : 0;
-
-                return (
-                  <button
-                    key={p.id ? `target-candidate-${p.id}` : `target-candidate-${index}`}
-                    onClick={() => !disabled && setSelectedTarget(p.id)}
-                    disabled={disabled}
-                    className={`relative p-3.5 rounded-xl text-left border-2 transition-all flex items-center justify-between select-none ${
-                      disabled 
-                        ? isFellowDeathEater
-                          ? 'bg-[#041c12]/50 border-emerald-950/60 opacity-40 cursor-not-allowed grayscale-[40%]'
-                          : 'bg-[#120803]/50 border-[#3a2213] opacity-40 cursor-not-allowed grayscale' 
-                        : isMyVote
-                          ? 'bg-[#1b3d2b] border-emerald-400 ring-1 ring-emerald-400'
-                          : isSelected 
-                            ? isFellowDeathEater
-                              ? 'bg-[#0a3825] border-emerald-300 ring-2 ring-emerald-400'
-                              : 'bg-[#462c14] border-[#ffd88f] ring-1 ring-[#ffd88f]' 
-                            : isFellowDeathEater
-                              ? 'bg-gradient-to-r from-[#052418] via-[#083623] to-[#052418] border-emerald-500/90 hover:border-emerald-400 hover:bg-[#0c442c]'
-                              : 'bg-[#1a0e07] border-[#5a3a1f] hover:border-[#7a5229] hover:bg-[#26150c]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className={`p-2 rounded-lg border ${
-                        isMyVote
-                          ? 'bg-emerald-900 text-emerald-300 border-emerald-500'
-                          : isSelected 
-                            ? isFellowDeathEater
-                              ? 'bg-emerald-800 text-emerald-200 border-emerald-300'
-                              : 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ebdcb0]' 
-                            : isPDead 
-                              ? 'bg-[#2a0303] text-red-400 border-red-900' 
-                              : isFellowDeathEater
-                                ? 'bg-emerald-950 text-emerald-400 border-emerald-600'
-                                : isPInjured
-                                  ? 'bg-[#3d2406] text-amber-300 border-amber-600'
-                                  : 'bg-[#120803] text-[#ebdcb0] border-[#5a3a1f]'
-                      }`}>
-                        {isMyVote ? (
-                          <CheckCircle size={14} />
-                        ) : isFellowDeathEater ? (
-                          <DarkMarkCrest className="w-3.5 h-3.5 text-emerald-400" />
-                        ) : isSpecialForSnape ? (
-                          <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
-                        ) : pettigrewInspectStatus === 'SPECIAL' ? (
-                          <Target className="w-3.5 h-3.5 text-amber-400" />
-                        ) : pettigrewInspectStatus === 'NORMAL' ? (
-                          <Target className="w-3.5 h-3.5 text-gray-500" />
-                        ) : isPDead ? (
-                          <Skull size={14} />
-                        ) : (
-                          <Wand2 size={14} />
-                        )}
-                      </div>
-                      <div className="truncate">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className={`font-serif font-bold text-sm block truncate ${
-                            isPDead 
-                              ? 'line-through text-[#7a5229]' 
-                              : isFellowDeathEater
-                                ? 'text-emerald-300'
-                                : 'text-[#f5eedb]'
-                          }`}>
-                            {p.name}
-                          </span>
-                          {isMyVote && (
-                            <span className="text-[9px] font-mono font-black text-emerald-300 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-600 uppercase">
-                              Phiếu bạn
-                            </span>
-                          )}
-                          {isFellowDeathEater && (
-                            <span className="text-[9px] font-mono font-black text-emerald-200 bg-emerald-950/95 px-2 py-0.5 rounded border border-emerald-400 flex items-center gap-1 uppercase tracking-wider">
-                              <DarkMarkCrest className="w-2.5 h-2.5 text-emerald-300" />
-                              Đồng Minh: {p.role?.name} {p.role?.id === 'VOLDEMORT' ? '👑' : ''}
-                            </span>
-                          )}
-                          {isSpecialForSnape && (
-                            <span className="text-[9px] font-mono font-bold text-purple-200 bg-purple-950/95 px-2 py-0.5 rounded border border-purple-500/70 flex items-center gap-1">
-                              <FlaskConical className="w-2.5 h-2.5 text-purple-400" />
-                              Nhân Vật Đặc Biệt (Ẩn Phe)
-                            </span>
-                          )}
-                          {pettigrewInspectStatus === 'HARRY_POTTER' && (
-                            <span className="text-[9px] font-mono font-black text-rose-300 bg-rose-950/95 px-2 py-0.5 rounded border border-rose-500/70 flex items-center gap-1 animate-pulse">
-                              <Target className="w-2.5 h-2.5 text-rose-400" />
-                              ⚡ Đích Danh: Harry Potter Thật! (Nợ Mạng ⚠️)
-                            </span>
-                          )}
-                          {pettigrewInspectStatus === 'RON_WEASLEY' && (
-                            <span className="text-[9px] font-mono font-bold text-orange-300 bg-orange-950/95 px-2 py-0.5 rounded border border-orange-500/70 flex items-center gap-1">
-                              <Target className="w-2.5 h-2.5 text-orange-400" />
-                              🐀 Đích Danh: Ron Weasley (Cậu chủ cũ)
-                            </span>
-                          )}
-                          {pettigrewInspectStatus === 'SPECIAL' && (
-                            <span className="text-[9px] font-mono font-bold text-amber-300 bg-amber-950/95 px-2 py-0.5 rounded border border-amber-500/70 flex items-center gap-1">
-                              <Target className="w-2.5 h-2.5 text-amber-400" />
-                              Đánh Hơi: Nhân Vật Đặc Biệt ✨
-                            </span>
-                          )}
-                          {pettigrewInspectStatus === 'NORMAL' && (
-                            <span className="text-[9px] font-mono text-gray-400 bg-gray-900/95 px-2 py-0.5 rounded border border-gray-700 flex items-center gap-1">
-                              <Target className="w-2.5 h-2.5 text-gray-500" />
-                              Đánh Hơi: Bản Sao / Thường Dân
-                            </span>
-                          )}
-                          {isPInjured && (
-                            <span className="text-[9px] font-mono font-bold text-amber-300 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-600 uppercase">
-                              Bị thương
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className={`text-[10px] font-mono ${
-                            isPDead 
-                              ? 'text-[#ebdcb0]/50' 
-                              : isFellowDeathEater
-                                ? 'text-emerald-400 font-bold'
-                                : isPInjured 
-                                  ? 'text-amber-400 font-bold' 
-                                  : 'text-[#ebdcb0]/60'
-                          }`}>
-                            {isPDead 
-                              ? (isFellowDeathEater ? '💀 Đồng minh đã tử trận' : 'Đã tử trận')
-                              : isFellowDeathEater
-                                ? '🐍 Đồng minh Tử Thần Thực Tử'
-                                : isPInjured 
-                                  ? '⚠️ Đang bị thương nặng' 
-                                  : 'Mục tiêu khả dĩ'}
-                          </span>
-                          {voteCount > 0 && (
-                            <span className="text-[10px] font-mono font-bold text-[#ffd88f] bg-[#3a2213] px-1.5 rounded border border-[#bd8436]">
-                              🗳️ {voteCount} phiếu
-                            </span>
-                          )}
-                          {killCount > 0 && (
-                            <span className="text-[10px] font-mono font-bold text-red-300 bg-red-950 px-1.5 rounded border border-red-800">
-                              🗡️ {killCount} phiếu
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="ml-2 flex-shrink-0">
-                      {isMyVote ? (
-                        <CheckCircle size={18} className="text-emerald-400" />
-                      ) : isSelected ? (
-                        <Crosshair size={18} className={isFellowDeathEater ? "text-emerald-300 animate-spin-slow" : "text-[#ffd88f] animate-spin-slow"} />
-                      ) : isFellowDeathEater ? (
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 block" />
-                      ) : (
-                        <span className="w-2 h-2 rounded-full bg-[#5a3a1f] block" />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Caution banner when a fellow Death Eater is selected */}
-            {effectiveTargetPlayer?.role?.faction === 'DEATH_EATERS' && me.role?.faction === 'DEATH_EATERS' && (
-              <div className="mt-3.5 p-3 rounded-xl bg-[#09261a] border-2 border-emerald-500/90 text-xs text-emerald-200 font-serif flex items-start gap-2.5">
-                <div className="p-1 rounded-lg bg-emerald-950 border border-emerald-400 text-emerald-300 shrink-0 mt-0.5">
-                  <DarkMarkCrest className="w-4 h-4 text-emerald-400" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-mono font-black text-emerald-300 uppercase tracking-wider block">
-                    ⚠️ CHÚ Ý: ĐANG CHỌN ĐỒNG MINH TỬ THẦN THỰC TỬ!
-                  </span>
-                  <span>
-                    Mục tiêu bạn vừa nhấp chọn là <strong>{effectiveTargetPlayer.name} ({effectiveTargetPlayer.role?.name})</strong>. Đây là đồng minh cùng hội kín của bạn. Hãy cân nhắc kỹ trước khi bấm Ám Sát hoặc Biểu Quyết Tước Đũa!
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 2. Spell Arsenal: Action Console */}
+          {/* 1. Spell Arsenal: Action Console - Bàn Thi Triển Ma Pháp & Biểu Quyết */}
           <div className="relative rounded-2xl hpvn-panel p-5">
-            <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] mb-3 flex items-center gap-2 tracking-wide">
-              <Wand2 size={18} className="text-[#bd8436]" />
-              Bàn Thi Triển Ma Pháp & Biểu Quyết
-            </h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#7a5229] pb-3 mb-4 gap-2">
+              <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] flex items-center gap-2 tracking-wide">
+                <Wand2 size={18} className="text-[#bd8436]" />
+                Bàn Thi Triển Ma Pháp & Biểu Quyết
+              </h3>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {effectiveTargetPlayer ? (
+                  <span className="text-xs font-mono font-bold text-[#ffd88f] bg-[#3a2213] px-3 py-1 rounded-full border border-[#ffd88f] flex items-center gap-1.5 shadow-sm">
+                    <Crosshair size={13} className="text-[#bd8436]" />
+                    Đang chọn: {effectiveTargetPlayer.name}
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-mono text-[#ebdcb0]/70 italic bg-black/40 px-2.5 py-0.5 rounded-full border border-white/10">
+                    Chưa chọn mục tiêu ở danh sách bên dưới
+                  </span>
+                )}
+              </div>
+            </div>
 
             {/* Persistent Confirmed Vote Box */}
             {myAction && (
@@ -1751,6 +1536,236 @@ export function PlayerScreen() {
                     <span>{toastMessage}</span>
                   </motion.div>
                 )}
+              </div>
+            )}
+          </div>
+
+          {/* 2. Skies of Privet Drive: Target Selection Grid - Danh Sách Mục Tiêu */}
+          <div className="relative rounded-2xl hpvn-panel-gold p-5 overflow-hidden">
+            <CardCornerFlourish className="absolute top-2 left-2 w-5 h-5 text-[#bd8436] pointer-events-none" />
+            <CardCornerFlourish className="absolute top-2 right-2 w-5 h-5 text-[#bd8436] -scale-x-100 pointer-events-none" />
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#7a5229] pb-3 mb-4 gap-2">
+              <div>
+                <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] flex items-center gap-2 tracking-wide">
+                  <Crosshair size={18} className="text-[#bd8436]" />
+                  Mục Tiêu Trên Bầu Trời (Chọn 1 người)
+                </h3>
+                <p className="text-xs text-[#ebdcb0] font-lora">
+                  {isDay ? 'Chọn đối tượng để biểu quyết Tước Đũa (Expelliarmus)' : 'Chọn mục tiêu để áp dụng kỹ năng ban đêm / ám sát / bay hộ tống'}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                {myAction && (
+                  <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/90 px-3 py-1 rounded-full border border-emerald-500/80 flex items-center gap-1.5">
+                    <CheckCircle size={13} className="text-emerald-400" />
+                    Đã lưu: {myAction.targetId === 'NONE' ? 'Án Binh (Không Giết)' : (myVotedTarget?.name || 'Mục tiêu')}
+                  </span>
+                )}
+                {selectedTarget && selectedTarget !== myAction?.targetId && (
+                  <span className="text-xs font-mono font-bold text-[#ffd88f] bg-[#3a2213] px-3 py-1 rounded-full border border-[#ffd88f] flex items-center gap-1.5">
+                    <Crosshair size={13} className="text-[#bd8436]" />
+                    Đang chọn: {effectiveTargetPlayer?.name}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Players Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
+              {gameState.players.filter(p => !p.isGM && p.id !== me.id).map((p, index) => {
+                const isSelected = effectiveTargetId === p.id;
+                const isMyVote = myAction?.targetId === p.id;
+                const isPDead = p.status === 'DEAD';
+                const isPInjured = p.status === 'INJURED';
+                const isFellowDeathEater = me.role?.faction === 'DEATH_EATERS' && p.role?.faction === 'DEATH_EATERS';
+                const isSpecialForSnape = me.role?.id === 'SEVERUS_SNAPE' && 
+                  p.role && 
+                  p.role.id !== 'HARRY_POTTER' && 
+                  p.role.id !== 'VOLDEMORT' && 
+                  p.role.id !== 'POTTER_FAKE';
+                const pettigrewInspectStatus = me.role?.id === 'PETER_PETTIGREW'
+                  ? gameState.skillStates[`${me.id}_PETTIGREW_INSPECTED_${p.id}`]
+                  : null;
+                const canSelectDead = isNight && me.role?.id === 'REMUS_LUPIN';
+                const disabled = isPDead && !canSelectDead;
+                const voteCount = isDay ? (voteCountsByTarget[p.id] || 0) : 0;
+                const killCount = isNight && me.role?.faction === 'DEATH_EATERS' ? (killCountsByTarget[p.id] || 0) : 0;
+
+                return (
+                  <button
+                    key={p.id ? `target-candidate-${p.id}` : `target-candidate-${index}`}
+                    onClick={() => !disabled && setSelectedTarget(p.id)}
+                    disabled={disabled}
+                    className={`relative p-3.5 rounded-xl text-left border-2 transition-all flex items-center justify-between select-none ${
+                      disabled 
+                        ? isFellowDeathEater
+                          ? 'bg-[#041c12]/50 border-emerald-950/60 opacity-40 cursor-not-allowed grayscale-[40%]'
+                          : 'bg-[#120803]/50 border-[#3a2213] opacity-40 cursor-not-allowed grayscale' 
+                        : isMyVote
+                          ? 'bg-[#1b3d2b] border-emerald-400 ring-1 ring-emerald-400'
+                          : isSelected 
+                            ? isFellowDeathEater
+                              ? 'bg-[#0a3825] border-emerald-300 ring-2 ring-emerald-400'
+                              : 'bg-[#462c14] border-[#ffd88f] ring-1 ring-[#ffd88f]' 
+                            : isFellowDeathEater
+                              ? 'bg-gradient-to-r from-[#052418] via-[#083623] to-[#052418] border-emerald-500/90 hover:border-emerald-400 hover:bg-[#0c442c]'
+                              : 'bg-[#1a0e07] border-[#5a3a1f] hover:border-[#7a5229] hover:bg-[#26150c]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`p-2 rounded-lg border ${
+                        isMyVote
+                          ? 'bg-emerald-900 text-emerald-300 border-emerald-500'
+                          : isSelected 
+                            ? isFellowDeathEater
+                              ? 'bg-emerald-800 text-emerald-200 border-emerald-300'
+                              : 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ebdcb0]' 
+                            : isPDead 
+                              ? 'bg-[#2a0303] text-red-400 border-red-900' 
+                              : isFellowDeathEater
+                                ? 'bg-emerald-950 text-emerald-400 border-emerald-600'
+                                : isPInjured
+                                  ? 'bg-[#3d2406] text-amber-300 border-amber-600'
+                                  : 'bg-[#120803] text-[#ebdcb0] border-[#5a3a1f]'
+                      }`}>
+                        {isMyVote ? (
+                          <CheckCircle size={14} />
+                        ) : isFellowDeathEater ? (
+                          <DarkMarkCrest className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : isSpecialForSnape ? (
+                          <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
+                        ) : pettigrewInspectStatus === 'SPECIAL' ? (
+                          <Target className="w-3.5 h-3.5 text-amber-400" />
+                        ) : pettigrewInspectStatus === 'NORMAL' ? (
+                          <Target className="w-3.5 h-3.5 text-gray-500" />
+                        ) : isPDead ? (
+                          <Skull size={14} />
+                        ) : (
+                          <Wand2 size={14} />
+                        )}
+                      </div>
+                      <div className="truncate">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`font-serif font-bold text-sm block truncate ${
+                            isPDead 
+                              ? 'line-through text-[#7a5229]' 
+                              : isFellowDeathEater
+                                ? 'text-emerald-300'
+                                : 'text-[#f5eedb]'
+                          }`}>
+                            {p.name}
+                          </span>
+                          {isMyVote && (
+                            <span className="text-[9px] font-mono font-black text-emerald-300 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-600 uppercase">
+                              Phiếu bạn
+                            </span>
+                          )}
+                          {isFellowDeathEater && (
+                            <span className="text-[9px] font-mono font-black text-emerald-200 bg-emerald-950/95 px-2 py-0.5 rounded border border-emerald-400 flex items-center gap-1 uppercase tracking-wider">
+                              <DarkMarkCrest className="w-2.5 h-2.5 text-emerald-300" />
+                              Đồng Minh: {p.role?.name} {p.role?.id === 'VOLDEMORT' ? '👑' : ''}
+                            </span>
+                          )}
+                          {isSpecialForSnape && (
+                            <span className="text-[9px] font-mono font-bold text-purple-200 bg-purple-950/95 px-2 py-0.5 rounded border border-purple-500/70 flex items-center gap-1">
+                              <FlaskConical className="w-2.5 h-2.5 text-purple-400" />
+                              Nhân Vật Đặc Biệt (Ẩn Phe)
+                            </span>
+                          )}
+                          {pettigrewInspectStatus === 'HARRY_POTTER' && (
+                            <span className="text-[9px] font-mono font-black text-rose-300 bg-rose-950/95 px-2 py-0.5 rounded border border-rose-500/70 flex items-center gap-1 animate-pulse">
+                              <Target className="w-2.5 h-2.5 text-rose-400" />
+                              ⚡ Đích Danh: Harry Potter Thật! (Nợ Mạng ⚠️)
+                            </span>
+                          )}
+                          {pettigrewInspectStatus === 'RON_WEASLEY' && (
+                            <span className="text-[9px] font-mono font-bold text-orange-300 bg-orange-950/95 px-2 py-0.5 rounded border border-orange-500/70 flex items-center gap-1">
+                              <Target className="w-2.5 h-2.5 text-orange-400" />
+                              🐀 Đích Danh: Ron Weasley (Cậu chủ cũ)
+                            </span>
+                          )}
+                          {pettigrewInspectStatus === 'SPECIAL' && (
+                            <span className="text-[9px] font-mono font-bold text-amber-300 bg-amber-950/95 px-2 py-0.5 rounded border border-amber-500/70 flex items-center gap-1">
+                              <Target className="w-2.5 h-2.5 text-amber-400" />
+                              Đánh Hơi: Nhân Vật Đặc Biệt ✨
+                            </span>
+                          )}
+                          {pettigrewInspectStatus === 'NORMAL' && (
+                            <span className="text-[9px] font-mono text-gray-400 bg-gray-900/95 px-2 py-0.5 rounded border border-gray-700 flex items-center gap-1">
+                              <Target className="w-2.5 h-2.5 text-gray-500" />
+                              Đánh Hơi: Bản Sao / Thường Dân
+                            </span>
+                          )}
+                          {isPInjured && (
+                            <span className="text-[9px] font-mono font-bold text-amber-300 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-600 uppercase">
+                              Bị thương
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className={`text-[10px] font-mono ${
+                            isPDead 
+                              ? 'text-[#ebdcb0]/50' 
+                              : isFellowDeathEater
+                                ? 'text-emerald-400 font-bold'
+                                : isPInjured 
+                                  ? 'text-amber-400 font-bold' 
+                                  : 'text-[#ebdcb0]/60'
+                          }`}>
+                            {isPDead 
+                              ? (isFellowDeathEater ? '💀 Đồng minh đã tử trận' : 'Đã tử trận')
+                              : isFellowDeathEater
+                                ? '🐍 Đồng minh Tử Thần Thực Tử'
+                                : isPInjured 
+                                  ? '⚠️ Đang bị thương nặng' 
+                                  : 'Mục tiêu khả dĩ'}
+                          </span>
+                          {voteCount > 0 && (
+                            <span className="text-[10px] font-mono font-bold text-[#ffd88f] bg-[#3a2213] px-1.5 rounded border border-[#bd8436]">
+                              🗳️ {voteCount} phiếu
+                            </span>
+                          )}
+                          {killCount > 0 && (
+                            <span className="text-[10px] font-mono font-bold text-red-300 bg-red-950 px-1.5 rounded border border-red-800">
+                              🗡️ {killCount} phiếu
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="ml-2 flex-shrink-0">
+                      {isMyVote ? (
+                        <CheckCircle size={18} className="text-emerald-400" />
+                      ) : isSelected ? (
+                        <Crosshair size={18} className={isFellowDeathEater ? "text-emerald-300 animate-spin-slow" : "text-[#ffd88f] animate-spin-slow"} />
+                      ) : isFellowDeathEater ? (
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 block" />
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-[#5a3a1f] block" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Caution banner when a fellow Death Eater is selected */}
+            {effectiveTargetPlayer?.role?.faction === 'DEATH_EATERS' && me.role?.faction === 'DEATH_EATERS' && (
+              <div className="mt-3.5 p-3 rounded-xl bg-[#09261a] border-2 border-emerald-500/90 text-xs text-emerald-200 font-serif flex items-start gap-2.5">
+                <div className="p-1 rounded-lg bg-emerald-950 border border-emerald-400 text-emerald-300 shrink-0 mt-0.5">
+                  <DarkMarkCrest className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono font-black text-emerald-300 uppercase tracking-wider block">
+                    ⚠️ CHÚ Ý: ĐANG CHỌN ĐỒNG MINH TỬ THẦN THỰC TỬ!
+                  </span>
+                  <span>
+                    Mục tiêu bạn vừa nhấp chọn là <strong>{effectiveTargetPlayer.name} ({effectiveTargetPlayer.role?.name})</strong>. Đây là đồng minh cùng hội kín của bạn. Hãy cân nhắc kỹ trước khi bấm Ám Sát hoặc Biểu Quyết Tước Đũa!
+                  </span>
+                </div>
               </div>
             )}
           </div>

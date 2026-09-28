@@ -37,7 +37,9 @@ Trò chơi bao gồm **21 thẻ bài nhân vật** được chế tác thủ cô
 2. **Ron Weasley (Người Bạn Trung Thành):** Lá chắn sống của Harry. Tự động nhận đòn hy sinh chết thay nếu Harry bị tấn công.
 3. **Hermione Granger (Phù Thủy Uyên Bác):** Mỗi ban ngày, có thể gửi tin mật cho Quản Trò Merlin để soi danh tính thật của 1 người chơi.
 4. **Albus Dumbledore (Hiệu Trưởng Vĩ Đại):** Ban ngày chọn bảo hộ 1 người chơi khỏi bị ám sát (không được bảo vệ 1 người 2 lượt liên tiếp).
-5. **Severus Snape (Gián Điệp Nhị Trùng):** Thuộc Hội Phượng Hoàng nhưng mang Bế Quan Bí Thuật đỉnh cao — nếu Hermione soi sẽ thấy là TTTT, nhưng nếu Pettigrew soi lại thấy là HPH!
+5. **Severus Snape (Bậc Thầy Bế Quan Bí Thuật · Điệp Viên Hai Mang):** 
+   - **Kỹ năng Đêm Chủ Động — `Bọc Lót Sectumsempra`:** Chọn bảo vệ 1 người trong đêm. Nếu mục tiêu bị Tử Thần Thực Tử tấn công, nhát chém Sectumsempra của Snape sẽ can thiệp rạch nát đòn ám sát, cứu sống mục tiêu! Nhưng nếu mục tiêu *không* bị tấn công, bùa lạc sẽ sượt qua tai khiến mục tiêu bị câm lặng kỹ năng ở vòng kế tiếp.
+   - **Nội tại — `Bế Quan Bí Thuật` (Occlumency):** Tâm trí bất khả xâm phạm — miễn nhiễm hoàn toàn trước bùa soi của Hermione ("Tâm Trí Bất Khả Xâm Phạm") và đánh lừa khứu giác của Peter Pettigrew.
 6. **Remus Lupin (Người Sói Hào Hiệp):** Sở hữu 1 bình thuốc hồi sinh duy nhất trong trận để cứu sống 1 đồng đội vừa ngã xuống ban ngày.
 7. **Alastor "Mắt Điên" Moody (Thần Sáng Khét Tiếng):** Sở hữu 1 phát đạn Avada Kedavra vào ban đêm. Nếu bắn nhầm đồng minh Hội Phượng Hoàng, Moody sẽ tự vẫn vì ân hận.
 8. **Rubeus Hagrid (Người Lai Khổng Lồ):** Thể lực phi thường, phải bị tấn công 2 lần mới tử trận.
@@ -52,7 +54,10 @@ Trò chơi bao gồm **21 thẻ bài nhân vật** được chế tác thủ cô
 15. **Chúa Tể Voldemort (He-Who-Must-Not-Be-Named):** Biết mặt toàn bộ thuộc hạ TTTT, nắm quyền quyết định đòn ám sát ban ngày (hoặc chọn Án Binh). Nếu Voldemort chết, Tử Thần Thực Tử thua ngay lập tức!
 16. **Bellatrix Lestrange (Cuồng Tín Tử Vì Đạo):** Nếu bị treo cổ, ban ngày tiếp theo Voldemort thịnh nộ được quyền giết 2 người liên tiếp!
 17. **Lucius Malfoy (Quý Tộc Xảo Quyệt):** Nếu bị treo cổ, ban ngày tiếp theo Voldemort bị tước trượng và cấm giết người.
-18. **Peter Pettigrew (Đuôi Trùn Phản Bội):** Ban ngày có thể soi 1 người chơi để kiểm tra xem họ có thuộc Hội Phượng Hoàng hay không.
+18. **Peter Pettigrew (Đuôi Trùn · Khứu Giác Chuột & Món Nợ Mạng):** 
+   - **Kỹ năng Tức Thời — `Đánh Hơi Nhà Hang Sóc`:** Nhờ 12 năm sống lốt chuột Scabbers, Pettigrew có thể ngửi mùi nhận diện đích danh **Harry Potter Thật** và **Ron Weasley**, phân biệt các nhân vật Đặc Biệt khác và Bản Sao thường.
+   - **Hạn chế — `Món Nợ Sinh Mệnh` (Life Debt):** Bàn tay bạc bị co giật/phản phệ nếu chính tay Pettigrew trực tiếp bỏ phiếu giết Harry Potter thật.
+   - **Nội tại — `Cắt Ngón Tay Hóa Chuột Đào Tẩu`:** Lần đầu bị trục xuất ban ngày, Pettigrew giả chết hóa chuột trốn thoát, sống sót qua phiên xử nhưng mất quyền biểu quyết ở ngày kế tiếp.
 
 ### 🧙‍♂️ Quản Trò (Merlin / Game Master)
 - Đóng vai trò phân xử, thông báo các chặng bay, công bố biến cố thời tiết bầu trời và dẫn dắt câu chuyện qua hệ thống thông cáo nổi tự động.
@@ -163,9 +168,31 @@ Các tính năng quan trọng và cải tiến đã hoàn thiện trong các b�
   - Hiển thị thanh tiến trình trực quan song hành Gryffindor (Đỏ/Vàng) và Slytherin (Xanh Ngọc).
   - Gắn huy hiệu cảnh báo kích hoạt *Phục Kích Kép Chặng 3* cho phòng đông người.
 
+### 🪄 12. Kỹ Năng Chuẩn Nguyên Tác: Severus Snape & Peter Pettigrew
+- **Severus Snape (Bậc Thầy Bế Quan Bí Thuật · Điệp Viên Hai Mang):**
+  - **Kỹ năng Đêm Chủ Động — `Bọc Lót Sectumsempra` (`NIGHT`):** Chọn bọc lót cho 1 mục tiêu. Nếu người đó bị Tử Thần Thực Tử tấn công, nhát chém Sectumsempra của Snape sẽ can thiệp rạch nát đòn ám sát, cứu sống mục tiêu! Nhưng nếu người đó *không* bị tấn công, thần chú lạc sẽ sượt qua tai (như George Weasley mất tai) làm câm lặng kỹ năng chủ động ở vòng kế tiếp (`SECTUMSEMPRA_SILENCED`).
+  - **Nội tại — `Bế Quan Bí Thuật` (Occlumency):** Miễn nhiễm hoàn toàn trước bùa soi của Hermione ("Tâm Trí Bất Khả Xâm Phạm") và đánh lừa khứu giác của Peter Pettigrew.
+- **Peter Pettigrew (Đuôi Trùn · Khứu Giác Chuột, Món Nợ Mạng & Hóa Thú):**
+  - **Kỹ năng Tức Thời — `Đánh Hơi Nhà Hang Sóc` (`INSTANT`):** Nhờ 12 năm sống ở dạng chuột Scabbers bên cạnh Ron, Pettigrew có thể ngửi mùi nhận diện đích danh **Harry Potter Thật** (`HARRY_POTTER`) và **Ron Weasley** (`RON_WEASLEY`), đồng thời phân biệt nhân vật Đặc Biệt (`SPECIAL`) và Bản Sao thường (`NORMAL`).
+  - **Hạn chế — `Món Nợ Sinh Mệnh` (Life Debt):** Bàn tay bạc bị co giật/phản phệ nếu chính tay Pettigrew trực tiếp bỏ phiếu ám sát Harry Potter thật (các Tử Thần khác vẫn có thể giết).
+  - **Nội tại — `Cắt Ngón Tay Hóa Chuột Đào Tẩu` (Rat Escape):** Lần đầu tiên bị biểu quyết trục xuất ban ngày, Pettigrew tự cắt ngón tay hóa chuột giả chết trốn thoát, sống sót qua phiên xử nhưng bị cấm biểu quyết ở ngày kế tiếp (`VOTE_SILENCED`).
+
+### ⚖️ 13. Đại Tu Thuật Toán Phân Vai Công Bằng 2 Giai Đoạn (Guaranteed Fair Role Engine & Anti-TTTT Streak Audit)
+Khắc phục triệt để hiện tượng người chơi bị bắt làm Tử Thần Thực Tử (TTTT) quá nhiều lần liên tục khi đổi phòng, chuyển tab hoặc trong các phòng 4 – 15 người:
+- **Triệt tiêu "Bẫy Tân Binh" (Newcomer Priority Trap):** Trước đây, người mới vào phòng hoặc chuyển tab bị gán `totalGames = 0, totalEvil = 0` dẫn đến `evilRatio = 0` $\rightarrow$ điểm ưu tiên đạt mức tối đa 100 điểm, luôn luôn bị ép làm TTTT ở ván đầu tiên. Thuật toán mới khởi tạo điểm trung tính (`evilCount / N`) và giảm nhẹ `-15 điểm` cho tân binh trong ván đầu tiên để ưu tiên làm quen nhịp game ở phe HPH.
+- **Định danh Thiết bị Bền Vững (`Persistent Device ID`):** Lưu trữ cố định `seven-potters-device-id` trên trình duyệt. Khi người chơi chuyển tab, ngắt kết nối di động hoặc bị dọn dẹp khỏi lobby sau 90 giây: khi quay lại, hệ thống nhận diện đúng người cũ qua `deviceId`, không sinh ID rác mới, bảo toàn lịch sử chuỗi TTTT.
+- **Bắt tay Lịch sử Liên Phòng (`Cross-Room History Handshake`):** Client tự lưu lịch sử vai trò cá nhân vào `localStorage` sau mỗi ván. Khi tham gia bất kỳ phòng mới nào, gói `JOIN_REQUEST` gửi kèm `personalHistory`. Host mới lập tức nhận diện: *"Người chơi này vừa làm TTTT ở phòng cũ $\rightarrow$ Khóa cứng không cho làm TTTT ở phòng này!"*.
+- **Khóa Cứng (`Hard Lock`) & Hồi Chiêu TTTT (`Soft Cooldown`):**
+  - **Hard Lock:** Nếu vừa làm TTTT ở ván liền kề, điểm ưu tiên bị phạt `-1,000,000 điểm` $\rightarrow$ **Xác suất làm TTTT liên tiếp = 0%** (Max streak = 1 tuyệt đối).
+  - **Soft Cooldown:** Tích lũy điểm hạn hán `+20 điểm/ván` cho mỗi ván chơi phe HPH, luân phiên đều đặn TTTT cho mọi người chơi trong phòng.
+
 ---
 
 ## 🛠️ 6. Cài Đặt & Khởi Chạy Dự Án (Developer Guide)
+
+### Triển khai Trực tuyến (Live Production)
+- 🌐 **Website chính thức:** [https://seven-potters.vercel.app](https://seven-potters.vercel.app)
+- 📦 **Mã nguồn:** [GitHub - qkn202/7-potters](https://github.com/qkn202/7-potters.git)
 
 ### Yêu cầu môi trường
 - **Node.js**: >= 18.18.0
@@ -187,11 +214,11 @@ Mở trình duyệt tại [http://localhost:3000](http://localhost:3000) để t
 ### Kiểm thử hệ thống tự động (Automated Test Suites)
 Dự án được bảo vệ bởi bộ kiểm thử tự động toàn diện:
 
-1. **Kiểm thử 13 cơ chế Boardgame cốt lõi:**
+1. **Kiểm thử 19 cơ chế Boardgame & Thuật toán công bằng:**
    ```bash
    npx tsx tests/test_game_mechanics.ts
    ```
-   *(Kiểm tra điều kiện thắng Hang Sóc, Tia Lửa Vàng, Bột Bóng Tối, Kẹo Ngất Xỉu, Bay Hộ Tống, Gương Sirius, Khử xung đột, Chia bài chống lặp, Nút Không Giết Án Binh).*
+   *(Kiểm tra toàn bộ 19/19 test cases: Hang Sóc, Tia Lửa Vàng, Bột Bóng Tối, Kẹo Ngất Xỉu, Bay Hộ Tống, Gương Sirius, Khử xung đột, Chia bài chống lặp, Nút Án Binh, Kingsley 50%, Snape Sectumsempra & Bế quan bí thuật, Pettigrew ngửi mùi & Nợ mạng & Thoát chết hóa chuột, Bắt tay liên phòng, Chuyển tab Device ID, và Stress test phòng 4 - 15 người qua 700+ ván).*
 
 2. **Kiểm thử 8 kịch bản Multiplayer & Đồng bộ mạng thời gian thực:**
    ```bash

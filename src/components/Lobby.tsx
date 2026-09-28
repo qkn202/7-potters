@@ -21,7 +21,8 @@ import {
   Wifi,
   Flame,
   Plus,
-  ShieldAlert
+  ShieldAlert,
+  Wand2
 } from 'lucide-react';
 import { 
   PhoenixCrest, 
@@ -39,6 +40,7 @@ export function Lobby() {
     startGame, 
     leaveGame, 
     addBot, 
+    assignRoles,
     kickPlayer,
     roomCode,
     isHost,
@@ -60,6 +62,7 @@ export function Lobby() {
 
   const nonGmPlayers = gameState.players.filter(p => !p.isGM);
   const optimalBalance = getOptimalBalance(nonGmPlayers.length);
+  const hasAssignedRoles = nonGmPlayers.length > 0 && nonGmPlayers.every(p => Boolean(p.role));
 
   const inviteUrl = typeof window !== 'undefined' && roomCode 
     ? `${window.location.origin}/?room=${roomCode}` 
@@ -254,16 +257,30 @@ export function Lobby() {
                   </div>
                 </div>
 
-                {/* Name */}
+                {/* Name & Role */}
                 <div className="min-w-0">
                   <div className={`font-cinzel font-bold text-xs truncate ${
                     isFellowDeathEater ? 'text-emerald-300' : isMe ? 'text-amber-300' : 'text-slate-200'
                   }`}>
                     {p.name}
                   </div>
-                  <div className="text-[10px] text-slate-500 font-mono truncate">
-                    {isMe ? '✦ BẠN' : p.house ? house.name : 'Tân binh'}
-                  </div>
+                  {p.role ? (
+                    (isGM || isMe || isFellowDeathEater) ? (
+                      <div className={`text-[10px] font-serif font-bold truncate mt-0.5 ${
+                        p.role.faction === 'DEATH_EATERS' ? 'text-emerald-400' : 'text-amber-300'
+                      }`}>
+                        ✦ {p.role.name}
+                      </div>
+                    ) : (
+                      <div className="text-[10px] text-cyan-400/90 font-mono truncate mt-0.5">
+                        ✓ Đã có thẻ bài
+                      </div>
+                    )
+                  ) : (
+                    <div className="text-[10px] text-slate-500 font-mono truncate">
+                      {isMe ? '✦ BẠN' : p.house ? house.name : 'Tân binh'}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             );
@@ -275,26 +292,45 @@ export function Lobby() {
       <div className="space-y-2 pt-2 border-t border-slate-800/80">
         {hasControl ? (
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
+            {/* Toolbar Buttons: Add Bot, Assign Roles, Copy Link */}
+            <div className="grid grid-cols-3 gap-1.5">
               <button
                 type="button"
                 onClick={() => addBot()}
-                className="flex-1 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cinzel font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none"
+                className="py-2.5 px-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cinzel font-bold text-xs flex items-center justify-center gap-1 transition-all cursor-pointer select-none active:scale-95"
+                title="Thêm Bot phụ chiến"
               >
-                <Plus size={14} />
-                <span>Thêm Bot</span>
+                <Plus size={13} />
+                <span>+ Bot</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => assignRoles()}
+                disabled={gameState.players.length < 2}
+                className={`py-2.5 px-2 rounded-xl border font-cinzel font-bold text-xs flex items-center justify-center gap-1 transition-all cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
+                  hasAssignedRoles
+                    ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
+                    : 'bg-amber-950/50 border-amber-400/50 text-amber-300 shadow-[0_0_10px_rgba(245,197,66,0.2)] animate-pulse'
+                }`}
+                title="Phân phát và xáo bài vai trò"
+              >
+                <Wand2 size={13} className={hasAssignedRoles ? 'text-emerald-400' : 'text-amber-400'} />
+                <span>{hasAssignedRoles ? 'Xáo Lại' : 'Chia Vai'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleCopyLink()}
-                className="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-cinzel font-bold text-xs flex items-center justify-center gap-1 transition-all cursor-pointer select-none"
+                className="py-2.5 px-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-300 font-cinzel font-bold text-xs flex items-center justify-center gap-1 transition-all cursor-pointer select-none active:scale-95"
+                title="Sao chép link mời người chơi"
               >
-                <Copy size={13} />
-                <span>Link Mời</span>
+                {copiedLink ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                <span>{copiedLink ? 'Đã Chép' : 'Link Mời'}</span>
               </button>
             </div>
 
+            {/* Start Campaign Button */}
             <button
               type="button"
               onClick={() => startGame()}

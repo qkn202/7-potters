@@ -2182,8 +2182,44 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const nonGm = prev.players.filter(p => !p.isGM);
       const balance = getOptimalBalance(nonGm.length);
       const maxStages = prev.maxStages || balance.maxStages;
+
+      // Auto-assign roles if not yet assigned or if any player lacks a role
+      let updatedPlayers = prev.players;
+      let updatedRoleMap = prev.previousRoleMap;
+      let updatedRoleHistory = prev.roleHistory;
+      let updatedWeasleyItems = prev.weasleyItems || INITIAL_WEASLEY_ITEMS;
+
+      const needsRoleAssignment = nonGm.some(p => !p.role);
+      if (needsRoleAssignment && nonGm.length > 0) {
+        const assigned = assignRolesFairly(
+          prev.players,
+          prev.previousRoleMap,
+          prev.roleHistory
+        );
+        updatedPlayers = assigned.players;
+        updatedRoleMap = assigned.previousRoleMap;
+        updatedRoleHistory = assigned.roleHistory;
+
+        if (currentPlayerId) {
+          const hostPlayer = updatedPlayers.find(p => p.id === currentPlayerId);
+          if (hostPlayer && hostPlayer.personalHistory) {
+            savePersonalHistory(hostPlayer.personalHistory);
+          }
+        }
+
+        if (nonGm.length >= 14) {
+          updatedWeasleyItems = updatedWeasleyItems.map(item => 
+            item.id === 'DARKNESS_POWDER' ? { ...item, count: 2, maxCount: 2 } : item
+          );
+        }
+      }
+
       return {
         ...prev,
+        players: updatedPlayers,
+        previousRoleMap: updatedRoleMap,
+        roleHistory: updatedRoleHistory,
+        weasleyItems: updatedWeasleyItems,
         phase: 'NIGHT',
         round: 1,
         flightStage: 1,
@@ -2193,6 +2229,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         goldenFlameUsed: false,
         logs: [
           ...prev.logs, 
+          ...(needsRoleAssignment ? [`Hệ thống: Tự động phân chia vai trò công bằng & bí mật cho ${nonGm.length} phù thủy!`] : []),
           `Hệ thống: Trận Không Chiến Bảy Potter bùng nổ! Chặng 1/${maxStages}: Xuất phát từ Số 4 Privet Drive!`,
           'Hệ thống: 🌙 Biến cố [Bầu Trời Surrey Tĩnh Lặng] đang kích hoạt: Đa Quả Dịch bảo vệ danh tính, hãy chọn người bay hộ tống để cùng né đòn!',
           'Hệ thống: 🌙 BAN ĐÊM (Lượt 1) bắt đầu. Đến lượt Phe TỬ THẦN THỰC TỬ (Ám sát) & Phù thủy đặc biệt HỘI PHƯỢNG HOÀNG (Hermione, Dumbledore, Lupin, Kingsley) hành động! Mọi phù thủy hãy cơ động bay hộ tống hoặc thi triển bùa chú!'

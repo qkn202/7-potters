@@ -98,16 +98,16 @@ Các phát minh ma thuật đặc biệt tiếp tế từ Fred & George Weasley:
 
 Các tính năng quan trọng và cải tiến đã hoàn thiện trong các bản phát hành gần nhất:
 
-### 🛡️ 1. Cơ Chế "Bay Hộ Tống" — Ai Cũng Có Thể Hộ Tống Được Không?
-- **Quy tắc chuẩn:** Bất kỳ phù thủy nào còn sống (đặc biệt là phe Sáng) đều có quyền chọn 1 đồng đội đáng tin cậy để **"Bay Hộ Tống"** trong lượt ban ngày.
+### 🛡️ 1. Cơ Chế "Bay Hộ Tống" — Nhiều Người Cùng Hộ Tống 1 Người Được Không?
+- **Quy tắc chuẩn:** **HOÀN TOÀN ĐƯỢC!** Bất kỳ phù thủy nào còn sống (đặc biệt là phe Sáng) đều có thể chọn cùng 1 mục tiêu để **"Bay Hộ Tống"** trong lượt ban đêm nhằm tạo thành nhiều tầng lớp khiên chắn sinh mệnh.
 - **Xử lý khử xung đột theo từng chặng (Harmonized Resolution):**
-  - **Ở Chặng 1 & Chặng 2 (Chặng né đòn):** Nếu mục tiêu bị tấn công có người bay hộ tống, cả hai sẽ liệng chổi né đòn an toàn vào làn mây. **Tia Lửa Vàng được giữ nguyên, không bị kích hoạt lãng phí!**
+  - **Ở Chặng 1 & Chặng 2 (Chặng né đòn):** Chỉ cần mục tiêu có người bay hộ tống (bất kể 1 hay nhiều người cùng hộ tống), cả phi đội sẽ liệng chổi né đòn an toàn vào làn mây bão Surrey. **Mục tiêu an toàn thoát nạn, không ai bị thương vong** và **Tia Lửa Vàng được giữ nguyên, không bị kích hoạt lãng phí!**
   - **Ở Chặng 3+ (Chặng Voldemort phục kích):**
     - Nếu mục tiêu trực tiếp là Harry Potter & Tia Lửa Vàng còn hiệu lực: Lửa Vàng ưu tiên bùng nổ bảo vệ Harry (Tia Lửa Vàng CHỈ cứu Harry Potter, không silence Voldemort). Người hộ tống không phải hy sinh.
-    - Nếu mục tiêu là người khác (hoặc Harry là người đi hộ tống, hoặc Tia Lửa Vàng đã dùng): Người bay hộ tống sẽ dũng cảm lấy thân mình chắn đòn tử thủ (hy sinh) để bảo vệ đồng đội mục tiêu sống sót!
+    - Nếu mục tiêu bị tấn công và có người cùng bay hộ tống (hoặc Tia Lửa Vàng đã dùng): **1 trong số những người bay hộ tống sẽ dũng cảm đứng ra đỡ đòn chí mạng và hy sinh** để bảo vệ mục tiêu. **Mục tiêu được cứu sống an toàn**, và các đồng đội khác cùng bay hộ tống vẫn sống sót bình an!
 
 ### 🚫 2. Nút "Không Giết Ai Cả (Án Binh Bất Động)" Cho Phe Tử Thần Thực Tử (4T)
-- Bổ sung nút **"Không Giết Ai Cả / Án Binh"** trong giao diện ban ngày của Phe Tử Thần Thực Tử.
+- Bổ sung nút **"Không Giết Ai Cả / Án Binh"** trong giao diện ban đêm của Phe Tử Thần Thực Tử.
 - **Ý nghĩa chiến thuật:** Giúp Voldemort và các Tử Thần Thực Tử có quyền chủ động hoãn đòn ám sát, thăm dò tình hình, tránh kích hoạt sớm Lửa Vàng của Harry hoặc tránh sập bẫy Bellatrix/Mundungus.
 - Xử lý mượt mà cả 2 kịch bản:
   1. Khi **Voldemort còn sống**: Lệnh `NONE` có hiệu lực tối cao, huỷ đòn ám sát của lượt.
@@ -125,27 +125,36 @@ Các tính năng quan trọng và cải tiến đã hoàn thiện trong các b�
 - Bổ sung bộ nhớ xoay vòng `previousRoleMap`:
   - Người chơi (kể cả Host phòng) được đảm bảo **100% không bị lặp lại các vai trò chính (Harry Potter, Voldemort) qua 2 ván liên tiếp**.
   - Xóa bỏ triệt để thiên vị vị trí phòng (Positional Bias), phân phối xác suất đều cho mọi người chơi trong phòng.
+- **Tự động chia vai (Auto-deal on Start):** Khi Quản trò/Host nhấn "Bắt Đầu Trận Chiến", hệ thống tự động chia vai trò ngay lập tức mà không cần thêm thao tác thủ công.
 
-### 💡 5. Trợ Lý Gợi Ý Hành Động Động (Dynamic Action Coach)
-- Hiển thị bảng chỉ dẫn hành động thời gian thực trên màn hình người chơi (`PlayerScreen`):
-  - Phân tích vai trò, phe phái và giai đoạn ngày/đêm.
-  - Hướng dẫn rõ ràng: khi nào nên Bay Hộ Tống, khi nào nên dùng bảo bối Weasley, cách chọn mục tiêu tước đũa hoặc án binh.
+### 📱 5. Tối Ưu Hóa Giao Diện Bàn Tác Chiến & Trải Nghiệm Mobile Tinh Gọn (Compact UI)
+- **Đảo thứ tự ưu tiên giao diện:**
+  - **Bàn Thi Triển Ma Pháp & Biểu Quyết** được đưa lên vị trí số 1 (nằm ngay phía trên danh sách mục tiêu), ngang tầm mắt của người chơi. Hiển thị tức thời phiếu bầu đã lưu và các nút hành động (Biểu Quyết Tước Đũa, Ám Sát, Bay Hộ Tống, Kỹ Năng Đặc Biệt, Bảo Bối Weasley).
+  - **Danh sách Mục Tiêu Trên Bầu Trời** được bố trí ngay bên dưới. Khi chạm chọn bất kỳ ai, thanh hành động phía trên lập tức cập nhật tên mục tiêu theo thời gian thực.
+- **Lược bỏ chữ thừa (Anti-Clutter):** Loại bỏ hoàn toàn các khối chữ dài dòng ("Mật Lệnh Hội Kín" & "Trợ Lý Hành Động") trên màn hình điện thoại, giúp người chơi lập tức nhìn thấy thẻ bài và bàn tác chiến mà không phải cuộn trang.
+- **Nhận diện đồng minh trực quan:** Đồng minh Tử Thần Thực Tử được đánh dấu viền xanh ngọc lục bảo và huy hiệu Dấu Ấn Hắc Ám ngay trên thẻ bài; mục tiêu đặc biệt của Snape hiển thị biểu tượng lọ độc dược tím rõ ràng.
 
-### 📱 6. Nâng Cấp Toàn Diện UI/UX Mobile & Responsive
-- Thiết kế tối ưu hiển thị trên màn hình điện thoại (Viewport 375px – 430px):
-  - Thanh trạng thái chặng bay `FlightTrack` thu gọn mượt mà.
-  - Thẻ căn cước phù thủy cố định giúp người chơi luôn nhìn thấy vai trò và năng lực của mình.
-  - Bảng danh sách người chơi và nút thao tác được phóng to chuẩn công thái học di động, thao tác dễ dàng bằng một tay.
-  - Khóa góc nhìn (Perspective Lock) cố định đúng vai người chơi khi tham gia phòng mạng xã hội, ngăn ngừa lỗi hiển thị nhầm sang quyền Quản trò.
+### 🚪 6. Nút Thoát Game / Rời Phòng Linh Hoạt (Leave Game)
+- Bổ sung nút **"Thoát Game"** ở góc phải Header, thanh công cụ Bàn Tác Chiến của người chơi và Màn Hình Chiến Thắng/Thua Cuộc.
+- Người chơi có thể chủ động rời phòng về trang chủ bất kỳ lúc nào, tự động dọn dẹp state và giải phóng vị trí cho người khác.
 
-### 🌐 7. Đồng Bộ Thời Gian Thực & Đăng Nhập Tài Khoản HPVN
+### 🧪 7. Hệ Thống 20 Bài Kiểm Thử Cơ Chế Toàn Diện (20/20 Test Suites Passing)
+- Bộ test tự động `tests/test_game_mechanics.ts` bao phủ 100% cơ chế:
+  - Bay Hộ Tống nhiều người & khử xung đột Tia Lửa Vàng.
+  - Severus Snape (Bọc lót Sectumsempra & Bế quan bí thuật).
+  - Peter Pettigrew (Đánh hơi Scabbers, Món nợ mạng & Hóa thú đào tẩu).
+  - Kingsley Shacklebolt (Cứu sống 100% thành viên Hội).
+  - Remus Lupin (Thuốc hồi sinh bí mật ban đêm & phân giải rạng sáng).
+  - Phòng chống lặp vai TTTT & Stress-test công bằng 4 - 15 người.
+
+### 🌐 8. Đồng Bộ Thời Gian Thực & Đăng Nhập Tài Khoản HPVN
 - Đăng nhập trực tiếp bằng tài khoản **Harry Potter Việt Nam (HPVN)**, đồng bộ Nhà Hogwarts (Gryffindor, Slytherin, Ravenclaw, Hufflepuff) và danh xưng phù thủy.
 - Đồng bộ hóa trạng thái phòng chơi tức thời qua **Mạng Lò Sưởi Floo (Supabase Realtime / Firebase / WebRTC Peer Network)** với cơ chế tự động kết nối lại khi mạng di động chập chờn.
 
-### 🚀 8. Triển Khai Hoàn Tất Lên Vercel & GitHub
-- Dự án đã được build tối ưu, cấu hình đầy đủ biến môi trường và triển khai thành công lên **Vercel** và đồng bộ kho mã nguồn **GitHub**.
+### 🚀 9. Triển Khai Hoàn Tất Lên Vercel & GitHub
+- Dự án đã được build tối ưu, cấu hình đầy đủ biến môi trường và triển khai thành công lên **Vercel** ([seven-potters.vercel.app](https://seven-potters.vercel.app)) và đồng bộ kho mã nguồn **GitHub**.
 
-### ⚖️ 9. Bảng Phân Bổ Cân Bằng Tối Ưu (N = 4..15 Phù Thủy) & Thuật Toán Mô Phỏng Monte Carlo
+### ⚖️ 10. Bảng Phân Bổ Cân Bằng Tối Ưu (N = 4..15 Phù Thủy) & Thuật Toán Mô Phỏng Monte Carlo
 
 - **Vấn đề đã khắc phục:** Loại bỏ hoàn toàn công thức thô `Math.floor(N / 3)`. Ở các phòng ít người ($N=4, 5$), nếu phe Tối có 2 người thì chỉ cần 1 thành viên HPH tử trận ban ngày là Tử Thần Thực Tử đạt thế cân bằng số lượng (*Parity Condition*) và thắng ngay tại Vòng 1 với tỷ lệ lên đến **74.9%**.
 

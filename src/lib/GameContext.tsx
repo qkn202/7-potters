@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
-import { GameState, Player, GamePhase, Faction, Role, NetworkMessage, WeasleyItem, WeasleyItemId, SkyEvent, ActiveVisualFX, ActiveVisualFXType, InterruptState, RoleHistoryEntry } from './types';
+import { GameState, Player, GamePhase, Faction, Role, NetworkMessage, WeasleyItem, WeasleyItemId, SkyEvent, ActiveVisualFX, ActiveVisualFXType, InterruptState, RoleHistoryEntry, MatchEvent } from './types';
 import { ROLES } from './roles';
 import { SevenPottersNetwork } from './peerNetwork';
 
@@ -169,6 +169,8 @@ const DEFAULT_STATE: GameState = {
   logs: ['Hệ thống: Chào mừng đến với Chiến dịch Bảy Potter!'],
   winner: null,
   winReason: null,
+  matchEvents: [],
+  matchChronicle: [],
   pendingActions: {},
   resolutionReport: null,
   skillStates: {},
@@ -303,19 +305,135 @@ export const getWinReason = (
   return 'Trận chiến đã ngã ngũ!';
 };
 
+export const generateMatchChronicle = (
+  winner: Faction,
+  players: Player[],
+  flightStage?: number,
+  maxStages?: number,
+  matchEvents?: MatchEvent[]
+): string[] => {
+  const nonGmPlayers = players.filter(p => !p.isGM);
+  const alivePlayers = nonGmPlayers.filter(p => p.status !== 'DEAD');
+  const deathEaters = nonGmPlayers.filter(p => p.role?.faction === 'DEATH_EATERS');
+  const hph = nonGmPlayers.filter(p => p.role?.faction === 'ORDER_OF_PHOENIX');
+  const neutrals = nonGmPlayers.filter(p => p.role?.faction === 'NEUTRAL');
+  const targetStage = maxStages || 4;
+  const currentStage = flightStage || 1;
+  const factionName = 
+    winner === 'ORDER_OF_PHOENIX' ? 'HỘI PHƯỢNG HOÀNG' :
+    winner === 'DEATH_EATERS' ? 'TỬ THẦN THỰC TỬ' : 'PHE TRUNG LẬP';
+  const mainReason = getWinReason(winner, players, flightStage, maxStages);
+
+  const lines: string[] = [];
+
+  lines.push('════════════════════════════════════════════════════════════════');
+  lines.push('📜 BIÊN NIÊN SỬ CHIẾN TRƯỜNG: CHIẾN DỊCH BẢY POTTER');
+  lines.push('════════════════════════════════════════════════════════════════');
+  lines.push(`🏆 KẾT THÚC TRẬN CHIẾN: Phe [${factionName}] GIÀNH CHIẾN THẮNG!`);
+  lines.push(`🎯 Lý do then chốt: ${mainReason}`);
+  lines.push('────────────────────────────────────────────────────────────────');
+  lines.push('👥 1. XUẤT PHÁT ĐIỂM & DANH TÍNH BÍ MẬT (Số 4 Privet Drive):');
+
+  const harry = nonGmPlayers.find(p => p.role?.id === 'HARRY_POTTER');
+  if (harry) {
+    const statusText = harry.status === 'DEAD' ? '💀 ĐÃ TỬ TRẬN' : '✨ CÒN SỐNG';
+    lines.push(`   ⚡ Harry Potter thật: ${harry.name} [${statusText}]`);
+  }
+
+  const phoenix = hph.filter(p => p.role?.id !== 'HARRY_POTTER');
+  if (phoenix.length > 0) {
+    lines.push(`   🛡️ Hội Phượng Hoàng (${phoenix.length} phù thủy):`);
+    phoenix.forEach(p => {
+      const statusText = p.status === 'DEAD' ? '💀 Đã hy sinh' : '✨ Còn sống';
+      lines.push(`      • ${p.name} — ${p.role?.name || 'Vệ sĩ'} [${statusText}]`);
+    });
+  }
+
+  if (deathEaters.length > 0) {
+    lines.push(`   💀 Binh đoàn Tử Thần Thực Tử (${deathEaters.length} kẻ thù):`);
+    deathEaters.forEach(p => {
+      const statusText = p.status === 'DEAD' ? '💀 Đã bị tiêu diệt / tước đũa' : '⚔️ Còn hoạt động';
+      lines.push(`      • ${p.name} — ${p.role?.name || 'Tử Thần Thực Tử'} [${statusText}]`);
+    });
+  }
+
+  if (neutrals.length > 0) {
+    lines.push(`   ⚖️ Phe Trung Lập (${neutrals.length} người):`);
+    neutrals.forEach(p => {
+      const statusText = p.status === 'DEAD' ? '💀 Đã gục ngã' : '✨ Còn sống';
+      lines.push(`      • ${p.name} — ${p.role?.name || 'Trung Lập'} [${statusText}]`);
+    });
+  }
+
+  lines.push('────────────────────────────────────────────────────────────────');
+  lines.push('🗺️ 2. DIỄN BIẾN TOÀN BỘ CHẶNG BAY & VÒNG ĐẤU:');
+
+  if (matchEvents && matchEvents.length > 0) {
+    matchEvents.forEach((ev) => {
+      lines.push(`   ${ev.title}:`);
+      if (ev.summary && ev.summary.length > 0) {
+        ev.summary.forEach((s: string) => {
+          lines.push(`      • ${s}`);
+        });
+      } else {
+        lines.push('      • Không ghi nhận biến cố bất thường.');
+      }
+    });
+  } else {
+    lines.push(`   📍 Chặng 1 đến Chặng ${currentStage}: Phi đội cơ động bay né đòn và giao tranh ác liệt trên bầu trời.`);
+  }
+
+  lines.push('────────────────────────────────────────────────────────────────');
+  lines.push('🏁 3. BÌNH LUẬN & ĐÁNH GIÁ NGUYÊN NHÂN THẮNG LỢI TOÀN DIỆN:');
+
+  if (winner === 'ORDER_OF_PHOENIX') {
+    const aliveHarry = alivePlayers.find(p => p.role?.id === 'HARRY_POTTER');
+    if (currentStage >= targetStage && aliveHarry) {
+      lines.push(`   • Khởi đầu từ Số 4 Privet Drive, Hội Phượng Hoàng đã triển khai xuất sắc kế sách Đa Quả Dịch, chia nhỏ lực lượng và liên tục bay hộ tống bọc lót cho nhau.`);
+      lines.push(`   • Bất chấp các đòn phục kích giông bão và Avada Kedavra của phe Hắc Ám qua từng chặng bay, tinh thần đoàn kết và sự hy sinh dũng cảm của các thành viên đã che chở cho ${aliveHarry.name} (Harry Potter thật).`);
+      lines.push(`   • Cú hạ cánh thành công tại Trang Trại Hang Sóc (The Burrow - Chặng ${targetStage}) đã kích hoạt kết giới cổ xưa, đánh dấu thắng lợi huy hoàng của Phe Ánh Sáng!`);
+    } else if (deathEaters.every(p => p.status === 'DEAD')) {
+      lines.push(`   • Trải qua các vòng tranh luận ban ngày và không chiến ban đêm, Hội đồng phù thủy đã phối hợp nhịp nhàng, liên tiếp vạch trần chân tướng các Tử Thần Thực Tử.`);
+      lines.push(`   • Bằng các thần chú Expelliarmus chuẩn xác ban ngày và ma thuật phòng ngự ban đêm, toàn bộ binh đoàn tay sai Hắc Ám đã bị tiêu diệt và tước đũa phép hoàn toàn, trả lại bình yên cho bầu trời nước Anh!`);
+    } else {
+      lines.push(`   • Phe Hội Phượng Hoàng đã kiểm soát hoàn toàn thế trận từ xuất phát điểm cho tới hồi kết, đập tan âm mưu phục kích của Tử Thần Thực Tử.`);
+    }
+  } else if (winner === 'DEATH_EATERS') {
+    const deadHarry = nonGmPlayers.find(p => p.role?.id === 'HARRY_POTTER' && p.status === 'DEAD');
+    if (deadHarry) {
+      lines.push(`   • Mặc dù Hội Phượng Hoàng đã dùng thuốc Đa Quả Dịch tạo ra Bảy Potter để nghi binh, Tử Thần Thực Tử vẫn kiên trì bám đuổi và dần loại bỏ các lớp phòng thủ bọc lót.`);
+      lines.push(`   • Đòn tấn công chí mạng vào thời khắc then chốt đã hạ gục ${deadHarry.name} (Harry Potter thật). Thiếu đi Kẻ Được Chọn, hy vọng của thế giới phù thủy sụp đổ, bóng tối ngự trị tuyệt đối.`);
+    } else if (deathEaters.length >= alivePlayers.filter(p => p.role?.faction !== 'DEATH_EATERS').length) {
+      lines.push(`   • Nhờ vào sức mạnh hắc ám vượt trội và sự suy giảm lực lượng liên tiếp của Hội Phượng Hoàng qua các đợt không chiến, binh đoàn Tử Thần Thực Tử đã giành quyền kiểm soát tuyệt đối về sĩ số.`);
+      lines.push(`   • Với ưu thế áp đảo hoàn toàn trên bầu trời, phe Hắc Ám không còn gặp bất kỳ trở ngại nào và giành thắng lợi tối thượng!`);
+    } else {
+      lines.push(`   • Tử Thần Thực Tử đã hoàn thành mục tiêu chiến dịch, thống trị bầu trời đêm.`);
+    }
+  } else {
+    lines.push(`   • Cuộc hỗn chiến khốc liệt giữa hai phe Ánh Sáng và Bóng Tối đã khiến cả hai phe chịu tổn thất nặng nề, tạo cơ hội cho Phe Trung Lập sống sót sau cùng và giành lấy chiến thắng!`);
+  }
+
+  lines.push('════════════════════════════════════════════════════════════════');
+
+  return lines;
+};
+
 export const createEndGameLogs = (
   winner: Faction,
   players: Player[],
   flightStage?: number,
-  maxStages?: number
+  maxStages?: number,
+  matchEvents?: MatchEvent[]
 ): string[] => {
   const factionName = 
     winner === 'ORDER_OF_PHOENIX' ? 'HỘI PHƯỢNG HOÀNG' :
     winner === 'DEATH_EATERS' ? 'TỬ THẦN THỰC TỬ' : 'PHE TRUNG LẬP';
   const reason = getWinReason(winner, players, flightStage, maxStages);
+  const chronicle = generateMatchChronicle(winner, players, flightStage, maxStages, matchEvents);
   return [
     `Hệ thống: 🏆 KẾT THÚC TRẬN CHIẾN: Phe [${factionName}] GIÀNH CHIẾN THẮNG!`,
-    `Hệ thống: 📜 Lý do: ${reason}`
+    `Hệ thống: 📜 Lý do: ${reason}`,
+    ...chronicle.map(line => `Hệ thống: ${line}`)
   ];
 };
 
@@ -1116,8 +1234,21 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       });
 
       const winner = checkWinCondition(newPlayers, curState.flightStage, curState.maxStages);
+      let nextMatchEvents = curState.matchEvents || [];
+      if (winner) {
+        const instantEvent: MatchEvent = {
+          round: curState.round,
+          phase: curState.phase,
+          flightStage: curState.flightStage,
+          title: `⚡ KỸ NĂNG ĐẶC BIỆT: Alastor Moody bắn lén ${target.name}`,
+          summary: [`Moody khai hỏa đũa phép hạ sát ${target.name}.`],
+          timestamp: Date.now(),
+        };
+        nextMatchEvents = [...nextMatchEvents, instantEvent];
+      }
       const winReason = winner ? getWinReason(winner, newPlayers, curState.flightStage, curState.maxStages) : null;
-      const winLogs = winner ? createEndGameLogs(winner, newPlayers, curState.flightStage, curState.maxStages) : [];
+      const winLogs = winner ? createEndGameLogs(winner, newPlayers, curState.flightStage, curState.maxStages, nextMatchEvents) : [];
+      const matchChronicle = winner ? generateMatchChronicle(winner, newPlayers, curState.flightStage, curState.maxStages, nextMatchEvents) : (curState.matchChronicle || []);
       updateState({
         ...curState,
         players: newPlayers,
@@ -1125,6 +1256,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         logs: [...logs, ...winLogs],
         winner,
         winReason,
+        matchEvents: nextMatchEvents,
+        matchChronicle,
         phase: winner ? 'END' : curState.phase
       });
       return 'Đã khai hỏa Avada Kedavra!';
@@ -2204,7 +2337,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
         const winner = prev.phase !== 'LOBBY' ? checkWinCondition(remainingPlayers, prev.flightStage, prev.maxStages) : null;
         const winReason = winner ? getWinReason(winner, remainingPlayers, prev.flightStage, prev.maxStages) : null;
-        const winLogs = winner ? createEndGameLogs(winner, remainingPlayers, prev.flightStage, prev.maxStages) : [];
+        const winLogs = winner ? createEndGameLogs(winner, remainingPlayers, prev.flightStage, prev.maxStages, prev.matchEvents) : [];
+        const matchChronicle = winner ? generateMatchChronicle(winner, remainingPlayers, prev.flightStage, prev.maxStages, prev.matchEvents) : (prev.matchChronicle || []);
 
         return {
           ...prev,
@@ -2217,6 +2351,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           ],
           winner: winner || prev.winner,
           winReason: winReason || prev.winReason,
+          matchChronicle,
           phase: winner ? 'END' : prev.phase
         };
       });
@@ -2360,6 +2495,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         currentSkyEvent: getSkyEventForStage(1, maxStages),
         escortPairs: {},
         goldenFlameUsed: false,
+        winner: null,
+        winReason: null,
+        matchEvents: [],
+        matchChronicle: [],
         logs: [
           ...prev.logs, 
           ...(needsRoleAssignment ? [`Hệ thống: Tự động phân chia vai trò công bằng & bí mật cho ${nonGm.length} phù thủy!`] : []),
@@ -2411,6 +2550,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       flightStage: 1,
       maxStages: 4,
       winner: null,
+      winReason: null,
+      matchEvents: [],
+      matchChronicle: [],
       currentSkyEvent: getSkyEventForStage(1, 4),
       pendingActions: {},
       escortPairs: {},
@@ -2449,7 +2591,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       const winner = checkWinCondition(prev.players, newFlightStage, maxS);
       const winReason = winner ? getWinReason(winner, prev.players, newFlightStage, maxS) : null;
-      const winLogs = winner ? createEndGameLogs(winner, prev.players, newFlightStage, maxS) : [];
+      const winLogs = winner ? createEndGameLogs(winner, prev.players, newFlightStage, maxS, prev.matchEvents) : [];
+      const matchChronicle = winner ? generateMatchChronicle(winner, prev.players, newFlightStage, maxS, prev.matchEvents) : (prev.matchChronicle || []);
 
       return {
         ...prev,
@@ -2461,6 +2604,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         escortPairs: {},
         winner,
         winReason,
+        matchChronicle,
         pendingActions: {},
         resolutionReport: null,
         logs: [
@@ -2492,7 +2636,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       const winner = prev.phase !== 'LOBBY' ? checkWinCondition(remainingPlayers, prev.flightStage, prev.maxStages) : null;
       const winReason = winner ? getWinReason(winner, remainingPlayers, prev.flightStage, prev.maxStages) : null;
-      const winLogs = winner ? createEndGameLogs(winner, remainingPlayers, prev.flightStage, prev.maxStages) : [];
+      const winLogs = winner ? createEndGameLogs(winner, remainingPlayers, prev.flightStage, prev.maxStages, prev.matchEvents) : [];
+      const matchChronicle = winner ? generateMatchChronicle(winner, remainingPlayers, prev.flightStage, prev.maxStages, prev.matchEvents) : (prev.matchChronicle || []);
 
       return {
         ...prev,
@@ -2505,6 +2650,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ],
         winner: winner || prev.winner,
         winReason: winReason || prev.winReason,
+        matchChronicle,
         phase: winner ? 'END' : prev.phase
       };
     });
@@ -2520,8 +2666,21 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       );
       
       const winner = checkWinCondition(newPlayers, prev.flightStage, prev.maxStages);
+      let nextMatchEvents = prev.matchEvents || [];
+      if (winner) {
+        const gmEvent: MatchEvent = {
+          round: prev.round,
+          phase: prev.phase,
+          flightStage: prev.flightStage,
+          title: `⚡ QUẢN TRÒ LOẠI BỎ: ${target.name} ngã xuống`,
+          summary: [`Quản trò đã loại bỏ ${target.name} khỏi trận đấu.`],
+          timestamp: Date.now()
+        };
+        nextMatchEvents = [...nextMatchEvents, gmEvent];
+      }
       const winReason = winner ? getWinReason(winner, newPlayers, prev.flightStage, prev.maxStages) : null;
-      const winLogs = winner ? createEndGameLogs(winner, newPlayers, prev.flightStage, prev.maxStages) : [];
+      const winLogs = winner ? createEndGameLogs(winner, newPlayers, prev.flightStage, prev.maxStages, nextMatchEvents) : [];
+      const matchChronicle = winner ? generateMatchChronicle(winner, newPlayers, prev.flightStage, prev.maxStages, nextMatchEvents) : (prev.matchChronicle || []);
 
       return {
         ...prev,
@@ -2529,6 +2688,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         logs: [...prev.logs, `Hệ thống: ${target.name} đã ngã xuống!`, ...winLogs],
         winner,
         winReason,
+        matchEvents: nextMatchEvents,
+        matchChronicle,
         phase: winner ? 'END' : prev.phase
       };
     });
@@ -3275,9 +3436,31 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const isNextNight = gameState.phase === 'DAY';
     const maxS = gameState.maxStages || 4;
     const nextFlightStage = isNextNight ? Math.min(maxS, (gameState.flightStage || 1) + 1) : (gameState.flightStage || 1);
+
+    const currentPhase = gameState.phase;
+    const currentRound = gameState.round;
+    const currentStage = gameState.flightStage || 1;
+    const currentSky = gameState.currentSkyEvent;
+
+    const eventTitle = currentPhase === 'NIGHT'
+      ? `📍 VÒNG ${currentRound} (BAN ĐÊM) - Chặng ${currentStage}/${maxS}: [${currentSky?.title || 'Không Chiến'}]`
+      : `📍 VÒNG ${currentRound} (BAN NGÀY): Phiên Biểu Quyết Expelliarmus`;
+
+    const newMatchEvent: MatchEvent = {
+      round: currentRound,
+      phase: currentPhase,
+      flightStage: currentStage,
+      title: eventTitle,
+      summary: summary && summary.length > 0 ? summary : ['Không có biến cố thương vong nào ghi nhận.'],
+      skyEventTitle: currentSky?.title,
+      timestamp: Date.now(),
+    };
+
+    const nextMatchEvents = [...(gameState.matchEvents || []), newMatchEvent];
     const winner = checkWinCondition(newPlayers, nextFlightStage, maxS);
     const winReason = winner ? getWinReason(winner, newPlayers, nextFlightStage, maxS) : null;
-    const winLogs = winner ? createEndGameLogs(winner, newPlayers, nextFlightStage, maxS) : [];
+    const winLogs = winner ? createEndGameLogs(winner, newPlayers, nextFlightStage, maxS, nextMatchEvents) : [];
+    const matchChronicle = winner ? generateMatchChronicle(winner, newPlayers, nextFlightStage, maxS, nextMatchEvents) : (gameState.matchChronicle || []);
     const nextRound = winner ? gameState.round : (isNextNight ? gameState.round + 1 : gameState.round);
     const resolutionLogs = summary.map(line => `Hệ thống: ${line}`);
 
@@ -3375,6 +3558,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       ],
       winner,
       winReason,
+      matchEvents: nextMatchEvents,
+      matchChronicle,
       phase: winner ? 'END' : (gameState.phase === 'DAY' ? 'NIGHT' : 'DAY'),
       round: nextRound
     });

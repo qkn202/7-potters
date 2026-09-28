@@ -65,6 +65,8 @@ export function PlayerScreen() {
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [inspectSelf, setInspectSelf] = useState(false);
   const [mobileTab, setMobileTab] = useState<'battle' | 'card' | 'log'>('battle');
+  const [showChronicle, setShowChronicle] = useState(true);
+  const [copiedChronicle, setCopiedChronicle] = useState(false);
 
   useEffect(() => {
     if (skillToast) {
@@ -241,6 +243,80 @@ export function PlayerScreen() {
                 📜 LÝ DO CHIẾN THẮNG:
               </span>
               <p className="italic text-[#f5eedb]">{gameState.winReason}</p>
+            </div>
+          )}
+
+          {/* Detailed Match Chronicle Scroll (Biên Niên Sử Ván Đấu) */}
+          {gameState.matchChronicle && gameState.matchChronicle.length > 0 && (
+            <div className="mb-6 text-left max-w-xl mx-auto w-full">
+              <div className="flex items-center justify-between mb-2">
+                <button
+                  onClick={() => setShowChronicle(!showChronicle)}
+                  className="flex items-center gap-2 text-xs sm:text-sm font-serif font-bold text-[#ffd88f] hover:text-white transition-colors cursor-pointer"
+                >
+                  <ScrollText size={16} className="text-[#ffd88f]" />
+                  <span>📜 BIÊN NIÊN SỬ CHIẾN TRƯỜNG</span>
+                  <span className="text-[11px] font-mono text-[#ebdcb0]/60">
+                    {showChronicle ? '▼ Thu gọn' : '▶ Xem chi tiết từ đầu đến cuối'}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    const text = gameState.matchChronicle?.join('\n') || '';
+                    navigator.clipboard.writeText(text);
+                    setCopiedChronicle(true);
+                    setTimeout(() => setCopiedChronicle(false), 2500);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-black/60 border border-[#bd8436]/50 hover:bg-[#3a2213] text-[11px] font-mono font-bold text-[#ffd88f] transition-all flex items-center gap-1 cursor-pointer"
+                  title="Sao chép toàn bộ biên niên sử ván đấu"
+                >
+                  {copiedChronicle ? '✓ Đã chép!' : '📋 Sao chép'}
+                </button>
+              </div>
+
+              {showChronicle && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-black/80 border border-[#bd8436]/60 shadow-2xl max-h-[42vh] overflow-y-auto space-y-1.5 font-mono text-xs text-[#ebdcb0] leading-relaxed scrollbar-thin scrollbar-thumb-[#bd8436]/50 scrollbar-track-transparent">
+                  {gameState.matchChronicle.map((line, idx) => {
+                    const isHeader = line.includes('═══') || line.includes('───');
+                    const isTitle = line.includes('BIÊN NIÊN SỬ') || line.includes('KẾT THÚC TRẬN CHIẾN');
+                    const isSection = line.includes('1. XUẤT PHÁT ĐIỂM') || line.includes('2. DIỄN BIẾN') || line.includes('3. BÌNH LUẬN');
+                    const isEventHeader = line.trim().startsWith('📍') || line.trim().startsWith('⚡');
+                    const isWinHighlight = line.includes('GIÀNH CHIẾN THẮNG');
+                    const isHarry = line.includes('Harry Potter');
+
+                    if (isHeader) {
+                      return <div key={idx} className="text-[#bd8436]/40 select-none py-0.5">{line}</div>;
+                    }
+                    if (isTitle) {
+                      return (
+                        <div key={idx} className={`font-bold font-serif text-center sm:text-sm py-1 ${isWinHighlight ? 'text-[#ffd88f] text-sm sm:text-base animate-pulse' : 'text-amber-300'}`}>
+                          {line}
+                        </div>
+                      );
+                    }
+                    if (isSection) {
+                      return (
+                        <div key={idx} className="font-bold text-[#ffd88f] border-b border-[#bd8436]/30 pt-2 pb-1 mt-2 text-xs font-serif">
+                          {line}
+                        </div>
+                      );
+                    }
+                    if (isEventHeader) {
+                      return (
+                        <div key={idx} className="font-bold text-amber-200 pt-1.5 text-xs">
+                          {line}
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={idx} className={`pl-2 sm:pl-3 ${isHarry ? 'text-amber-100 font-semibold' : 'text-[#ebdcb0]/90'}`}>
+                        {line}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 

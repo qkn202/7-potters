@@ -1,6 +1,6 @@
-import { checkWinCondition, getWinReason, createEndGameLogs, INITIAL_WEASLEY_ITEMS, validateWeasleyItemUse, fisherYatesShuffle, assignRolesFairly } from '../src/lib/GameContext';
+import { checkWinCondition, getWinReason, createEndGameLogs, generateMatchChronicle, INITIAL_WEASLEY_ITEMS, validateWeasleyItemUse, fisherYatesShuffle, assignRolesFairly } from '../src/lib/GameContext';
 import { ROLES } from '../src/lib/roles';
-import type { Player, Role } from '../src/lib/types';
+import type { Player, Role, MatchEvent } from '../src/lib/types';
 
 function createMockPlayer(id: string, name: string, role: Role, status: 'ALIVE' | 'DEAD' = 'ALIVE'): Player {
   return {
@@ -1249,8 +1249,97 @@ async function runMechanicsTests() {
   }
   console.log('✅ TEST 21 PASSED: Thông tin phe thắng và lý do chiến thắng được ghi nhận chuẩn xác 100% vào Nhật Ký!');
 
+  // -------------------------------------------------------------
+  // TEST 22: TOÀN BỘ BIÊN NIÊN SỬ CHIẾN TRƯỜNG TỪ ĐẦU ĐẾN CUỐI (DETAILED MATCH CHRONICLE)
+  // -------------------------------------------------------------
+  console.log('\n--- [TEST 22] BIÊN NIÊN SỬ CHIẾN TRƯỜNG CHI TIẾT TỪ ĐẦU ĐẾN CUỐI ---');
+  {
+    const matchPlayers: Player[] = [
+      createMockPlayer('p1', 'Minh Anh', ROLES.HARRY_POTTER, 'ALIVE'),
+      createMockPlayer('p2', 'Bảo Linh', ROLES.HERMIONE_GRANGER, 'ALIVE'),
+      createMockPlayer('p3', 'Tuấn Kiệt', ROLES.RON_WEASLEY, 'ALIVE'),
+      createMockPlayer('p4', 'Quốc Đạt', ROLES.VOLDEMORT, 'DEAD'),
+      createMockPlayer('p5', 'Phương Thảo', ROLES.BELLATRIX_LESTRANGE, 'DEAD'),
+    ];
+
+    const sampleEvents: MatchEvent[] = [
+      {
+        round: 1,
+        phase: 'NIGHT',
+        flightStage: 1,
+        title: '📍 VÒNG 1 (BAN ĐÊM) - Chặng 1/4: [Bầu Trời Surrey Tĩnh Lặng]',
+        summary: [
+          'Bảo Linh bay hộ tống Tuấn Kiệt.',
+          'Tử Thần Thực Tử phóng Avada Kedavra nhắm vào Tuấn Kiệt.',
+          'Đa Quả Dịch bảo vệ: Cả hai liệng chổi né đòn an toàn trong sương mù!',
+          'Không có ai tử nạn trong đêm nay.'
+        ],
+        skyEventTitle: 'Bầu Trời Surrey Tĩnh Lặng',
+        timestamp: Date.now()
+      },
+      {
+        round: 1,
+        phase: 'DAY',
+        flightStage: 1,
+        title: '📍 VÒNG 1 (BAN NGÀY): Phiên Biểu Quyết Expelliarmus',
+        summary: [
+          'Hội đồng bỏ phiếu: Phương Thảo nhận được 4 phiếu tước đũa phép.',
+          'Phương Thảo (Bellatrix Lestrange) bị tước đũa phép và trục xuất khỏi bầu trời!'
+        ],
+        timestamp: Date.now()
+      },
+      {
+        round: 2,
+        phase: 'NIGHT',
+        flightStage: 2,
+        title: '📍 VÒNG 2 (BAN ĐÊM) - Chặng 2/4: [Tầng Mây Giông & Sấm Chớp]',
+        summary: [
+          'Alastor Moody bất ngờ khai hỏa đũa phép hạ sát Quốc Đạt!',
+          'Chúa Tể Voldemort đã bị tiêu diệt! Toàn bộ Tử Thần Thực Tử tan rã.'
+        ],
+        skyEventTitle: 'Tầng Mây Giông & Sấm Chớp',
+        timestamp: Date.now()
+      }
+    ];
+
+    const winner = checkWinCondition(matchPlayers, 2, 4);
+    if (winner !== 'ORDER_OF_PHOENIX') throw new Error(`TEST 22 FAILED: Expected ORDER_OF_PHOENIX, got ${winner}`);
+
+    const chronicle = generateMatchChronicle(winner, matchPlayers, 2, 4, sampleEvents);
+    const chronicleText = chronicle.join('\n');
+
+    // 1. Phải có banner tiêu đề biên niên sử
+    if (!chronicleText.includes('BIÊN NIÊN SỬ CHIẾN TRƯỜNG')) {
+      throw new Error('TEST 22 FAILED: Thiếu tiêu đề Biên Niên Sử');
+    }
+    // 2. Phải có phần 1: Xuất phát điểm và danh tính ban đầu
+    if (!chronicleText.includes('1. XUẤT PHÁT ĐIỂM & DANH TÍNH BÍ MẬT') || !chronicleText.includes('Minh Anh') || !chronicleText.includes('Quốc Đạt')) {
+      throw new Error('TEST 22 FAILED: Thiếu thông tin người chơi và vai trò ban đầu');
+    }
+    // 3. Phải có phần 2: Diễn biến từng vòng và chặng bay
+    if (!chronicleText.includes('2. DIỄN BIẾN TOÀN BỘ CHẶNG BAY & VÒNG ĐẤU') || !chronicleText.includes('Surrey') || !chronicleText.includes('Expelliarmus')) {
+      throw new Error('TEST 22 FAILED: Thiếu diễn biến chi tiết các chặng bay');
+    }
+    // 4. Phải có phần 3: Bình luận và phân tích lý do thắng lợi toàn diện từ đầu đến cuối
+    if (!chronicleText.includes('3. BÌNH LUẬN & ĐÁNH GIÁ NGUYÊN NHÂN THẮNG LỢI TOÀN DIỆN')) {
+      throw new Error('TEST 22 FAILED: Thiếu phần 3 bình luận nguyên nhân thắng lợi');
+    }
+
+    // Kiểm tra createEndGameLogs tích hợp chronicle
+    const endLogs = createEndGameLogs(winner, matchPlayers, 2, 4, sampleEvents);
+    if (!endLogs[0].includes('HỘI PHƯỢNG HOÀNG') || !endLogs[1].includes('Lý do:') || endLogs.length < 15) {
+      throw new Error(`TEST 22 FAILED: createEndGameLogs không chứa đủ biên niên sử (length=${endLogs.length})`);
+    }
+
+    console.log('✓ 22.1 Tiêu đề Biên Niên Sử & Lực Lượng:', chronicle[1]);
+    console.log('✓ 22.2 Danh tính Harry thật & Đồng đội:', chronicle[7]);
+    console.log('✓ 22.3 Số lượng sự kiện từng vòng ghi nhận:', sampleEvents.length, 'vòng.');
+    console.log('✓ 22.4 Tổng số dòng biên niên sử sinh ra:', chronicle.length, 'dòng chi tiết.');
+    console.log('✅ TEST 22 PASSED: Biên Niên Sử Chiến Trường chi tiết từ đầu đến cuối ván đấu hoạt động xuất sắc!');
+  }
+
   console.log('\n====================================================');
-  console.log('🎉 TẤT CẢ 21/21 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
+  console.log('🎉 TẤT CẢ 22/22 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
   console.log('====================================================\n');
 }
 

@@ -6,6 +6,9 @@
 ### 🎮 Chế Độ Chơi Mới: MOD HPVN - Ultimate Edition
 Kết hợp tinh hoa từ Classic & Chaos Mode! 4-20 người chơi, 10-25 phút, Ghost Voting, Chaos Events, Dark Pact Protection. **[Xem chi tiết →](#-7-mod-hpvn---ultimate-edition)**
 
+### 🛠️ Cập Nhật Mới: Sửa Lỗi Game Logic P0/P1
+Audit và fix các lỗi nghiêm trọng: George Peru Darkness, self-target validation, vote re-submit warning, vote permission enforcement, double execution fix. **[Xem chi tiết →](#-15-sửa-lỗi-game-logic-p0p1-bug-fixes)**
+
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-7--potters-181717?logo=github)](https://github.com/qkn202/7-potters.git)
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?logo=next.js)](https://nextjs.org/)
@@ -240,6 +243,52 @@ Khắc phục triệt để hiện tượng người chơi bị bắt làm Tử 
   - Lupin chọn 1 đồng đội đã ngã xuống (hoặc cứu người bị ám sát trong đêm) và gửi lệnh ngầm. Phe Tử Thần Thực Tử hoàn toàn không hay biết mục tiêu được hồi sinh.
   - Tại thời điểm phân giải rạng sáng (`calculateResolution` & `applyResolution`), nếu Lupin còn sống và không bị phong ấn, mục tiêu sẽ chính thức sống lại (`revivedPlayers`) với thông báo phép màu trang trọng trên Bảng Vàng Merlin.
   - Ngăn ngừa hoàn toàn lỗi đảo lộn thứ tự log và hiện tượng mâu thuẫn trạng thái sống/chết.
+
+---
+
+### 🐛 15. Sửa Lỗi Game Logic P0/P1 (Bug Fixes)
+
+Đã thực hiện audit và sửa các lỗi logic nghiêm trọng trong `GameContext.tsx`:
+
+#### P0 - Lỗi Nghiêm Trọng (Ngay lập tức)
+
+| ID | Mô tả | Fix |
+|:---|:---|:---|
+| **P0-1** | George Peru Darkness không hoạt động | Thêm check `GLOBAL_SULK_R${round}` trước kill resolution. George dùng `GLOBAL_SULK` nhưng resolution check `PERUVIAN_DARKNESS` → không khớp |
+| **P0-2** | Fred/George/Bill/Fleur thiếu phase validation | Đã xác nhận: Tất cả 4 nhân vật đã có `if (curState.phase !== 'NIGHT')` validation ✅ |
+
+#### P1 - Lỗi Quan Trọng (Ưu tiên cao)
+
+| ID | Mô tả | Fix |
+|:---|:---|:---|
+| **P1-1** | Self-target validation: Dumbledore protect self, Snape shield self, Lupin revive self | Thêm validation tại `executePlayerActionCore`, `executeInstantSkillCore`, và `consumeWeasleyItem` |
+| **P1-2** | Vote re-submit không có warning | Thêm toast warning khi đổi phiếu vote |
+| **P1-canVote** | Không enforce `canVote` permission | Thêm validation ngăn silenced/fainted voters bỏ phiếu tại thời điểm submit |
+| **P2-1** | Client execute cả cục bộ lẫn gửi Host → double execution | Sửa `playerAction`: Client chỉ gửi đến Host, không execute cục bộ |
+
+---
+
+### 📜 16. Biên Niên Sử Chiến Trường Chi Tiết (Detailed Match Chronicle & Victory Reasons)
+
+Ở cuối mỗi ván đấu, hệ thống tự động tổng hợp và ghi nhận **Biên Niên Sử Chiến Trường (Biên niên sử từ đầu đến cuối ván đấu)** hiển thị trên cả Terminal Log, màn hình Vinh quang người chơi (`PlayerScreen`) và Bảng điều khiển Quản trò (`GMDashboard`):
+
+1. **👥 Xuất Phát Điểm & Danh Tính Bí Mật (Số 4 Privet Drive)**:
+   - Liệt kê toàn bộ người chơi tham chiến và danh tính bí mật từ lúc cất cánh:
+     - ⚡ **Harry Potter thật** (Kẻ Được Chọn) và tình trạng cuối cùng (Còn sống / Đã tử trận).
+     - 🛡️ **Hội Phượng Hoàng**: Các bản sao Đa Quả Dịch & Hộ vệ đặc biệt (Hermione, Ron, Dumbledore, Lupin, Kingsley, Snape...).
+     - 💀 **Tử Thần Thực Tử**: Chúa Tể Voldemort và toàn bộ binh đoàn Hắc Ám (Bellatrix, Fenrir, Lucius...).
+     - ⚖️ **Phe Trung Lập**: Peter Pettigrew, Jester, v.v.
+
+2. **🗺️ Diễn Biến Toàn Bộ Chặng Bay & Vòng Đấu (Round-by-Round Timeline)**:
+   - Ghi lại tường tận từng hành động ma thuật then chốt qua mỗi vòng:
+     - 🌙 **Ban Đêm**: Biến cố bầu trời (Surrey tĩnh lặng, Mây giông, Phục kích), ai bay hộ tống ai, ai bị tấn công, bùa ma thuật can thiệp (khiên Dumbledore, Sectumsempra Snape, Đa Quả Dịch né đòn, Tia Lửa Vàng bùng nổ, hồi sinh Lupin...).
+     - ☀️ **Ban Ngày**: Phiên luận tội Expelliarmus của Hội đồng phù thủy, kết quả bỏ phiếu tước đũa phép, hoặc các kỹ năng can thiệp tức thì (Moody bắn lén, Dolores Umbridge cấm túc...).
+
+3. **🏁 Phán Quyết & Phân Tích Lý Do Thắng Lợi Toàn Diện**:
+   - Phân tích nguyên nhân quyết định từ đầu đến cuối trận:
+     - Vì sao Hội Phượng Hoàng đưa được Harry hạ cánh an toàn xuống Hang Sóc hoặc quét sạch Tử Thần Thực Tử.
+     - Hoặc cách thức Tử Thần Thực Tử phát hiện và hạ sát Harry Potter thật / áp đảo quân số.
+     - Cung cấp nút **📋 Sao chép Biên Niên Sử** 1-click để chia sẻ bản tóm tắt trận đấu vào nhóm chat Facebook / Discord / Zalo.
 
 ---
 

@@ -92,6 +92,16 @@ export interface ActiveVisualFX {
   timestamp: number;
 }
 
+export interface MatchEvent {
+  round: number;
+  phase: GamePhase;
+  flightStage: number;
+  title: string;
+  summary: string[];
+  skyEventTitle?: string;
+  timestamp?: number;
+}
+
 export interface GameState {
   players: Player[];
   phase: GamePhase;
@@ -105,6 +115,8 @@ export interface GameState {
   logs: string[];
   winner: Faction | null;
   winReason?: string | null;
+  matchEvents?: MatchEvent[];
+  matchChronicle?: string[];
   pendingActions: Record<string, { actionName: string, targetId: string }>;
   resolutionReport: ResolutionReport | null;
   skillStates: Record<string, boolean | string>; // Lưu trạng thái dùng skill (VD: 'playerID_LUPIN': true, 'DUMBLEDORE_R1': 'targetId')

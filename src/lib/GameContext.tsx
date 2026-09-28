@@ -40,6 +40,7 @@ export interface GameContextType {
   consumeWeasleyItem: (itemId: WeasleyItemId, targetId?: string) => string | void;
   triggerVisualFX: (fx: ActiveVisualFX) => void;
   clearVisualFX: () => void;
+  startQuickSoloGame: () => void;
 }
 
 export const INITIAL_WEASLEY_ITEMS: WeasleyItem[] = [
@@ -2134,6 +2135,63 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  /**
+   * One-click Instant Solo Battle Generator
+   * Instantly creates a complete 8-player battle with bot companions and launches straight into the in-game HUD
+   */
+  const startQuickSoloGame = () => {
+    const myId = 'player_hero_harry';
+    const myPlayer: Player = {
+      id: myId,
+      name: 'Harry Potter (Bạn)',
+      role: ROLES.HARRY_POTTER,
+      status: 'ALIVE',
+      isGM: false,
+      house: 'GRYFFINDOR',
+    };
+
+    const mockBots: Player[] = [
+      { id: 'bot_hermione', name: 'Hermione Granger (Bot)', role: ROLES.HERMIONE_GRANGER, status: 'ALIVE', isGM: false, isBot: true, house: 'GRYFFINDOR' },
+      { id: 'bot_ron', name: 'Ron Weasley (Bot)', role: ROLES.RON_WEASLEY, status: 'ALIVE', isGM: false, isBot: true, house: 'GRYFFINDOR' },
+      { id: 'bot_snape', name: 'Severus Snape (Bot)', role: ROLES.SEVERUS_SNAPE, status: 'ALIVE', isGM: false, isBot: true, house: 'SLYTHERIN' },
+      { id: 'bot_dumbledore', name: 'Albus Dumbledore (Bot)', role: ROLES.ALBUS_DUMBLEDORE, status: 'ALIVE', isGM: false, isBot: true, house: 'GRYFFINDOR' },
+      { id: 'bot_lupin', name: 'Remus Lupin (Bot)', role: ROLES.REMUS_LUPIN, status: 'ALIVE', isGM: false, isBot: true, house: 'GRYFFINDOR' },
+      { id: 'bot_voldemort', name: 'Lord Voldemort (Bot)', role: ROLES.VOLDEMORT, status: 'ALIVE', isGM: false, isBot: true, house: 'SLYTHERIN' },
+      { id: 'bot_bellatrix', name: 'Bellatrix Lestrange (Bot)', role: ROLES.BELLATRIX_LESTRANGE, status: 'ALIVE', isGM: false, isBot: true, house: 'SLYTHERIN' },
+    ];
+
+    const allPlayers = [myPlayer, ...mockBots];
+    setCurrentPlayerId(myId);
+    setRoomCode(null);
+    setIsHost(false);
+    setStorageItem('seven-potters-session-id', myId);
+    setStorageItem('seven-potters-player-name', 'Harry Potter (Bạn)');
+    setStorageItem('seven-potters-is-gm', 'false');
+
+    updateState(() => ({
+      players: allPlayers,
+      phase: 'NIGHT',
+      round: 1,
+      flightStage: 1,
+      maxStages: 4,
+      winner: null,
+      currentSkyEvent: getSkyEventForStage(1, 4),
+      pendingActions: {},
+      escortPairs: {},
+      skillStates: {},
+      resolutionReport: null,
+      interruptState: null,
+      weasleyItems: INITIAL_WEASLEY_ITEMS,
+      goldenFlameUsed: false,
+      logs: [
+        'Hệ thống: ⚡ Khởi động trận chiến Bảy Potter! Bạn nhập vai Harry Potter.',
+        'Hệ thống: 🌙 BAN ĐÊM (Lượt 1) bắt đầu. Hãy chọn 1 đồng đội để Bay Hộ Tống hoặc ẩn mình!'
+      ],
+      roleHistory: {},
+      previousRoleMap: {},
+    }));
+  };
+
   const setPhase = (phase: GamePhase) => {
     updateState(prev => {
       let newRound = prev.round;
@@ -3077,7 +3135,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       clearSkillToast,
       consumeWeasleyItem,
       triggerVisualFX,
-      clearVisualFX
+      clearVisualFX,
+      startQuickSoloGame
     }}>
       {children}
     </GameContext.Provider>

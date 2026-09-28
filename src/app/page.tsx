@@ -14,7 +14,7 @@ import {
 } from '@/components/ArtAssets';
 import { FlooChatDrawer, FlooHeaderTrigger, FlooFloatingTrigger } from '@/components/FlooChatDrawer';
 import Link from 'next/link';
-import { BookOpen, User, RotateCcw, AlertTriangle, Wifi, WifiOff, Clock, Package, Bot, Sparkles } from 'lucide-react';
+import { BookOpen, User, RotateCcw, AlertTriangle, Wifi, WifiOff, Clock, Package, Bot, Sparkles, Crown } from 'lucide-react';
 import { FlightTrack } from '@/components/FlightTrack';
 import { WeasleyCrateModal } from '@/components/WeasleyCrateModal';
 import { CinematicFXOverlay } from '@/components/CinematicFXOverlay';
@@ -139,14 +139,16 @@ export default function Home() {
             <span className="text-[11px] hidden sm:inline md:hidden">Bí Kíp</span>
           </button>
 
-          {/* Quick Link to Preview New In-Game HUD */}
+
+          {/* MOD HPVN - Ultimate Edition Link */}
           <Link
-            href="/preview-hud"
-            title="Xem giao diện in-game mới không cần tạo phòng"
-            className="hpvn-btn-phoenix p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0 border border-amber-400/60"
+            href="/hpvn"
+            title="MOD HPVN - Ultimate Edition: Kết hợp Classic & Chaos"
+            className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0 border border-purple-400/60"
           >
-            <Sparkles size={14} className="text-amber-300 shrink-0 animate-pulse" />
-            <span className="text-[10px] sm:text-xs text-[#ffd88f] hidden xs:inline">HUD In-Game Mới</span>
+            <Crown size={14} className="text-purple-300 shrink-0" />
+            <span className="text-[11px] sm:text-xs text-[#ffd88f] hidden md:inline">MOD HPVN</span>
+            <span className="text-[11px] hidden sm:inline md:hidden">HPVN</span>
           </Link>
 
           {/* Perspective Indicator / Impersonator: CHỈ DUY NHẤT Ở CHẾ ĐỘ GIẢ LẬP MỚI MỞ CHO TẤT CẢ MỌI NGƯỜI */}
@@ -187,8 +189,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* 4-Stage Flight Progress Track (Active during gameplay) */}
-      {gameState.phase !== 'LOBBY' && gameState.phase !== 'END' && (
+      {/* 4-Stage Flight Progress Track: Chỉ hiển thị cho Quản Trò Merlin (vì PlayerScreen đã có Zone 1 Flight HUD tích hợp siêu mượt) */}
+      {gameState.phase !== 'LOBBY' && gameState.phase !== 'END' && currentPlayer?.isGM && (
         <FlightTrack 
           flightStage={gameState.flightStage || 1}
           maxStages={gameState.maxStages || 4}
@@ -217,23 +219,25 @@ export default function Home() {
         {content}
       </main>
 
-      {/* HPVN Floo Footer */}
-      <footer className="py-4 px-4 text-center text-xs text-[#ebdcb0]/70 border-t border-[#7a5229]/60 bg-[#140b05]/90 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-2">
-          <DeathlyHallowsSymbol className="w-4 h-4 text-[#bd8436]" />
-          <span className="font-lora">
-            HPVN Archive · Trận Chiến Bảy Potter (The Battle of the Seven Potters) · Realtime Multiplayer Edition
-          </span>
-        </div>
+      {/* HPVN Floo Footer (Ẩn khi đang chơi in-game để nhường toàn bộ không gian cho HUD xúc giác) */}
+      {(!currentPlayer || currentPlayer.isGM || gameState.phase === 'LOBBY' || gameState.phase === 'END') && (
+        <footer className="py-4 px-4 text-center text-xs text-[#ebdcb0]/70 border-t border-[#7a5229]/60 bg-[#140b05]/90 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto w-full">
+          <div className="flex items-center gap-2">
+            <DeathlyHallowsSymbol className="w-4 h-4 text-[#bd8436]" />
+            <span className="font-lora">
+              HPVN Archive · Trận Chiến Bảy Potter (The Battle of the Seven Potters) · Realtime Multiplayer Edition
+            </span>
+          </div>
 
-        {/* Force Reset Emergency Button for Tester */}
-        <button 
-          onClick={() => setShowResetConfirm(true)}
-          className="text-[11px] text-red-400/90 hover:text-red-300 bg-red-950/40 hover:bg-red-950/70 px-2.5 py-1 rounded transition-colors border border-red-900/50 flex items-center gap-1 font-mono cursor-pointer"
-        >
-          <RotateCcw size={11} /> Reset dữ liệu thử nghiệm
-        </button>
-      </footer>
+          {/* Force Reset Emergency Button for Tester */}
+          <button 
+            onClick={() => setShowResetConfirm(true)}
+            className="text-[11px] text-red-400/90 hover:text-red-300 bg-red-950/40 hover:bg-red-950/70 px-2.5 py-1 rounded transition-colors border border-red-900/50 flex items-center gap-1 font-mono cursor-pointer"
+          >
+            <RotateCcw size={11} /> Reset dữ liệu thử nghiệm
+          </button>
+        </footer>
+      )}
 
       {/* Global Card Deck Codex Modal */}
       <CardDeckModal

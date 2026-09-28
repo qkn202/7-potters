@@ -44,12 +44,12 @@ type JoinMode = 'create' | 'join' | 'mock';
 type AuthTab = 'hpvn' | 'guest';
 
 export function JoinForm() {
-  const { createRoom, joinRoom, joinGame, errorMsg: globalError } = useGame();
+  const { createRoom, joinRoom, joinGame, startQuickSoloGame, errorMsg: globalError } = useGame();
   
   // Game Room Mode
   const [mode, setMode] = useState<JoinMode>('create');
   const [roomCodeInput, setRoomCodeInput] = useState('');
-  const [isGM, setIsGM] = useState(true);
+  const [isGM, setIsGM] = useState(false);
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -283,28 +283,26 @@ export function JoinForm() {
           </p>
         </div>
 
-        {/* Prominent Banner to Preview New In-Game HUD */}
-        <Link
-          href="/preview-hud"
-          className="mb-5 p-3 rounded-2xl bg-gradient-to-r from-amber-950/90 via-[#351e0f]/95 to-amber-950/90 border-2 border-amber-400 text-amber-200 text-xs sm:text-sm font-serif font-bold flex items-center justify-between gap-2 shadow-2xl hover:border-amber-300 transition-all group relative z-20"
+        {/* ONE-CLICK INSTANT PLAY BUTTON */}
+        <button
+          type="button"
+          onClick={() => startQuickSoloGame()}
+          className="w-full mb-3.5 py-4 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-serif font-black text-sm sm:text-base tracking-wide flex items-center justify-center gap-2.5 shadow-[0_0_25px_rgba(245,158,11,0.5)] border-2 border-amber-200 transition-all active:scale-95 cursor-pointer relative z-20 group"
         >
-          <div className="flex items-center gap-2 min-w-0">
-            <Sparkles size={18} className="text-amber-400 animate-pulse shrink-0" />
-            <div className="flex flex-col text-left truncate">
-              <span className="text-[#ffd88f] font-black text-xs sm:text-sm">✨ GIAO DIỆN IN-GAME MỚI</span>
-              <span className="text-[10px] sm:text-[11px] text-amber-200/80 font-normal truncate">Chạm để mở xem ngay góc nhìn 4 phân vùng không cần tạo phòng!</span>
-            </div>
-          </div>
-          <span className="px-2.5 py-1.5 rounded-xl bg-amber-500 text-black font-black text-xs shrink-0 group-hover:scale-105 transition-transform flex items-center gap-1 shadow-md">
-            MỞ XEM ➔
-          </span>
-        </Link>
+          <Sparkles size={20} className="text-black animate-pulse" />
+          <span>⚡ VÀO CHƠI GAME NGAY (SOLO VỚI BOT)</span>
+        </button>
+
+        {/* Quick Instant Solo Subtitle */}
+        <p className="text-center text-xs font-serif text-[#ebdcb0]/80 mb-5 relative z-20 italic">
+          ✨ Nhập vai Harry Potter bay hộ tống cùng 7 đồng đội bot · Khởi động ngay
+        </p>
 
         {/* Mode Selector Tabs (Create / Join / Mock) */}
         <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#120803] rounded-xl border border-[#7a5229]/60 mb-5 relative z-10">
           <button
             type="button"
-            onClick={() => { setMode('create'); setIsGM(true); setLocalError(null); }}
+            onClick={() => { setMode('create'); setIsGM(false); setLocalError(null); }}
             className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               mode === 'create'
                 ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'
@@ -330,7 +328,7 @@ export function JoinForm() {
 
           <button
             type="button"
-            onClick={() => { setMode('mock'); setIsGM(true); setLocalError(null); }}
+            onClick={() => { setMode('mock'); setIsGM(false); setLocalError(null); }}
             className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               mode === 'mock'
                 ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'

@@ -87,7 +87,12 @@ export function PlayerScreen() {
     resolveInterrupt, 
     skillToast, 
     clearSkillToast, 
-    consumeWeasleyItem 
+    consumeWeasleyItem,
+    simulateBotActions,
+    calculateResolution,
+    applyResolution,
+    roomCode,
+    isHost
   } = useGame();
 
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
@@ -96,6 +101,18 @@ export function PlayerScreen() {
   const [inspectSelf, setInspectSelf] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isLogOpen, setIsLogOpen] = useState(false);
+
+  const canAdvanceTurn = !roomCode || isHost;
+
+  const handleAdvancePhase = () => {
+    simulateBotActions();
+    calculateResolution();
+  };
+
+  const handleConfirmAdvance = () => {
+    applyResolution();
+    setSelectedTarget(null);
+  };
 
   // Skill Toast Handling
   useEffect(() => {
@@ -442,6 +459,19 @@ export function PlayerScreen() {
               <ScrollText size={13} />
               <span className="hidden sm:inline">Nhật Ký</span>
             </button>
+
+            {/* Solo / Host Quick Turn Advance */}
+            {canAdvanceTurn && (
+              <button
+                type="button"
+                onClick={handleAdvancePhase}
+                className="p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black text-[11px] font-serif font-black flex items-center gap-1 transition-all shadow-md active:scale-95 cursor-pointer"
+                title="Mô phỏng hành động các bot và tính toán kết quả chuyển pha"
+              >
+                <Zap size={13} className="text-black fill-black" />
+                <span>Chuyển Lượt</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -1021,13 +1051,26 @@ export function PlayerScreen() {
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={() => setIsInventoryOpen(true)}
-            className="py-3 px-3 rounded-2xl bg-[#1c1208] hover:bg-[#2b1b0c] border border-amber-500/40 text-amber-300 font-serif font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shrink-0"
+            className="py-3 px-3 rounded-2xl bg-[#1c1208] hover:bg-[#2b1b0c] border border-amber-500/40 text-amber-300 font-serif font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shrink-0 cursor-pointer"
             title="Mở túi đồ bảo bối Weasley"
           >
             <Package size={16} className="text-amber-400" />
             <span className="hidden xs:inline">Túi Đồ</span>
             <span>({availableItemsCount})</span>
           </motion.button>
+
+          {/* Solo / Host Turn Advance Button */}
+          {canAdvanceTurn && (
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={handleAdvancePhase}
+              className="py-3 px-3 sm:px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-serif font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.4)] border border-amber-200 shrink-0 cursor-pointer"
+              title="Tính toán ma pháp và chuyển sang pha tiếp theo"
+            >
+              <Zap size={16} className="text-black fill-black" />
+              <span>Chuyển Lượt</span>
+            </motion.button>
+          )}
         </div>
       </div>
 
@@ -1167,6 +1210,72 @@ export function PlayerScreen() {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ============================================================== */}
+      {/* BÁO CÁO KHÔNG CHIẾN (BATTLE AFTERMATH / RESOLUTION MODAL)       */}
+      {/* ============================================================== */}
+      <AnimatePresence>
+        {gameState.resolutionReport && (
+          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-lg w-full rounded-3xl p-6 sm:p-8 hpvn-panel-gold border-2 border-amber-400 shadow-2xl space-y-4"
+            >
+              <CardCornerFlourish className="absolute top-2.5 left-2.5 w-6 h-6 text-amber-400 pointer-events-none" />
+              <CardCornerFlourish className="absolute top-2.5 right-2.5 w-6 h-6 text-amber-400 -scale-x-100 pointer-events-none" />
+
+              <div className="text-center">
+                <span className="text-[10px] sm:text-xs font-mono tracking-[0.25em] uppercase text-amber-300 block mb-1">
+                  CHIẾN TRƯỜNG BẢY POTTER · KẾT QUẢ KHÔNG CHIẾN
+                </span>
+                <h3 className="text-xl sm:text-2xl font-serif font-black text-[#ffd88f] flex items-center justify-center gap-2">
+                  {isNight ? (
+                    <>
+                      <Sun className="text-amber-400 animate-pulse" size={24} />
+                      <span>Bình Minh Khởi Sắc · Kết Quả Đêm</span>
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="text-indigo-400 animate-pulse" size={24} />
+                      <span>Hoàng Hôn Buông Xuống · Phán Quyết</span>
+                    </>
+                  )}
+                </h3>
+              </div>
+
+              {/* Summary narrative lines */}
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar text-left">
+                {gameState.resolutionReport.summary.length === 0 ? (
+                  <p className="text-xs text-zinc-400 font-serif italic text-center py-4">
+                    Không có biến cố nào phát sinh trong lượt này.
+                  </p>
+                ) : (
+                  gameState.resolutionReport.summary.map((line, idx) => (
+                    <div 
+                      key={`res-line-${idx}`}
+                      className="p-3 rounded-xl bg-black/60 border border-amber-500/25 text-xs sm:text-sm font-serif text-amber-100 leading-relaxed"
+                    >
+                      {line}
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Confirm & Fly Forward Button */}
+              <button
+                type="button"
+                onClick={handleConfirmAdvance}
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-serif font-black text-sm sm:text-base tracking-wide flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.5)] border-2 border-amber-200 transition-all active:scale-95 cursor-pointer"
+              >
+                <Sparkles size={18} className="text-black" />
+                <span>TIẾP TỤC CHẶNG BAY ➔</span>
+              </button>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

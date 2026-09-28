@@ -74,9 +74,9 @@ Trò chơi bao gồm **21 thẻ bài nhân vật** được chế tác thủ cô
 - **Chặng 4: Hàng Rào Bảo Vệ Hang Sóc (`SAFEHOUSE_BURROW`):** Hạ cánh an toàn, kích hoạt màn chắn cổ xưa. *(Ở phòng đông người, hành trình mở rộng thêm Chặng 5 Trạm Khóa Cảng và Chặng 6 Hang Sóc).*
 
 ### 4.2. Cơ Chế Lõi Kép & Lửa Vàng Tự Vệ (Golden Flame Retaliation)
-Theo nguyên tác, khi Voldemort tấn công Harry lần đầu tiên:
-- Đũa phép lông đuôi phượng hoàng của Harry tự động nhận diện kẻ thù, **phóng ra dòng Lửa Vàng thiêu đốt đòn tấn công và tước đoạt cây đũa phép của Lucius Malfoy**.
-- Voldemort bị cấm giết người ở đêm kế tiếp. Cơ chế Lửa Vàng chỉ kích hoạt **1 lần duy nhất trong toàn trận** để bảo vệ Harry thật.
+Theo nguyên tác, khi Voldemort tấn công trúng Harry Potter thật lần đầu tiên:
+- Đũa phép lông đuôi phượng hoàng của Harry tự động nhận diện kẻ thù, **bộc phát Tia Lửa Vàng thiêu rụi đòn chí mạng và cứu sống Harry Potter** (kích hoạt **1 lần duy nhất trong toàn trận**).
+- **Quy tắc chuẩn:** Tia Lửa Vàng **CHỈ cứu sống duy nhất Harry Potter** khi Harry là mục tiêu bị tấn công trực diện (không bảo vệ người khác kể cả khi Harry đi hộ tống). Tia Lửa Vàng **KHÔNG làm câm lặng (silence) Chúa Tể Voldemort**. Voldemort vẫn có thể hạ sát mục tiêu khác trong cùng đêm (như đêm ám sát kép Double Kill) hoặc các đêm tiếp theo.
 
 ### 4.3. Rương Bảo Bối Tiệm Phù Thủy Weasley (Weasleys' Wizard Wheezes)
 Các phát minh ma thuật đặc biệt tiếp tế từ Fred & George Weasley:
@@ -96,8 +96,8 @@ Các tính năng quan trọng và cải tiến đã hoàn thiện trong các b�
 - **Xử lý khử xung đột theo từng chặng (Harmonized Resolution):**
   - **Ở Chặng 1 & Chặng 2 (Chặng né đòn):** Nếu mục tiêu bị tấn công có người bay hộ tống, cả hai sẽ liệng chổi né đòn an toàn vào làn mây. **Tia Lửa Vàng được giữ nguyên, không bị kích hoạt lãng phí!**
   - **Ở Chặng 3+ (Chặng Voldemort phục kích):**
-    - Nếu Tia Lửa Vàng còn hiệu lực: Lửa Vàng ưu tiên bùng nổ bảo vệ Harry và tước trượng Voldemort, **người hộ tống không phải hy sinh oan uổng**.
-    - Nếu Tia Lửa Vàng đã dùng: Người bay hộ tống sẽ dũng cảm lấy thân mình chắn đòn tử thủ (hy sinh) để bảo vệ Harry hoặc đồng đội mục tiêu sống sót!
+    - Nếu mục tiêu trực tiếp là Harry Potter & Tia Lửa Vàng còn hiệu lực: Lửa Vàng ưu tiên bùng nổ bảo vệ Harry (Tia Lửa Vàng CHỈ cứu Harry Potter, không silence Voldemort). Người hộ tống không phải hy sinh.
+    - Nếu mục tiêu là người khác (hoặc Harry là người đi hộ tống, hoặc Tia Lửa Vàng đã dùng): Người bay hộ tống sẽ dũng cảm lấy thân mình chắn đòn tử thủ (hy sinh) để bảo vệ đồng đội mục tiêu sống sót!
 
 ### 🚫 2. Nút "Không Giết Ai Cả (Án Binh Bất Động)" Cho Phe Tử Thần Thực Tử (4T)
 - Bổ sung nút **"Không Giết Ai Cả / Án Binh"** trong giao diện ban ngày của Phe Tử Thần Thực Tử.
@@ -185,6 +185,11 @@ Khắc phục triệt để hiện tượng người chơi bị bắt làm Tử 
 - **Khóa Cứng (`Hard Lock`) & Hồi Chiêu TTTT (`Soft Cooldown`):**
   - **Hard Lock:** Nếu vừa làm TTTT ở ván liền kề, điểm ưu tiên bị phạt `-1,000,000 điểm` $\rightarrow$ **Xác suất làm TTTT liên tiếp = 0%** (Max streak = 1 tuyệt đối).
   - **Soft Cooldown:** Tích lũy điểm hạn hán `+20 điểm/ván` cho mỗi ván chơi phe HPH, luân phiên đều đặn TTTT cho mọi người chơi trong phòng.
+
+### ⚡ 14. Tinh Chỉnh Quy Tắc Tia Lửa Vàng (Golden Flame Precision Rules)
+- **Tia Lửa Vàng CHỈ cứu Harry Potter:** Kỹ năng chỉ kích hoạt khi bản thân Harry Potter là nạn nhân trực tiếp của đòn tấn công trong đêm. Khi Harry đóng vai trò người bay hộ tống cho người khác, Tia Lửa Vàng **không** kích hoạt (áp dụng luật hy sinh của người hộ tống thông thường).
+- **Không Silence Chúa Tể Voldemort:** Bỏ hiệu ứng câm lặng (silence) lên Voldemort ở đêm tiếp theo.
+- **Voldemort vẫn có thể kill người khác đêm đó:** Trong đêm ám sát kép (Double Kill từ Bellatrix hoặc Vòng vây Phục kích ở phòng lớn), nếu Harry được Tia Lửa Vàng che chở, Voldemort vẫn tiêu diệt mục tiêu còn lại bình thường trong cùng đêm.
 
 ---
 

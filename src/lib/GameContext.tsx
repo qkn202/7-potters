@@ -2512,12 +2512,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
                 summary.push(`Cơn bão sấm chớp mù mịt làm đòn tấn công nhắm vào ${victim.name} bị nổ tung giữa không trung! ${victim.name} an toàn thoát nạn!`);
               }
             } 
-            // 2. Golden Flame Wand Retaliation (Tia Lửa Vàng): Triggers before any escort has to sacrifice, or if Harry is escorting
-            else if (!gameState.goldenFlameUsed && (victim.role?.id === 'HARRY_POTTER' || primaryEscort?.role?.id === 'HARRY_POTTER' || activeEscorts.some(e => e.role?.id === 'HARRY_POTTER'))) {
+            // 2. Golden Flame Wand Retaliation (Tia Lửa Vàng): CHỈ cứu Harry Potter khi bị tấn công trực diện (không cứu người khác, không silence Voldemort)
+            else if (!gameState.goldenFlameUsed && !newSkillStates['GOLDEN_FLAME_TRIGGERED'] && victim.role?.id === 'HARRY_POTTER') {
               goldenFlameShielded = true;
               newSkillStates['GOLDEN_FLAME_TRIGGERED'] = true;
-              newSkillStates[`voldemort_silenced_R${gameState.round + 1}`] = true;
-              summary.push(`⚡ TIA LỬA VÀNG BÙNG NỔ! Chiếc đũa phép lông đuôi phượng hoàng của Harry tự động nhận diện và phản pháo Chúa Tể Voldemort! Đòn chí mạng bị thiêu rụi hoàn toàn! Đũa phép Lucius Malfoy bị nổ tung!`);
+              summary.push(`⚡ TIA LỬA VÀNG BÙNG NỔ! Chiếc đũa phép lông đuôi phượng hoàng của Harry tự động nhận diện và phản pháo Chúa Tể Voldemort! Đòn chí mạng bị thiêu rụi, cứu sống Harry Potter trong gang tấc!`);
             }
             // 3. Hagrid Sacrifice (when Golden Flame already spent)
             else if (hagridProtecting && hagrid) {

@@ -396,15 +396,15 @@ async function runMechanicsTests() {
       escortShielded = true;
       // Both survive, goldenFlameUsed unchanged
     }
-    // 2. Golden Flame Wand Retaliation (Tia Lửa Vàng)
-    else if (!params.goldenFlameUsed && (params.victimRole === 'HARRY_POTTER' || params.escortRole === 'HARRY_POTTER')) {
+    // 2. Golden Flame Wand Retaliation (Tia Lửa Vàng): CHỈ cứu Harry Potter khi bị tấn công trực diện, không silence Voldemort
+    else if (!params.goldenFlameUsed && params.victimRole === 'HARRY_POTTER') {
       goldenFlameShielded = true;
       goldenFlameTriggered = true;
       nextGoldenFlameUsed = true;
-      voldemortSilenced = true;
-      // Neither dies!
+      voldemortSilenced = false; // Golden Flame DOES NOT silence Voldemort
+      // Harry survives!
     }
-    // 3. Bay Hộ Tống Heroic Sacrifice (Stage 3+, when Golden Flame already spent)
+    // 3. Bay Hộ Tống Heroic Sacrifice (Stage 3+, when Golden Flame already spent or victim is not Harry)
     else if (hasEscort) {
       escortShielded = true;
       escortDied = true;
@@ -434,11 +434,11 @@ async function runMechanicsTests() {
     goldenFlameUsed: false
   });
 
-  if (res11_1.goldenFlameShielded && res11_1.goldenFlameTriggered && !res11_1.victimDied && !res11_1.escortDied && res11_1.voldemortSilenced) {
+  if (res11_1.goldenFlameShielded && res11_1.goldenFlameTriggered && !res11_1.victimDied && !res11_1.escortDied && !res11_1.voldemortSilenced) {
     console.log('✓ 11.1: Harry bị tấn công ở Chặng 3 khi có Hộ tống & Tia Lửa Vàng sẵn sàng:');
-    console.log('   ➔ Tia Lửa Vàng bùng nổ, Voldemort bị cấm đêm sau, Hermione KHÔNG phải hy sinh oan uổng!');
+    console.log('   ➔ Tia Lửa Vàng bùng nổ cứu sống Harry, Voldemort KHÔNG bị silence, Hermione không phải hy sinh!');
   } else {
-    throw new Error(`TEST 11.1 FAILED: Tia Lửa Vàng không bảo vệ được cả Harry và người hộ tống: ${JSON.stringify(res11_1)}`);
+    throw new Error(`TEST 11.1 FAILED: Tia Lửa Vàng không bảo vệ được Harry hoặc bị silence Voldemort: ${JSON.stringify(res11_1)}`);
   }
 
   // Case 11.2: Harry is target at Stage 3, Bay Hộ Tống active, Golden Flame ALREADY USED
@@ -464,11 +464,13 @@ async function runMechanicsTests() {
     goldenFlameUsed: false
   });
 
-  if (res11_3.goldenFlameShielded && res11_3.goldenFlameTriggered && !res11_3.victimDied && !res11_3.escortDied && res11_3.voldemortSilenced) {
+  // Quy tắc mới: Tia Lửa Vàng CHỈ cứu Harry khi Harry là mục tiêu trực tiếp.
+  // Khi Harry làm hộ tống người khác, Tia Lửa Vàng KHÔNG kích hoạt. Harry hy sinh hộ tống để cứu Hermione.
+  if (!res11_3.goldenFlameTriggered && !res11_3.goldenFlameShielded && res11_3.escortShielded && res11_3.escortDied && !res11_3.victimDied && !res11_3.voldemortSilenced) {
     console.log('✓ 11.3: Harry đóng vai trò Bay Hộ Tống cho đồng đội ở Chặng 3:');
-    console.log('   ➔ Đũa phép Harry tự động kích hoạt Tia Lửa Vàng, cứu sống cả Harry lẫn đồng đội!');
+    console.log('   ➔ Tia Lửa Vàng CHỈ cứu Harry (không kích hoạt cho người khác). Voldemort vẫn hạ sát được người hộ tống!');
   } else {
-    throw new Error(`TEST 11.3 FAILED: Harry làm hộ tống không kích hoạt được Tia Lửa Vàng: ${JSON.stringify(res11_3)}`);
+    throw new Error(`TEST 11.3 FAILED: Quy tắc Golden Flame chỉ cứu Harry bị vi phạm: ${JSON.stringify(res11_3)}`);
   }
 
   // Case 11.4: Harry is target at Stage 1 (PERFECT_DISGUISE), Bay Hộ Tống active, Golden Flame ready
@@ -484,6 +486,28 @@ async function runMechanicsTests() {
     console.log('   ➔ Hai người né đòn an toàn, Tia Lửa Vàng KHÔNG bị kích hoạt lãng phí (giữ nguyên cho chặng sau)!');
   } else {
     throw new Error(`TEST 11.4 FAILED: Chặng né đòn làm hao phí Tia Lửa Vàng: ${JSON.stringify(res11_4)}`);
+  }
+
+  // Case 11.5: Double Kill Night - Voldemort tấn công đồng thời Harry và người khác
+  const res11_5_t1 = simulateAttackResolution({
+    victimRole: 'HARRY_POTTER',
+    escortRole: null,
+    modifier: 'VOLDEMORT_AMBUSH',
+    goldenFlameUsed: false
+  });
+  const res11_5_t2 = simulateAttackResolution({
+    victimRole: 'RON_WEASLEY',
+    escortRole: null,
+    modifier: 'VOLDEMORT_AMBUSH',
+    goldenFlameUsed: res11_5_t1.nextGoldenFlameUsed
+  });
+
+  if (res11_5_t1.goldenFlameShielded && !res11_5_t1.victimDied && !res11_5_t1.voldemortSilenced &&
+      !res11_5_t2.goldenFlameShielded && res11_5_t2.victimDied) {
+    console.log('✓ 11.5: Đêm Voldemort ám sát 2 người (Double Kill) gồm Harry và người khác:');
+    console.log('   ➔ Harry được Tia Lửa Vàng cứu sống, nhưng Voldemort KHÔNG bị silence và vẫn hạ sát mục tiêu còn lại trong đêm!');
+  } else {
+    throw new Error(`TEST 11.5 FAILED: Voldemort không thể kill người khác trong cùng đêm với Tia Lửa Vàng: ${JSON.stringify({ t1: res11_5_t1, t2: res11_5_t2 })}`);
   }
 
   console.log('✅ TEST 11 PASSED: Xung đột giữa Tia Lửa Vàng và Bay Hộ Tống đã được giải quyết triệt để 100%!');

@@ -2425,7 +2425,39 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   };
 
   const impersonatePlayer = (playerId: string) => {
+    if (playerId === '__MERLIN__' || playerId === 'merlin') {
+      const existingGM = stateRef.current.players.find(p => p.isGM);
+      if (existingGM) {
+        setCurrentPlayerId(existingGM.id);
+        setStorageItem('seven-potters-session-id', existingGM.id);
+        setStorageItem('seven-potters-is-gm', 'true');
+        return;
+      } else {
+        const gmId = 'player_merlin_gm';
+        const gmPlayer: Player = {
+          id: gmId,
+          name: 'Merlin (Quản Trò)',
+          status: 'ALIVE',
+          isGM: true,
+          house: 'GRYFFINDOR',
+          userTag: 'Quản Trò',
+          role: null,
+        };
+        updateState(prev => ({
+          ...prev,
+          players: [gmPlayer, ...prev.players]
+        }));
+        setCurrentPlayerId(gmId);
+        setStorageItem('seven-potters-session-id', gmId);
+        setStorageItem('seven-potters-is-gm', 'true');
+        return;
+      }
+    }
+
     setCurrentPlayerId(playerId);
+    setStorageItem('seven-potters-session-id', playerId);
+    const targetPlayer = stateRef.current.players.find(p => p.id === playerId);
+    setStorageItem('seven-potters-is-gm', targetPlayer?.isGM ? 'true' : 'false');
   };
 
   /**

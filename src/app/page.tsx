@@ -24,6 +24,7 @@ export default function Home() {
     gameState, 
     currentPlayerId, 
     impersonatePlayer,
+    leaveGame,
     consumeWeasleyItem,
     clearVisualFX,
     roomCode,
@@ -38,10 +39,12 @@ export default function Home() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+  const existingGM = gameState.players.find(p => p.isGM);
+  const nonGmPlayers = gameState.players.filter(p => !p.isGM);
 
   // Perspective switcher allowed only in Simulation mode (!roomCode)
   const isSimulationMode = !roomCode;
-  const canSwitchPerspective = isSimulationMode;
+  const canSwitchPerspective = isSimulationMode && gameState.players.length > 0;
 
   // Screen routing based on state
   let content;
@@ -58,19 +61,23 @@ export default function Home() {
   return (
     <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden bg-[#050811] text-slate-100 selection:bg-amber-400 selection:text-black">
       
-      {/* 1. FLOATING SIMULATION PERSPECTIVE SWITCHER (FOR TESTERS ONLY IN MOCK MODE) */}
-      {canSwitchPerspective && !currentPlayer?.isGM && gameState.players.length > 0 && (
-        <div className="fixed top-2 right-2 z-50 flex items-center gap-1.5 bg-slate-950/90 backdrop-blur-md px-2.5 py-1 rounded-full border border-cyan-500/50 text-[11px] text-cyan-300 font-mono shadow-[0_0_15px_rgba(56,189,248,0.25)] select-none">
-          <Bot size={12} className="text-cyan-400 animate-pulse shrink-0" />
+      {/* 1. FLOATING SIMULATION PERSPECTIVE SWITCHER (FOR PLAYERS IN MOCK MODE) */}
+      {canSwitchPerspective && !currentPlayer?.isGM && (
+        <div className="fixed top-2 right-2 z-50 flex items-center gap-1.5 bg-slate-950/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-cyan-500/60 text-xs text-cyan-300 font-mono shadow-[0_0_20px_rgba(56,189,248,0.3)] select-none">
+          <Bot size={13} className="text-cyan-400 animate-pulse shrink-0" />
+          <span className="text-[10px] text-cyan-400/80 uppercase font-bold hidden sm:inline">Góc nhìn:</span>
           <select
-            value={currentPlayerId || ''}
+            value={currentPlayer?.isGM ? (existingGM?.id || '__MERLIN__') : (currentPlayerId || '')}
             onChange={(e) => impersonatePlayer(e.target.value)}
-            className="bg-transparent text-[11px] text-cyan-200 font-bold focus:outline-none cursor-pointer max-w-[120px] truncate"
-            title="Đổi góc nhìn kiểm thử"
+            className="bg-transparent text-xs text-cyan-200 font-bold focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[170px] truncate"
+            title="Đổi góc nhìn kiểm thử (Người chơi / Quản trò)"
           >
-            {gameState.players.map((p, idx) => (
+            <option value={existingGM?.id || '__MERLIN__'} className="bg-slate-950 text-amber-300 font-bold">
+              👑 Merlin (Quản Trò)
+            </option>
+            {nonGmPlayers.map((p, idx) => (
               <option key={`perspective-${p.id || idx}`} value={p.id} className="bg-slate-950 text-slate-100">
-                {p.name} {p.isGM ? '👑 (GM)' : ''} {p.role ? `· ${p.role.name}` : ''}
+                {p.name} {p.role ? `· ${p.role.name}` : ''}
               </option>
             ))}
           </select>
@@ -88,15 +95,45 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Perspective Switcher for GM in Simulation Mode */}
+            {canSwitchPerspective && (
+              <div className="flex items-center gap-1.5 bg-slate-900 border border-cyan-500/50 px-2.5 py-1 rounded-full text-xs font-mono text-cyan-300 shadow-sm">
+                <Bot size={13} className="text-cyan-400 shrink-0" />
+                <span className="text-[10px] text-cyan-400/80 uppercase font-bold hidden sm:inline">Góc nhìn:</span>
+                <select
+                  value={currentPlayer?.isGM ? (existingGM?.id || '__MERLIN__') : (currentPlayerId || '')}
+                  onChange={(e) => impersonatePlayer(e.target.value)}
+                  className="bg-transparent text-xs text-cyan-200 font-bold focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[170px] truncate"
+                  title="Đổi sang góc nhìn Người Chơi"
+                >
+                  <option value={existingGM?.id || '__MERLIN__'} className="bg-slate-950 text-amber-300 font-bold">
+                    👑 Merlin (Quản Trò)
+                  </option>
+                  {nonGmPlayers.map((p, idx) => (
+                    <option key={`gm-persp-${p.id || idx}`} value={p.id} className="bg-slate-950 text-slate-100">
+                      {p.name} {p.role ? `· ${p.role.name}` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <button
               onClick={() => setIsDeckOpen(true)}
-              className="px-2.5 py-1 rounded-lg bg-slate-900 border border-amber-400/40 text-amber-300 text-xs font-cinzel font-bold"
+              className="px-2.5 py-1 rounded-lg bg-slate-900 border border-amber-400/40 text-amber-300 text-xs font-cinzel font-bold cursor-pointer hover:bg-slate-800"
             >
               27 Thẻ Bài
             </button>
             <button
+              onClick={() => leaveGame()}
+              className="px-2.5 py-1 rounded-lg bg-red-950/70 border border-red-500/40 text-red-300 text-xs font-serif font-bold cursor-pointer hover:bg-red-900"
+              title="Thoát Game"
+            >
+              Thoát
+            </button>
+            <button
               onClick={() => setShowResetConfirm(true)}
-              className="px-2.5 py-1 rounded-lg bg-red-950 border border-red-700/60 text-red-300 text-xs font-mono"
+              className="px-2.5 py-1 rounded-lg bg-red-950 border border-red-700/60 text-red-300 text-xs font-mono cursor-pointer hover:bg-red-900"
             >
               Reset
             </button>

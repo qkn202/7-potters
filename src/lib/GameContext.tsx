@@ -369,21 +369,23 @@ export function calculateAssignmentPenalty(
 
 /**
  * Khung cấu hình cân bằng tối ưu phân bổ 4T vs HPH & Chặng bay
- * Đã điều chỉnh dựa trên simulation 11,000 ván để đạt win rate 45-55% cho HPH
+ * Đã fine-tuned dựa trên simulation nhiều lần để đạt win rate 45-55% cho HPH
+ *
+ * LƯU Ý: Một số bàn (9-10, 12-13) có thể cần điều chỉnh thêm tùy meta game
  */
 export const OPTIMAL_BALANCE_SPEC: Record<number, { evil: number; good: number; stages: number; desc: string }> = {
   4: { evil: 1, good: 3, stages: 4, desc: '1 Tử Thần Thực Tử vs 3 Hội Phượng Hoàng · 4 Chặng bay' },
   5: { evil: 2, good: 3, stages: 4, desc: '2 Tử Thần Thực Tử vs 3 Hội Phượng Hoàng · 4 Chặng bay' },
   6: { evil: 2, good: 4, stages: 4, desc: '2 Tử Thần Thực Tử vs 4 Hội Phượng Hoàng · 4 Chặng bay' },
-  7: { evil: 2, good: 5, stages: 5, desc: '2 Tử Thần Thực Tử vs 5 Hội Phượng Hoàng · 5 Chặng bay' },
+  7: { evil: 3, good: 4, stages: 5, desc: '3 Tử Thần Thực Tử vs 4 Hội Phượng Hoàng · 5 Chặng bay' },
   8: { evil: 3, good: 5, stages: 5, desc: '3 Tử Thần Thực Tử vs 5 Hội Phượng Hoàng · 5 Chặng bay' },
   9: { evil: 3, good: 6, stages: 5, desc: '3 Tử Thần Thực Tử vs 6 Hội Phượng Hoàng · 5 Chặng bay' },
-  10: { evil: 3, good: 7, stages: 5, desc: '3 Tử Thần Thực Tử vs 7 Hội Phượng Hoàng · 5 Chặng bay' },
+  10: { evil: 4, good: 6, stages: 5, desc: '4 Tử Thần Thực Tử vs 6 Hội Phượng Hoàng · 5 Chặng bay' },
   11: { evil: 4, good: 7, stages: 6, desc: '4 Tử Thần Thực Tử vs 7 Hội Phượng Hoàng · 6 Chặng bay' },
-  12: { evil: 5, good: 7, stages: 6, desc: '5 Tử Thần Thực Tử vs 7 Hội Phượng Hoàng · 6 Chặng bay' },
-  13: { evil: 5, good: 8, stages: 6, desc: '5 Tử Thần Thực Tử vs 8 Hội Phượng Hoàng · 6 Chặng bay' },
-  14: { evil: 6, good: 8, stages: 6, desc: '6 Tử Thần Thực Tử vs 8 Hội Phượng Hoàng · 6 Chặng bay' },
-  15: { evil: 6, good: 9, stages: 6, desc: '6 Tử Thần Thực Tử vs 9 Hội Phượng Hoàng · 6 Chặng bay' },
+  12: { evil: 4, good: 8, stages: 6, desc: '4 Tử Thần Thực Tử vs 8 Hội Phượng Hoàng · 6 Chặng bay' },
+  13: { evil: 4, good: 9, stages: 6, desc: '4 Tử Thần Thực Tử vs 9 Hội Phượng Hoàng · 6 Chặng bay' },
+  14: { evil: 5, good: 9, stages: 6, desc: '5 Tử Thần Thực Tử vs 9 Hội Phượng Hoàng · 6 Chặng bay' },
+  15: { evil: 5, good: 10, stages: 6, desc: '5 Tử Thần Thực Tử vs 10 Hội Phượng Hoàng · 6 Chặng bay' },
 };
 
 export function getOptimalBalance(N: number): { evilCount: number; goodCount: number; maxStages: number; desc: string } {
@@ -556,7 +558,8 @@ export function assignRolesFairly(
   });
 
   // --- PHE HỘI PHƯỢNG HOÀNG ---
-  const baseGoodPool: Role[] = [
+  // Tạo base pool cho HPH
+  let baseGoodPool: Role[] = [
     ROLES.POTTER_FAKE,
     ROLES.POTTER_FAKE,
     ROLES.ALBUS_DUMBLEDORE,
@@ -575,6 +578,19 @@ export function assignRolesFairly(
     ROLES.FLEUR_DELACOUR,
     ROLES.NYMPHADORA_TONKS,
   ];
+
+  // GIỚI HẠN: Trong bàn nhỏ (<=6 người), chỉ có tối đa 1 trong 2: Hermione HOẶC Arthur
+  // Điều này ngăn chặn "Double Info" combo quá mạnh trong bàn nhỏ
+  if (N <= 6) {
+    // Random loại bỏ 1 trong 2 (Hermione hoặc Arthur)
+    const keepHermione = Math.random() < 0.5;
+    baseGoodPool = baseGoodPool.filter(r => {
+      if (r.id === 'HERMIONE_GRANGER' && !keepHermione) return false;
+      if (r.id === 'ARTHUR_WEASLEY' && keepHermione) return false;
+      return true;
+    });
+  }
+
   const shuffledGood = fisherYatesShuffle(baseGoodPool);
 
   // Chọn Harry Potter: ưu tiên người chưa từng là Harry ở ván trước
@@ -981,31 +997,34 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       return 'Đã khai hỏa Avada Kedavra!';
     }
 
-    if (actionName === 'Cắn' && me.role?.id === 'FENRIR_GREYBACK') {
-      if (curState.phase !== 'NIGHT') return 'Kỹ năng cắn chỉ có hiệu lực vào ban đêm!';
-      if (curState.skillStates[`${me.id}_FENRIR`]) return 'Bạn đã dùng vết cắn ma sói rồi (chỉ dùng 1 lần trong ván)!';
+    // FENRIR GREYBACK: Cắn và chuyển sang phe 4T (giữ nguyên kỹ năng cũ)
+    if ((actionName === 'Cắn' || actionName === 'Cắn Chuyển Hóa') && me.role?.id === 'FENRIR_GREYBACK') {
+      if (curState.phase !== 'NIGHT') return 'Fenrir chỉ có thể cắn vào ban đêm!';
+      const stateKey = `${me.id}_FENRIR`;
+      if (curState.skillStates[stateKey] || curState.skillStates[`${me.id}_FENRIR_BITE`]) {
+        return 'Bạn đã dùng vết cắn ma sói rồi (chỉ dùng 1 lần trong ván)!';
+      }
       if (target.status === 'DEAD') return 'Mục tiêu đã chết, không thể cắn!';
       if (target.role?.faction === 'DEATH_EATERS') return 'Không thể cắn đồng minh Tử Thần Thực Tử!';
-
-      const updatedTargetRole: Role = {
-        ...(target.role || {
-          id: 'WEREWOLF',
-          name: 'Người Sói',
-          description: 'Đã bị Fenrir cắn thành Ma Sói',
-          badge: 'wolf'
-        }),
-        faction: 'NEUTRAL',
-        title: 'Ma Sói Lang Thang · Cursed Werewolf',
-        ability: 'Bạn đã bị Fenrir cắn thành Ma Sói! Bạn mất toàn bộ năng lực cũ và nay chiến đấu độc lập (Phe Trung Lập).'
-      };
+      if (target.role?.id === 'HARRY_POTTER') return 'Không thể cắn Harry Potter!';
 
       updateState({
         ...curState,
-        players: curState.players.map(p => p.id === targetId ? { ...p, role: updatedTargetRole } : p),
-        skillStates: { ...curState.skillStates, [`${me.id}_FENRIR`]: true },
-        logs: [...curState.logs, `Hệ thống: 1 tiếng sói hú rợn người... Fenrir Greyback đã gieo vết cắn lên ${target.name}! Mục tiêu nay thuộc phe Trung Lập.`]
+        players: curState.players.map(p =>
+          p.id === targetId ? {
+            ...p,
+            role: p.role ? { ...p.role, faction: 'DEATH_EATERS' as Faction } : p.role,
+            faction: 'DEATH_EATERS' as Faction
+          } : p
+        ),
+        skillStates: { 
+          ...curState.skillStates, 
+          [stateKey]: true,
+          [`${me.id}_FENRIR_BITE`]: true 
+        },
+        logs: [...curState.logs, `Hệ thống: FENRIR CẮN! ${target.name} đã bị biến thành Ma Sói và chuyển sang PHE TỬ THẦN THỰC TỬ! Họ giữ nguyên kỹ năng cũ và giờ là đồng minh của 4T!`]
       });
-      return `Đã cắn ${target.name}! Mục tiêu nay chuyển sang phe Trung Lập.`;
+      return `Đã cắn và chuyển ${target.name} sang phe 4T! Họ giữ nguyên kỹ năng.`;
     }
 
     // ARTHUR WEASLEY: Xem phe của người chơi
@@ -1051,10 +1070,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
 
     // GEORGE WEASLEY: Tạo Bột Khói Mù Peru (vô hiệu hóa ám sát)
+    // CHỈ DÙNG ĐƯỢC CÁCH ĐÊM (cooldown 1 vòng để cân bằng)
     if (actionName === 'Rải Bột' && me.role?.id === 'GEORGE_WEASLEY') {
       if (curState.phase !== 'NIGHT') return 'George chỉ có thể rải bột vào ban đêm!';
       const stateKey = `${me.id}_GEORGE_R${curState.round}`;
+      const prevStateKey = `${me.id}_GEORGE_R${curState.round - 1}`; // Kiểm tra vòng trước
+
       if (curState.skillStates[stateKey]) return 'Bạn đã rải bột khói trong lượt này rồi!';
+      if (curState.skillStates[prevStateKey]) return 'George cần nghỉ 1 đêm trước khi rải bột lại! (50% cooldown)';
 
       updateState({
         ...curState,
@@ -1174,28 +1197,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       return `Đã SILENCED ${target.name}! Họ sẽ bị mất kỹ năng ở vòng kế tiếp.`;
     }
 
-    // FENRIR GREYBACK: Cắn và chuyển sang phe 4T
-    if (actionName === 'Cắn Chuyển Hóa' && me.role?.id === 'FENRIR_GREYBACK') {
-      if (curState.phase !== 'NIGHT') return 'Fenrir chỉ có thể cắn vào ban đêm!';
-      const stateKey = `${me.id}_FENRIR_BITE`;
-      if (curState.skillStates[stateKey]) return 'Bạn đã dùng kỹ năng cắn rồi!';
-      if (target.status === 'DEAD') return 'Mục tiêu đã chết, không thể cắn!';
-      if (target.role?.faction === 'DEATH_EATERS') return 'Không thể cắn đồng minh Tử Thần Thực Tử!';
-      if (target.role?.id === 'HARRY_POTTER') return 'Không thể cắn Harry Potter!';
-
-      updateState({
-        ...curState,
-        players: curState.players.map(p =>
-          p.id === targetId ? {
-            ...p,
-            faction: 'DEATH_EATERS' as Faction
-          } : p
-        ),
-        skillStates: { ...curState.skillStates, [stateKey]: true },
-        logs: [...curState.logs, `Hệ thống: FENRIR CẮN! ${target.name} đã bị biến thành Ma Sói và chuyển sang PHE TỬ THẦN THỰC TỬ! Họ giữ nguyên kỹ năng cũ và giờ là đồng minh của 4T!`]
-      });
-      return `Đã cắn và chuyển ${target.name} sang phe 4T! Họ giữ nguyên kỹ năng.`;
-    }
   }, [updateState]);
 
   // Core Interrupt Resolution

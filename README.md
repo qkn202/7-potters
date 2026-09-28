@@ -28,36 +28,40 @@ Trong trò chơi, người chơi sẽ được chia ngẫu nhiên vào 2 phe đ�
 
 ---
 
-## 🎭 3. Hệ Thống 21 Thẻ Bài Nhân Vật & Kỹ Năng
+## 🎭 3. Hệ Thống 22 Thẻ Bài Nhân Vật & Kỹ Năng
 
-Trò chơi bao gồm **21 thẻ bài nhân vật** được chế tác thủ công với đồ họa viền vàng kim, cánh phượng hoàng lửa và rắn lục bảo thạch:
+Trò chơi bao gồm **22 thẻ bài nhân vật** được chế tác thủ công với đồ họa viền vàng kim, cánh phượng hoàng lửa và rắn lục bảo thạch:
 
 ### 🦅 Phe Hội Phượng Hoàng (17 Vai Trò)
-1. **Harry Potter (Kẻ Được Chọn · The Boy Who Lived):** Trái tim của chiến dịch. Nếu Harry chết, Hội vẫn có thể thắng nếu tiêu diệt được Voldemort, nhưng nhiệm vụ vô cùng gian nan.
-2. **Ron Weasley (Người Bạn Trung Thành):** Lá chắn sống của Harry. Tự động nhận đòn hy sinh chết thay nếu Harry bị tấn công.
-3. **Hermione Granger (Phù Thủy Uyên Bác):** Mỗi ban ngày, có thể gửi tin mật cho Quản Trò Merlin để soi danh tính thật của 1 người chơi.
-4. **Albus Dumbledore (Hiệu Trưởng Vĩ Đại):** Ban ngày chọn bảo hộ 1 người chơi khỏi bị ám sát (không được bảo vệ 1 người 2 lượt liên tiếp).
-5. **Severus Snape (Bậc Thầy Bế Quan Bí Thuật · Điệp Viên Hai Mang):** 
-   - **Kỹ năng Đêm Chủ Động — `Bọc Lót Sectumsempra`:** Chọn bảo vệ 1 người trong đêm. Nếu mục tiêu bị Tử Thần Thực Tử tấn công, nhát chém Sectumsempra của Snape sẽ can thiệp rạch nát đòn ám sát, cứu sống mục tiêu! Nhưng nếu mục tiêu *không* bị tấn công, bùa lạc sẽ sượt qua tai khiến mục tiêu bị câm lặng kỹ năng ở vòng kế tiếp.
+1. **Harry Potter (Kẻ Được Chọn · The Boy Who Lived):** Trái tim của chiến dịch và mục tiêu săn lùng số 1 của Voldemort. Đũa phép sở hữu **Tia Lửa Vàng (Golden Flame Retaliation)**: Tự động thiêu rụi đòn chí mạng và cứu sống Harry khi bị tấn công trực diện lần đầu tiên (1 lần duy nhất trong toàn trận; không câm lặng Voldemort). Nếu Harry sống sót đưa đoàn bay an toàn hạ cánh xuống Hang Sóc (The Burrow - Chặng cuối) hoặc Hội tiêu diệt được Voldemort, Hội Phượng Hoàng **THẮNG NGAY LẬP TỨC!**
+2. **Ron Weasley (Người Bạn Trung Thành · King Weasley):** Tấm khiên sinh mệnh của Harry. Nếu Harry Potter thật bị Tử Thần Thực Tử tấn công trực diện vào ban đêm (khi Tia Lửa Vàng đã cạn và không có người Bay Hộ Tống chắn đòn), Ron sẽ tự động dũng cảm lao ra đỡ đòn chí mạng chết thay cho Harry!
+3. **Hermione Granger (Phù Thủy Uyên Bác · Brightest Witch):** Mỗi ban Đêm, có thể thi triển bùa **Soi Danh Tính** để biết chính xác vai trò thật của 1 người chơi (không thể soi Harry Potter hay Chúa Tể Voldemort; Severus Snape có Bế Quan Bí Thuật sẽ hiển thị "Tâm Trí Bất Khả Xâm Phạm"). *Giới hạn: Ở bàn ≤ 6 người, chỉ xuất hiện tối đa 1 trong 2 nhân vật Hermione hoặc Arthur.*
+4. **Albus Dumbledore (Hiệu Trưởng Vĩ Đại · Supreme Mugwump):** Mỗi ban Đêm, chọn 1 người chơi để phù phép bảo vệ (Protego) khỏi bị Tử Thần Thực Tử ám sát (không được bảo vệ cùng 1 người 2 lượt liên tiếp).
+5. **Severus Snape (Bậc Thầy Bế Quan Bí Thuật · Điệp Viên Hai Mang):**
+   - **Kỹ năng Đêm Chủ Động — `Bọc Lót Sectumsempra`:** Chọn bảo vệ 1 người trong đêm. Nếu mục tiêu bị Tử Thần Thực Tử tấn công, nhát chém Sectumsempra của Snape sẽ can thiệp rạch nát đòn ám sát, cứu sống mục tiêu! Nhưng nếu mục tiêu *không* bị tấn công, bùa lạc sẽ cắt đứt tai / làm bị thương khiến mục tiêu bị phong ấn kỹ năng ở vòng kế tiếp.
    - **Nội tại — `Bế Quan Bí Thuật` (Occlumency):** Tâm trí bất khả xâm phạm — miễn nhiễm hoàn toàn trước bùa soi của Hermione ("Tâm Trí Bất Khả Xâm Phạm") và đánh lừa khứu giác của Peter Pettigrew.
-6. **Remus Lupin (Người Sói Hào Hiệp · Moony):** Sở hữu 1 bình Thuốc Hồi Sinh độc dược quý giá (1 lần duy nhất trong toàn trận). Vào ban đêm, Lupin có thể âm thầm chọn 1 đồng đội đã ngã xuống (bị trục xuất ban ngày hoặc bị ám sát trong đêm) để hồi sinh. Hành động diễn ra hoàn toàn bí mật trong đêm (phe Tử Thần Thực Tử không biết trước), và mục tiêu sẽ chính thức sống lại vào rạng sáng hôm sau trong Báo Cáo Tuyệt Mật của Quản Trò Merlin.
-7. **Alastor "Mắt Điên" Moody (Thần Sáng Khét Tiếng):** Sở hữu 1 phát đạn Avada Kedavra vào ban đêm. Nếu bắn nhầm đồng minh Hội Phượng Hoàng, Moody sẽ tự vẫn vì ân hận.
-8. **Rubeus Hagrid (Người Lai Khổng Lồ):** Thể lực phi thường, phải bị tấn công 2 lần mới tử trận.
-9. **Arthur, Fred & George Weasley (Gia Tộc Weasley):** Liên kết ruột thịt sâu sắc — nếu 1 trong 3 người bị giết, 2 người còn lại sẽ chết theo (*Hiệu ứng Domino Weasley*).
-10. **Mundungus Fletcher (Kẻ Hèn Nhát):** Tay buôn lậu chợ đen. Khi bị trúng đòn chí mạng, kích hoạt cơ chế khẩn cấp chọn 1 người sống bất kỳ để chết thay mình!
-11. **Kingsley Shacklebolt (Thần Sáng Hoàng Gia):** Có 50% cơ hội (tung đồng xu Merlin) cứu sống đồng đội bị ám sát ban ngày.
-12. **Bill Weasley & Fleur Delacour (Tình Yêu Veela):** Cặp đôi bất tử — chỉ chết khi cả hai cùng bị nhắm giết đồng thời trong cùng một đêm.
-13. **Nymphadora Tonks (Biến Hình Sư):** Khi tử trận, có thể chọn biến hình kế thừa vai trò và năng lực của 1 người đã khuất.
-14. **Bản Sao Harry (Polyjuice Decoys):** Uống Đa Quả Dịch mang khuôn mặt Harry, đóng vai trò nghi binh hút sát thương bảo vệ Harry thật.
+6. **Remus Lupin (Người Sói Hào Hiệp · Moony):** Sở hữu 1 bình Thuốc Hồi Sinh độc dược quý giá (1 lần duy nhất trong toàn trận). Vào ban đêm, Lupin có thể âm thầm chọn 1 đồng đội đã ngã xuống (bị trục xuất ban ngày hoặc bị ám sát trong đêm) để hồi sinh. Hành động diễn ra hoàn toàn bí mật trong đêm (phe Tử Thần Thực Tử không biết trước), và mục tiêu sẽ chính thức sống lại vào rạng sáng hôm sau trong Báo Cáo Tuyệt Mật của Quản Trò Merlin. (Nếu Lupin bị giết cùng đêm, bùa hồi sinh bị ngắt).
+7. **Alastor "Mắt Điên" Moody (Thần Sáng Khét Tiếng · Constant Vigilance):** Sở hữu 1 phát đạn Avada Kedavra vào **Ban Ngày** (lúc Biểu Quyết Bùa Tước Khí Giới), có thể lập tức bắn chết 1 người chơi. Tuy nhiên, nếu bắn nhầm thành viên Hội Phượng Hoàng, Moody sẽ tự vẫn vì ân hận.
+8. **Rubeus Hagrid (Người Lai Khổng Lồ · Keeper of Keys):** Mỗi ban đêm, Bác Hagrid có thể đưa 1 đồng đội lên chiếc mô-tô bay khổng lồ để hộ tống bảo vệ họ an toàn. Nếu mục tiêu bị tấn công ở chặng nguy hiểm, Hagrid sẽ lấy thân mình chắn đòn tử thủ. Thể lực khổng lồ phi thường giúp Hagrid kiên cường trên bầu trời, là chỗ dựa vững chắc cho phi đội.
+9. **Arthur Weasley (Trụ Cột Nhà Weasley · Ministry Veteran):** Mỗi ban Đêm, có thể chọn 1 người chơi để **Soi Phe**, kiểm tra xem người đó thuộc phe HỘI PHƯỢNG HOÀNG, TỬ THẦN THỰC TỬ hay TRUNG LẬP. *Giới hạn: Ở bàn ≤ 6 người, chỉ xuất hiện tối đa 1 trong 2 nhân vật Hermione hoặc Arthur.*
+10. **Fred Weasley (Anh Em Sinh Đôi · Weasley Twin):** Mỗi ban Đêm, có thể lén tặng 1 viên **Kẹo Ngất Xỉu** (Fainting Fancies) cho 1 người chơi còn sống. Nạn nhân ăn kẹo sẽ bị choáng váng và mất quyền biểu quyết (vote) ở vòng phán quyết ban ngày tiếp theo.
+11. **George Weasley (Anh Em Sinh Đôi · Saint-like):** Mỗi ban Đêm, có thể tạo 1 **Bột Khói Mù Peru** và rải lên bầu trời. Toàn bộ Tử Thần Thực Tử bị SULK (mất quyền ám sát) trong đêm đó. **Lưu ý: Cần nghỉ 1 đêm giữa mỗi lần rải bột (cooldown 1 đêm) để cân bằng trò chơi.**
+12. **Mundungus Fletcher (Kẻ Hèn Nhát · Scoundrel of the Order):** Tay buôn lậu chợ đen. Khi bị Tử Thần Thực Tử tấn công chí mạng vào ban đêm, bản năng sinh tồn trỗi dậy kích hoạt cơ chế khẩn cấp: Mundungus được tự tay bấm chọn 1 người chơi còn sống bất kỳ trên bàn để Độn Thổ lôi họ ra chết thay mình! (1 lần duy nhất trong toàn trận).
+13. **Kingsley Shacklebolt (Thần Sáng Hoàng Gia · Auror Commander):** Nếu có 1 thành viên Hội Phượng Hoàng bị Tử Thần Thực Tử hạ sát trong đêm, Kingsley sẽ **CỨU SỐNG người đó an toàn (100% thành công)**! Ngoài ra, Kingsley hoàn toàn miễn nhiễm trước mọi loại bùa Câm Lặng (Silencing).
+14. **Bill Weasley (Phá Bùa Cổ Xưa · Curse Breaker):** Mỗi ban Đêm, có thể dùng chuyên môn Phá Bùa (Curse Breaker) chọn 1 người chơi đang bị phong ấn kỹ năng (do bùa lạc Sectumsempra của Snape hoặc các bùa câm lặng khác) để giải thoát và khôi phục năng lực sử dụng kỹ năng cho họ.
+15. **Fleur Delacour (Tình Yêu Veela · Beauxbatons Champion):** Mỗi ban Đêm, Fleur có thể dùng **Lưỡi Kiếm Gryffindor** để chém 1 người chơi. Nếu mục tiêu thuộc phe Tử Thần Thực Tử, kẻ đó bị **LOẠI KHỎI TRÒ CHƠI NGAY LẬP TỨC** (không cần qua biểu quyết). Tuy nhiên, nếu chém nhầm đồng minh Hội Phượng Hoàng, Fleur sẽ tự vẫn vì tội lỗi!
+16. **Nymphadora Tonks (Phù Thủy Biến Hình · Metamorphmagus):** Khi tử trận, Tonks có thể kích hoạt khả năng biến hình để chọn kế thừa vai trò và toàn bộ năng lực ma thuật của một người chơi đã khuất trên bàn.
+17. **Bản Sao Harry (Người Bảo Vệ · Polyjuice Decoy):** Uống thuốc Đa Quả Dịch mang ngoại hình Harry Potter để phân tán sự chú ý của kẻ thù. Có quyền biểu quyết ban ngày và Bay Hộ Tống ban đêm. Ngoài ra, 1 lần duy nhất trong toàn trận, có thể tự nguyện Reveal thân phận là Potter Fake và niệm bùa phong ấn (**Silenced Ultimate**) lên 1 kẻ thuộc phe Tử Thần Thực Tử, khiến kẻ đó bị tước toàn bộ kỹ năng ở vòng tiếp theo!
 
-### 🐍 Phe Tử Thần Thực Tử (4 Vai Trò)
-15. **Chúa Tể Voldemort (He-Who-Must-Not-Be-Named):** Biết mặt toàn bộ thuộc hạ TTTT, nắm quyền quyết định đòn ám sát ban ngày (hoặc chọn Án Binh). Nếu Voldemort chết, Tử Thần Thực Tử thua ngay lập tức!
-16. **Bellatrix Lestrange (Cuồng Tín Tử Vì Đạo):** Nếu bị treo cổ, ban ngày tiếp theo Voldemort thịnh nộ được quyền giết 2 người liên tiếp!
-17. **Lucius Malfoy (Quý Tộc Xảo Quyệt):** Nếu bị treo cổ, ban ngày tiếp theo Voldemort bị tước trượng và cấm giết người.
-18. **Peter Pettigrew (Đuôi Trùn · Khứu Giác Chuột & Món Nợ Mạng):** 
+### 🐍 Phe Tử Thần Thực Tử (5 Vai Trò)
+18. **Chúa Tể Voldemort (Chúa Tể Hắc Ám · He-Who-Must-Not-Be-Named):** Biết mặt toàn bộ Tử Thần Thực Tử và nắm quyền quyết định tối cao về mục tiêu ám sát trong đêm (hoặc ra lệnh **Án Binh Bất Động**). Nếu Chúa Tể Voldemort bị tiêu diệt (bị biểu quyết ban ngày hoặc bị trúng đạn Moody/kiếm Fleur), phe Tử Thần Thực Tử **THUA NGAY LẬP TỨC!**
+19. **Bellatrix Lestrange (Nữ Tử Thần Cuồng Tín · Dark Lieutenant):** Nếu Bellatrix bị xử tử bằng biểu quyết Tước Đũa ban ngày, cơn thịnh nộ báo thù bùng nổ giúp Chúa Tể Voldemort được quyền **ám sát liên tiếp 2 người (Double Kill)** trong đêm tiếp theo!
+20. **Lucius Malfoy (Quý Tộc Xảo Quyệt · Pureblood Patrician):** Mỗi ban Đêm, Lucius có thể chọn 1 người chơi để soi và biết chính xác vai trò cụ thể của người đó (**Bí Mật Soi Vai Trò - Spy**). Ngoài ra, nếu Lucius bị treo cổ ban ngày, mối liên hệ gia tộc bị đứt gãy khiến Voldemort bị KHÓA (không được phép ám sát) ở đêm tiếp theo.
+21. **Peter Pettigrew (Kẻ Phản Bội · Đuôi Trùn / Wormtail):**
    - **Kỹ năng Tức Thời — `Đánh Hơi Nhà Hang Sóc`:** Nhờ 12 năm sống lốt chuột Scabbers, Pettigrew có thể ngửi mùi nhận diện đích danh **Harry Potter Thật** và **Ron Weasley**, phân biệt các nhân vật Đặc Biệt khác và Bản Sao thường.
-   - **Hạn chế — `Món Nợ Sinh Mệnh` (Life Debt):** Bàn tay bạc bị co giật/phản phệ nếu chính tay Pettigrew trực tiếp bỏ phiếu giết Harry Potter thật.
-   - **Nội tại — `Cắt Ngón Tay Hóa Chuột Đào Tẩu`:** Lần đầu bị trục xuất ban ngày, Pettigrew giả chết hóa chuột trốn thoát, sống sót qua phiên xử nhưng mất quyền biểu quyết ở ngày kế tiếp.
+   - **Hạn chế — `Món Nợ Sinh Mệnh` (Life Debt):** Bàn tay bạc bị co giật/phản phệ nếu chính tay Pettigrew trực tiếp bỏ phiếu ám sát Harry Potter thật.
+   - **Nội tại — `Cắt Ngón Tay Hóa Chuột Đào Tẩu`:** Lần đầu bị trục xuất ban ngày, Pettigrew tự cắt ngón tay hóa chuột trốn thoát, sống sót qua phiên xử nhưng mất quyền biểu quyết ở ngày kế tiếp.
+22. **Fenrir Greyback (Ma Sói Đồ Tể · Lycanthrope Savage):** Một lần duy nhất trong toàn trận vào ban đêm, Fenrir có thể cắn 1 người chơi (không thể cắn Harry Potter hay đồng minh Tử Thần Thực Tử). Nạn nhân bị cắn sẽ bị **CHUYỂN SANG PHE TỬ THẦN THỰC TỬ**, trở thành đồng minh của phe Ác nhưng vẫn giữ nguyên kỹ năng cũ!
 
 ### 🧙‍♂️ Quản Trò (Merlin / Game Master)
 - Đóng vai trò phân xử, thông báo các chặng bay, công bố biến cố thời tiết bầu trời và dẫn dắt câu chuyện qua hệ thống thông cáo nổi tự động.
@@ -138,21 +142,31 @@ Các tính năng quan trọng và cải tiến đã hoàn thiện trong các b�
 ### 🚀 8. Triển Khai Hoàn Tất Lên Vercel & GitHub
 - Dự án đã được build tối ưu, cấu hình đầy đủ biến môi trường và triển khai thành công lên **Vercel** và đồng bộ kho mã nguồn **GitHub**.
 
-### ⚖️ 9. Bảng Phân Bổ Cân Bằng Tối Ưu (N = 4..15 Phù Thủy) & Thuật Toán Mô Phỏng Monte Carlo 10.000 Ván
+### ⚖️ 9. Bảng Phân Bổ Cân Bằng Tối Ưu (N = 4..15 Phù Thủy) & Thuật Toán Mô Phỏng Monte Carlo
+
 - **Vấn đề đã khắc phục:** Loại bỏ hoàn toàn công thức thô `Math.floor(N / 3)`. Ở các phòng ít người ($N=4, 5$), nếu phe Tối có 2 người thì chỉ cần 1 thành viên HPH tử trận ban ngày là Tử Thần Thực Tử đạt thế cân bằng số lượng (*Parity Condition*) và thắng ngay tại Vòng 1 với tỷ lệ lên đến **74.9%**.
-- **Hiệu chuẩn bảng tỷ lệ vàng (`OPTIMAL_BALANCE_SPEC`):**
-  - **N = 4:** 1 Tử Thần : 3 HPH · 4 Chặng bay · HPH thắng 57.7% / 4T thắng 42.3% (Cân bằng xuất sắc).
-  - **N = 5:** 1 Tử Thần : 4 HPH · 4 Chặng bay · Cấm tuyệt đối 2 4T ở phòng 5 người để tránh sập ván sớm.
-  - **N = 6:** 2 Tử Thần : 4 HPH · 4 Chặng bay · HPH thắng **52.3%** / 4T thắng **47.7%** (🏆 Tỷ Lệ Vàng).
-  - **N = 7:** 2 Tử Thần : 5 HPH · 5 Chặng bay.
-  - **N = 8:** 3 Tử Thần : 5 HPH · 5 Chặng bay · HPH thắng **46.5%** / 4T thắng **53.5%** (🏆 Tỷ Lệ Vàng).
-  - **N = 9:** 3 Tử Thần : 6 HPH · 5 Chặng bay.
-  - **N = 10:** 4 Tử Thần : 6 HPH · 5 Chặng bay · HPH thắng **48.7%** / 4T thắng **51.3%** (🏆 Tỷ Lệ Vàng).
-  - **N = 11:** 4 Tử Thần : 7 HPH · 6 Chặng bay.
-  - **N = 12:** 4 Tử Thần : 8 HPH · 6 Chặng bay · Kích hoạt **Phục kích kép** · HPH thắng **52.1%** / 4T thắng **47.9%** (🏆 Tỷ Lệ Vàng).
-  - **N = 13:** 5 Tử Thần : 8 HPH · 6 Chặng bay.
-  - **N = 14:** 5 Tử Thần : 9 HPH · 6 Chặng bay · Kích hoạt **Phục kích kép** · HPH thắng **52.0%** / 4T thắng **48.0%** (🏆 Tỷ Lệ Vàng).
-  - **N = 15:** 5 Tử Thần : 10 HPH · 6 Chặng bay · Kích hoạt **Phục kích kép** · HPH thắng **55.0%** / 4T thắng **45.0%** (🏆 Tỷ Lệ Vàng).
+
+- **Bảng cân bằng tối ưu đã fine-tuned qua nhiều lần simulation (`OPTIMAL_BALANCE_SPEC`):**
+
+| Sĩ Số | 4T | HPH | Chặng Bay | Ghi Chú |
+|:---:|:---:|:---:|:---:|:---|
+| **4** | 1 | 3 | 4 | Bàn siêu nhỏ - HPH mạnh |
+| **5** | 2 | 3 | 4 | HPH slightly favored |
+| **6** | 2 | 4 | 4 | Cân bằng tốt |
+| **7** | 3 | 4 | 5 | 🏆 Cân bằng |
+| **8** | 3 | 5 | 5 | 🏆 Cân bằng |
+| **9** | 3 | 6 | 5 | 🏆 Cân bằng |
+| **10** | 4 | 6 | 5 | 4T slightly favored |
+| **11** | 4 | 7 | 6 | 🏆 Cân bằng |
+| **12** | 4 | 8 | 6 | HPH slightly favored |
+| **13** | 4 | 9 | 6 | HPH slightly favored |
+| **14** | 5 | 9 | 6 | 🏆 Cân bằng |
+| **15** | 5 | 10 | 6 | 🏆 Cân bằng |
+
+> **Lưu ý:** Một số bàn (5-6, 9-10, 12-13) có thể thiên vị nhẹ một phe. Điều chỉnh thêm tùy meta game thực tế.
+
+### Giới Hạn Đặc Biệt
+- **Hermione + Arthur:** Ở bàn ≤ 6 người, chỉ xuất hiện tối đa 1 trong 2 để tránh Double Info quá mạnh.
 
 ### ⚡ 10. Cơ Chế Phục Kích Kép Chặng 3 (Large Room Ambush) Cho Phòng Đông (N ≥ 12)
 - **Cơ sở phân tích số người chết (Attrition Rate):**
@@ -161,7 +175,23 @@ Các tính năng quan trọng và cải tiến đã hoàn thiện trong các b�
   - Ở phòng đông người ($N \ge 12$), nếu 4T chỉ ám sát 1 người mỗi ngày thì dân làng sẽ vote chết Voldemort trước khi tới Hang Sóc (HPH thắng > 85%).
 - **Giải pháp:** Khi $N \ge 12$, nếu Chúa Tể Voldemort còn sống khi đoàn bay tiến vào **Chặng 3: Vòng Vây Hắc Ám & Phục Kích (`VOLDEMORT_AMBUSH`)**, Tử Thần Thực Tử được phát động **ám sát liên hoàn 2 mục tiêu cùng lúc**, đưa tỷ lệ thắng cả 2 phe về mức cân bằng hoàn hảo ~50 - 52%.
 
-### 📊 11. Widget Tỷ Lệ Phe Chiến Thuật Trong Lobby (Monte Carlo Calibrated)
+### 📊 11. Buff Nhân Vật Yếu - Cập Nhật Balance Mới
+
+Dựa trên Monte Carlo simulation 11,000 ván, các nhân vật sau đã được buff để cân bằng game:
+
+#### Các Buff Đã Áp Dụng
+
+| Nhân Vật | Trước | Sau | Ghi Chú |
+|:---|:---:|:---:|:---|
+| **Kingsley Shacklebolt** | 50% cứu | **100% cứu sống** | Thần Sáng bảo vệ đồng đội chắc chắn |
+| **Potter Fake** | Chỉ decoy | **+ Silenced ability** | Có thể silence 1 TTTT sau khi reveal |
+| **Lucius Malfoy** | Chỉ lock Voldy | **+ Spy ability** | Xem vai trò người chơi mỗi đêm |
+| **Fenrir Greyback** | Chuyển Neutral | **Chuyển 4T** | Cắn người → gia nhập phe 4T |
+
+#### Giới Hạn Đặc Biệt
+- **Hermione + Arthur:** Ở bàn ≤ 6 người, chỉ xuất hiện tối đa 1 trong 2 để tránh Double Info quá mạnh.
+
+### 📊 12. Widget Tỷ Lệ Phe Chiến Thuật Trong Lobby (Monte Carlo Calibrated)
 - Tích hợp widget trực quan ngay trên sảnh chờ trước khi bắt đầu trận:
   - Tự động nhận diện sĩ số phù thủy thực tế trong phòng.
   - Hiển thị số lượng Hội Phượng Hoàng vs Tử Thần Thực Tử cùng số chặng bay đề xuất.
@@ -191,7 +221,7 @@ Khắc phục triệt để hiện tượng người chơi bị bắt làm Tử 
 - **Không Silence Chúa Tể Voldemort:** Bỏ hiệu ứng câm lặng (silence) lên Voldemort ở đêm tiếp theo.
 - **Voldemort vẫn có thể kill người khác đêm đó:** Trong đêm ám sát kép (Double Kill từ Bellatrix hoặc Vòng vây Phục kích ở phòng lớn), nếu Harry được Tia Lửa Vàng che chở, Voldemort vẫn tiêu diệt mục tiêu còn lại bình thường trong cùng đêm.
 
-### 🐺 15. Chuẩn Hóa Cơ Chế Thuốc Hồi Sinh Remus Lupin (Secret Night Action & Dawn Resurrection)
+### 🐺 16. Chuẩn Hóa Cơ Chế Thuốc Hồi Sinh Remus Lupin (Secret Night Action & Dawn Resurrection)
 - **Vấn đề đã khắc phục:** Trước đây, kỹ năng của Lupin được xếp vào nhóm kỹ năng tức thời (Instant Skill), dẫn đến việc người chơi sống lại ngay giữa đêm, làm rò rỉ thông tin sớm trong nhật ký (logs) cho phe Tử Thần Thực Tử, đồng thời gây lỗi đảo lộn thứ tự thông báo (người chơi bị treo cổ ban ngày xong tự dưng có log sống lại ngay trong đêm trước khi kết thúc phase).
 - **Cơ chế chuẩn hóa mới:**
   - Chuyển Thuốc Hồi Sinh thành **Hành Động Ban Đêm bí mật** (`pendingActions` với action `hồi sinh`).
@@ -245,7 +275,13 @@ Dự án được bảo vệ bởi bộ kiểm thử tự động toàn diện:
    ```
    *(Mô phỏng 10.000 ván đấu cho từng mốc sĩ số, phân tích tỷ lệ thắng, tỷ lệ tử vong do ám sát vs biểu quyết).*
 
-4. **Kiểm tra cân bằng và mô phỏng tỷ lệ chặng bay:**
+4. **Chạy simulation cân bằng (JavaScript):**
+   ```bash
+   node simulation.js
+   ```
+   *(Chạy 1,000 ván mỗi bàn 5-15 người, hiển thị tỷ lệ thắng HPH vs 4T và phân tích balance).*
+
+5. **Kiểm tra cân bằng và mô phỏng tỷ lệ chặng bay:**
    ```bash
    npx tsx tests/simulate_flight_balance.ts
    npx tsx tests/simulate_flight_optimization.ts

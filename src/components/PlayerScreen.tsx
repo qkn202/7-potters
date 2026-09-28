@@ -387,16 +387,32 @@ export function PlayerScreen() {
             badgeVariant: 'emerald' as const,
             alert: undefined as string | undefined,
             steps: [
-              { num: '1', title: 'Cắn biến đổi', desc: 'Có thể chọn 1 phù thủy phe Hội và bấm "Cắn" (1 lần trong game) để biến họ thành Ma Sói trung lập.' },
+              { num: '1', title: 'Cắn chuyển hóa (4T)', desc: 'Có thể chọn 1 phù thủy phe Hội và bấm "Cắn" (1 lần trong game) để biến họ gia nhập phe Tử Thần Thực Tử (giữ nguyên kỹ năng cũ).' },
               { num: '2', title: 'Tiếp sức ám sát', desc: 'Hoặc chọn mục tiêu để dồn phiếu "Ám Sát" cùng Chúa Tể Voldemort.' }
             ],
-            tip: 'Cắn một đồng minh mạnh như Dumbledore hoặc Moody sẽ làm tê liệt sức mạnh của phe Phượng Hoàng!',
+            tip: 'Cắn một đồng minh mạnh như Dumbledore hoặc Kingsley để tha hóa họ và cướp kỹ năng quý giá cho phe Tử Thần Thực Tử!',
             statusText: myAction ? `✓ Đã lưu mục tiêu: [${myVotedTarget?.name}]` : 'Chọn mục tiêu bên dưới để Cắn hoặc Ám sát',
             statusType: myAction ? 'success' as const : 'info' as const,
           };
         }
 
-        // Bellatrix or Lucius Malfoy
+        if (me.role?.id === 'LUCIUS_MALFOY') {
+          return {
+            title: 'Lucius Malfoy · Bí Mật Soi Vai Trò',
+            badge: 'Điệp Viên Quý Tộc',
+            badgeVariant: 'emerald' as const,
+            alert: undefined as string | undefined,
+            steps: [
+              { num: '1', title: 'Soi vai trò ban đêm', desc: 'Chọn 1 người chơi và bấm "Thi Triển Soi Vai Trò" để biết chính xác vai trò của họ.' },
+              { num: '2', title: 'Cảnh giác ban ngày', desc: 'Tuyệt đối tránh bị treo cổ, vì nếu Lucius chết thì đêm tiếp theo Voldemort sẽ bị khóa quyền ám sát!' }
+            ],
+            tip: 'Dùng kỹ năng soi để tìm ra Harry thật hoặc các nhân vật then chốt của Hội, hỗ trợ Voldemort ra tay chính xác!',
+            statusText: myAction ? `✓ Đã lưu mục tiêu: [${myVotedTarget?.name}]` : 'Chọn mục tiêu bên dưới để Soi hoặc Ám sát',
+            statusType: myAction ? 'success' as const : 'info' as const,
+          };
+        }
+
+        // Bellatrix or other Death Eaters
         const isBella = me.role?.id === 'BELLATRIX_LESTRANGE';
         return {
           title: `${me.role?.name || 'Tử Thần Thực Tử'} · Hiệp Lực Ám Sát`,
@@ -409,7 +425,7 @@ export function PlayerScreen() {
           ],
           tip: isBella 
             ? 'Nếu bạn bị treo cổ ban ngày, ban đêm tiếp theo Voldemort sẽ được quyền ám sát tới 2 người!'
-            : 'Tuyệt đối tránh bị treo cổ, vì nếu Lucius chết thì đêm tiếp theo Voldemort sẽ mất quyền ám sát!',
+            : 'Hiệp lực cùng Chúa Tể Voldemort để tiêu diệt gọn gàng mục tiêu then chốt trong đêm!',
           statusText: myAction 
             ? (myAction.targetId === 'NONE'
                 ? '✓ Đã chọn: Án Binh Bất Động (Không ám sát ai đêm nay)'
@@ -506,7 +522,7 @@ export function PlayerScreen() {
           alert: undefined as string | undefined,
           steps: [
             { num: '1', title: 'Kích hoạt thế trận', desc: 'Bấm nút "Chỉ Huy Ứng Cứu" bên dưới để chuẩn bị sẵn thế trận ứng cứu cho toàn phi đội.' },
-            { num: '2', title: 'Cứu sống đồng đội (50%)', desc: 'Nếu có 1 thành viên Hội bị Tử Thần Thực Tử giết ban đêm, có 50% cơ hội (tung đồng xu Merlin) cứu sống người đó!' }
+            { num: '2', title: 'Cứu sống đồng đội (100%)', desc: 'Nếu có 1 thành viên Hội bị Tử Thần Thực Tử giết ban đêm, Kingsley sẽ CỨU SỐNG người đó (100%)! Ngoài ra, Kingsley miễn nhiễm bùa Silencing.' }
           ],
           tip: 'Kích hoạt ngay ban đêm để bảo toàn sinh mạng cho các nhân vật mấu chốt của Hội!',
           statusText: myAction ? '✓ Đã kích hoạt thế trận ứng cứu cho đêm nay' : 'Nhấn nút "Chỉ Huy Ứng Cứu" bên dưới để kích hoạt',
@@ -566,6 +582,94 @@ export function PlayerScreen() {
             ? `✓ Đang bay hộ tống cùng: [${myVotedTarget?.name}]` 
             : 'Kỹ năng đỡ đòn tự động sẵn sàng nếu Harry bị nhắm bắn',
           statusType: myAction ? 'success' as const : 'info' as const,
+        };
+      }
+
+      if (me.role?.id === 'ARTHUR_WEASLEY') {
+        return {
+          title: 'Arthur Weasley · Soi Phe Ban Đêm',
+          badge: 'Trinh Sát Hội',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Soi phe đối tượng', desc: 'Chọn 1 người chơi và bấm "Thi Triển Soi Phe" để biết họ thuộc phe Hội Phượng Hoàng, Tử Thần Thực Tử hay Trung Lập.' },
+            { num: '2', title: 'Dẫn dắt ban ngày', desc: 'Dùng thông tin soi được để cùng phe Sáng vạch trần kẻ ác trong phiên biểu quyết ban ngày.' }
+          ],
+          tip: 'Tích cực soi phe vào ban đêm để phân loại người chơi khả nghi và dẫn dắt phe Sáng biểu quyết!',
+          statusText: effectiveTargetPlayer 
+            ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Bấm "Thi Triển Soi Phe" bên dưới!`
+            : 'Chọn 1 người chơi để soi phe',
+          statusType: effectiveTargetPlayer ? 'warning' as const : 'info' as const,
+        };
+      }
+
+      if (me.role?.id === 'FRED_WEASLEY') {
+        return {
+          title: 'Fred Weasley · Kẹo Ngất Xỉu Cấp Tốc',
+          badge: 'Phù Thủy Quỷ Quái',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Chọn người tặng kẹo', desc: 'Chọn 1 người chơi bạn nghi ngờ là kẻ cầm đầu phe ác hoặc hay thao túng biểu quyết.' },
+            { num: '2', title: 'Lén tặng kẹo', desc: 'Bấm "Thi Triển Tặng Kẹo" để làm họ bị choáng ngất và tước quyền vote của họ ở ban ngày tiếp theo.' }
+          ],
+          tip: 'Vô hiệu hóa quyền biểu quyết của kẻ ác nguy hiểm nhất để bảo vệ đồng đội trong các pha vote căng thẳng!',
+          statusText: effectiveTargetPlayer 
+            ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Bấm "Thi Triển Tặng Kẹo" bên dưới!`
+            : 'Chọn 1 người chơi để tặng Kẹo Ngất Xỉu',
+          statusType: effectiveTargetPlayer ? 'warning' as const : 'info' as const,
+        };
+      }
+
+      if (me.role?.id === 'GEORGE_WEASLEY') {
+        return {
+          title: 'George Weasley · Bột Khói Mù Peru',
+          badge: 'Phù Thủy Quỷ Quái',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Rải bột mù mịt', desc: 'Bấm "Thi Triển Rải Bột" để phủ kín bầu trời bằng Bột Khói Mù Peru (khiến toàn bộ Tử Thần Thực Tử mất quyền ám sát đêm nay).' },
+            { num: '2', title: 'Chú ý thời gian nghỉ', desc: 'Sau mỗi lần rải bột, bạn cần nghỉ 1 đêm (cooldown 1 đêm) trước khi có thể rải tiếp.' }
+          ],
+          tip: 'Kích hoạt vào những đêm hiểm nghèo để vô hiệu hóa hoàn toàn đòn ám sát của phe Tử Thần Thực Tử!',
+          statusText: 'Bấm "Thi Triển Rải Bột" bên dưới để rải bột khói mù bảo vệ toàn bộ bầu trời đêm nay!',
+          statusType: 'info' as const,
+        };
+      }
+
+      if (me.role?.id === 'BILL_WEASLEY') {
+        return {
+          title: 'Bill Weasley · Chuyên Gia Phá Bùa',
+          badge: 'Phá Bùa Cổ Xưa',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Tìm đồng minh bị phong ấn', desc: 'Theo dõi nhật ký xem ai bị bùa lạc Sectumsempra hoặc các bùa câm lặng khác làm mất kỹ năng.' },
+            { num: '2', title: 'Giải phong ấn', desc: 'Chọn người đó và bấm "Thi Triển Giải Phong Ấn" để khôi phục năng lực ma thuật cho họ.' }
+          ],
+          tip: 'Ưu tiên giải phong ấn cho Dumbledore, Hermione hoặc Snape nếu họ không may dính bùa câm lặng!',
+          statusText: effectiveTargetPlayer 
+            ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Bấm "Thi Triển Giải Phong Ấn" bên dưới!`
+            : 'Chọn 1 người đang bị phong ấn để giải bùa',
+          statusType: effectiveTargetPlayer ? 'warning' as const : 'info' as const,
+        };
+      }
+
+      if (me.role?.id === 'FLEUR_DELACOUR') {
+        return {
+          title: 'Fleur Delacour · Lưỡi Kiếm Gryffindor',
+          badge: 'Tình Yêu Veela',
+          badgeVariant: 'amber' as const,
+          alert: undefined as string | undefined,
+          steps: [
+            { num: '1', title: 'Xác định mục tiêu Tử Thần', desc: 'Chỉ chọn người bạn có bằng chứng chắc chắn là Tử Thần Thực Tử!' },
+            { num: '2', title: 'Xuất kiếm kết liễu', desc: 'Bấm "Thi Triển Chém Kiếm" để loại bỏ ngay kẻ ác (chém nhầm đồng minh Hội Phượng Hoàng, bạn sẽ tự sát vì ân hận).' }
+          ],
+          tip: 'Lưỡi Kiếm Gryffindor kết liễu ngay lập tức nhưng rủi ro cực lớn! Hãy phối hợp chặt chẽ với người soi phe!',
+          statusText: effectiveTargetPlayer 
+            ? `👉 Đang chọn: [${effectiveTargetPlayer.name}] ➔ Bấm "Thi Triển Chém Kiếm" bên dưới!`
+            : 'Chọn 1 kẻ tình nghi để xuất kiếm kết liễu',
+          statusType: effectiveTargetPlayer ? 'warning' as const : 'info' as const,
         };
       }
 
@@ -1956,16 +2060,40 @@ export function PlayerScreen() {
                 if (me.role?.id === 'HERMIONE_GRANGER') skillName = 'Soi Danh Tính';
                 if (me.role?.id === 'PETER_PETTIGREW') skillName = 'Đánh Hơi';
                 if (me.role?.id === 'FENRIR_GREYBACK') skillName = 'Cắn';
+                if (me.role?.id === 'ARTHUR_WEASLEY') skillName = 'Soi Phe';
+                if (me.role?.id === 'FRED_WEASLEY') skillName = 'Tặng Kẹo';
+                if (me.role?.id === 'GEORGE_WEASLEY') skillName = 'Rải Bột';
+                if (me.role?.id === 'BILL_WEASLEY') skillName = 'Giải Phong Ấn';
+                if (me.role?.id === 'FLEUR_DELACOUR') skillName = 'Chém Kiếm';
+                if (me.role?.id === 'LUCIUS_MALFOY') skillName = 'Soi Vai Trò';
+                if (me.role?.id === 'POTTER_FAKE') skillName = 'Silenced Ultimate';
 
                 // Check skill cooldowns
                 const hermioneUsed = Boolean(gameState.skillStates[`${me.id}_HERMIONE_R${gameState.round}`]);
                 const pettigrewUsed = Boolean(gameState.skillStates[`${me.id}_PETTIGREW_R${gameState.round}`]);
-                const fenrirUsed = Boolean(gameState.skillStates[`${me.id}_FENRIR`]);
+                const fenrirUsed = Boolean(gameState.skillStates[`${me.id}_FENRIR`] || gameState.skillStates[`${me.id}_FENRIR_BITE`]);
+                const arthurUsed = Boolean(gameState.skillStates[`${me.id}_ARTHUR_R${gameState.round}`]);
+                const fredUsed = Boolean(gameState.skillStates[`${me.id}_FRED_R${gameState.round}`]);
+                const georgeUsed = Boolean(gameState.skillStates[`${me.id}_GEORGE_R${gameState.round}`] || gameState.skillStates[`${me.id}_GEORGE_R${gameState.round - 1}`]);
+                const billUsed = Boolean(gameState.skillStates[`${me.id}_BILL_R${gameState.round}`]);
+                const fleurUsed = Boolean(gameState.skillStates[`${me.id}_FLEUR_R${gameState.round}`]);
+                const luciusUsed = Boolean(gameState.skillStates[`${me.id}_LUCIUS_R${gameState.round}`]);
+                const potterFakeUsed = Boolean(gameState.skillStates[`${me.id}_POTTERFAKE_ULTIMATE`]);
 
                 // Determine if current skill is on cooldown
-                const isSkillOnCooldown = (skillName === 'Soi Danh Tính' && hermioneUsed) ||
-                  ((skillName === 'Đánh Hơi' || skillName === 'Soi Đặc Biệt' || skillName === 'Soi Phe') && pettigrewUsed) ||
-                  (skillName === 'Cắn' && fenrirUsed);
+                const isSkillOnCooldown = 
+                  (skillName === 'Soi Danh Tính' && hermioneUsed) ||
+                  ((skillName === 'Đánh Hơi' || skillName === 'Soi Đặc Biệt') && pettigrewUsed) ||
+                  (skillName === 'Cắn' && fenrirUsed) ||
+                  (skillName === 'Soi Phe' && arthurUsed) ||
+                  (skillName === 'Tặng Kẹo' && fredUsed) ||
+                  (skillName === 'Rải Bột' && georgeUsed) ||
+                  (skillName === 'Giải Phong Ấn' && billUsed) ||
+                  (skillName === 'Chém Kiếm' && fleurUsed) ||
+                  (skillName === 'Soi Vai Trò' && luciusUsed) ||
+                  (skillName === 'Silenced Ultimate' && potterFakeUsed);
+
+                const isGeorge = skillName === 'Rải Bột';
 
                 return (
                   <div className="space-y-3">
@@ -2001,13 +2129,14 @@ export function PlayerScreen() {
                       {skillName && (
                         <button
                           onClick={() => {
-                            if (effectiveTargetId && !isSkillOnCooldown) {
-                              const res = executeInstantSkill(skillName!, effectiveTargetId);
+                            const targetId = isGeorge ? (effectiveTargetId || me.id) : effectiveTargetId;
+                            if (targetId && !isSkillOnCooldown) {
+                              const res = executeInstantSkill(skillName!, targetId);
                               setToastMessage(res || 'Đã thi triển');
                               setTimeout(() => setToastMessage(null), 5000);
                             }
                           }}
-                          disabled={!effectiveTargetId || isDead || isSkillOnCooldown}
+                          disabled={(!isGeorge && !effectiveTargetId) || isDead || isSkillOnCooldown}
                           className={`flex-1 py-3 px-4 rounded-xl hpvn-btn-gold flex items-center justify-between sm:justify-start gap-3 shadow-lg ${isSkillOnCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
                           title={isSkillOnCooldown ? 'Đã dùng kỹ năng này trong lượt này!' : ''}
                         >
@@ -2016,18 +2145,34 @@ export function PlayerScreen() {
                           </div>
                           <div className="flex flex-col text-left min-w-0">
                             <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-[#ffd88f] truncate">
-                              {isSkillOnCooldown ? `Đã Dùng: ${skillName}` : `Thi Triển ${skillName}`}
+                              {isSkillOnCooldown 
+                                ? (skillName === 'Rải Bột' && Boolean(gameState.skillStates[`${me.id}_GEORGE_R${gameState.round - 1}`]) 
+                                    ? 'Đang Nghỉ 1 Đêm (Cooldown)' 
+                                    : `Đã Dùng: ${skillName}`)
+                                : `Thi Triển ${skillName}`}
                             </span>
                             <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
                               {skillName === 'Soi Danh Tính'
-                                ? 'Hỏi Merlin để biết chính xác thẻ bài thật của người này'
-                                : skillName === 'Đánh Hơi' || skillName === 'Soi Đặc Biệt' || skillName === 'Soi Phe'
+                                ? 'Soi biết chính xác thẻ bài thật của người này'
+                                : skillName === 'Đánh Hơi' || skillName === 'Soi Đặc Biệt'
                                   ? 'Đánh hơi nhận diện đích danh Harry/Ron hoặc nhân vật đặc biệt'
-                                  : skillName === 'Hồi Sinh'
-                                    ? 'Cứu sống lại 1 đồng đội đã tử trận (1 lần duy nhất)'
-                                    : skillName === 'Cắn'
-                                      ? 'Biến mục tiêu thành Ma Sói (Trung Lập) và tước toàn bộ kỹ năng'
-                                      : 'Thi triển quyền năng ma pháp'}
+                                  : skillName === 'Soi Phe'
+                                    ? 'Kiểm tra phe Hội Phượng Hoàng, Tử Thần Thực Tử hay Trung Lập'
+                                    : skillName === 'Soi Vai Trò'
+                                      ? 'Bí mật soi biết vai trò cụ thể của người này'
+                                      : skillName === 'Tặng Kẹo'
+                                        ? 'Tặng Kẹo Ngất Xỉu tước quyền vote ban ngày tiếp theo của mục tiêu'
+                                        : skillName === 'Rải Bột'
+                                          ? 'Rải Bột Khói Mù Peru khiến toàn bộ TTTT mất quyền ám sát đêm nay'
+                                          : skillName === 'Giải Phong Ấn'
+                                            ? 'Giải bùa câm lặng khôi phục kỹ năng cho đồng đội bị phong ấn'
+                                            : skillName === 'Chém Kiếm'
+                                              ? 'Dùng Kiếm Gryffindor chém chết ngay 4T (chém nhầm đồng minh sẽ tự sát)'
+                                              : skillName === 'Silenced Ultimate'
+                                                ? 'Reveal Potter Fake và phong ấn kỹ năng của 1 TTTT ở vòng sau'
+                                                : skillName === 'Cắn'
+                                                  ? 'Cắn 1 người chuyển sang phe Tử Thần Thực Tử (1 lần duy nhất)'
+                                                  : 'Thi triển quyền năng ma pháp'}
                             </span>
                           </div>
                         </button>
@@ -2189,7 +2334,7 @@ export function PlayerScreen() {
                         <button
                           onClick={() => {
                             playerAction('chỉ huy ứng cứu', 'ALL');
-                            setToastMessage('✓ Đã chỉ huy toàn quân sẵn sàng ứng cứu đêm nay (50% cơ hội tung đồng xu cứu sống đồng đội).');
+                            setToastMessage('✓ Đã chỉ huy toàn quân sẵn sàng ứng cứu đêm nay (100% cứu sống 1 thành viên Hội bị ám sát).');
                             setTimeout(() => setToastMessage(null), 3500);
                           }}
                           disabled={isDead}
@@ -2202,10 +2347,10 @@ export function PlayerScreen() {
                             <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-[#ffd88f] truncate">
                               {isKingsleyAction(myAction?.actionName || '')
                                 ? '✓ Đã Kích Hoạt Ứng Cứu Đêm Nay'
-                                : 'Chỉ Huy Ứng Cứu (50%)'}
+                                : 'Chỉ Huy Ứng Cứu (100%)'}
                             </span>
                             <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
-                              Sẵn sàng thế trận: 50% tung đồng xu cứu sống 1 thành viên Hội bị ám sát
+                              Sẵn sàng thế trận: 100% cứu sống 1 thành viên Hội bị ám sát trong đêm
                             </span>
                           </div>
                         </button>

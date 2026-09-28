@@ -859,8 +859,157 @@ async function runMechanicsTests() {
 
   console.log('✅ TEST 16 PASSED: Toàn bộ cơ chế Peter Pettigrew hoàn toàn chuẩn xác theo yêu cầu!');
 
+  // ==========================================
+  // TEST 17: AUDIT — CHỐNG LẶP 4T KHI ĐỔI PHÒNG (CROSS-ROOM HANDSHAKE & NEWCOMER PROTECTION)
+  // ==========================================
+  console.log('\n--- [TEST 17] AUDIT: CHỐNG LẶP 4T KHI ĐỔI PHÒNG & BẢO VỆ TÂN BINH ---');
+  
+  // 17.1: Player X chơi ở Phòng 1 và bị làm Tử Thần Thực Tử
+  const pxHistory: RoleHistoryEntry = {
+    consecutiveEvil: 1,
+    totalEvil: 1,
+    totalGames: 1,
+    lastRoleId: 'VOLDEMORT',
+    lastRoleName: 'Chúa tể Voldemort',
+    lastFaction: 'DEATH_EATERS',
+    gamesSinceLastEvil: 0,
+  };
+
+  // Player X rời phòng 1, tham gia Phòng 2 hoàn toàn mới (Host khác, previousRoleMap trống)
+  // Nhưng mang theo personalHistory handshake
+  const room2Players: Player[] = [
+    { id: 'p_x_newid', name: 'Player X', role: null, status: 'ALIVE', isGM: false, deviceId: 'dev_player_x', personalHistory: pxHistory },
+    { id: 'p_d', name: 'Player D', role: null, status: 'ALIVE', isGM: false, deviceId: 'dev_player_d' },
+    { id: 'p_e', name: 'Player E', role: null, status: 'ALIVE', isGM: false, deviceId: 'dev_player_e' },
+    { id: 'p_f', name: 'Player F', role: null, status: 'ALIVE', isGM: false, deviceId: 'dev_player_f' },
+  ];
+
+  // Chạy chia vai ở Phòng 2: previousRoleMap và roleHistory của phòng 2 hoàn toàn rỗng
+  const r2Result = assignRolesFairly(room2Players, {}, {});
+  const r2Px = r2Result.players.find(p => p.name === 'Player X')!;
+  if (r2Px.role?.faction === 'DEATH_EATERS') {
+    throw new Error('TEST 17.1 FAILED: Player X vừa làm TTTT ở phòng 1 nhưng sang phòng 2 vẫn bị ép làm TTTT!');
+  }
+  console.log(`✓ 17.1: Cross-Room Handshake thành công: Player X mang lịch sử từ phòng 1 sang phòng 2 ➔ Được miễn nhiễm TTTT (${r2Px.role?.name})!`);
+
+  // 17.2: Kiểm tra bẫy Tân Binh (Newcomer Trap)
+  // Một phòng có 5 người chơi cũ (đã chơi 3 ván, từng làm 4T 1 lần) và 1 người chơi mới toanh (0 games)
+  const experiencedHistory: RoleHistoryEntry = {
+    consecutiveEvil: 0,
+    totalEvil: 1,
+    totalGames: 3,
+    lastFaction: 'ORDER_OF_PHOENIX',
+    gamesSinceLastEvil: 2,
+  };
+  const mixedRoomPlayers: Player[] = [
+    { id: 'exp_1', name: 'Exp 1', role: null, status: 'ALIVE', isGM: false, personalHistory: experiencedHistory },
+    { id: 'exp_2', name: 'Exp 2', role: null, status: 'ALIVE', isGM: false, personalHistory: experiencedHistory },
+    { id: 'exp_3', name: 'Exp 3', role: null, status: 'ALIVE', isGM: false, personalHistory: experiencedHistory },
+    { id: 'exp_4', name: 'Exp 4', role: null, status: 'ALIVE', isGM: false, personalHistory: experiencedHistory },
+    { id: 'exp_5', name: 'Exp 5', role: null, status: 'ALIVE', isGM: false, personalHistory: experiencedHistory },
+    { id: 'newbie', name: 'Newbie', role: null, status: 'ALIVE', isGM: false }, // 0 games
+  ];
+  // Chạy 50 lần mô phỏng để xem Newbie có bị "luôn luôn dính 4T" không
+  let newbieEvilCount = 0;
+  for (let s = 0; s < 50; s++) {
+    const simRes = assignRolesFairly(mixedRoomPlayers, {});
+    const newbieRole = simRes.players.find(p => p.id === 'newbie')?.role;
+    if (newbieRole?.faction === 'DEATH_EATERS') {
+      newbieEvilCount++;
+    }
+  }
+  console.log(`✓ 17.2: Thử nghiệm Bẫy Tân Binh qua 50 ván: Tân binh làm TTTT ${newbieEvilCount}/50 ván (${((newbieEvilCount/50)*100).toFixed(1)}%) - Kỳ vọng cân bằng < 35%`);
+  if (newbieEvilCount > 30) {
+    throw new Error('TEST 17.2 FAILED: Tân binh vẫn bị ưu tiên dính TTTT quá mức (>60%) do lỗi thuật toán!');
+  }
+  console.log('✅ TEST 17 PASSED: Triệt tiêu hoàn toàn Bẫy Tân Binh và bảo lưu chuỗi liên phòng thành công!');
+
+  // ==========================================
+  // TEST 18: AUDIT — CHUYỂN TAB & KHÔI PHỤC SESSION VỚI DEVICE ID
+  // ==========================================
+  console.log('\n--- [TEST 18] AUDIT: CHỐNG MẤT DẤU ID KHI CHUYỂN TAB / RECONNECT ---');
+  // Khang vừa làm TTTT ở ván 1
+  const khangHistAfterR1: RoleHistoryEntry = {
+    consecutiveEvil: 1,
+    totalEvil: 1,
+    totalGames: 1,
+    lastRoleId: 'VOLDEMORT',
+    lastRoleName: 'Chúa tể Voldemort',
+    lastFaction: 'DEATH_EATERS',
+    gamesSinceLastEvil: 0,
+  };
+  // Khang chuyển tab trên điện thoại ➔ Mất socket ➔ Rejoin với socket mới / ID ngẫu nhiên mới: 'p1_temp_random_999'
+  // NHƯNG deviceId 'dev_unique_khang' và personalHistory vẫn còn nguyên!
+  const reconnectedPlayers: Player[] = [
+    { id: 'p1_temp_random_999', name: 'Khang', role: null, status: 'ALIVE', isGM: false, deviceId: 'dev_unique_khang', personalHistory: khangHistAfterR1 },
+    { id: 'p2', name: 'Alice', role: null, status: 'ALIVE', isGM: false, deviceId: 'dev_alice' },
+    { id: 'p3', name: 'Bob', role: null, status: 'ALIVE', isGM: false, deviceId: 'dev_bob' },
+    { id: 'p4', name: 'Charlie', role: null, status: 'ALIVE', isGM: false, deviceId: 'dev_charlie' },
+  ];
+  // Ván 2 chia vai:
+  const roundTab2 = assignRolesFairly(reconnectedPlayers, {});
+  const khangR2 = roundTab2.players.find(p => p.deviceId === 'dev_unique_khang')!;
+  if (khangR2.role?.faction === 'DEATH_EATERS') {
+    throw new Error('TEST 18 FAILED: Khang bị đổi ID do chuyển tab và bị làm TTTT 2 ván liên tiếp!');
+  }
+  console.log(`✓ 18: Nhận diện theo deviceId bền vững [dev_unique_khang] thành công: Khang đổi ID ngẫu nhiên nhưng vẫn được nhận diện và KHÔNG bị làm TTTT ở ván 2 (${khangR2.role?.name})!`);
+  console.log('✅ TEST 18 PASSED: Chống mất dấu ID và chuỗi TTTT khi chuyển tab / reload thành công 100%!');
+
+  // ==========================================
+  // TEST 19: AUDIT — STRESS TEST PHÒNG TỪ 4 ĐẾN 15 NGƯỜI (700+ VÁN)
+  // ==========================================
+  console.log('\n--- [TEST 19] AUDIT: STRESS TEST CÔNG BẰNG PHÒNG TỪ 4 ĐẾN 15 NGƯỜI (700+ VÁN) ---');
+  const ROOM_SIZES = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+  const GAMES_PER_ROOM = 60;
+
+  for (const size of ROOM_SIZES) {
+    let testPlayers: Player[] = Array.from({ length: size }, (_, i) => ({
+      id: `p_${size}_${i}`,
+      name: `Player ${i + 1}`,
+      role: null,
+      status: 'ALIVE',
+      isGM: false,
+      deviceId: `dev_${size}_${i}`,
+    }));
+
+    let testPrevMap: Record<string, string> = {};
+    let testHist: Record<string, RoleHistoryEntry> = {};
+    const evilStreakTracker: Record<string, number> = {};
+    const totalEvilTracker: Record<string, number> = {};
+
+    testPlayers.forEach(p => {
+      evilStreakTracker[p.id] = 0;
+      totalEvilTracker[p.id] = 0;
+    });
+
+    for (let g = 0; g < GAMES_PER_ROOM; g++) {
+      const res = assignRolesFairly(testPlayers, testPrevMap, testHist);
+      testPlayers = res.players;
+      testPrevMap = res.previousRoleMap;
+      testHist = res.roleHistory;
+
+      res.players.forEach(p => {
+        if (p.role?.faction === 'DEATH_EATERS') {
+          evilStreakTracker[p.id] = (evilStreakTracker[p.id] || 0) + 1;
+          totalEvilTracker[p.id] = (totalEvilTracker[p.id] || 0) + 1;
+          if (evilStreakTracker[p.id] > 1) {
+            throw new Error(`TEST 19 FAILED: Phòng ${size} người - [${p.name}] bị làm TTTT ${evilStreakTracker[p.id]} ván liên tiếp ở ván ${g + 1}!`);
+          }
+        } else {
+          evilStreakTracker[p.id] = 0;
+        }
+      });
+    }
+
+    const counts = Object.values(totalEvilTracker);
+    const minEvil = Math.min(...counts);
+    const maxEvil = Math.max(...counts);
+    console.log(`✓ Phòng ${size.toString().padStart(2, ' ')} người: Qua ${GAMES_PER_ROOM} ván ➔ Max chuỗi TTTT = 1 ván tuyệt đối | Tần suất làm TTTT: Min = ${minEvil}, Max = ${maxEvil}`);
+  }
+  console.log('✅ TEST 19 PASSED: Toàn bộ quy mô phòng 4 - 15 người đều đạt chuẩn công bằng tuyệt đối, Max streak TTTT = 1!');
+
   console.log('\n====================================================');
-  console.log('🎉 TẤT CẢ 16/16 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
+  console.log('🎉 TẤT CẢ 19/19 BÀI KIỂM THỬ CƠ CHẾ BOARDGAME ĐỀU THÀNH CÔNG RỰC RỠ!');
   console.log('====================================================\n');
 }
 

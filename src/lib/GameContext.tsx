@@ -278,12 +278,53 @@ export function fisherYatesShuffle<T>(array: T[]): T[] {
 }
 
 /**
+ * Lấy hoặc tạo mã định danh thiết bị cố định (Persistent Device ID)
+ * Đảm bảo 1 thiết bị/trình duyệt luôn giữ nguyên định danh qua F5, đổi tab, chuyển phòng.
+ */
+export function getOrCreateDeviceId(): string {
+  if (typeof window === 'undefined') return 'server_device';
+  try {
+    let id = localStorage.getItem('seven-potters-device-id');
+    if (!id) {
+      id = 'dev_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now().toString(36);
+      localStorage.setItem('seven-potters-device-id', id);
+    }
+    return id;
+  } catch {
+    return 'temp_device';
+  }
+}
+
+/**
+ * Lấy lịch sử vai trò cá nhân của người chơi lưu trên Client
+ */
+export function getPersonalHistory(): RoleHistoryEntry | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem('seven-potters-personal-history');
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
+
+/**
+ * Lưu lịch sử vai trò cá nhân của người chơi lên Client (bảo lưu khi đổi phòng)
+ */
+export function savePersonalHistory(entry: RoleHistoryEntry): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('seven-potters-personal-history', JSON.stringify(entry));
+  } catch {}
+}
+
+/**
  * Trích xuất định danh bền vững cho người chơi (persistent player key)
- * Ưu tiên hpvnUid -> userTag -> name (chuẩn hóa thường) -> id
+ * Ưu tiên hpvnUid -> deviceId -> userTag -> name (chuẩn hóa thường) -> id
  * Đảm bảo người chơi F5/refresh hoặc rejoin vẫn giữ nguyên lịch sử vai trò.
  */
-export function getPlayerKey(player: { id: string; name: string; hpvnUid?: string; userTag?: string }): string {
+export function getPlayerKey(player: { id: string; name: string; hpvnUid?: string; userTag?: string; deviceId?: string }): string {
   if (player.hpvnUid) return `hpvn_${player.hpvnUid}`;
+  if (player.deviceId) return `dev_${player.deviceId}`;
   if (player.userTag) return `tag_${player.userTag.trim().toLowerCase()}`;
   if (player.name && player.name.trim()) return `name_${player.name.trim().toLowerCase()}`;
   return player.id;
@@ -404,31 +445,57 @@ export function assignRolesFairly(
   };
 
   const prevMap = previousRoleMap || {};
+  const roomEvilDensity = evilCount / N;
 
-  // GIAI ĐOẠN 1: PHÂN BỔ PHE PHÁI (FACTION PARTITIONING)
+  // GIAI ĐOẠN 1: PHÂN BỔ PHE PHÁI (FACTION PARTITIONING & ANTI-STREAK ENGINE)
   // Tính điểm ưu tiên cho từng người chơi:
   const scored = nonGmPlayers.map(p => {
     const key = getPlayerKey(p);
-    // Kiểm tra xem ván trước người này có là 4T không
-    const prevRoleId = prevMap[p.id] || p.previousRoleId;
-    const prevWasEvil = (prevRoleId && ROLES[prevRoleId]?.faction === 'DEATH_EATERS') || (p.role?.faction === 'DEATH_EATERS');
-    const existingHist = mergedHistory[key];
     
+    // Tìm lịch sử từ mergedHistory hoặc từ p.personalHistory (gửi từ client handshake)
+    const existingHist = mergedHistory[key] || p.personalHistory;
+    
+    // Kiểm tra xem ván trước người này có là 4T không (theo previousRoleMap, p.previousRoleId, p.role hoặc existingHist)
+    const prevRoleId = prevMap[p.id] || p.previousRoleId || existingHist?.lastRoleId;
+    const prevWasEvil = 
+      existingHist?.lastFaction === 'DEATH_EATERS' ||
+      (existingHist?.consecutiveEvil !== undefined && existingHist.consecutiveEvil > 0) ||
+      (prevRoleId && ROLES[prevRoleId]?.faction === 'DEATH_EATERS') || 
+      (p.role?.faction === 'DEATH_EATERS');
+
     const consecutiveEvil = existingHist 
-      ? (existingHist.consecutiveEvil || 0)
+      ? (existingHist.consecutiveEvil ?? (prevWasEvil ? 1 : 0))
       : prevWasEvil ? 1 : (p.consecutiveEvil || 0);
 
-    const totalEvil = existingHist ? existingHist.totalEvil : (prevWasEvil ? 1 : 0);
-    const totalGames = existingHist ? existingHist.totalGames : 0;
+    const totalEvil = existingHist?.totalEvil ?? (prevWasEvil ? 1 : 0);
+    const totalGames = existingHist?.totalGames ?? (prevWasEvil ? 1 : 0);
+    const gamesSinceLastEvil = consecutiveEvil > 0 
+      ? 0 
+      : (existingHist?.gamesSinceLastEvil ?? (prevWasEvil ? 0 : 1));
 
-    // Phạt cực nặng nếu vừa là 4T ở ván liền kề (-50,000)
-    // Người chưa là 4T hoặc ít là 4T nhất sẽ được điểm cao nhất
-    let score = Math.random() * 20; // Nhiễu ngẫu nhiên để công bằng giữa các người có cùng tỷ lệ
-    if (consecutiveEvil > 0) {
-      score -= 50000 * consecutiveEvil;
+    // Nhiễu ngẫu nhiên có kiểm soát (0 - 25) để bảo đảm tính bất ngờ
+    let score = Math.random() * 25;
+
+    if (consecutiveEvil > 0 || prevWasEvil) {
+      // KHÓA CỨNG (HARD LOCK): Phạt -1.000.000 điểm. Tuyệt đối không cho làm 4T 2 ván liên tiếp!
+      score -= 1000000 * Math.max(1, consecutiveEvil);
     } else {
-      const evilRatio = totalGames > 0 ? (totalEvil / totalGames) : 0;
-      score += (1 - evilRatio) * 100;
+      // HỒI CHIÊU & CÂN BẰNG TỶ LỆ (FAIR ROTATION & PITY SYSTEM)
+      // 1. Tỷ lệ dài hạn: nếu evilRatio > roomEvilDensity thì bị trừ điểm; nếu ít hơn thì được cộng điểm
+      const evilRatio = totalGames > 0 ? (totalEvil / totalGames) : roomEvilDensity;
+      score += (roomEvilDensity - evilRatio) * 150;
+
+      // 2. Điểm hạn hán / hồi chiêu (Pity drought factor):
+      // Người càng nhiều ván chưa làm 4T (gamesSinceLastEvil) càng được ưu tiên đến lượt
+      const drought = Math.min(gamesSinceLastEvil, 6);
+      score += drought * 20;
+
+      // 3. Xử lý triệt để bẫy Tân Binh (Newcomer Protection):
+      // Nếu là người mới hoàn toàn (totalGames === 0, vừa vào phòng hoặc chuyển tab/đổi phòng):
+      // Giảm nhẹ 15 điểm để ưu tiên xếp vào phe HPH trong ván đầu tiên, tránh việc luôn luôn bị làm 4T ngay khi vào phòng!
+      if (totalGames === 0) {
+        score -= 15;
+      }
     }
 
     return { 
@@ -441,6 +508,8 @@ export function assignRolesFairly(
         totalGames,
         lastRoleId: existingHist?.lastRoleId || prevRoleId,
         lastRoleName: existingHist?.lastRoleName || (prevRoleId ? ROLES[prevRoleId]?.name : undefined),
+        lastFaction: existingHist?.lastFaction || (prevWasEvil ? 'DEATH_EATERS' : 'ORDER_OF_PHOENIX'),
+        gamesSinceLastEvil,
       } 
     };
   });
@@ -537,27 +606,33 @@ export function assignRolesFairly(
     newRoleMap[p.id] = assignedRole.id;
 
     const key = getPlayerKey(p);
-    const oldHist = newRoleHistory[key] || {
+    const oldHist = newRoleHistory[key] || p.personalHistory || {
       consecutiveEvil: 0,
       totalEvil: 0,
       totalGames: 0,
+      gamesSinceLastEvil: 1,
     };
     const isEvil = assignedRole.faction === 'DEATH_EATERS';
 
-    newRoleHistory[key] = {
+    const updatedHist: RoleHistoryEntry = {
       consecutiveEvil: isEvil ? ((oldHist.consecutiveEvil || 0) + 1) : 0,
       totalEvil: isEvil ? ((oldHist.totalEvil || 0) + 1) : (oldHist.totalEvil || 0),
       totalGames: (oldHist.totalGames || 0) + 1,
       lastRoleId: assignedRole.id,
       lastRoleName: assignedRole.name,
+      lastFaction: assignedRole.faction,
+      gamesSinceLastEvil: isEvil ? 0 : ((oldHist.gamesSinceLastEvil || 0) + 1),
     };
+
+    newRoleHistory[key] = updatedHist;
 
     return {
       ...p,
       role: assignedRole,
       status: 'ALIVE' as const,
       previousRoleId: assignedRole.id,
-      consecutiveEvil: newRoleHistory[key].consecutiveEvil,
+      consecutiveEvil: updatedHist.consecutiveEvil,
+      personalHistory: updatedHist,
     };
   });
 
@@ -1031,19 +1106,42 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           setOfflinePlayerIds(prev => prev.filter(id => id !== reqPlayer.id));
 
           updateState(prev => {
-            const existingIdx = prev.players.findIndex(p => p.id === reqPlayer.id || p.name === reqPlayer.name);
+            const existingIdx = prev.players.findIndex(p => 
+              p.id === reqPlayer.id || 
+              (p.deviceId && reqPlayer.deviceId && p.deviceId === reqPlayer.deviceId) ||
+              (p.hpvnUid && reqPlayer.hpvnUid && p.hpvnUid === reqPlayer.hpvnUid) ||
+              p.name.trim().toLowerCase() === reqPlayer.name.trim().toLowerCase()
+            );
             let nextPlayers = [...prev.players];
             let logMsg = '';
 
+            const carriedHistory = reqPlayer.personalHistory;
+            const playerKey = getPlayerKey(reqPlayer);
+
+            const nextRoleHistory = { ...(prev.roleHistory || {}) };
+            const nextPreviousRoleMap = { ...(prev.previousRoleMap || {}) };
+
+            if (carriedHistory && !nextRoleHistory[playerKey]) {
+              nextRoleHistory[playerKey] = carriedHistory;
+            }
+            if (reqPlayer.previousRoleId && !nextPreviousRoleMap[reqPlayer.id]) {
+              nextPreviousRoleMap[reqPlayer.id] = reqPlayer.previousRoleId;
+            }
+
             if (existingIdx >= 0) {
+              const oldP = nextPlayers[existingIdx];
               // Reconnect existing player
               nextPlayers[existingIdx] = {
-                ...nextPlayers[existingIdx],
+                ...oldP,
                 id: reqPlayer.id,
                 name: reqPlayer.name,
-                house: reqPlayer.house || nextPlayers[existingIdx].house,
-                userTag: reqPlayer.userTag || nextPlayers[existingIdx].userTag,
-                hpvnUid: reqPlayer.hpvnUid || nextPlayers[existingIdx].hpvnUid,
+                house: reqPlayer.house || oldP.house,
+                userTag: reqPlayer.userTag || oldP.userTag,
+                hpvnUid: reqPlayer.hpvnUid || oldP.hpvnUid,
+                deviceId: reqPlayer.deviceId || oldP.deviceId,
+                personalHistory: carriedHistory || oldP.personalHistory,
+                consecutiveEvil: carriedHistory?.consecutiveEvil ?? oldP.consecutiveEvil,
+                previousRoleId: reqPlayer.previousRoleId || oldP.previousRoleId,
               };
               logMsg = `Hệ thống: ${reqPlayer.name} đã kết nối lại vào phòng.`;
             } else {
@@ -1055,6 +1153,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             return {
               ...prev,
               players: nextPlayers,
+              roleHistory: nextRoleHistory,
+              previousRoleMap: nextPreviousRoleMap,
               logs: [...prev.logs, logMsg],
             };
           });
@@ -1147,6 +1247,29 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
                 localStorage.setItem(`seven-potters-room-${roomCodeRef.current}-state`, JSON.stringify(syncedState));
               } else {
                 localStorage.setItem('seven-potters-mock-state', JSON.stringify(syncedState));
+              }
+
+              // Cập nhật lịch sử vai trò cá nhân trên Client để bảo lưu khi đổi phòng
+              const myId = currentPlayerIdRef.current;
+              const me = syncedState.players?.find(p => p.id === myId);
+              if (me && me.role) {
+                const myKey = getPlayerKey(me);
+                const myHist = syncedState.roleHistory?.[myKey];
+                if (myHist) {
+                  savePersonalHistory(myHist);
+                } else {
+                  const isEvil = me.role.faction === 'DEATH_EATERS';
+                  const old = getPersonalHistory() || { consecutiveEvil: 0, totalEvil: 0, totalGames: 0 };
+                  savePersonalHistory({
+                    consecutiveEvil: isEvil ? ((old.consecutiveEvil || 0) + 1) : 0,
+                    totalEvil: isEvil ? ((old.totalEvil || 0) + 1) : (old.totalEvil || 0),
+                    totalGames: (old.totalGames || 0) + 1,
+                    lastRoleId: me.role.id,
+                    lastRoleName: me.role.name,
+                    lastFaction: me.role.faction,
+                    gamesSinceLastEvil: isEvil ? 0 : ((old.gamesSinceLastEvil || 0) + 1),
+                  });
+                }
               }
             } catch (e) {}
           }
@@ -1274,6 +1397,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (!me && myId) {
         const savedName = getStorageItem('seven-potters-player-name');
         if (savedName) {
+          const myPersonalHist = getPersonalHistory();
           me = {
             id: myId,
             name: savedName,
@@ -1283,6 +1407,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             house: getStorageItem('seven-potters-house') || undefined,
             userTag: getStorageItem('seven-potters-user-tag') || undefined,
             hpvnUid: getStorageItem('seven-potters-hpvn-uid') || undefined,
+            deviceId: getOrCreateDeviceId(),
+            personalHistory: myPersonalHist || undefined,
+            consecutiveEvil: myPersonalHist?.consecutiveEvil || 0,
+            previousRoleId: myPersonalHist?.lastRoleId,
           };
         }
       }
@@ -1395,6 +1523,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       setRoomCode(savedRoom);
       setIsHost(savedIsHost);
 
+      const myPersonalHist = getPersonalHistory();
       const restorePlayer: Player = {
         id: sessionId,
         name: savedName,
@@ -1404,6 +1533,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         house: savedHouse,
         userTag: savedUserTag,
         hpvnUid: savedHpvnUid,
+        deviceId: getOrCreateDeviceId(),
+        personalHistory: myPersonalHist || undefined,
+        consecutiveEvil: myPersonalHist?.consecutiveEvil || 0,
+        previousRoleId: myPersonalHist?.lastRoleId,
       };
 
       const net = new SevenPottersNetwork();
@@ -1459,7 +1592,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   ): Promise<string> => {
     // Generate a 4-letter uppercase code e.g. "POT7"
     const code = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const hostId = 'player_' + Math.random().toString(36).substring(2, 9);
+    const myDeviceId = getOrCreateDeviceId();
+    const myPersonalHist = getPersonalHistory();
+    const savedSessionId = getStorageItem('seven-potters-session-id');
+    const hostId = savedSessionId || ('player_' + Math.random().toString(36).substring(2, 9));
     
     const hostPlayer: Player = {
       id: hostId,
@@ -1470,6 +1606,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       house: extra?.house,
       userTag: extra?.userTag,
       hpvnUid: extra?.hpvnUid,
+      deviceId: myDeviceId,
+      personalHistory: myPersonalHist || undefined,
+      consecutiveEvil: myPersonalHist?.consecutiveEvil || 0,
+      previousRoleId: myPersonalHist?.lastRoleId,
     };
 
     if (netRef.current) {
@@ -1531,7 +1671,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const code = inputRoomCode.trim().toUpperCase();
     if (!code) throw new Error('Mã phòng không được để trống.');
 
-    const playerId = 'player_' + Math.random().toString(36).substring(2, 9);
+    const myDeviceId = getOrCreateDeviceId();
+    const myPersonalHist = getPersonalHistory();
+    const savedSessionId = getStorageItem('seven-potters-session-id');
+    const playerId = savedSessionId || ('player_' + Math.random().toString(36).substring(2, 9));
     const clientPlayer: Player = {
       id: playerId,
       name,
@@ -1541,6 +1684,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       house: extra?.house,
       userTag: extra?.userTag,
       hpvnUid: extra?.hpvnUid,
+      deviceId: myDeviceId,
+      personalHistory: myPersonalHist || undefined,
+      consecutiveEvil: myPersonalHist?.consecutiveEvil || 0,
+      previousRoleId: myPersonalHist?.lastRoleId,
     };
 
     if (netRef.current) {
@@ -1603,7 +1750,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const newPlayerId = 'player_' + Math.random().toString(36).substring(2, 9);
+    const myDeviceId = getOrCreateDeviceId();
+    const myPersonalHist = getPersonalHistory();
+    const savedSessionId = getStorageItem('seven-potters-session-id');
+    const newPlayerId = savedSessionId || ('player_' + Math.random().toString(36).substring(2, 9));
     const newPlayer: Player = {
       id: newPlayerId,
       name,
@@ -1613,6 +1763,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       house: extra?.house,
       userTag: extra?.userTag,
       hpvnUid: extra?.hpvnUid,
+      deviceId: myDeviceId,
+      personalHistory: myPersonalHist || undefined,
+      consecutiveEvil: myPersonalHist?.consecutiveEvil || 0,
+      previousRoleId: myPersonalHist?.lastRoleId,
     };
     
     setCurrentPlayerId(newPlayerId);
@@ -1701,6 +1855,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         prev.previousRoleMap,
         prev.roleHistory
       );
+
+      // Lưu lại personalHistory của Host nếu Host cũng là người chơi
+      if (currentPlayerId) {
+        const hostPlayer = newPlayers.find(p => p.id === currentPlayerId);
+        if (hostPlayer && hostPlayer.personalHistory) {
+          savePersonalHistory(hostPlayer.personalHistory);
+        }
+      }
 
       // Thang Chặng Co Giãn Tự Động theo Bảng Cân Bằng (Game Balance Optimization)
       const balance = getOptimalBalance(N);
@@ -1897,6 +2059,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           status: 'ALIVE',
           previousRoleId: p.role?.id || p.previousRoleId,
           consecutiveEvil: p.consecutiveEvil,
+          personalHistory: p.personalHistory,
         })),
         logs: ['Hệ thống: Merlin đã reset game. Đang chờ chia lại vai trò mới (chống lặp vai)...'],
       };

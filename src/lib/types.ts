@@ -32,8 +32,10 @@ export interface Player {
   house?: string;
   userTag?: string;
   hpvnUid?: string;
+  deviceId?: string;
   previousRoleId?: string;
   consecutiveEvil?: number;
+  personalHistory?: RoleHistoryEntry;
 }
 
 export interface RoleHistoryEntry {
@@ -42,6 +44,8 @@ export interface RoleHistoryEntry {
   totalGames: number;
   lastRoleId?: string;
   lastRoleName?: string;
+  lastFaction?: Faction;
+  gamesSinceLastEvil?: number;
 }
 
 export type GamePhase = 'LOBBY' | 'DAY' | 'NIGHT' | 'END';

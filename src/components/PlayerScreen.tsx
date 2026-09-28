@@ -109,6 +109,11 @@ export function PlayerScreen() {
     }
   }, [gameState.phase]);
 
+  // Reset selected target when round or phase transitions
+  useEffect(() => {
+    setSelectedTarget(null);
+  }, [gameState.phase, gameState.round]);
+
   const playerLogsEndRef = useRef<HTMLDivElement>(null);
   const playerLogsContainerRef = useRef<HTMLDivElement>(null);
 
@@ -1145,8 +1150,8 @@ export function PlayerScreen() {
                           setTimeout(() => setToastMessage(null), 3500);
                         }
                       }}
-                      disabled={!effectiveTargetId || isDead}
-                      className="flex-1 py-3 px-4 rounded-xl hpvn-btn-phoenix flex items-center justify-between sm:justify-start gap-3 shadow-lg disabled:opacity-40"
+                      disabled={!effectiveTargetId || isDead || effectiveTargetPlayer?.status === 'DEAD'}
+                      className="flex-1 py-3 px-4 rounded-xl hpvn-btn-phoenix flex items-center justify-between sm:justify-start gap-3 shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <div className="p-2 rounded-lg bg-black/40 border border-amber-400/40 text-[#ffd88f] shrink-0">
                         <Crosshair size={20} />
@@ -1925,12 +1930,15 @@ export function PlayerScreen() {
             {isDay ? (
               <button
                 onClick={() => {
-                  playerAction('biểu quyết tước đũa', effectiveTargetId!);
-                  setSelectedTarget(effectiveTargetId);
-                  setToastMessage(`✓ Đã lưu phiếu biểu quyết Tước Đũa cho: ${effectiveTargetPlayer.name}!`);
-                  setTimeout(() => setToastMessage(null), 3500);
+                  if (effectiveTargetId && !isDead && effectiveTargetPlayer?.status !== 'DEAD') {
+                    playerAction('biểu quyết tước đũa', effectiveTargetId);
+                    setSelectedTarget(effectiveTargetId);
+                    setToastMessage(`✓ Đã lưu phiếu biểu quyết Tước Đũa cho: ${effectiveTargetPlayer.name}!`);
+                    setTimeout(() => setToastMessage(null), 3500);
+                  }
                 }}
-                className="px-4 py-2.5 rounded-xl hpvn-btn-phoenix font-serif font-bold text-xs flex items-center gap-1.5 flex-shrink-0 active:scale-95"
+                disabled={isDead || !effectiveTargetId || effectiveTargetPlayer?.status === 'DEAD'}
+                className="px-4 py-2.5 rounded-xl hpvn-btn-phoenix font-serif font-bold text-xs flex items-center gap-1.5 flex-shrink-0 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Crosshair size={14} />
                 <span>
@@ -1943,13 +1951,15 @@ export function PlayerScreen() {
                   <>
                     <button
                       onClick={() => {
-                        playerAction('giết', effectiveTargetId!);
-                        setSelectedTarget(effectiveTargetId);
-                        setToastMessage(`✓ Đã lưu mục tiêu Ám Sát: ${effectiveTargetPlayer.name}!`);
-                        setTimeout(() => setToastMessage(null), 3500);
+                        if (effectiveTargetId && !isDead && !isSilenced && effectiveTargetPlayer?.status !== 'DEAD') {
+                          playerAction('giết', effectiveTargetId);
+                          setSelectedTarget(effectiveTargetId);
+                          setToastMessage(`✓ Đã lưu mục tiêu Ám Sát: ${effectiveTargetPlayer.name}!`);
+                          setTimeout(() => setToastMessage(null), 3500);
+                        }
                       }}
-                      disabled={isSilenced}
-                      className="px-3 py-2 rounded-xl hpvn-btn-floo font-serif font-bold text-xs flex items-center gap-1 active:scale-95 disabled:opacity-40"
+                      disabled={isSilenced || isDead || !effectiveTargetId || effectiveTargetPlayer?.status === 'DEAD'}
+                      className="px-3 py-2 rounded-xl hpvn-btn-floo font-serif font-bold text-xs flex items-center gap-1 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <Skull size={13} />
                       <span>Ám Sát</span>
@@ -1957,13 +1967,15 @@ export function PlayerScreen() {
 
                     <button
                       onClick={() => {
-                        playerAction('giết', 'NONE');
-                        setSelectedTarget(null);
-                        setToastMessage('✓ Đã chọn: Không ám sát ai đêm nay! (Án binh)');
-                        setTimeout(() => setToastMessage(null), 3500);
+                        if (!isDead && !isSilenced) {
+                          playerAction('giết', 'NONE');
+                          setSelectedTarget(null);
+                          setToastMessage('✓ Đã chọn: Không ám sát ai đêm nay! (Án binh)');
+                          setTimeout(() => setToastMessage(null), 3500);
+                        }
                       }}
-                      disabled={isSilenced}
-                      className={`px-3 py-2 rounded-xl font-serif font-bold text-xs flex items-center gap-1 active:scale-95 disabled:opacity-40 border ${
+                      disabled={isSilenced || isDead}
+                      className={`px-3 py-2 rounded-xl font-serif font-bold text-xs flex items-center gap-1 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed border ${
                         myAction?.targetId === 'NONE' && isKillAction(myAction?.actionName || '')
                           ? 'bg-emerald-950 text-emerald-300 border-emerald-400'
                           : 'bg-zinc-800 text-zinc-300 border-zinc-600 hover:bg-zinc-700'
@@ -1977,12 +1989,15 @@ export function PlayerScreen() {
                 {me.role?.id === 'ALBUS_DUMBLEDORE' && (
                   <button
                     onClick={() => {
-                      playerAction('bảo vệ', effectiveTargetId!);
-                      setSelectedTarget(effectiveTargetId);
-                      setToastMessage(`✓ Đã lưu khiên Bảo Vệ cho: ${effectiveTargetPlayer.name}!`);
-                      setTimeout(() => setToastMessage(null), 3500);
+                      if (effectiveTargetId && !isDead && effectiveTargetPlayer?.status !== 'DEAD') {
+                        playerAction('bảo vệ', effectiveTargetId);
+                        setSelectedTarget(effectiveTargetId);
+                        setToastMessage(`✓ Đã lưu khiên Bảo Vệ cho: ${effectiveTargetPlayer.name}!`);
+                        setTimeout(() => setToastMessage(null), 3500);
+                      }
                     }}
-                    className="px-3 py-2 rounded-xl hpvn-btn-gold font-serif font-bold text-xs flex items-center gap-1.5 active:scale-95"
+                    disabled={isDead || !effectiveTargetId || effectiveTargetPlayer?.status === 'DEAD'}
+                    className="px-3 py-2 rounded-xl hpvn-btn-gold font-serif font-bold text-xs flex items-center gap-1.5 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Shield size={13} />
                     <span>Bảo Vệ</span>
@@ -1991,12 +2006,15 @@ export function PlayerScreen() {
                 {effectiveTargetId !== me.id && (
                   <button
                     onClick={() => {
-                      playerAction('bay hộ tống', effectiveTargetId!);
-                      setSelectedTarget(effectiveTargetId);
-                      setToastMessage(`✓ Đã lưu mục tiêu Bay Hộ Tống: ${effectiveTargetPlayer.name}!`);
-                      setTimeout(() => setToastMessage(null), 3500);
+                      if (effectiveTargetId && !isDead && effectiveTargetPlayer?.status !== 'DEAD') {
+                        playerAction('bay hộ tống', effectiveTargetId);
+                        setSelectedTarget(effectiveTargetId);
+                        setToastMessage(`✓ Đã lưu mục tiêu Bay Hộ Tống: ${effectiveTargetPlayer.name}!`);
+                        setTimeout(() => setToastMessage(null), 3500);
+                      }
                     }}
-                    className="px-3 py-2 rounded-xl bg-amber-800 hover:bg-amber-700 text-[#ffd88f] border border-amber-500 font-serif font-bold text-xs flex items-center gap-1 active:scale-95"
+                    disabled={isDead || !effectiveTargetId || effectiveTargetPlayer?.status === 'DEAD'}
+                    className="px-3 py-2 rounded-xl bg-amber-800 hover:bg-amber-700 text-[#ffd88f] border border-amber-500 font-serif font-bold text-xs flex items-center gap-1 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Shield size={13} />
                     <span>{myAction?.targetId === effectiveTargetId && isEscortAction(myAction?.actionName || '') ? '✓ Đang Hộ Tống' : 'Hộ Tống'}</span>

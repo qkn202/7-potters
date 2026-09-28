@@ -1822,7 +1822,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
               // Cập nhật lịch sử vai trò cá nhân trên Client để bảo lưu khi đổi phòng
               const myId = currentPlayerIdRef.current;
-              const me = syncedState.players?.find(p => p.id === myId);
+              let me = syncedState.players?.find(p => p.id === myId);
+              if (!me && myId) {
+                const myDeviceId = getOrCreateDeviceId();
+                const savedName = getStorageItem('seven-potters-player-name');
+                me = syncedState.players?.find(p => 
+                  (p.deviceId && p.deviceId === myDeviceId) ||
+                  (savedName && p.name.trim().toLowerCase() === savedName.trim().toLowerCase())
+                );
+                if (me) {
+                  setCurrentPlayerId(me.id);
+                  currentPlayerIdRef.current = me.id;
+                  setStorageItem('seven-potters-session-id', me.id);
+                }
+              }
               if (me && me.role) {
                 const myKey = getPlayerKey(me);
                 const myHist = syncedState.roleHistory?.[myKey];

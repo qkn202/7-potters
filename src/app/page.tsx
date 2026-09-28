@@ -12,9 +12,9 @@ import {
   DarkMarkCrest, 
   DeathlyHallowsSymbol 
 } from '@/components/ArtAssets';
-import { FlooChatDrawer, FlooFloatingTrigger } from '@/components/FlooChatDrawer';
+import { FlooChatDrawer, FlooHeaderTrigger, FlooFloatingTrigger } from '@/components/FlooChatDrawer';
 import Link from 'next/link';
-import { BookOpen, User, RotateCcw, AlertTriangle, Clock, Package, Bot, Crown } from 'lucide-react';
+import { BookOpen, User, RotateCcw, AlertTriangle, Wifi, WifiOff, Clock, Package, Bot, Sparkles, LogOut } from 'lucide-react';
 import { FlightTrack } from '@/components/FlightTrack';
 import { WeasleyCrateModal } from '@/components/WeasleyCrateModal';
 import { CinematicFXOverlay } from '@/components/CinematicFXOverlay';
@@ -24,13 +24,13 @@ export default function Home() {
     gameState, 
     currentPlayerId, 
     impersonatePlayer,
-    leaveGame,
     consumeWeasleyItem,
     clearVisualFX,
     roomCode,
     isHost,
     connStatus,
-    disconnectCountdown 
+    disconnectCountdown,
+    leaveGame
   } = useGame();
 
   const [isDeckOpen, setIsDeckOpen] = useState(false);
@@ -39,12 +39,12 @@ export default function Home() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
-  const existingGM = gameState.players.find(p => p.isGM);
-  const nonGmPlayers = gameState.players.filter(p => !p.isGM);
 
-  // Perspective switcher allowed only in Simulation mode (!roomCode)
+  // Quyền đổi góc nhìn (Perspective Switcher):
+  // CHỈ DUY NHẤT ở chế độ Giả Lập (!roomCode), host và tất cả người chơi khác mới có thể nhìn qua góc nhìn của nhau để kiểm thử.
+  // Ở chế độ phòng Online (có roomCode), TUYỆT ĐỐI KHÔNG AI được đổi góc nhìn để bảo đảm tính bảo mật, tránh nhìn trộm thẻ bài bí mật!
   const isSimulationMode = !roomCode;
-  const canSwitchPerspective = isSimulationMode && gameState.players.length > 0;
+  const canSwitchPerspective = isSimulationMode;
 
   // Screen routing based on state
   let content;
@@ -59,90 +59,139 @@ export default function Home() {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden bg-[#050811] text-slate-100 selection:bg-amber-400 selection:text-black">
+    <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
       
-      {/* 1. FLOATING SIMULATION PERSPECTIVE SWITCHER (FOR PLAYERS IN MOCK MODE) */}
-      {canSwitchPerspective && !currentPlayer?.isGM && (
-        <div className="fixed top-2 right-2 z-50 flex items-center gap-1.5 bg-slate-950/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-cyan-500/60 text-xs text-cyan-300 font-mono shadow-[0_0_20px_rgba(56,189,248,0.3)] select-none">
-          <Bot size={13} className="text-cyan-400 animate-pulse shrink-0" />
-          <span className="text-[10px] text-cyan-400/80 uppercase font-bold hidden sm:inline">Góc nhìn:</span>
-          <select
-            value={currentPlayer?.isGM ? (existingGM?.id || '__MERLIN__') : (currentPlayerId || '')}
-            onChange={(e) => impersonatePlayer(e.target.value)}
-            className="bg-transparent text-xs text-cyan-200 font-bold focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[170px] truncate"
-            title="Đổi góc nhìn kiểm thử (Người chơi / Quản trò)"
-          >
-            <option value={existingGM?.id || '__MERLIN__'} className="bg-slate-950 text-amber-300 font-bold">
-              👑 Merlin (Quản Trò)
-            </option>
-            {nonGmPlayers.map((p, idx) => (
-              <option key={`perspective-${p.id || idx}`} value={p.id} className="bg-slate-950 text-slate-100">
-                {p.name} {p.role ? `· ${p.role.name}` : ''}
-              </option>
-            ))}
-          </select>
+      {/* Top Magical Navigation Bar - Styled after HPVN Floo Shoutbox Header */}
+      <header className="sticky top-0 z-40 hpvn-header-banner px-2 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between backdrop-blur-md gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <PhoenixCrest className="w-5 h-5 sm:w-7 sm:h-7 shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="font-title-magical font-bold text-xs sm:text-xl md:text-2xl tracking-wide text-[#ffd88f] flex items-center gap-1 leading-none">
+                <span className="hidden sm:inline">⚡</span> 
+                <span className="truncate hidden sm:inline">HPVN · BẢY POTTER</span> 
+                <span className="truncate sm:hidden">BẢY POTTER</span> 
+                <span className="hidden sm:inline">⚡</span>
+              </span>
+              <span className="text-[9px] sm:text-[10px] font-lora italic text-[#ebdcb0]/80 tracking-widest hidden lg:inline truncate">
+                MẠNG FLOO HỘI PHƯỢNG HOÀNG · TRẬN CHIẾN TRÊN KHÔNG
+              </span>
+            </div>
+            <DarkMarkCrest className="w-5 h-5 sm:w-7 sm:h-7 hidden sm:block shrink-0" />
+          </div>
         </div>
-      )}
 
-      {/* 2. DEDICATED GM / MERLIN HEADER (ONLY VISIBLE ON GM DASHBOARD) */}
-      {currentPlayer?.isGM && (
-        <header className="sticky top-0 z-40 bg-slate-950/95 border-b border-amber-400/40 px-3 py-2 flex items-center justify-between backdrop-blur-md">
-          <div className="flex items-center gap-2">
-            <PhoenixCrest className="w-6 h-6 text-amber-400" />
-            <span className="font-cinzel font-black text-sm text-amber-300">
-              MERLIN DASHBOARD
-            </span>
+        {/* Center/Right Controls: Perspective Switcher & Rulebook */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          
+          {/* Floo Realtime Status Beacon */}
+          <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-lg bg-[#1a0e07]/90 border border-[#7a5229] text-[10px] sm:text-[11px] font-mono text-[#ffd88f] shrink-0">
+            {roomCode ? (
+              <>
+                <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0 ${
+                  connStatus === 'connected' 
+                    ? 'bg-emerald-400 animate-pulse' 
+                    : connStatus === 'connecting' || connStatus === 'reconnecting'
+                    ? 'bg-amber-400 animate-pulse'
+                    : 'bg-red-500'
+                }`} />
+                <span className="font-bold">
+                  <span className="hidden sm:inline">Phòng: </span>#{roomCode}
+                </span>
+              </>
+            ) : (
+              <span 
+                title="Chế độ Giả Lập: Cho phép đổi góc nhìn tự do giữa các người chơi để kiểm thử"
+                className="flex items-center gap-1 font-bold text-cyan-300 font-mono text-[10px] sm:text-[11px]"
+              >
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                <span className="hidden sm:inline">Chế độ </span>Giả Lập
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Perspective Switcher for GM in Simulation Mode */}
-            {canSwitchPerspective && (
-              <div className="flex items-center gap-1.5 bg-slate-900 border border-cyan-500/50 px-2.5 py-1 rounded-full text-xs font-mono text-cyan-300 shadow-sm">
-                <Bot size={13} className="text-cyan-400 shrink-0" />
-                <span className="text-[10px] text-cyan-400/80 uppercase font-bold hidden sm:inline">Góc nhìn:</span>
-                <select
-                  value={currentPlayer?.isGM ? (existingGM?.id || '__MERLIN__') : (currentPlayerId || '')}
-                  onChange={(e) => impersonatePlayer(e.target.value)}
-                  className="bg-transparent text-xs text-cyan-200 font-bold focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[170px] truncate"
-                  title="Đổi sang góc nhìn Người Chơi"
-                >
-                  <option value={existingGM?.id || '__MERLIN__'} className="bg-slate-950 text-amber-300 font-bold">
-                    👑 Merlin (Quản Trò)
-                  </option>
-                  {nonGmPlayers.map((p, idx) => (
-                    <option key={`gm-persp-${p.id || idx}`} value={p.id} className="bg-slate-950 text-slate-100">
-                      {p.name} {p.role ? `· ${p.role.name}` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+          {/* Floo Shoutbox Header Button (In-App Drawer) */}
+          <FlooHeaderTrigger onClick={() => setIsFlooOpen(true)} />
 
+          {/* Weasleys' Wizard Wheezes Supply Crate Button */}
+          {gameState.phase !== 'LOBBY' && (
             <button
-              onClick={() => setIsDeckOpen(true)}
-              className="px-2.5 py-1 rounded-lg bg-slate-900 border border-amber-400/40 text-amber-300 text-xs font-cinzel font-bold cursor-pointer hover:bg-slate-800"
+              onClick={() => setIsWeasleyCrateOpen(true)}
+              title="Hòm Đồ Tiệm Phù Thủy Weasley"
+              className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer relative shrink-0"
             >
-              27 Thẻ Bài
+              <Package size={14} className="text-amber-300 shrink-0" />
+              <span className="text-[11px] sm:text-xs hidden md:inline">Bảo Bối Weasley</span>
+              <span className="text-[11px] hidden sm:inline md:hidden">Bảo Bối</span>
+              {(gameState.weasleyItems || []).some(i => i.count > 0) && (
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping absolute -top-0.5 -right-0.5" />
+              )}
             </button>
+          )}
+
+          {/* Rulebook / Codex Deck Button */}
+          <button
+            onClick={() => setIsDeckOpen(true)}
+            title="Xem 22 thẻ bài & luật chơi"
+            className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0"
+          >
+            <BookOpen size={14} className="shrink-0" />
+            <span className="text-[11px] sm:text-xs hidden md:inline">Bí Kíp 22 Thẻ Bài</span>
+            <span className="text-[11px] hidden sm:inline md:hidden">Bí Kíp</span>
+          </button>
+
+          {/* Exit Game Button */}
+          {currentPlayerId && (
             <button
               onClick={() => leaveGame()}
-              className="px-2.5 py-1 rounded-lg bg-red-950/70 border border-red-500/40 text-red-300 text-xs font-serif font-bold cursor-pointer hover:bg-red-900"
-              title="Thoát Game"
+              title="Rời khỏi phòng / Thoát trận đấu"
+              className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-red-950/80 hover:bg-red-900 border border-red-700/70 text-red-200 text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0 transition-colors"
             >
-              Thoát
+              <LogOut size={13} className="text-red-400 shrink-0" />
+              <span className="text-[11px] sm:text-xs hidden sm:inline">Thoát</span>
             </button>
-            <button
-              onClick={() => setShowResetConfirm(true)}
-              className="px-2.5 py-1 rounded-lg bg-red-950 border border-red-700/60 text-red-300 text-xs font-mono cursor-pointer hover:bg-red-900"
-            >
-              Reset
-            </button>
-          </div>
-        </header>
-      )}
+          )}
 
-      {/* 3. FLIGHT PROGRESS TRACK (ONLY FOR GM) */}
-      {gameState.phase !== 'LOBBY' && gameState.phase !== 'END' && currentPlayer?.isGM && (
+          {/* Perspective Indicator / Impersonator: CHỈ DUY NHẤT Ở CHẾ ĐỘ GIẢ LẬP MỚI MỞ CHO TẤT CẢ MỌI NGƯỜI */}
+          {gameState.players.length > 0 && (
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-[#1a0e07] px-1.5 sm:px-2 py-1 rounded border border-[#7a5229] text-xs shrink-0 max-w-[100px] sm:max-w-[190px]">
+              {canSwitchPerspective ? (
+                <>
+                  <Bot size={12} className="text-cyan-400 shrink-0" />
+                  <span className="hidden md:inline text-[11px] text-cyan-200/90 font-mono font-semibold">
+                    Góc nhìn:
+                  </span>
+                  <select
+                    value={currentPlayerId || ''}
+                    onChange={(e) => impersonatePlayer(e.target.value)}
+                    className="bg-transparent text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold focus:outline-none cursor-pointer truncate max-w-[75px] sm:max-w-[145px]"
+                    title="Chế độ giả lập: Tự do chuyển đổi góc nhìn giữa Merlin, Host và các người chơi khác"
+                  >
+                    {gameState.players.map((p, idx) => (
+                      <option key={`perspective-${p.id || idx}`} value={p.id} className="bg-[#1a0e07] text-[#ffd88f]">
+                        {p.name} {p.isGM ? '👑 (Merlin)' : (p.isBot || p.name.includes('(Bot)') || p.id.startsWith('bot_')) ? '🤖' : ''} {p.role ? `· ${p.role.name}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <>
+                  <User size={12} className="text-[#ffd88f] shrink-0" />
+                  <span 
+                    className="text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold truncate max-w-[75px] sm:max-w-[145px]"
+                    title={`Bạn đang tham gia với tư cách: ${currentPlayer?.name}`}
+                  >
+                    {currentPlayer?.name || 'Phù thủy'}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* 4-Stage Flight Progress Track (Active during gameplay) */}
+      {gameState.phase !== 'LOBBY' && gameState.phase !== 'END' && (
         <FlightTrack 
           flightStage={gameState.flightStage || 1}
           maxStages={gameState.maxStages || 4}
@@ -152,77 +201,110 @@ export default function Home() {
         />
       )}
 
-      {/* 4. DISCONNECTION COUNTDOWN WARNING BANNER */}
+      {/* 10-Minute Host Disconnection Countdown Warning Banner */}
       {disconnectCountdown !== null && (
-        <div className="bg-gradient-to-r from-red-950 via-amber-950 to-red-950 border-b border-red-700/80 text-amber-200 px-4 py-2 text-center text-xs font-mono flex items-center justify-center gap-2 animate-pulse z-30">
+        <div className="bg-gradient-to-r from-red-950 via-amber-950 to-red-950 border-b border-red-700/80 text-amber-200 px-4 py-2.5 text-center text-xs sm:text-sm font-serif flex items-center justify-center gap-2 animate-pulse z-30">
           <Clock className="w-4 h-4 text-amber-400 shrink-0" />
           <span>
-            Chủ phòng tạm ngắt kết nối. Bảo lưu phòng:{' '}
-            <strong className="text-white bg-black/50 px-1.5 py-0.5 rounded border border-amber-400/40">
+            <strong>Cảnh Báo:</strong> Merlin / Chủ phòng đang tạm ngắt kết nối. Phòng chơi sẽ được bảo lưu trong:{' '}
+            <strong className="font-mono text-white text-sm bg-black/40 px-2 py-0.5 rounded border border-amber-500/50">
               {Math.floor(disconnectCountdown / 60)}:{(disconnectCountdown % 60).toString().padStart(2, '0')}
             </strong>
+            {' '}(Đang chờ Merlin kết nối lại...)
           </span>
         </div>
       )}
 
-      {/* 5. MAIN CONTENT AREA */}
-      <main className="flex-1 w-full">
+      {/* Main Content Area with safe bottom spacing */}
+      <main className="flex-1 pb-16 sm:pb-8">
         {content}
       </main>
 
-      {/* 6. GLOBAL CARD DECK CODEX MODAL */}
+      {/* HPVN Floo Footer */}
+      <footer className="py-4 px-4 text-center text-xs text-[#ebdcb0]/70 border-t border-[#7a5229]/60 bg-[#140b05]/90 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto w-full">
+        <div className="flex items-center gap-2">
+          <DeathlyHallowsSymbol className="w-4 h-4 text-[#bd8436]" />
+          <span className="font-lora">
+            HPVN Archive · Trận Chiến Bảy Potter (The Battle of the Seven Potters) · Realtime Multiplayer Edition
+          </span>
+        </div>
+
+        {/* Force Reset Emergency Button for Tester */}
+        <button 
+          onClick={() => setShowResetConfirm(true)}
+          className="text-[11px] text-red-400/90 hover:text-red-300 bg-red-950/40 hover:bg-red-950/70 px-2.5 py-1 rounded transition-colors border border-red-900/50 flex items-center gap-1 font-mono cursor-pointer"
+        >
+          <RotateCcw size={11} /> Reset dữ liệu thử nghiệm
+        </button>
+      </footer>
+
+      {/* Global Card Deck Codex Modal */}
       <CardDeckModal
         isOpen={isDeckOpen}
         onClose={() => setIsDeckOpen(false)}
       />
 
-      {/* 7. RESET CONFIRMATION MODAL */}
+      {/* Reset Confirmation In-App Modal */}
       {showResetConfirm && (
         <div 
           onClick={() => setShowResetConfirm(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="arcane-card-glass rounded-3xl p-5 max-w-xs w-full text-center border border-amber-400/50 space-y-3 shadow-2xl"
+            className="hpvn-panel-gold rounded-2xl p-6 max-w-sm w-full text-center border-2 border-[#bd8436] space-y-4 animate-in fade-in zoom-in duration-200"
           >
-            <div className="w-10 h-10 rounded-full bg-red-950/80 border border-red-800 text-red-400 flex items-center justify-center mx-auto">
-              <AlertTriangle className="w-5 h-5 animate-pulse" />
+            <div className="w-12 h-12 rounded-full bg-red-950/80 border border-red-800 text-red-400 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6 animate-pulse" />
             </div>
             
-            <h3 className="font-cinzel font-bold text-base text-amber-300">
-              Khôi Phục Dữ Liệu?
+            <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] tracking-wide">
+              Khôi Phục Khẩn Cấp
             </h3>
 
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Thao tác này sẽ xóa sạch phòng chơi và đưa ván cờ về trạng thái ban đầu.
+            <p className="text-xs text-[#ebdcb0] font-lora leading-relaxed">
+              Hành động này sẽ xóa sạch dữ liệu phòng chơi và đặt lại toàn bộ ván cờ về trạng thái ban đầu. Bạn có chắc chắn muốn thực hiện?
             </p>
 
-            <div className="flex justify-center gap-2 pt-1">
+            <div className="flex justify-center gap-3 pt-2">
               <button
                 onClick={() => {
-                  try {
-                    localStorage.clear();
-                    sessionStorage.clear();
-                  } catch {}
+                  const keys = [
+                    'seven-potters-mock-state',
+                    'seven-potters-session-id',
+                    'seven-potters-room-code',
+                    'seven-potters-is-host',
+                    'seven-potters-player-name',
+                    'seven-potters-is-gm',
+                    'seven-potters-house',
+                    'seven-potters-user-tag',
+                    'seven-potters-hpvn-uid',
+                    'seven-potters-session-timestamp',
+                  ];
+                  keys.forEach(k => {
+                    try {
+                      sessionStorage.removeItem(k);
+                      localStorage.removeItem(k);
+                    } catch {}
+                  });
                   window.location.reload();
                 }}
-                className="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-cinzel font-bold cursor-pointer"
+                className="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded-xl text-xs font-serif font-bold transition-colors cursor-pointer"
               >
-                Xác nhận
+                Xác nhận Reset
               </button>
               <button
                 onClick={() => setShowResetConfirm(false)}
-                className="flex-1 py-2 bg-slate-900 border border-slate-700 text-slate-300 rounded-xl text-xs font-cinzel font-bold cursor-pointer"
+                className="px-4 py-2 bg-[#28180e] hover:bg-[#3a2213] text-[#ebdcb0] rounded-xl text-xs font-serif border border-[#7a5229] transition-colors cursor-pointer"
               >
-                Hủy
+                Hủy bỏ
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 8. WEASLEY SUPPLY CRATE MODAL */}
+      {/* Weasleys' Wizard Wheezes Supply Crate Modal */}
       <WeasleyCrateModal 
         isOpen={isWeasleyCrateOpen}
         onClose={() => setIsWeasleyCrateOpen(false)}
@@ -235,15 +317,17 @@ export default function Home() {
         }}
       />
 
-      {/* 9. FLOATING MAGIC TRIGGER & FLOO CHAT DRAWER */}
+      {/* Floating Magic Trigger for In-App Floo Chat */}
       <FlooFloatingTrigger onClick={() => setIsFlooOpen(true)} />
+
+      {/* In-App Floo Chat Drawer */}
       <FlooChatDrawer 
         isOpen={isFlooOpen} 
         onClose={() => setIsFlooOpen(false)} 
         onOpen={() => setIsFlooOpen(true)} 
       />
 
-      {/* 10. CINEMATIC VISUAL FX OVERLAY */}
+      {/* Cinematic Visual FX Overlay for High-Stakes Events */}
       <CinematicFXOverlay 
         activeFX={gameState.activeFX} 
         onDismiss={clearVisualFX} 

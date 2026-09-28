@@ -163,19 +163,19 @@ export function CardDeckModal({
           {/* Deck Modal Faction Ambient Artwork Background */}
           <DeckModalFactionBackground faction={selectedFaction} />
 
-          {/* Header styled with Midnight Gilded Arcane theme */}
-          <div className="relative z-20 p-3.5 sm:p-5 flex flex-col gap-3 bg-slate-950/90 border-b border-amber-400/30 backdrop-blur-md">
+          {/* Header styled after HPVN Floo banner */}
+          <div className="hpvn-header-banner relative z-20 p-3.5 sm:p-5 flex flex-col gap-3 border-b border-[#7a5229]/60">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                <div className="p-1.5 sm:p-2 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/40 shrink-0">
+                <div className="p-1.5 sm:p-2 rounded-xl bg-[#3a2213] text-[#ffd88f] border border-[#ebdcb0]/50 shrink-0">
                   <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-cinzel font-black text-amber-300 tracking-wide truncate">
-                    Bí Kíp 27 Thẻ Bài
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-title-magical font-bold text-[#ffd88f] tracking-wide truncate">
+                    Bí Kíp Thẻ Bài · Seven Potters
                   </h2>
-                  <p className="text-[11px] sm:text-xs text-slate-400 font-sans truncate">
-                    Tổng hợp toàn bộ nhân vật & kỹ năng ma thuật
+                  <p className="text-[11px] sm:text-xs text-[#ebdcb0] font-lora truncate">
+                    Tổng hợp {allRoles.length} nhân vật & kỹ năng phép thuật
                   </p>
                 </div>
               </div>
@@ -183,7 +183,7 @@ export function CardDeckModal({
               {/* Close Button always pinned top right */}
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 border border-slate-700 transition-colors shrink-0 cursor-pointer active:scale-95"
+                className="p-2 rounded-xl bg-[#1c0f07] hover:bg-[#2b170c] text-[#ffd88f] border border-[#7a5229] transition-colors shrink-0 cursor-pointer active:scale-95"
                 title="Đóng bí kíp thẻ bài"
               >
                 <X size={18} />
@@ -193,49 +193,41 @@ export function CardDeckModal({
             {/* Filter & Search Bar */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
               <div className="relative flex-1 sm:max-w-xs">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bd8436]" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Tìm nhân vật, kỹ năng..."
-                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-900 border border-slate-700 text-slate-100 placeholder:text-slate-500 font-sans focus:outline-none focus:border-amber-400"
+                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#140b05] border border-[#7a5229] text-[#f5eedb] placeholder-[#8c622e] font-lora focus:outline-none focus:border-[#ffd88f]"
                 />
               </div>
 
               {/* Horizontally Scrollable Faction Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-slate-900/90 p-1 rounded-xl border border-slate-800 shrink-0">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-[#140b05] p-1 rounded-xl border border-[#7a5229] shrink-0">
                 <button
                   onClick={() => setSelectedFaction('ALL')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-cinzel whitespace-nowrap transition-all ${
-                    selectedFaction === 'ALL' ? 'bg-amber-400 text-slate-950 font-black shadow-md' : 'text-slate-400 hover:text-amber-300'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-serif whitespace-nowrap transition-colors ${
+                    selectedFaction === 'ALL' ? 'hpvn-btn-gold font-bold' : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
                   }`}
                 >
                   Tất cả ({allRoles.length})
                 </button>
                 <button
                   onClick={() => setSelectedFaction('ORDER_OF_PHOENIX')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-cinzel whitespace-nowrap flex items-center gap-1 transition-all ${
-                    selectedFaction === 'ORDER_OF_PHOENIX' ? 'bg-red-700 text-white font-black shadow-md' : 'text-slate-400 hover:text-red-400'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-serif whitespace-nowrap flex items-center gap-1 transition-colors ${
+                    selectedFaction === 'ORDER_OF_PHOENIX' ? 'hpvn-btn-phoenix font-bold' : 'text-[#ebdcb0]/70 hover:text-red-400'
                   }`}
                 >
                   <PhoenixCrest className="w-3.5 h-3.5 shrink-0" /> Phượng Hoàng
                 </button>
                 <button
                   onClick={() => setSelectedFaction('DEATH_EATERS')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-cinzel whitespace-nowrap flex items-center gap-1 transition-all ${
-                    selectedFaction === 'DEATH_EATERS' ? 'bg-emerald-700 text-white font-black shadow-md' : 'text-slate-400 hover:text-emerald-400'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-serif whitespace-nowrap flex items-center gap-1 transition-colors ${
+                    selectedFaction === 'DEATH_EATERS' ? 'hpvn-btn-floo font-bold' : 'text-[#ebdcb0]/70 hover:text-emerald-400'
                   }`}
                 >
                   <DarkMarkCrest className="w-3.5 h-3.5 shrink-0" /> Tử Thần
-                </button>
-                <button
-                  onClick={() => setSelectedFaction('NEUTRAL')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-cinzel whitespace-nowrap flex items-center gap-1 transition-all ${
-                    selectedFaction === 'NEUTRAL' ? 'bg-purple-700 text-white font-black shadow-md' : 'text-slate-400 hover:text-purple-300'
-                  }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5 shrink-0" /> Trung Lập
                 </button>
               </div>
             </div>

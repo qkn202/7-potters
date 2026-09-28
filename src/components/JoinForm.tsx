@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useGame } from '@/lib/GameContext';
 import { 
   Sparkles, 
+  Wand2, 
+  Crown, 
   BookOpen, 
   KeyRound, 
   PlusCircle, 
@@ -11,19 +13,19 @@ import {
   Laptop, 
   AlertCircle, 
   Loader2,
+  Lock,
   User,
   ShieldCheck,
   LogOut,
   Castle,
-  UserCircle2,
-  ChevronRight,
-  Crown,
-  Check
+  UserCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   PhoenixCrest, 
   DarkMarkCrest, 
+  WaxSeal, 
+  CardCornerFlourish,
   DeathlyHallowsSymbol 
 } from './ArtAssets';
 import { CardDeckModal } from './CardDeckModal';
@@ -37,28 +39,22 @@ import {
 } from '@/lib/flooFirebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
-type JoinMode = 'join' | 'create' | 'mock';
-type AuthTab = 'guest' | 'hpvn';
-
-const HOUSES = [
-  { id: 'GRYFFINDOR', name: 'Gryffindor', icon: '🦁', color: 'from-red-950 to-amber-950 border-amber-500/50 text-amber-300' },
-  { id: 'SLYTHERIN', name: 'Slytherin', icon: '🐍', color: 'from-emerald-950 to-teal-950 border-emerald-500/50 text-emerald-300' },
-  { id: 'RAVENCLAW', name: 'Ravenclaw', icon: '🦅', color: 'from-blue-950 to-indigo-950 border-cyan-500/50 text-cyan-300' },
-  { id: 'HUFFLEPUFF', name: 'Hufflepuff', icon: '🦡', color: 'from-amber-950 to-stone-900 border-yellow-500/50 text-yellow-300' },
-];
+type JoinMode = 'create' | 'join' | 'mock';
+type AuthTab = 'hpvn' | 'guest';
 
 export function JoinForm() {
-  const { createRoom, joinRoom, joinGame, startQuickSoloGame, errorMsg: globalError } = useGame();
+  const { createRoom, joinRoom, joinGame, errorMsg: globalError } = useGame();
   
-  const [mode, setMode] = useState<JoinMode>('join');
+  // Game Room Mode
+  const [mode, setMode] = useState<JoinMode>('create');
   const [roomCodeInput, setRoomCodeInput] = useState('');
-  const [isGM, setIsGM] = useState(false);
+  const [isGM, setIsGM] = useState(true);
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
-  // Authentication State (Default to fast guest for frictionless mobile entry)
-  const [authTab, setAuthTab] = useState<AuthTab>('guest');
+  // HPVN Authentication State
+  const [authTab, setAuthTab] = useState<AuthTab>('hpvn');
   const [currentUserProfile, setCurrentUserProfile] = useState<FlooUserProfile | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
@@ -88,12 +84,13 @@ export function JoinForm() {
       if (roomParam && roomParam.trim()) {
         setRoomCodeInput(roomParam.trim().toUpperCase());
         setMode('join');
+        setIsGM(false);
         setAuthTab('guest');
       }
     }
   }, []);
 
-  // Listen to HPVN Firebase Auth
+  // Listen to HPVN Firebase Auth State changes & sync profile
   useEffect(() => {
     let isMounted = true;
     try {
@@ -119,7 +116,9 @@ export function JoinForm() {
             console.warn('[JoinForm] Error loading HPVN profile:', err);
           }
         } else {
-          if (isMounted) setCurrentUserProfile(null);
+          if (isMounted) {
+            setCurrentUserProfile(null);
+          }
         }
         if (isMounted) setIsCheckingAuth(false);
       });
@@ -140,7 +139,7 @@ export function JoinForm() {
       setCurrentUserProfile(null);
       setLocalError(null);
     } catch (err: any) {
-      setLocalError(err?.message || 'Không thể đăng xuất.');
+      setLocalError(err?.message || 'Không thể đăng xuất tài khoản HPVN.');
     }
   };
 
@@ -148,9 +147,10 @@ export function JoinForm() {
     e.preventDefault();
     setLocalError(null);
 
+    // Validate Room Code for 'join' mode
     const cleanCode = roomCodeInput.trim().toUpperCase();
     if (mode === 'join' && !cleanCode) {
-      setLocalError('Nhập mã phòng 4 ký tự');
+      setLocalError('Vui lòng nhập Mã Phòng gồm 4 ký tự!');
       return;
     }
 
@@ -161,52 +161,79 @@ export function JoinForm() {
       let extraData: { house?: string; userTag?: string; hpvnUid?: string } | undefined = undefined;
 
       if (skyOfficeIdentity) {
+        // SkyOffice supplies a display identity for this embedded game session.
         finalName = skyOfficeIdentity.name;
         extraData = { house: skyOfficeIdentity.house, userTag: 'SkyOffice' };
       } else if (currentUserProfile) {
+        // Authenticated via persistent session
         finalName = currentUserProfile.username.trim();
         extraData = {
           house: currentUserProfile.house,
-          userTag: isGM ? 'Quản Trò' : currentUserProfile.userTag,
+          userTag: currentUserProfile.userTag,
           hpvnUid: currentUserProfile.uid,
         };
       } else if (authTab === 'hpvn') {
+        // Fresh HPVN login
         const account = hpvnAccount.trim();
         const password = hpvnPassword;
-        if (!account || !password) {
-          setLocalError('Nhập tài khoản & mật khẩu HPVN');
+        if (!account) {
+          setLocalError('Vui lòng nhập Tài khoản hoặc Email HPVN!');
+          setIsSubmitting(false);
+          return;
+        }
+        if (!password) {
+          setLocalError('Vui lòng nhập Mật khẩu tài khoản HPVN!');
           setIsSubmitting(false);
           return;
         }
 
+        // Authenticate with HPVN
         const user = await signInHPVN(account, password);
         const profile = await fetchFlooUserProfile(user.uid);
         
         finalName = profile?.username || user.displayName || account;
         extraData = {
           house: profile?.house,
-          userTag: isGM ? 'Quản Trò' : profile?.userTag,
+          userTag: profile?.userTag,
           hpvnUid: user.uid,
         };
       } else {
-        finalName = guestName.trim() || (isGM ? 'Merlin' : 'Phù Thủy Ẩn Danh');
+        // Guest mode
+        finalName = guestName.trim();
+        if (!finalName) {
+          if (isGM) {
+            finalName = 'Merlin';
+          } else {
+            setLocalError('Vui lòng nhập Danh Xưng / Bí Danh Phù Thủy!');
+            setIsSubmitting(false);
+            return;
+          }
+        }
         extraData = {
           house: guestHouse,
-          userTag: isGM ? 'Quản Trò' : 'Tân Binh',
+          userTag: isGM ? 'Quản Trò' : 'Phù thủy',
         };
       }
 
+      // Execute room entry
       if (mode === 'create') {
         await createRoom(finalName, isGM, extraData);
       } else if (mode === 'join') {
+        // Người tham gia phòng vào chơi luôn là Người Chơi (không thể là GM)
         await joinRoom(cleanCode, finalName, false, extraData);
       } else {
+        // Single-device / Mock mode
         joinGame(finalName, isGM, extraData);
       }
     } catch (err: any) {
-      let msg = err?.message || 'Lỗi kết nối. Thử lại!';
-      if (msg.includes('auth/invalid-credential') || msg.includes('401')) {
-        msg = 'Sai tài khoản hoặc mật khẩu HPVN';
+      console.error('[JoinForm] Submit error:', err);
+      let msg = err?.message || 'Không thể kết nối. Vui lòng thử lại!';
+      if (msg.includes('auth/invalid-credential') || msg.includes('401') || msg.includes('Sai account')) {
+        msg = 'Sai tài khoản hoặc mật khẩu HPVN. Vui lòng kiểm tra lại!';
+      } else if (msg.includes('auth/user-not-found')) {
+        msg = 'Tài khoản không tồn tại trên hệ thống HPVN.';
+      } else if (msg.includes('auth/wrong-password')) {
+        msg = 'Mật khẩu không chính xác.';
       }
       setLocalError(msg);
     } finally {
@@ -218,241 +245,305 @@ export function JoinForm() {
   const activeHouseStyle = currentUserProfile ? getHouseStyle(currentUserProfile.house) : null;
 
   return (
-    <div className="w-full max-w-[440px] mx-auto min-h-screen px-4 py-5 flex flex-col justify-between selection:bg-amber-400 selection:text-black">
-      
-      {/* 1. BRAND HERO HEADER */}
-      <div className="text-center pt-2 select-none">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <PhoenixCrest className="w-7 h-7 text-amber-400 drop-shadow-[0_0_12px_rgba(245,197,66,0.6)]" />
-          <DeathlyHallowsSymbol className="w-5 h-5 text-amber-300/80" />
-          <DarkMarkCrest className="w-7 h-7 text-emerald-400 drop-shadow-[0_0_12px_rgba(16,185,129,0.5)]" />
-        </div>
-        
-        <h1 className="font-cinzel text-3xl sm:text-4xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-[#fff2b2] via-[#f5c542] to-[#b8860b] drop-shadow-[0_2px_10px_rgba(245,197,66,0.3)]">
-          7 POTTERS
-        </h1>
-        <p className="text-[11px] font-sans tracking-[0.2em] uppercase text-cyan-300/80 font-semibold mt-0.5">
-          Trận Chiến Trên Không · Mobile Edition
-        </p>
-      </div>
+    <div className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 py-8">
+      {/* Background ambient lighting */}
+      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#8c0c0c]/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-[#047857]/20 rounded-full blur-3xl pointer-events-none" />
 
-      {/* 2. CARD FAN SHOWCASE (TAP TO VIEW 27 CARDS) */}
-      <div 
-        onClick={() => setIsDeckOpen(true)}
-        className="relative h-28 my-3 flex items-center justify-center cursor-pointer group select-none active:scale-95 transition-transform"
-        title="Chạm để xem 27 thẻ bài ma thuật"
+      {/* Main Dossier Container */}
+      <motion.div 
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="relative w-full max-w-lg rounded-3xl p-4 sm:p-8 md:p-10 hpvn-panel-gold overflow-hidden"
       >
-        <div className="absolute inset-0 bg-radial from-amber-500/10 via-transparent to-transparent blur-xl pointer-events-none" />
-        
-        {[
-          { img: '/cards/hermione.jpg', rotate: '-18deg', x: '-70px', z: 1 },
-          { img: '/cards/mcgonagall.jpg', rotate: '-9deg', x: '-35px', z: 2 },
-          { img: '/cards/harry.jpg', rotate: '0deg', x: '0px', z: 3, center: true },
-          { img: '/cards/neville.jpg', rotate: '9deg', x: '35px', z: 2 },
-          { img: '/cards/voldemort.jpg', rotate: '18deg', x: '70px', z: 1 },
-        ].map((c, i) => (
-          <div
-            key={i}
-            style={{
-              transform: `translateX(${c.x}) rotate(${c.rotate})`,
-              zIndex: c.z,
-            }}
-            className={`absolute w-14 h-22 rounded-xl overflow-hidden border transition-all duration-300 shadow-xl ${
-              c.center 
-                ? 'border-amber-400 ring-2 ring-amber-400/60 shadow-[0_0_20px_rgba(245,197,66,0.4)] scale-110 -translate-y-1' 
-                : 'border-amber-500/30 brightness-90 group-hover:brightness-100'
-            }`}
-          >
-            <img src={c.img} alt="Card" className="w-full h-full object-cover" />
+        {/* Corner Antique Flourishes */}
+        <CardCornerFlourish className="absolute top-2.5 left-2.5 w-6 h-6 sm:w-8 sm:h-8 text-[#bd8436] pointer-events-none" />
+        <CardCornerFlourish className="absolute top-2.5 right-2.5 w-6 h-6 sm:w-8 sm:h-8 text-[#bd8436] -scale-x-100 pointer-events-none" />
+        <CardCornerFlourish className="absolute bottom-2.5 left-2.5 w-6 h-6 sm:w-8 sm:h-8 text-[#bd8436] -scale-y-100 pointer-events-none" />
+        <CardCornerFlourish className="absolute bottom-2.5 right-2.5 w-6 h-6 sm:w-8 sm:h-8 text-[#bd8436] -scale-x-100 -scale-y-100 pointer-events-none" />
+
+        {/* Top Header Badge */}
+        <div className="text-center relative z-10 mb-5 sm:mb-6">
+          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2.5">
+            <PhoenixCrest className="w-8 h-8 sm:w-10 sm:h-10" />
+            <DeathlyHallowsSymbol className="w-5 h-5 sm:w-6 sm:h-6 text-[#bd8436]" />
+            <DarkMarkCrest className="w-8 h-8 sm:w-10 sm:h-10" />
           </div>
-        ))}
 
-        <div className="absolute bottom-0 px-2.5 py-0.5 rounded-full bg-black/75 border border-amber-400/40 text-[10px] text-amber-300 font-mono flex items-center gap-1 z-10 backdrop-blur-md shadow-lg">
-          <BookOpen size={11} />
-          <span>27 Thẻ Bài Ma Thuật</span>
-          <ChevronRight size={11} />
+          <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.25em] sm:tracking-[0.3em] uppercase text-[#ffd88f] block mb-1">
+            HỘI PHƯỢNG HOÀNG · ĐỒNG BỘ DỮ LIỆU HPVN
+          </span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-title-magical font-bold tracking-wide text-[#ffd88f]">
+            Chiến Dịch 7 Potter
+          </h1>
+          <p className="text-xs sm:text-sm text-[#ebdcb0] font-lora italic mt-1 px-2 sm:px-4">
+            Cuộc tháo chạy định mệnh từ Privet Drive đến Trang trại Hang Sóc
+          </p>
         </div>
-      </div>
 
-      {/* 3. MAIN INTERACTIVE CARD DOCK */}
-      <div className="arcane-card-glass rounded-3xl p-4 sm:p-5 border border-amber-400/30 relative">
-        
-        {/* ONE-TAP INSTANT SOLO PLAY BUTTON */}
-        <button
-          type="button"
-          onClick={() => startQuickSoloGame()}
-          className="w-full py-3.5 px-4 mb-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:brightness-110 active:scale-98 text-slate-950 font-cinzel font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(245,197,66,0.4)] border border-amber-200 transition-all cursor-pointer select-none"
-        >
-          <Sparkles size={17} className="animate-spin-slow text-slate-900" />
-          <span>⚡ CHƠI NGAY (SOLO VỚI BOT)</span>
-        </button>
-
-        {/* MODE SELECTOR PILLS */}
-        <div className="grid grid-cols-3 gap-1 p-1 bg-slate-950/80 rounded-xl border border-slate-800 mb-3.5">
+        {/* Mode Selector Tabs (Create / Join / Mock) */}
+        <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#120803] rounded-xl border border-[#7a5229]/60 mb-5 relative z-10">
           <button
             type="button"
-            onClick={() => { setMode('join'); setLocalError(null); }}
-            className={`py-2 text-xs font-cinzel font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
-              mode === 'join'
-                ? 'bg-amber-400/20 text-amber-300 border border-amber-400/50 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <LogIn size={13} />
-            <span>Vào Phòng</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setMode('create'); setLocalError(null); }}
-            className={`py-2 text-xs font-cinzel font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
+            onClick={() => { setMode('create'); setIsGM(true); setLocalError(null); }}
+            className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               mode === 'create'
-                ? 'bg-amber-400/20 text-amber-300 border border-amber-400/50 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'
+                : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
             }`}
           >
-            <PlusCircle size={13} />
+            <PlusCircle size={14} />
             <span>Tạo Phòng</span>
           </button>
 
           <button
             type="button"
-            onClick={() => { setMode('mock'); setLocalError(null); }}
-            className={`py-2 text-xs font-cinzel font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
-              mode === 'mock'
-                ? 'bg-amber-400/20 text-amber-300 border border-amber-400/50 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+            onClick={() => { setMode('join'); setIsGM(false); setAuthTab('guest'); setLocalError(null); }}
+            className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              mode === 'join'
+                ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'
+                : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
             }`}
           >
-            <Laptop size={13} />
+            <LogIn size={14} />
+            <span>Vào Phòng</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setMode('mock'); setIsGM(true); setLocalError(null); }}
+            className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              mode === 'mock'
+                ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803]'
+                : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
+            }`}
+          >
+            <Laptop size={14} />
             <span>Giả Lập</span>
           </button>
         </div>
 
-        {/* ERROR TOAST */}
+        {/* Error Notification */}
         {displayError && (
-          <div className="mb-3 p-2.5 rounded-xl bg-red-950/80 border border-red-500/50 text-red-200 text-xs flex items-center gap-2 animate-in fade-in">
-            <AlertCircle size={14} className="text-red-400 shrink-0" />
-            <span className="truncate">{displayError}</span>
+          <div className="mb-4 p-3 rounded-xl bg-red-950/70 border border-red-800/80 text-red-200 text-xs font-serif flex items-center gap-2 relative z-10 animate-in fade-in duration-200">
+            <AlertCircle size={16} className="text-red-400 shrink-0" />
+            <span>{displayError}</span>
           </div>
         )}
 
-        {/* FORM */}
-        <form onSubmit={handleSubmit} className="space-y-3">
+        {/* Main Mission Form */}
+        <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
           
-          {/* Room PIN Input (Only for Join mode) */}
+          {/* Room Code Input (Only in 'join' mode) */}
           {mode === 'join' && (
             <div>
+              <label className="block text-xs font-serif uppercase tracking-widest text-[#ffd88f] mb-1.5 font-bold">
+                Mã Phòng (4 Ký Tự)
+              </label>
               <div className="relative">
                 <input
                   type="text"
                   maxLength={6}
                   value={roomCodeInput}
                   onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-2.5 bg-slate-950/90 border border-amber-400/40 rounded-xl focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-amber-300 font-mono text-center tracking-[0.3em] uppercase text-lg transition-all placeholder:text-slate-600 placeholder:text-xs placeholder:tracking-normal font-bold"
-                  placeholder="NHẬP MÃ PHÒNG (VD: POT7)"
+                  className="w-full px-4 py-3 bg-[#120803] border-2 border-[#bd8436] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-2 focus:ring-[#bd8436]/50 text-[#ffd88f] placeholder-[#8c622e] font-mono text-center tracking-[0.3em] uppercase text-lg transition-all"
+                  placeholder="VÍ DỤ: POT7"
                   required
                 />
-                <KeyRound size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-amber-400/60 pointer-events-none" />
+                <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#bd8436]">
+                  <KeyRound size={18} />
+                </div>
               </div>
             </div>
           )}
 
-          {/* AUTH / PROFILE CARD */}
+          {/* USER AUTHENTICATION SECTION */}
           {currentUserProfile ? (
-            <div className={`p-3 rounded-xl border flex items-center justify-between gap-2.5 ${activeHouseStyle?.bgColor || 'bg-slate-900'} ${activeHouseStyle?.borderColor || 'border-slate-700'}`}>
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="text-2xl">{activeHouseStyle?.badge || '🧙'}</span>
-                <div className="min-w-0">
-                  <div className="font-cinzel font-bold text-sm text-amber-300 truncate">
-                    {currentUserProfile.username}
+            /* Authenticated HPVN Member Profile Card */
+            <div className={`p-4 rounded-2xl border-2 transition-all select-none ${activeHouseStyle?.bgColor} ${activeHouseStyle?.borderColor}`}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-11 h-11 rounded-xl bg-[#120803] border border-[#bd8436] flex items-center justify-center text-2xl shrink-0">
+                    {activeHouseStyle?.badge || '🧙'}
                   </div>
-                  <div className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-                    <ShieldCheck size={11} />
-                    <span>HPVN Verified</span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-serif font-bold text-base text-[#ffd88f] truncate block">
+                        {currentUserProfile.username}
+                      </span>
+                      {currentUserProfile.house && currentUserProfile.house !== 'NONE' && (
+                        <span className={`text-[10px] px-2 py-0.5 rounded font-mono shrink-0 ${activeHouseStyle?.pillColor}`}>
+                          {activeHouseStyle?.name}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <ShieldCheck size={12} className="text-emerald-400 shrink-0" />
+                      <span className="text-[11px] text-[#ebdcb0]/80 font-mono truncate">
+                        {currentUserProfile.userTag ? `[${currentUserProfile.userTag}] · ` : ''}Tài khoản HPVN đã xác thực
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleSignOutHPVN}
-                className="p-1.5 bg-slate-950/80 hover:bg-red-950/80 text-slate-400 hover:text-red-300 border border-slate-700 rounded-lg text-xs transition-colors cursor-pointer"
-                title="Đăng xuất"
-              >
-                <LogOut size={13} />
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-2.5">
-              {/* Guest / HPVN Segmented Switch */}
-              <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-                <span>Danh tính phù thủy:</span>
+
                 <button
                   type="button"
-                  onClick={() => setAuthTab(authTab === 'guest' ? 'hpvn' : 'guest')}
-                  className="text-amber-400 hover:text-amber-300 underline font-mono cursor-pointer"
+                  onClick={handleSignOutHPVN}
+                  className="px-2.5 py-1.5 bg-[#120803]/80 hover:bg-red-950 text-red-300 hover:text-red-200 border border-[#7a5229]/60 hover:border-red-700/80 rounded-lg text-xs font-serif flex items-center gap-1 transition-all shrink-0 cursor-pointer"
+                  title="Đăng xuất tài khoản này"
                 >
-                  {authTab === 'guest' ? 'Dùng nick HPVN?' : 'Vào dạng Khách?'}
+                  <LogOut size={13} />
+                  <span className="hidden sm:inline">Đổi TK</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Authentication Tabs & Inputs (HPVN or Guest) */
+            <div className="space-y-3.5">
+              {/* Dual-mode Selection Tabs */}
+              <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#120803] rounded-xl border border-[#7a5229]/60">
+                <button
+                  type="button"
+                  onClick={() => { setAuthTab('hpvn'); setLocalError(null); }}
+                  className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    authTab === 'hpvn'
+                      ? 'bg-[#3a2213] text-[#ffd88f] border border-[#bd8436]'
+                      : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
+                  }`}
+                >
+                  <Castle size={14} className="text-[#ffd88f]" />
+                  <span>Tài Khoản HPVN</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setAuthTab('guest'); setLocalError(null); }}
+                  className={`py-2 px-2 text-xs font-serif font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    authTab === 'guest'
+                      ? 'bg-[#3a2213] text-[#ffd88f] border border-[#bd8436]'
+                      : 'text-[#ebdcb0]/70 hover:text-[#ffd88f]'
+                  }`}
+                >
+                  <UserCircle2 size={14} />
+                  <span>Khách Vãng Lai</span>
                 </button>
               </div>
 
-              {authTab === 'guest' ? (
-                <>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      maxLength={20}
-                      value={guestName}
-                      onChange={(e) => setGuestName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-950/90 border border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-slate-100 placeholder:text-slate-500 text-xs font-sans transition-all"
-                      placeholder={isGM ? "Merlin (Quản Trò)..." : "Tên phù thủy của bạn..."}
-                    />
-                    <User size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+              {/* Tab 1: HPVN Account Login */}
+              {authTab === 'hpvn' && (
+                <div className="space-y-3 p-3.5 bg-[#180e07] rounded-2xl border border-[#5a3a1f]">
+                  <div className="text-[11px] text-[#ebdcb0]/80 font-serif leading-relaxed flex items-start gap-1.5">
+                    <span className="text-[#ffd88f] text-sm">✦</span>
+                    <span>
+                      Đăng nhập tài khoản <strong>hpvn-archive.net</strong>. Hệ thống sẽ tự động đồng bộ <strong>Tên, Nhà (🦁/🐍/🦅/🦡) và Danh hiệu</strong> vào phòng chơi.
+                    </span>
                   </div>
 
-                  {/* House Chips */}
-                  <div className="grid grid-cols-4 gap-1.5 pt-0.5">
-                    {HOUSES.map((h) => (
-                      <button
-                        key={h.id}
-                        type="button"
-                        onClick={() => setGuestHouse(h.id)}
-                        className={`py-1.5 px-1 rounded-xl border text-[11px] font-sans flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
-                          guestHouse === h.id
-                            ? `bg-gradient-to-b ${h.color} ring-1 ring-amber-400/50 font-bold scale-102`
-                            : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
-                        }`}
-                      >
-                        <span className="text-sm">{h.icon}</span>
-                        <span className="text-[10px] truncate max-w-full">{h.name.slice(0, 4)}</span>
-                      </button>
-                    ))}
+                  <div>
+                    <label className="block text-[11px] font-serif uppercase tracking-wider text-[#ffd88f] mb-1 font-bold">
+                      Tài Khoản HPVN (hoặc Email)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={hpvnAccount}
+                        onChange={(e) => setHpvnAccount(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-[#120803] border border-[#7a5229] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-1 focus:ring-[#bd8436] text-[#f5eedb] placeholder-[#8c622e] font-serif text-sm transition-all"
+                        placeholder="Ví dụ: harrypotter, hermione..."
+                        autoComplete="username"
+                        required={authTab === 'hpvn'}
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#bd8436]">
+                        <User size={16} />
+                      </div>
+                    </div>
                   </div>
-                </>
-              ) : (
-                <div className="space-y-2 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                  <input
-                    type="text"
-                    value={hpvnAccount}
-                    onChange={(e) => setHpvnAccount(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-100 placeholder:text-slate-500"
-                    placeholder="Tài khoản HPVN..."
-                  />
-                  <input
-                    type="password"
-                    value={hpvnPassword}
-                    onChange={(e) => setHpvnPassword(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-100 placeholder:text-slate-500"
-                    placeholder="Mật khẩu..."
-                  />
+
+                  <div>
+                    <label className="block text-[11px] font-serif uppercase tracking-wider text-[#ffd88f] mb-1 font-bold">
+                      Mật Khẩu HPVN
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        value={hpvnPassword}
+                        onChange={(e) => setHpvnPassword(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-[#120803] border border-[#7a5229] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-1 focus:ring-[#bd8436] text-[#f5eedb] placeholder-[#8c622e] font-serif text-sm transition-all"
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        required={authTab === 'hpvn'}
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#bd8436]">
+                        <Lock size={16} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: Guest Player Name Input */}
+              {authTab === 'guest' && (
+                <div className="space-y-3 p-3.5 bg-[#180e07] rounded-2xl border border-[#5a3a1f]">
+                  <div>
+                    <label className="block text-xs font-serif uppercase tracking-widest text-[#ffd88f] mb-1 font-bold">
+                      Danh Xưng / Bí Danh Phù Thủy
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={guestName}
+                        onChange={(e) => setGuestName(e.target.value)}
+                        className="w-full px-4 py-3 bg-[#120803] border-2 border-[#7a5229] rounded-xl focus:outline-none focus:border-[#ffd88f] focus:ring-2 focus:ring-[#bd8436]/40 text-[#f5eedb] placeholder-[#8c622e] font-lora transition-all"
+                        placeholder={isGM ? "Merlin" : "Ví dụ: Harry, Moody Mắt Điên, Albus..."}
+                        required={authTab === 'guest'}
+                      />
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#bd8436]">
+                        <Wand2 size={18} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hogwarts House Picker for Guests */}
+                  <div>
+                    <label className="block text-[11px] font-serif uppercase tracking-wider text-[#ffd88f] mb-1.5 font-bold">
+                      Chọn Nhà Hogwarts Của Bạn
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                      {[
+                        { id: 'GRYFFINDOR', name: 'Gryffindor', badge: '🦁', color: 'border-red-600 bg-red-950/70 text-[#ffd88f]' },
+                        { id: 'SLYTHERIN', name: 'Slytherin', badge: '🐍', color: 'border-emerald-600 bg-emerald-950/70 text-emerald-300' },
+                        { id: 'RAVENCLAW', name: 'Ravenclaw', badge: '🦅', color: 'border-sky-600 bg-sky-950/70 text-sky-300' },
+                        { id: 'HUFFLEPUFF', name: 'Hufflepuff', badge: '🦡', color: 'border-amber-600 bg-amber-950/70 text-amber-300' },
+                      ].map((h) => (
+                        <button
+                          key={h.id}
+                          type="button"
+                          onClick={() => setGuestHouse(h.id)}
+                          className={`py-2 px-1.5 rounded-xl border text-xs font-serif flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                            guestHouse === h.id
+                              ? `${h.color} ring-2 ring-[#ffd88f]/70 font-bold shadow-md scale-[1.02]`
+                              : 'bg-[#120803] border-[#5a3a1f] text-[#ebdcb0]/70 hover:border-[#7a5229]'
+                          }`}
+                        >
+                          <span className="text-sm">{h.badge}</span>
+                          <span className="truncate text-[11px]">{h.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-[#ebdcb0]/60 font-mono italic">
+                    Chế độ khách: Tự do chọn danh xưng và Nhà Hogwarts yêu thích.
+                  </p>
                 </div>
               )}
             </div>
           )}
 
-          {/* GM Role Toggle Card (Chỉ hiển thị khi Tạo Phòng hoặc Giả Lập) */}
+          {/* GM Role Toggle Card (Chỉ hiển thị khi Tạo Phòng hoặc Thử Nghiệm, khi Tham Gia phòng thì luôn là Người Chơi) */}
           {mode !== 'join' && (
-            <div
+            <div 
               onClick={() => {
                 const nextGM = !isGM;
                 setIsGM(nextGM);
@@ -462,83 +553,104 @@ export function JoinForm() {
                   setGuestName('');
                 }
               }}
-              className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between select-none ${
-                isGM
-                  ? 'bg-amber-950/40 border-amber-400/80 shadow-[0_0_15px_rgba(245,197,66,0.25)]'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+              className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between select-none ${
+                isGM 
+                  ? 'bg-[#3a2213] border-[#ffd88f]' 
+                  : 'bg-[#180e07] border-[#5a3a1f] hover:border-[#7a5229]'
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 ${
-                  isGM
-                    ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 border-amber-200'
-                    : 'bg-slate-900 border-slate-700 text-slate-400'
+                <div className={`p-2 rounded-xl border ${
+                  isGM 
+                    ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ebdcb0]' 
+                    : 'bg-[#120803] text-[#ebdcb0] border-[#5a3a1f]'
                 }`}>
-                  <Crown size={16} />
+                  <Crown size={17} />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <span className={`block font-serif font-bold text-xs sm:text-sm ${isGM ? 'text-amber-300' : 'text-slate-200'}`}>
-                    Vai trò Quản trò (Merlin)
+                <div>
+                  <span className={`block font-serif font-bold text-xs sm:text-sm ${isGM ? 'text-[#ffd88f]' : 'text-[#ebdcb0]'}`}>
+                    Vai trò Merlin (Quản Trò)
                   </span>
-                  <span className="text-[10px] text-slate-400 font-sans block truncate">
-                    {isGM ? 'Có quyền điều phối trận cờ & tính toán ma pháp' : 'Người chơi tham gia bay hộ tống nhận thẻ bài'}
+                  <span className="text-[10px] sm:text-[11px] text-[#ebdcb0]/70 block font-mono">
+                    {isGM ? 'Đại Pháp Sư Merlin nắm giữ cuốn sổ định đoạt ván cờ' : 'Người chơi nhận thẻ nhân vật'}
                   </span>
                 </div>
               </div>
 
-              <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-colors shrink-0 ${
-                isGM 
-                  ? 'bg-amber-500 border-amber-400 text-slate-950 shadow-[0_0_8px_rgba(245,197,66,0.5)]' 
-                  : 'bg-slate-950 border-slate-700'
-              }`}>
-                {isGM && <Check size={14} className="stroke-[3]" />}
-              </div>
+              <input
+                type="checkbox"
+                id="isGM"
+                checked={isGM}
+                onChange={(e) => {
+                  const nextGM = e.target.checked;
+                  setIsGM(nextGM);
+                  if (nextGM && !guestName.trim()) {
+                    setGuestName('Merlin');
+                  } else if (!nextGM && guestName === 'Merlin') {
+                    setGuestName('');
+                  }
+                }}
+                className="w-4 h-4 rounded border-[#7a5229] text-[#bd8436] focus:ring-[#bd8436] bg-[#120803] pointer-events-none"
+              />
             </div>
           )}
 
-          {/* SUBMIT BUTTON */}
+          {/* Wax Sealed Entrance Action Button */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-98 text-slate-950 font-cinzel font-black text-xs tracking-wider uppercase transition-all shadow-[0_0_15px_rgba(245,197,66,0.3)] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 select-none"
+            className="w-full relative group overflow-hidden rounded-xl p-[2px] transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:pointer-events-none pt-2"
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={15} className="animate-spin" />
-                <span>Đang kết nối...</span>
-              </>
-            ) : (
-              <span className="flex items-center gap-1.5">
-                <Sparkles size={15} />
-                {mode === 'join' && 'VÀO PHÒNG CHIẾN ĐẤU'}
-                {mode === 'create' && (isGM ? 'THIẾT LẬP BÀN MERLIN' : 'KHỞI TẠO PHÒNG MỚI')}
-                {mode === 'mock' && (isGM ? 'VÀO BÀN MERLIN (QUẢN TRÒ)' : 'VÀO GIẢ LẬP')}
-              </span>
-            )}
+            <span className="absolute inset-0 bg-gradient-to-r from-[#8c0c0c] via-[#bd8436] to-[#047857] rounded-xl opacity-85 group-hover:opacity-100 transition-opacity" />
+            <div className="relative flex items-center justify-center gap-3 bg-gradient-to-r from-[#24150c] via-[#1a0e07] to-[#24150c] px-6 sm:px-8 py-3.5 rounded-xl transition-all group-hover:bg-opacity-90 font-serif font-bold text-base sm:text-lg text-[#ffd88f] tracking-wider uppercase border border-[#bd8436]/60">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 text-[#ffd88f] animate-spin" />
+                  <span>Đang xác thực & kết nối...</span>
+                </>
+              ) : (
+                <>
+                  <WaxSeal variant={isGM ? 'gold' : 'red'} letter={isGM ? 'M' : 'P'} size="sm" />
+                  <span>
+                    {currentUserProfile ? (
+                      mode === 'create'
+                        ? (isGM ? 'Mở Phòng (Merlin HPVN)' : `Tạo Phòng Với ${currentUserProfile.username}`)
+                        : mode === 'join'
+                        ? `Vào Phòng (${currentUserProfile.username})`
+                        : `Vào Giả Lập (${currentUserProfile.username})`
+                    ) : (
+                      mode === 'create'
+                        ? (isGM ? 'Thiết Lập Bàn Merlin' : 'Mở Phòng Bầu Trời')
+                        : mode === 'join'
+                        ? 'Gia Nhập Phòng'
+                        : (isGM ? 'Vào Bàn Merlin (Quản Trò)' : 'Gia Nhập Giả Lập')
+                    )}
+                  </span>
+                  <Sparkles size={18} className="text-[#ffd88f]" />
+                </>
+              )}
+            </div>
           </button>
         </form>
-      </div>
 
-      {/* 4. MINIMAL BOTTOM BAR */}
-      <div className="py-2 flex items-center justify-between text-[11px] text-slate-500 font-mono">
-        <button
-          type="button"
-          onClick={() => {
-            if (typeof window !== 'undefined') {
-              localStorage.clear();
-              sessionStorage.clear();
-              window.location.reload();
-            }
-          }}
-          className="hover:text-amber-400 transition-colors cursor-pointer"
-        >
-          ↻ Reset Cache
-        </button>
-        <span>HPVN · v2026.9</span>
-      </div>
+        {/* Quick Deck Codex Button */}
+        <div className="mt-5 pt-4 border-t border-[#7a5229]/40 flex items-center justify-between text-xs text-[#ebdcb0]/70">
+          <button
+            type="button"
+            onClick={() => setIsDeckOpen(true)}
+            className="flex items-center gap-1.5 text-[#ffd88f] hover:text-[#fff4d1] transition-colors font-serif font-bold cursor-pointer"
+          >
+            <BookOpen size={14} /> Sổ tay 22 Thẻ Bài & Luật chơi
+          </button>
+          <span className="font-mono text-[10px] text-[#ebdcb0]/60">HPVN Multiplayer Engine</span>
+        </div>
+      </motion.div>
 
-      {/* 27 CARDS CODEX MODAL */}
-      <CardDeckModal isOpen={isDeckOpen} onClose={() => setIsDeckOpen(false)} />
+      {/* Card Deck Modal */}
+      <CardDeckModal
+        isOpen={isDeckOpen}
+        onClose={() => setIsDeckOpen(false)}
+      />
     </div>
   );
 }

@@ -2,16 +2,19 @@
 
 import { useState } from 'react';
 import { useGame, getOptimalBalance } from '@/lib/GameContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
   Users, 
   Crown, 
   Play, 
+  UserCheck, 
   Sparkles, 
   BookOpen, 
   LogOut,
   Bot,
+  Wand2,
+  CheckCircle,
   UserX,
   Copy,
   Check,
@@ -19,14 +22,14 @@ import {
   X,
   Radio,
   Wifi,
-  Flame,
-  Plus,
-  ShieldAlert,
-  Wand2
+  WifiOff,
+  Flame
 } from 'lucide-react';
 import { 
   PhoenixCrest, 
   DarkMarkCrest, 
+  WaxSeal, 
+  CardCornerFlourish,
   DeathlyHallowsSymbol 
 } from './ArtAssets';
 import { CardDeckModal } from './CardDeckModal';
@@ -37,10 +40,10 @@ export function Lobby() {
   const { 
     gameState, 
     currentPlayerId, 
+    assignRoles, 
     startGame, 
     leaveGame, 
     addBot, 
-    assignRoles,
     kickPlayer,
     roomCode,
     isHost,
@@ -60,9 +63,9 @@ export function Lobby() {
 
   if (gameState.phase !== 'LOBBY') return null;
 
+  const hasAssignedRoles = gameState.players.some(p => p.role);
   const nonGmPlayers = gameState.players.filter(p => !p.isGM);
   const optimalBalance = getOptimalBalance(nonGmPlayers.length);
-  const hasAssignedRoles = nonGmPlayers.length > 0 && nonGmPlayers.every(p => Boolean(p.role));
 
   const inviteUrl = typeof window !== 'undefined' && roomCode 
     ? `${window.location.origin}/?room=${roomCode}` 
@@ -83,357 +86,516 @@ export function Lobby() {
   };
 
   return (
-    <div className="w-full max-w-[440px] mx-auto min-h-screen px-4 py-4 flex flex-col justify-between select-none">
-      
-      {/* 1. TOP HEADER & ROOM PIN */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <PhoenixCrest className="w-6 h-6 text-amber-400 drop-shadow-[0_0_8px_rgba(245,197,66,0.5)]" />
-            <div>
-              <h2 className="font-cinzel text-lg font-black tracking-wider text-amber-300">
-                SẢNH TẬP HỢP
-              </h2>
-              <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
-                <Users size={11} className="text-amber-400" />
-                <span>{gameState.players.length} Phù Thủy</span>
-                {connStatus === 'connected' && (
-                  <>
-                    <span>·</span>
-                    <span className="text-emerald-400 flex items-center gap-0.5">
-                      <Wifi size={10} /> Live
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Header Actions */}
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setIsDeckOpen(true)}
-              className="p-2 rounded-xl bg-slate-900 border border-amber-400/30 text-amber-300 hover:text-white transition-colors cursor-pointer"
-              title="27 Thẻ Bài"
-            >
-              <BookOpen size={15} />
-            </button>
-            <button
-              onClick={openFlooDrawer}
-              className="p-2 rounded-xl bg-slate-900 border border-emerald-500/30 text-emerald-400 hover:text-white transition-colors cursor-pointer"
-              title="Mạng Floo"
-            >
-              <Flame size={15} />
-            </button>
-            <button
-              onClick={() => setConfirmLeave(true)}
-              className="p-2 rounded-xl bg-slate-900 border border-red-500/30 text-red-400 hover:text-white transition-colors cursor-pointer"
-              title="Rời phòng"
-            >
-              <LogOut size={15} />
-            </button>
-          </div>
+    <div className="max-w-5xl mx-auto py-8 px-4">
+      {/* Lobby Header */}
+      <div className="text-center mb-6 sm:mb-8 relative">
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2">
+          <PhoenixCrest className="w-7 h-7 sm:w-9 sm:h-9" />
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-title-magical font-bold tracking-wide text-[#ffd88f]">
+            Sảnh Tập Hợp Chiến Dịch
+          </h2>
+          <DarkMarkCrest className="w-7 h-7 sm:w-9 sm:h-9" />
         </div>
 
-        {/* ROOM CODE SHARE BAR */}
+        {/* Room Code & Invite Share Bar */}
         {roomCode && (
-          <div className="arcane-card-glass rounded-2xl p-2.5 flex items-center justify-between border border-amber-400/30 shadow-lg">
-            <div className="flex items-center gap-2">
-              <Radio size={14} className="text-amber-400 animate-pulse shrink-0" />
-              <div>
-                <div className="text-[9px] uppercase font-mono tracking-widest text-slate-400">MÃ PHÒNG</div>
-                <div className="font-mono text-xl font-black text-amber-300 tracking-[0.2em] leading-none">
-                  {roomCode}
-                </div>
-              </div>
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-[#120803] px-3.5 sm:px-5 py-2 rounded-2xl border-2 border-[#bd8436] mb-4 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-1.5 font-serif font-bold text-xs sm:text-sm text-[#ebdcb0]">
+              <Radio size={14} className="text-[#ffd88f] animate-pulse" />
+              <span>Mã Phòng:</span>
+              <span className="font-mono text-base sm:text-lg font-black text-[#ffd88f] tracking-widest bg-[#221006] px-2.5 py-0.5 rounded-lg border border-[#7a5229]">
+                {roomCode}
+              </span>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-amber-300 font-mono text-[11px] font-bold flex items-center gap-1 hover:border-amber-400 transition-colors cursor-pointer"
+                className="px-2.5 py-1 bg-[#28180e] hover:bg-[#3a2213] text-[#ffd88f] rounded-lg border border-[#7a5229] text-xs font-serif font-bold flex items-center gap-1 transition-all cursor-pointer"
+                title="Sao chép mã phòng"
               >
                 {copiedCode ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
-                <span>{copiedCode ? 'ĐÃ CHÉP' : 'CHÉP'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsQrOpen(true)}
-                className="p-1.5 rounded-lg bg-amber-400 text-slate-950 hover:bg-amber-300 transition-colors cursor-pointer"
-                title="Mã QR"
-              >
-                <QrCode size={16} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* FACTION BALANCE PILL BAR */}
-        <div className="p-2.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-          <div className="flex items-center justify-between text-xs font-cinzel font-bold mb-1.5">
-            <span className="text-amber-400 flex items-center gap-1">
-              <PhoenixCrest className="w-3.5 h-3.5" /> {optimalBalance.goodCount} HỘI PHƯỢNG HOÀNG
-            </span>
-            <span className="text-emerald-400 flex items-center gap-1">
-              {optimalBalance.evilCount} TỬ THẦN <DarkMarkCrest className="w-3.5 h-3.5" />
-            </span>
-          </div>
-
-          <div className="w-full h-1.5 rounded-full overflow-hidden flex bg-slate-900 border border-slate-800">
-            <div
-              className="h-full bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-300"
-              style={{ width: `${(optimalBalance.goodCount / (nonGmPlayers.length || 1)) * 100}%` }}
-            />
-            <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300"
-              style={{ width: `${(optimalBalance.evilCount / (nonGmPlayers.length || 1)) * 100}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 2. SQUAD ROSTER (2-COLUMNS MOBILE GRID) */}
-      <div className="flex-1 my-3 overflow-y-auto max-h-[50vh] pr-1 custom-scrollbar">
-        
-        {/* Death Eater Secret Alert if roles were assigned */}
-        {currentPlayer?.role?.faction === 'DEATH_EATERS' && (
-          <div className="mb-2 p-2 rounded-xl bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 text-[11px] font-sans flex items-center gap-2">
-            <DarkMarkCrest className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Đồng minh Tử Thần Thực Tử phát sáng viền xanh lá!</span>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-2">
-          {gameState.players.map((p, index) => {
-            const isMe = p.id === currentPlayerId;
-            const isFellowDeathEater = currentPlayer?.role?.faction === 'DEATH_EATERS' && p.role?.faction === 'DEATH_EATERS' && !p.isGM;
-            const isOffline = offlinePlayerIds.includes(p.id);
-            const house = getHouseStyle(p.house || 'NONE');
-
-            return (
-              <motion.div
-                key={p.id || index}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.2, delay: index * 0.03 }}
-                className={`relative p-2.5 rounded-2xl border transition-all flex flex-col justify-between select-none ${
-                  isFellowDeathEater
-                    ? 'bg-emerald-950/40 border-emerald-500/80 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                    : isMe
-                    ? 'bg-amber-950/30 border-amber-400/80 shadow-[0_0_12px_rgba(245,197,66,0.2)]'
-                    : 'bg-slate-900/60 border-slate-800'
-                }`}
-              >
-                {/* Top badges */}
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-1">
-                    <span className="text-base">{house.badge}</span>
-                    <span className={`w-2 h-2 rounded-full ${isOffline ? 'bg-red-500' : 'bg-emerald-400'}`} />
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    {p.isGM ? (
-                      <span className="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 text-[9px] font-cinzel font-black flex items-center gap-0.5">
-                        <Crown size={9} /> MERLIN
-                      </span>
-                    ) : p.isBot ? (
-                      <span className="px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-500/50 text-cyan-300 text-[9px] font-mono flex items-center gap-0.5">
-                        <Bot size={9} /> BOT
-                      </span>
-                    ) : null}
-
-                    {/* Kick Button for Host */}
-                    {hasControl && !isMe && !p.isGM && (
-                      <button
-                        type="button"
-                        onClick={() => kickPlayer(p.id)}
-                        className="p-1 text-slate-500 hover:text-red-400 transition-colors cursor-pointer"
-                        title="Đuổi"
-                      >
-                        <UserX size={12} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Name & Role */}
-                <div className="min-w-0">
-                  <div className={`font-cinzel font-bold text-xs truncate ${
-                    isFellowDeathEater ? 'text-emerald-300' : isMe ? 'text-amber-300' : 'text-slate-200'
-                  }`}>
-                    {p.name}
-                  </div>
-                  {p.role ? (
-                    (isGM || isMe || isFellowDeathEater) ? (
-                      <div className={`text-[10px] font-serif font-bold truncate mt-0.5 ${
-                        p.role.faction === 'DEATH_EATERS' ? 'text-emerald-400' : 'text-amber-300'
-                      }`}>
-                        ✦ {p.role.name}
-                      </div>
-                    ) : (
-                      <div className="text-[10px] text-cyan-400/90 font-mono truncate mt-0.5">
-                        ✓ Đã có thẻ bài
-                      </div>
-                    )
-                  ) : (
-                    <div className="text-[10px] text-slate-500 font-mono truncate">
-                      {isMe ? '✦ BẠN' : p.house ? house.name : 'Tân binh'}
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 3. BOTTOM FLOATING ACTION DOCK */}
-      <div className="space-y-2 pt-2 border-t border-slate-800/80">
-        {hasControl ? (
-          <div className="space-y-2">
-            {/* Toolbar Buttons: Add Bot, Assign Roles, Copy Link */}
-            <div className="grid grid-cols-3 gap-1.5">
-              <button
-                type="button"
-                onClick={() => addBot()}
-                className="py-2.5 px-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cinzel font-bold text-xs flex items-center justify-center gap-1 transition-all cursor-pointer select-none active:scale-95"
-                title="Thêm Bot phụ chiến"
-              >
-                <Plus size={13} />
-                <span>+ Bot</span>
+                <span>{copiedCode ? 'Đã sao chép!' : 'Sao Chép Mã'}</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => assignRoles()}
-                disabled={gameState.players.length < 2}
-                className={`py-2.5 px-2 rounded-xl border font-cinzel font-bold text-xs flex items-center justify-center gap-1 transition-all cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
-                  hasAssignedRoles
-                    ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
-                    : 'bg-amber-950/50 border-amber-400/50 text-amber-300 shadow-[0_0_10px_rgba(245,197,66,0.2)] animate-pulse'
-                }`}
-                title="Phân phát và xáo bài vai trò"
-              >
-                <Wand2 size={13} className={hasAssignedRoles ? 'text-emerald-400' : 'text-amber-400'} />
-                <span>{hasAssignedRoles ? 'Xáo Lại' : 'Chia Vai'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleCopyLink()}
-                className="py-2.5 px-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-300 font-cinzel font-bold text-xs flex items-center justify-center gap-1 transition-all cursor-pointer select-none active:scale-95"
+                onClick={handleCopyLink}
+                className="px-2.5 py-1 bg-[#28180e] hover:bg-[#3a2213] text-[#ffd88f] rounded-lg border border-[#7a5229] text-xs font-serif font-bold flex items-center gap-1 transition-all cursor-pointer"
                 title="Sao chép link mời người chơi"
               >
                 {copiedLink ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
-                <span>{copiedLink ? 'Đã Chép' : 'Link Mời'}</span>
+                <span>{copiedLink ? 'Đã chép link!' : 'Chép Link Mời'}</span>
               </button>
-            </div>
 
-            {/* Start Campaign Button */}
-            <button
-              type="button"
-              onClick={() => startGame()}
-              disabled={gameState.players.length < 4}
-              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:brightness-110 active:scale-98 text-slate-950 font-cinzel font-black text-sm tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,197,66,0.35)] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed select-none"
-            >
-              <Play size={16} className="fill-slate-950 text-slate-950" />
-              <span>
-                {gameState.players.length < 4 ? 'CẦN TỐI THIỂU 4 NGƯỜI (BẤM THÊM BOT)' : 'BẮT ĐẦU CHIẾN DỊCH'}
-              </span>
-            </button>
-          </div>
-        ) : (
-          <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-amber-400/30 text-center space-y-1">
-            <div className="font-cinzel font-bold text-xs text-amber-300 flex items-center justify-center gap-1.5 animate-pulse">
-              <Sparkles size={14} className="text-amber-400" />
-              <span>Đang chờ Chủ phòng phát lệnh xuất kích...</span>
-            </div>
-            <p className="text-[10px] text-slate-500 font-mono">
-              Phòng sẵn sàng ({gameState.players.length} người)
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* QR MODAL */}
-      <AnimatePresence>
-        {isQrOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsQrOpen(false)}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              onClick={(e) => e.stopPropagation()}
-              className="arcane-card-glass rounded-3xl p-6 text-center max-w-xs w-full space-y-4 border border-amber-400/40"
-            >
-              <h3 className="font-cinzel font-bold text-base text-amber-300">QUÉT MÃ VÀO PHÒNG</h3>
-              <div className="p-3 bg-white rounded-2xl inline-block shadow-xl">
-                <QRCodeSVG value={inviteUrl} size={180} />
-              </div>
-              <div className="font-mono text-xl font-black text-amber-300 tracking-[0.25em]">
-                {roomCode}
-              </div>
               <button
                 type="button"
-                onClick={() => setIsQrOpen(false)}
-                className="w-full py-2 bg-slate-900 border border-slate-700 text-slate-300 rounded-xl text-xs font-cinzel font-bold cursor-pointer"
+                onClick={() => setIsQrOpen(true)}
+                className="px-2.5 py-1 bg-[#bd8436] hover:bg-[#ffd88f] text-[#120803] rounded-lg font-serif font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+                title="Quét mã QR để vào phòng trên điện thoại"
               >
-                Đóng
+                <QrCode size={13} />
+                <span>Mã QR</span>
               </button>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
 
-      {/* CONFIRM LEAVE MODAL */}
-      <AnimatePresence>
-        {confirmLeave && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setConfirmLeave(false)}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+        <p className="text-[#ebdcb0] font-lora text-xs sm:text-sm flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+          <Users size={15} className="text-[#ffd88f]" />
+          <span>Lực lượng hiện diện: <strong className="text-[#ffd88f] font-mono">{gameState.players.length}</strong> phù thủy</span>
+          <span className="text-[#7a5229] hidden sm:inline">|</span>
+          <span className="block sm:inline">{hasAssignedRoles ? '✅ Đã chia bài xong' : '⏳ Chờ phân phát vai trò'}</span>
+          {connStatus === 'connected' && (
+            <>
+              <span className="text-[#7a5229] hidden sm:inline">|</span>
+              <span className="text-emerald-400 text-xs font-mono flex items-center gap-1">
+                <Wifi size={13} /> Floo Realtime
+              </span>
+            </>
+          )}
+        </p>
+
+        {/* Rulebook / Deck Quick Button & Floo Chat */}
+        <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-2.5">
+          <button
+            onClick={() => setIsDeckOpen(true)}
+            className="hpvn-btn-gold px-3.5 sm:px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-2 cursor-pointer"
           >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              onClick={(e) => e.stopPropagation()}
-              className="arcane-card-glass rounded-3xl p-5 text-center max-w-xs w-full space-y-3 border border-red-500/40"
-            >
-              <h3 className="font-cinzel font-bold text-base text-red-300">RỜI PHÒNG?</h3>
-              <p className="text-xs text-slate-400">Bạn sẽ ngắt kết nối khỏi sảnh tập hợp này.</p>
-              <div className="flex gap-2 pt-1">
+            <BookOpen size={15} /> Xem Sách Bí Kíp 22 Thẻ Bài & Luật Chơi
+          </button>
+
+          <button
+            type="button"
+            onClick={openFlooDrawer}
+            className="hpvn-btn-gold px-3.5 sm:px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-2 cursor-pointer text-[#ffd88f]"
+          >
+            <Flame size={15} className="text-[#ffd88f] animate-pulse" /> Mạng Floo (Chat HPVN)
+          </button>
+        </div>
+
+        {/* Campaign Faction Balance Preview Widget */}
+        <div className="mt-5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-[#210c08]/90 via-[#180f14]/90 to-[#081a14]/90 border border-[#7a5229] shadow-xl relative overflow-hidden text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-[#5c3e1e]/60">
+            <div className="flex items-center gap-2.5">
+              <span className="p-1.5 rounded-lg bg-[#381e0d] border border-[#a47133] text-[#ffd88f] shrink-0">
+                <Sparkles size={16} />
+              </span>
+              <div>
+                <h4 className="font-serif font-bold text-xs sm:text-sm text-[#ffd88f] flex items-center gap-2">
+                  Tỷ Lệ Phe Chiến Thuật (Monte Carlo Calibrated)
+                </h4>
+                <p className="text-[11px] text-[#dfcbad]">
+                  Tự động căn chỉnh theo sĩ số phòng ({nonGmPlayers.length} người chơi)
+                </p>
+              </div>
+            </div>
+            <div className="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1 rounded-full bg-[#120803] border border-[#7a5229] text-xs font-mono text-[#ffd88f]">
+              <span>Chặng Bay: <strong className="text-amber-300">{optimalBalance.maxStages}</strong> Chặng</span>
+              {nonGmPlayers.length >= 12 && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-950 text-red-300 border border-red-700/60 font-serif">
+                  Phục Kích Kép Chặng 3
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            {/* HPH faction badge */}
+            <div className="p-2.5 rounded-xl bg-[#2b100d]/70 border border-red-800/60 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <PhoenixCrest className="w-5 h-5 text-amber-400 shrink-0" />
+                <div>
+                  <div className="font-bold text-red-200">Hội Phượng Hoàng</div>
+                  <div className="text-[10px] text-red-300/70">Bảo vệ Harry & đến Hang Sóc</div>
+                </div>
+              </div>
+              <span className="text-lg font-mono font-bold text-amber-300 bg-[#160604] px-2.5 py-0.5 rounded border border-red-700/60">
+                {optimalBalance.goodCount}
+              </span>
+            </div>
+
+            {/* DE faction badge */}
+            <div className="p-2.5 rounded-xl bg-[#09261a]/70 border border-emerald-800/60 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <DarkMarkCrest className="w-5 h-5 text-emerald-400 shrink-0" />
+                <div>
+                  <div className="font-bold text-emerald-200">Tử Thần Thực Tử</div>
+                  <div className="text-[10px] text-emerald-300/70">Ám sát Harry hoặc chiếm đa số</div>
+                </div>
+              </div>
+              <span className="text-lg font-mono font-bold text-emerald-300 bg-[#04140d] px-2.5 py-0.5 rounded border border-emerald-700/60">
+                {optimalBalance.evilCount}
+              </span>
+            </div>
+          </div>
+
+          {/* Dual Progress Bar */}
+          <div className="mt-3">
+            <div className="flex justify-between text-[10px] font-mono text-[#dfcbad] mb-1">
+              <span>{Math.round((optimalBalance.goodCount / (nonGmPlayers.length || 1)) * 100)}% HPH</span>
+              <span className="text-[#a89078]">{optimalBalance.desc}</span>
+              <span>{Math.round((optimalBalance.evilCount / (nonGmPlayers.length || 1)) * 100)}% Tử Thần</span>
+            </div>
+            <div className="w-full h-2 rounded-full overflow-hidden flex bg-black/60 border border-[#5c3e1e]/60">
+              <div
+                className="h-full bg-gradient-to-r from-amber-600 to-red-600 transition-all duration-300"
+                style={{ width: `${(optimalBalance.goodCount / (nonGmPlayers.length || 1)) * 100}%` }}
+              />
+              <div
+                className="h-full bg-gradient-to-r from-emerald-600 to-teal-500 transition-all duration-300"
+                style={{ width: `${(optimalBalance.evilCount / (nonGmPlayers.length || 1)) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        
+        {/* Left Column: Player Attendance Scroll */}
+        <div className={`lg:col-span-2 relative rounded-2xl hpvn-panel-gold p-4 sm:p-6 overflow-hidden ${
+          isGM ? 'order-2 lg:order-1' : 'order-1'
+        }`}>
+          <CardCornerFlourish className="absolute top-2 left-2 w-6 h-6 text-[#bd8436] pointer-events-none" />
+          <CardCornerFlourish className="absolute top-2 right-2 w-6 h-6 text-[#bd8436] -scale-x-100 pointer-events-none" />
+          <CardCornerFlourish className="absolute bottom-2 left-2 w-6 h-6 text-[#bd8436] -scale-y-100 pointer-events-none" />
+          <CardCornerFlourish className="absolute bottom-2 right-2 w-6 h-6 text-[#bd8436] -scale-x-100 -scale-y-100 pointer-events-none" />
+
+          <div className="flex items-center justify-between border-b border-[#7a5229] pb-3 mb-4">
+            <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] flex items-center gap-2 tracking-wide">
+              <DeathlyHallowsSymbol className="w-5 h-5 text-[#bd8436]" />
+              Danh Sách Phù Thủy Tham Gia
+            </h3>
+            <span className="text-xs font-mono text-[#ffd88f] bg-[#120803] px-2.5 py-1 rounded-full border border-[#7a5229]">
+              {nonGmPlayers.length} Chiến binh
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Death Eaters Secret Notification in Lobby if roles assigned */}
+            {currentPlayer?.role?.faction === 'DEATH_EATERS' && (
+              <div className="col-span-1 sm:col-span-2 mb-2 p-3 rounded-xl bg-[#062419] border border-emerald-500/80 text-emerald-200 text-xs font-serif flex items-center gap-2">
+                <DarkMarkCrest className="w-5 h-5 text-emerald-400 shrink-0" />
+                <span>
+                  <strong>Mật Lệnh Tử Thần Thực Tử:</strong> Dấu Hiệu Hắc Ám đã thức tỉnh! Các đồng minh Tử Thần Thực Tử được hiển thị <strong className="text-emerald-300 uppercase">MÀU XANH LÁ</strong> để nhận diện nhau.
+                </span>
+              </div>
+            )}
+
+            {gameState.players.map((p, index) => {
+              const isMe = p.id === currentPlayerId;
+              const isFellowDeathEater = currentPlayer?.role?.faction === 'DEATH_EATERS' && p.role?.faction === 'DEATH_EATERS' && !p.isGM;
+              const isOffline = offlinePlayerIds.includes(p.id);
+              
+              return (
+                <motion.div
+                  key={p.id ? `lobby-p-${p.id}` : `lobby-p-${index}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className={`p-3 sm:p-3.5 rounded-xl border transition-all flex items-center justify-between select-none ${
+                    isFellowDeathEater
+                      ? isMe
+                        ? 'bg-[#072d1f] border-emerald-400 ring-1 ring-emerald-400'
+                        : 'bg-[#062419] border-emerald-500/90 hover:border-emerald-400'
+                      : isMe
+                        ? 'bg-[#3a2213] border-[#ffd88f]'
+                        : 'bg-[#180e07] border-[#4e2d17] hover:border-[#7a5229]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-2">
+                    <div className={`p-2 rounded-xl border shrink-0 ${
+                      p.isGM 
+                        ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ebdcb0]' 
+                        : isFellowDeathEater
+                          ? 'bg-emerald-950 text-emerald-300 border-emerald-500'
+                          : isMe 
+                            ? 'bg-[#8c0c0c] text-[#ffd88f] border-[#dc2626]/50' 
+                            : 'bg-[#120803] text-[#ebdcb0] border-[#5a3a1f]'
+                    }`}>
+                      {p.isGM ? <Crown size={15} /> : isFellowDeathEater ? <DarkMarkCrest className="w-4 h-4 text-emerald-400" /> : <UserCheck size={15} />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`font-serif font-bold text-sm truncate block ${
+                          isFellowDeathEater 
+                            ? 'text-emerald-300' 
+                            : isMe 
+                              ? 'text-[#ffd88f]' 
+                              : 'text-[#f5eedb]'
+                        }`}>
+                          {p.name}
+                        </span>
+                        {p.house && p.house !== 'NONE' && (
+                          <span 
+                            className={`text-[10px] px-1.5 py-0.5 rounded font-mono shrink-0 flex items-center gap-1 ${getHouseStyle(p.house).pillColor}`}
+                            title={`Nhà ${getHouseStyle(p.house).name}`}
+                          >
+                            <span>{getHouseStyle(p.house).badge}</span>
+                            <span>{getHouseStyle(p.house).name}</span>
+                          </span>
+                        )}
+                        {p.userTag && (
+                          <span className="text-[9px] text-[#ffd88f]/80 font-mono italic shrink-0">
+                            [{p.userTag}]
+                          </span>
+                        )}
+                        {isMe && (
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded border font-mono shrink-0 ${
+                            isFellowDeathEater
+                              ? 'bg-emerald-900/60 text-emerald-200 border-emerald-500'
+                              : 'bg-[#bd8436]/25 text-[#ffd88f] border-[#bd8436]/50'
+                          }`}>
+                            Bạn
+                          </span>
+                        )}
+                        {isFellowDeathEater && !isMe && (
+                          <span className="text-[9px] bg-emerald-950 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-600 font-mono shrink-0">
+                            Đồng Minh
+                          </span>
+                        )}
+
+                        {/* Connection Presence Badge */}
+                        {isOffline ? (
+                          <span className="text-[9px] bg-red-950/80 text-red-300 border border-red-800/80 px-1.5 py-0.2 rounded-full font-mono flex items-center gap-1 shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                            Mất kết nối
+                          </span>
+                        ) : (
+                          <span className="text-[9px] bg-emerald-950/70 text-emerald-400 border border-emerald-800/60 px-1.5 py-0.2 rounded-full font-mono flex items-center gap-1 shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            Online
+                          </span>
+                        )}
+                      </div>
+                      <span className={`text-[11px] font-mono block truncate ${
+                        isFellowDeathEater ? 'text-emerald-400/90 font-bold' : 'text-[#ebdcb0]/60'
+                      }`}>
+                        {p.isGM 
+                          ? 'Merlin (Quản Trò)' 
+                          : isFellowDeathEater 
+                            ? `🐍 Đồng minh: ${p.role?.name}${p.role?.id === 'VOLDEMORT' ? ' 👑' : ''}`
+                            : p.role 
+                              ? 'Đã nhận thẻ bí mật' 
+                              : 'Đang chờ thẻ...'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {/* GM / Host Kick player button in lobby */}
+                    {hasControl && !p.isGM && p.id !== currentPlayerId && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          kickPlayer(p.id);
+                        }}
+                        title={`Đuổi ${p.name} khỏi phòng`}
+                        className="px-2 py-1 rounded-lg bg-red-950/70 hover:bg-red-900 text-red-300 hover:text-white border border-red-800/80 text-xs font-serif font-bold flex items-center gap-1 transition-all shrink-0 cursor-pointer"
+                      >
+                        <UserX size={12} />
+                        <span>Đuổi</span>
+                      </button>
+                    )}
+
+                    {p.role ? (
+                      <span title="Đã nhận vai trò" className="p-1 rounded-full bg-[#053d2b] text-emerald-400 border border-emerald-500/50 block">
+                        <CheckCircle size={15} />
+                      </span>
+                    ) : (
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#bd8436] block animate-pulse" />
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+
+            {gameState.players.length === 0 && (
+              <div className="col-span-2 text-center py-12 text-[#8c622e] font-lora">
+                Chưa có ai gia nhập phòng...
+              </div>
+            )}
+          </div>
+
+          {/* Leave Button */}
+          <div className="mt-6 pt-4 border-t border-[#7a5229]/40 flex justify-between items-center text-xs">
+            {confirmLeave ? (
+              <div className="flex items-center gap-2 bg-[#120803] p-1.5 rounded-lg border border-[#7a5229]">
+                <span className="text-red-300 text-xs font-lora">Rời phòng chờ?</span>
                 <button
-                  type="button"
-                  onClick={() => leaveGame()}
-                  className="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-cinzel font-bold text-xs cursor-pointer"
+                  onClick={leaveGame}
+                  className="px-2.5 py-1 bg-red-800 hover:bg-red-700 text-white rounded text-xs font-serif font-bold cursor-pointer"
                 >
                   Xác nhận
                 </button>
                 <button
-                  type="button"
                   onClick={() => setConfirmLeave(false)}
-                  className="flex-1 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 font-cinzel font-bold text-xs cursor-pointer"
+                  className="px-2 py-1 bg-[#28180e] hover:bg-[#3a2213] text-[#ebdcb0] rounded text-xs cursor-pointer"
                 >
-                  Ở lại
+                  Hủy
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            ) : (
+              <button 
+                onClick={() => setConfirmLeave(true)}
+                className="text-red-400 hover:text-red-300 font-medium transition-colors flex items-center gap-1.5 font-lora cursor-pointer"
+              >
+                <LogOut size={14} /> Rời Khỏi Phòng
+              </button>
+            )}
+            <span className="text-[#ebdcb0]/50 font-mono text-[11px]">HPVN Floo Network</span>
+          </div>
+        </div>
 
-      {/* 27 CARDS CODEX MODAL */}
-      <CardDeckModal isOpen={isDeckOpen} onClose={() => setIsDeckOpen(false)} />
+        {/* Right Column: GM Controls or Player Waiting Status */}
+        <div className={`lg:col-span-1 ${hasControl ? 'order-1 lg:order-2' : 'order-2'}`}>
+          {hasControl ? (
+            <div className="relative rounded-2xl hpvn-panel-gold p-4 sm:p-6 flex flex-col justify-between min-h-auto lg:min-h-[460px]">
+              <div>
+                <div className="flex items-center gap-2 border-b border-[#7a5229] pb-3 mb-4">
+                  <WaxSeal variant="gold" letter="M" size="sm" />
+                  <div>
+                    <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] tracking-wide">
+                      Bảng Lệnh {isGM ? 'Merlin (Quản Trò)' : 'Chủ Phòng'}
+                    </h3>
+                    <p className="text-[11px] text-[#ebdcb0]/60 font-mono">Điều khiển phòng &amp; Chia bài</p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-[#ebdcb0] font-lora leading-relaxed mb-6">
+                  Bạn đang nắm quyền điều phối chiến dịch. Thêm bot thử nghiệm nếu cần, sau đó xáo bộ thẻ và ấn bắt đầu chiến dịch.
+                </p>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={addBot}
+                    className="w-full py-3 px-4 hpvn-btn-gold rounded-xl flex items-center justify-center gap-2 text-xs font-serif font-bold cursor-pointer"
+                  >
+                    <Bot size={16} className="text-[#ffd88f]" />
+                    <span>Triệu Hồi Thần Sáng Bot (+1)</span>
+                  </button>
+
+                  <button
+                    onClick={assignRoles}
+                    disabled={gameState.players.length < 2}
+                    className="w-full py-3.5 px-4 hpvn-btn-phoenix rounded-xl disabled:opacity-40 flex items-center justify-center gap-2 text-xs font-serif font-bold cursor-pointer"
+                  >
+                    <Wand2 size={16} className="text-[#ffd88f]" />
+                    <span>Xáo Bài & Phân Phát Vai Trò</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Start Campaign Button */}
+              <div className="mt-8">
+                <button
+                  onClick={startGame}
+                  disabled={gameState.players.length < 2}
+                  className="w-full py-3.5 px-4 hpvn-btn-floo rounded-xl disabled:opacity-40 disabled:grayscale font-serif font-black text-base sm:text-lg tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95 transition-all"
+                >
+                  <Play size={20} />
+                  <span>Khai Mạc Chiến Dịch</span>
+                </button>
+                {!hasAssignedRoles && (
+                  <p className="text-[10px] text-[#ffd88f]/80 text-center font-mono mt-2">
+                    * Nhấn bắt đầu sẽ tự động xáo và chia vai trò
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="relative rounded-2xl hpvn-panel p-6 flex flex-col items-center justify-center text-center min-h-[460px]">
+              <div className="w-16 h-16 rounded-full bg-[#120803] border border-[#bd8436] flex items-center justify-center mb-4">
+                <Wand2 className="w-8 h-8 text-[#ffd88f] animate-pulse" />
+              </div>
+              <h3 className="font-title font-bold text-xl sm:text-2xl text-[#ffd88f] mb-2 tracking-wide">
+                Đang Chuẩn Bị Bùa Chú
+              </h3>
+              <p className="text-xs text-[#ebdcb0] font-lora max-w-xs leading-relaxed mb-6">
+                Merlin đang tập hợp các phù thủy và chuẩn bị chia sẻ thẻ bài định mệnh. Vui lòng giữ yên lặng trong sảnh!
+              </p>
+              
+              <div className="p-3 bg-[#120803] rounded-xl border border-[#5a3a1f] text-[11px] text-[#ebdcb0] font-mono max-w-xs">
+                {hasAssignedRoles ? (
+                  <span className="text-emerald-400 font-bold flex items-center justify-center gap-1">
+                    <CheckCircle size={14} /> Bạn đã được chia thẻ bài! Chờ khai mạc...
+                  </span>
+                ) : (
+                  <span className="text-[#ffd88f] flex items-center justify-center gap-1">
+                    ⏳ Đang chờ chia thẻ bài...
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* QR Code In-App Modal */}
+      {isQrOpen && roomCode && (
+        <div 
+          onClick={() => setIsQrOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative hpvn-panel-gold rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center border-2 border-[#bd8436] space-y-4"
+          >
+            <button
+              onClick={() => setIsQrOpen(false)}
+              className="absolute top-4 right-4 text-[#ebdcb0]/70 hover:text-[#ffd88f] p-1 rounded-lg bg-[#1a0e07] border border-[#7a5229] transition-colors cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="text-center">
+              <span className="text-[10px] font-mono tracking-widest text-[#ffd88f] uppercase block mb-1">
+                QUÉT MÃ THAM GIA PHÒNG
+              </span>
+              <h3 className="font-title font-bold text-2xl text-[#ffd88f] tracking-wide">
+                Phòng {roomCode}
+              </h3>
+              <p className="text-xs text-[#ebdcb0] font-lora mt-1">
+                Mở camera điện thoại để quét mã và tham gia ngay
+              </p>
+            </div>
+
+            {/* QR Code Canvas */}
+            <div className="bg-white p-4 rounded-2xl inline-block border-4 border-[#7a5229]">
+              <QRCodeSVG
+                value={inviteUrl}
+                size={210}
+                bgColor="#FFFFFF"
+                fgColor="#120803"
+                level="M"
+              />
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <p className="text-[11px] font-mono text-[#ffd88f] bg-[#120803] py-1.5 px-3 rounded-lg border border-[#7a5229] truncate">
+                {inviteUrl}
+              </p>
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803] font-serif font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {copiedLink ? <Check size={14} /> : <Copy size={14} />}
+                <span>{copiedLink ? 'Đã sao chép liên kết!' : 'Sao Chép Liên Kết'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Card Deck Modal */}
+      <CardDeckModal
+        isOpen={isDeckOpen}
+        onClose={() => setIsDeckOpen(false)}
+      />
     </div>
   );
 }

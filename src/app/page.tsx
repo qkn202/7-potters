@@ -139,6 +139,16 @@ export default function Home() {
             <span className="text-[11px] hidden sm:inline md:hidden">Bí Kíp</span>
           </button>
 
+          {/* Quick Link to Preview New In-Game HUD */}
+          <Link
+            href="/preview-hud"
+            title="Xem giao diện in-game mới không cần tạo phòng"
+            className="hpvn-btn-phoenix p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0 border border-amber-400/60"
+          >
+            <Sparkles size={14} className="text-amber-300 shrink-0 animate-pulse" />
+            <span className="text-[10px] sm:text-xs text-[#ffd88f] hidden xs:inline">HUD In-Game Mới</span>
+          </Link>
+
           {/* Perspective Indicator / Impersonator: CHỈ DUY NHẤT Ở CHẾ ĐỘ GIẢ LẬP MỚI MỞ CHO TẤT CẢ MỌI NGƯỜI */}
           {gameState.players.length > 0 && (
             <div className="flex items-center gap-1 sm:gap-1.5 bg-[#1a0e07] px-1.5 sm:px-2 py-1 rounded border border-[#7a5229] text-xs shrink-0 max-w-[100px] sm:max-w-[190px]">

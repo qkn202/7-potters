@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useGame } from '@/lib/GameContext';
+import Link from 'next/link';
 import { 
   Sparkles, 
   Wand2, 
@@ -281,6 +282,23 @@ export function JoinForm() {
             Cuộc tháo chạy định mệnh từ Privet Drive đến Trang trại Hang Sóc
           </p>
         </div>
+
+        {/* Prominent Banner to Preview New In-Game HUD */}
+        <Link
+          href="/preview-hud"
+          className="mb-5 p-3 rounded-2xl bg-gradient-to-r from-amber-950/90 via-[#351e0f]/95 to-amber-950/90 border-2 border-amber-400 text-amber-200 text-xs sm:text-sm font-serif font-bold flex items-center justify-between gap-2 shadow-2xl hover:border-amber-300 transition-all group relative z-20"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <Sparkles size={18} className="text-amber-400 animate-pulse shrink-0" />
+            <div className="flex flex-col text-left truncate">
+              <span className="text-[#ffd88f] font-black text-xs sm:text-sm">✨ GIAO DIỆN IN-GAME MỚI</span>
+              <span className="text-[10px] sm:text-[11px] text-amber-200/80 font-normal truncate">Chạm để mở xem ngay góc nhìn 4 phân vùng không cần tạo phòng!</span>
+            </div>
+          </div>
+          <span className="px-2.5 py-1.5 rounded-xl bg-amber-500 text-black font-black text-xs shrink-0 group-hover:scale-105 transition-transform flex items-center gap-1 shadow-md">
+            MỞ XEM ➔
+          </span>
+        </Link>
 
         {/* Mode Selector Tabs (Create / Join / Mock) */}
         <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#120803] rounded-xl border border-[#7a5229]/60 mb-5 relative z-10">

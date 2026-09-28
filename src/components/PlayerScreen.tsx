@@ -414,7 +414,7 @@ export function PlayerScreen() {
   const availableItemsCount = weasleyItems.filter(i => i.count > 0).length;
 
   return (
-    <div className="min-h-screen pb-32 sm:pb-24 pt-2 px-2 sm:px-4 max-w-5xl mx-auto flex flex-col">
+    <div className="w-full max-w-[440px] mx-auto min-h-screen px-2.5 pt-1.5 pb-28 flex flex-col select-none relative">
       {/* ============================================================== */}
       {/* FLOATING TOAST NOTIFICATION                                    */}
       {/* ============================================================== */}
@@ -439,57 +439,61 @@ export function PlayerScreen() {
       </AnimatePresence>
 
       {/* ============================================================== */}
-      {/* ============================================================== */}
       {/* ZONE 1: TOP FLIGHT HUD (EXACT MATCH OF USER'S SCREENSHOT)     */}
       {/* ============================================================== */}
-      <div className="relative mb-5 flex items-center justify-between px-1 pt-1 select-none">
+      <div className="relative mb-3 flex items-center justify-between px-1 pt-1 select-none">
         {/* Left Side: Glowing Blue Dot + Golden Progress Dash Pills */}
         <div className="flex items-center gap-1.5 shrink-0">
-          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.9)] animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#38bdf8] shadow-[0_0_10px_#38bdf8,0_0_20px_#0284c7] animate-pulse" />
           <div className="flex items-center gap-1">
-            <span className="w-6 h-1 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]" />
-            <span className="w-4 h-1 rounded-full bg-amber-400/60" />
-            <span className="w-2.5 h-1 rounded-full bg-amber-400/30" />
+            <span className="w-6 h-1 rounded-full bg-[#f59e0b] shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+            <span className="w-4 h-1 rounded-full bg-[#d97706]/70" />
+            <span className="w-2.5 h-1 rounded-full bg-[#b45309]/50" />
           </div>
         </div>
 
         {/* Center: Hanging Arch Shield Badge (Chặng 2/4) */}
-        <div className="relative -mt-1">
-          <div className="px-6 py-2 rounded-b-2xl bg-gradient-to-b from-[#131d2e] via-[#0d1624] to-[#080d16] border-x border-b-2 border-amber-400/70 shadow-[0_6px_20px_rgba(0,0,0,0.8)] text-center relative z-10 flex flex-col items-center">
-            <span className="font-serif font-black text-sm sm:text-base text-[#ffd88f] tracking-wider drop-shadow-md">
-              Chặng {gameState.round}/4
+        <div className="relative -mt-1 flex flex-col items-center">
+          <div className="px-5 sm:px-6 py-1.5 rounded-b-2xl bg-gradient-to-b from-[#131d2e] via-[#0d1624] to-[#070c16] border-x border-b-2 border-[#d4af37]/80 shadow-[0_8px_25px_rgba(0,0,0,0.9)] flex flex-col items-center">
+            <span className="font-serif font-black text-sm sm:text-base text-[#fef08a] tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              Chặng {gameState.round || 2}/4
             </span>
-            <div className="text-[10px] text-amber-400/80 -mt-0.5 leading-none">
+            <div className="text-[#ffd88f] text-[9px] -mt-0.5 leading-none">
               ✦
             </div>
           </div>
           {/* Subtle hanging fleur drop below badge */}
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-amber-400/70" />
+          <div className="w-2.5 h-2.5 rotate-45 bg-[#d4af37]/90 -mt-1 shadow-sm" />
         </div>
 
         {/* Right Side: Night Phase Pill & Pocket Watch + Open Trigger */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0c1422]/90 border border-amber-500/40 text-xs font-serif text-amber-200 shadow-inner">
-            {isNight ? <Moon size={12} className="text-cyan-300" /> : <Sun size={12} className="text-amber-400" />}
-            <span className="font-bold">{isNight ? `Đêm ${gameState.round}` : `Ngày ${gameState.round}`}</span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0a121e]/90 border border-[#b45309]/60 text-xs font-serif text-[#ffd88f] shadow-inner">
+            {isNight ? <Moon size={11} className="text-[#38bdf8]" /> : <Sun size={11} className="text-[#f59e0b]" />}
+            <span className="font-bold">{isNight ? `Đêm ${gameState.round || 2}` : `Ngày ${gameState.round || 2}`}</span>
           </div>
 
+          {/* Golden Pocket Watch Button */}
           <button
             onClick={() => setIsDeckOpen(true)}
-            className="p-1.5 rounded-full bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-black shadow-[0_0_10px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            className="relative w-7 h-7 rounded-full bg-gradient-to-br from-[#fef08a] via-[#d4af37] to-[#854d0e] p-[1.5px] shadow-[0_0_10px_rgba(212,175,55,0.5)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer"
             title="Bí Kíp 27 Thẻ Bài"
           >
-            <Clock size={15} className="text-black" />
+            <div className="w-full h-full rounded-full bg-[#0b172a] flex items-center justify-center text-[#ffd88f]">
+              <Clock size={13} className="text-[#ffd88f]" />
+            </div>
+            <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-1 rounded-t-full border border-[#fef08a]" />
           </button>
 
-          {/* Open Menu Trigger */}
+          {/* Open Menu Trigger with Green Notification Dot */}
           <button
             onClick={() => setIsInventoryOpen(true)}
-            className="px-2.5 py-1 rounded-xl bg-[#0e1726]/90 hover:bg-[#15233a] border border-[#23354d] text-xs font-mono text-cyan-200 flex items-center gap-1 cursor-pointer transition-colors shadow"
-            title="Bảo Bối & Lệnh Bí Mật"
+            className="px-2.5 py-1 rounded-xl bg-[#0e192a]/90 hover:bg-[#14233a] border border-[#1e3452] text-xs font-serif text-[#7dd3fc] flex items-center gap-0.5 cursor-pointer relative shadow transition-colors"
+            title="Bảo Bối & Menu Mật"
           >
             <span>Open</span>
-            <ChevronDown size={12} />
+            <ChevronDown size={11} />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-sm bg-[#10b981] shadow-[0_0_6px_#10b981]" />
           </button>
         </div>
       </div>
@@ -532,60 +536,61 @@ export function PlayerScreen() {
       {/* ============================================================== */}
       {/* ZONE 2: HERO PASSPORT (EXACT MATCH OF USER'S SCREENSHOT)       */}
       {/* ============================================================== */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#0b1320]/95 via-[#101b2c]/95 to-[#0b1320]/95 border border-[#1e2a3c] p-3.5 sm:p-4 mb-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
+      <div className="rounded-2xl bg-gradient-to-r from-[#0c1524]/95 via-[#111e33]/95 to-[#0c1524]/95 border border-[#1e2f47] p-3 sm:p-3.5 mb-3 shadow-[0_10px_30px_rgba(0,0,0,0.8)] backdrop-blur-md relative overflow-hidden flex items-center justify-between gap-2.5">
         {/* Subtle ambient golden lighting */}
         <div className="absolute top-0 left-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="flex items-center justify-between gap-3 relative z-10">
-          {/* Left: Square Card Portrait with Glowing Gold Rim */}
-          <div 
-            onClick={() => setInspectSelf(true)}
-            className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-2xl p-0.5 border-2 border-amber-400 ring-2 ring-amber-400/40 shadow-[0_0_18px_rgba(245,158,11,0.35)] shrink-0 bg-black cursor-pointer group hover:scale-105 transition-transform overflow-hidden"
-            title="Chạm để xem toàn bộ Thẻ Bài"
-          >
+        {/* Left: Square Card Portrait with Glowing Gold Rim */}
+        <div 
+          onClick={() => setInspectSelf(true)}
+          className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl p-0.5 bg-gradient-to-b from-[#fef08a] via-[#d4af37] to-[#854d0e] shadow-[0_0_15px_rgba(245,158,11,0.4)] shrink-0 overflow-hidden cursor-pointer group hover:scale-105 transition-transform"
+          title="Chạm để xem toàn bộ Thẻ Bài"
+        >
+          <div className="relative w-full h-full rounded-[14px] overflow-hidden bg-black">
             <Image
               src={me.role?.image || '/cards/harry.jpg'}
               alt={me.name}
               fill
-              className="object-cover object-top rounded-[14px]"
+              className="object-cover object-top"
               priority
             />
+            <div className="absolute inset-0 bg-radial from-amber-400/20 via-transparent to-black/30 pointer-events-none" />
             {isDead && (
-              <div className="absolute inset-0 bg-black/60 rounded-[14px] flex items-center justify-center text-red-400">
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-red-400">
                 <Skull size={20} />
               </div>
             )}
           </div>
+        </div>
 
-          {/* Middle: Hero Passport Subtitle + Character Name + Tactical Pill */}
-          <div className="flex-1 min-w-0 pr-1">
-            <span className="text-[11px] font-mono tracking-widest uppercase text-amber-300/90 block mb-0.5 font-bold">
-              Hero Passport
-            </span>
-            <h2 className="font-serif font-black text-xl sm:text-2xl text-white truncate leading-tight drop-shadow-md">
-              {me.role?.name || me.name}
-            </h2>
+        {/* Middle: Hero Passport Subtitle + Character Name + Tactical Pill */}
+        <div className="flex-1 min-w-0 pr-0.5">
+          <span className="text-[10px] sm:text-[11px] font-serif uppercase tracking-widest text-[#ffd88f]/90 block mb-0.5 font-bold">
+            Hero Passport
+          </span>
+          <h2 className="font-serif font-black text-lg sm:text-xl text-white tracking-wide truncate leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            {me.role?.name || me.name}
+          </h2>
 
-            {/* Tactical Prompt Pill */}
-            <div className="mt-1.5 px-3 py-1 rounded-full bg-[#161208]/90 border border-amber-500/50 text-[#ffd88f] text-[11px] sm:text-xs font-serif flex items-center gap-1.5 shadow-sm max-w-full truncate">
-              <span className="text-amber-400 shrink-0">🌙</span>
-              <span className="truncate">{getMissionPrompt()}</span>
-            </div>
+          {/* Tactical Prompt Pill */}
+          <div className="mt-1 px-2.5 py-0.5 rounded-full bg-[#14120b]/90 border border-[#b45309]/70 text-[#fef08a] text-[10px] sm:text-[11px] font-serif flex items-center gap-1 shadow-inner max-w-full">
+            <span className="text-amber-400 shrink-0">🌙</span>
+            <span className="truncate">{getMissionPrompt()}</span>
           </div>
+        </div>
 
-          {/* Right: Gryffindor Shield Crest */}
-          <div className="shrink-0 flex items-center justify-center">
-            <HouseCrestShield 
-              house={me.role?.faction === 'DEATH_EATERS' ? 'SLYTHERIN' : (me.house || 'GRYFFINDOR')} 
-              className="w-12 h-14 sm:w-14 sm:h-16 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" 
-            />
-          </div>
+        {/* Right: Gryffindor Shield Crest */}
+        <div className="shrink-0 flex items-center justify-center">
+          <HouseCrestShield 
+            house={me.role?.faction === 'DEATH_EATERS' ? 'SLYTHERIN' : (me.house || 'GRYFFINDOR')} 
+            className="w-11 h-13 sm:w-12 sm:h-14 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" 
+          />
         </div>
       </div>
 
       {/* Secret Allies Strip for Death Eaters */}
       {isDeathEater && (
-        <div className="mb-3 p-2.5 rounded-xl bg-[#031d13] border border-emerald-600/70 text-xs flex flex-col gap-1">
+        <div className="mb-2.5 p-2 rounded-xl bg-[#031d13] border border-emerald-600/70 text-xs flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-emerald-300 font-serif font-bold text-[11px]">
             <DarkMarkCrest className="w-3.5 h-3.5" />
             <span>Liên Minh Tử Thần Thực Tử:</span>
@@ -610,21 +615,12 @@ export function PlayerScreen() {
         </div>
       )}
 
-
       {/* ============================================================== */}
       {/* ZONE 3: FLIGHT FORMATION ARENA (ĐẤU TRƯỜNG PHI ĐỘI BẦU TRỜ)     */}
       {/* ============================================================== */}
-      <div className="flex-1 space-y-2 mb-4">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-serif font-black uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
-            <Feather size={13} className="text-amber-400" />
-            Phi Đội Bầu Trời ({gameState.players.filter(p => !p.isGM && p.id !== me.id).length} Phù Thủy)
-          </span>
-          <span className="text-[10px] text-zinc-400 font-mono">Chạm để nhắm mục tiêu</span>
-        </div>
-
+      <div className="flex-1 space-y-2 mb-3">
         {/* 2-Column Responsive Grid matching user's exact mockup */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 w-full">
           {gameState.players.filter(p => !p.isGM && p.id !== me.id).map((player, idx) => {
             const isSelected = effectiveTargetId === player.id;
             const isMyVote = myAction?.targetId === player.id;
@@ -645,7 +641,7 @@ export function PlayerScreen() {
             let statusBadgeNode: React.ReactNode = null;
             if (isMyVote) {
               statusBadgeNode = (
-                <span className="px-2.5 py-1 rounded-full bg-[#0a1829] border border-cyan-400 text-cyan-200 text-[11px] font-serif font-bold shadow-[0_0_12px_rgba(34,211,238,0.5)] flex items-center gap-1 shrink-0 animate-pulse">
+                <span className="px-2 py-0.5 rounded-full bg-[#0a1829] border border-cyan-400 text-cyan-200 text-[10px] font-serif font-bold shadow-[0_0_10px_rgba(34,211,238,0.5)] flex items-center gap-1 shrink-0 animate-pulse">
                   🛡️ Hộ tống
                 </span>
               );
@@ -689,8 +685,8 @@ export function PlayerScreen() {
       {/* ============================================================== */}
       {/* ZONE 4: FLOATING BOTTOM ACTION DOCK (VÙNG NGÓN TAY CÁI)         */}
       {/* ============================================================== */}
-      <div className="fixed bottom-0 left-0 right-0 p-2.5 sm:p-3 bg-gradient-to-t from-black via-[#0e0703]/98 to-transparent border-t border-amber-500/20 backdrop-blur-lg z-40">
-        <div className="max-w-xl mx-auto flex items-center gap-2">
+      <div className="fixed bottom-0 left-0 right-0 p-2 sm:p-2.5 bg-gradient-to-t from-black via-[#060b13]/98 to-transparent border-t border-[#1e2f47]/50 backdrop-blur-lg z-40">
+        <div className="max-w-[440px] mx-auto flex items-center gap-2">
           
           {/* ================= DAY ACTION: VOTE TƯỚC ĐŨA ================= */}
           {isDay ? (

@@ -60,134 +60,136 @@ export default function Home() {
   return (
     <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
       
-      {/* Top Magical Navigation Bar - Styled after HPVN Floo Shoutbox Header */}
-      <header className="sticky top-0 z-40 hpvn-header-banner px-2 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between backdrop-blur-md gap-1.5 sm:gap-3">
-        <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink">
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            <PhoenixCrest className="w-5 h-5 sm:w-7 sm:h-7 shrink-0" />
-            <div className="flex flex-col min-w-0">
-              <span className="font-title-magical font-bold text-xs sm:text-xl md:text-2xl tracking-wide text-[#ffd88f] flex items-center gap-1 leading-none">
-                <span className="hidden sm:inline">⚡</span> 
-                <span className="truncate hidden sm:inline">HPVN · BẢY POTTER</span> 
-                <span className="truncate sm:hidden">BẢY POTTER</span> 
-                <span className="hidden sm:inline">⚡</span>
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-lora italic text-[#ebdcb0]/80 tracking-widest hidden lg:inline truncate">
-                MẠNG FLOO HỘI PHƯỢNG HOÀNG · TRẬN CHIẾN TRÊN KHÔNG
-              </span>
-            </div>
-            <DarkMarkCrest className="w-5 h-5 sm:w-7 sm:h-7 hidden sm:block shrink-0" />
-          </div>
-        </div>
-
-        {/* Center/Right Controls: Perspective Switcher & Rulebook */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-          
-          {/* Floo Realtime Status Beacon */}
-          <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-lg bg-[#1a0e07]/90 border border-[#7a5229] text-[10px] sm:text-[11px] font-mono text-[#ffd88f] shrink-0">
-            {roomCode ? (
-              <>
-                <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0 ${
-                  connStatus === 'connected' 
-                    ? 'bg-emerald-400 animate-pulse' 
-                    : connStatus === 'connecting' || connStatus === 'reconnecting'
-                    ? 'bg-amber-400 animate-pulse'
-                    : 'bg-red-500'
-                }`} />
-                <span className="font-bold">
-                  <span className="hidden sm:inline">Phòng: </span>#{roomCode}
+      {/* Top Magical Navigation Bar - Styled after HPVN Floo Shoutbox Header (Hidden during in-game PlayerScreen for authentic AAA HUD) */}
+      {(!currentPlayer || currentPlayer.isGM || gameState.phase === 'LOBBY') && (
+        <header className="sticky top-0 z-40 hpvn-header-banner px-2 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between backdrop-blur-md gap-1.5 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              <PhoenixCrest className="w-5 h-5 sm:w-7 sm:h-7 shrink-0" />
+              <div className="flex flex-col min-w-0">
+                <span className="font-title-magical font-bold text-xs sm:text-xl md:text-2xl tracking-wide text-[#ffd88f] flex items-center gap-1 leading-none">
+                  <span className="hidden sm:inline">⚡</span> 
+                  <span className="truncate hidden sm:inline">HPVN · BẢY POTTER</span> 
+                  <span className="truncate sm:hidden">BẢY POTTER</span> 
+                  <span className="hidden sm:inline">⚡</span>
                 </span>
-              </>
-            ) : (
-              <span 
-                title="Chế độ Giả Lập: Cho phép đổi góc nhìn tự do giữa các người chơi để kiểm thử"
-                className="flex items-center gap-1 font-bold text-cyan-300 font-mono text-[10px] sm:text-[11px]"
-              >
-                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
-                <span className="hidden sm:inline">Chế độ </span>Giả Lập
-              </span>
-            )}
+                <span className="text-[9px] sm:text-[10px] font-lora italic text-[#ebdcb0]/80 tracking-widest hidden lg:inline truncate">
+                  MẠNG FLOO HỘI PHƯỢNG HOÀNG · TRẬN CHIẾN TRÊN KHÔNG
+                </span>
+              </div>
+              <DarkMarkCrest className="w-5 h-5 sm:w-7 sm:h-7 hidden sm:block shrink-0" />
+            </div>
           </div>
 
-          {/* Floo Shoutbox Header Button (In-App Drawer) */}
-          <FlooHeaderTrigger onClick={() => setIsFlooOpen(true)} />
-
-          {/* Weasleys' Wizard Wheezes Supply Crate Button */}
-          {gameState.phase !== 'LOBBY' && (
-            <button
-              onClick={() => setIsWeasleyCrateOpen(true)}
-              title="Hòm Đồ Tiệm Phù Thủy Weasley"
-              className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer relative shrink-0"
-            >
-              <Package size={14} className="text-amber-300 shrink-0" />
-              <span className="text-[11px] sm:text-xs hidden md:inline">Bảo Bối Weasley</span>
-              <span className="text-[11px] hidden sm:inline md:hidden">Bảo Bối</span>
-              {(gameState.weasleyItems || []).some(i => i.count > 0) && (
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping absolute -top-0.5 -right-0.5" />
-              )}
-            </button>
-          )}
-
-          {/* Rulebook / Codex Deck Button */}
-          <button
-            onClick={() => setIsDeckOpen(true)}
-            title="Xem 27 thẻ bài & luật chơi"
-            className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0"
-          >
-            <BookOpen size={14} className="shrink-0" />
-            <span className="text-[11px] sm:text-xs hidden md:inline">Bí Kíp 27 Thẻ Bài</span>
-            <span className="text-[11px] hidden sm:inline md:hidden">Bí Kíp</span>
-          </button>
-
-
-          {/* MOD HPVN - Ultimate Edition Link */}
-          <Link
-            href="/hpvn"
-            title="MOD HPVN - Ultimate Edition: Kết hợp Classic & Chaos"
-            className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0 border border-purple-400/60"
-          >
-            <Crown size={14} className="text-purple-300 shrink-0" />
-            <span className="text-[11px] sm:text-xs text-[#ffd88f] hidden md:inline">MOD HPVN</span>
-            <span className="text-[11px] hidden sm:inline md:hidden">HPVN</span>
-          </Link>
-
-          {/* Perspective Indicator / Impersonator: CHỈ DUY NHẤT Ở CHẾ ĐỘ GIẢ LẬP MỚI MỞ CHO TẤT CẢ MỌI NGƯỜI */}
-          {gameState.players.length > 0 && (
-            <div className="flex items-center gap-1 sm:gap-1.5 bg-[#1a0e07] px-1.5 sm:px-2 py-1 rounded border border-[#7a5229] text-xs shrink-0 max-w-[100px] sm:max-w-[190px]">
-              {canSwitchPerspective ? (
+          {/* Center/Right Controls: Perspective Switcher & Rulebook */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            
+            {/* Floo Realtime Status Beacon */}
+            <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-lg bg-[#1a0e07]/90 border border-[#7a5229] text-[10px] sm:text-[11px] font-mono text-[#ffd88f] shrink-0">
+              {roomCode ? (
                 <>
-                  <Bot size={12} className="text-cyan-400 shrink-0" />
-                  <span className="hidden md:inline text-[11px] text-cyan-200/90 font-mono font-semibold">
-                    Góc nhìn:
+                  <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0 ${
+                    connStatus === 'connected' 
+                      ? 'bg-emerald-400 animate-pulse' 
+                      : connStatus === 'connecting' || connStatus === 'reconnecting'
+                      ? 'bg-amber-400 animate-pulse'
+                      : 'bg-red-500'
+                  }`} />
+                  <span className="font-bold">
+                    <span className="hidden sm:inline">Phòng: </span>#{roomCode}
                   </span>
-                  <select
-                    value={currentPlayerId || ''}
-                    onChange={(e) => impersonatePlayer(e.target.value)}
-                    className="bg-transparent text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold focus:outline-none cursor-pointer truncate max-w-[75px] sm:max-w-[145px]"
-                    title="Chế độ giả lập: Tự do chuyển đổi góc nhìn giữa Merlin, Host và các người chơi khác"
-                  >
-                    {gameState.players.map((p, idx) => (
-                      <option key={`perspective-${p.id || idx}`} value={p.id} className="bg-[#1a0e07] text-[#ffd88f]">
-                        {p.name} {p.isGM ? '👑 (Merlin)' : (p.isBot || p.name.includes('(Bot)') || p.id.startsWith('bot_')) ? '🤖' : ''} {p.role ? `· ${p.role.name}` : ''}
-                      </option>
-                    ))}
-                  </select>
                 </>
               ) : (
-                <>
-                  <User size={12} className="text-[#ffd88f] shrink-0" />
-                  <span 
-                    className="text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold truncate max-w-[75px] sm:max-w-[145px]"
-                    title={`Bạn đang tham gia với tư cách: ${currentPlayer?.name}`}
-                  >
-                    {currentPlayer?.name || 'Phù thủy'}
-                  </span>
-                </>
+                <span 
+                  title="Chế độ Giả Lập: Cho phép đổi góc nhìn tự do giữa các người chơi để kiểm thử"
+                  className="flex items-center gap-1 font-bold text-cyan-300 font-mono text-[10px] sm:text-[11px]"
+                >
+                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                  <span className="hidden sm:inline">Chế độ </span>Giả Lập
+                </span>
               )}
             </div>
-          )}
-        </div>
-      </header>
+
+            {/* Floo Shoutbox Header Button (In-App Drawer) */}
+            <FlooHeaderTrigger onClick={() => setIsFlooOpen(true)} />
+
+            {/* Weasleys' Wizard Wheezes Supply Crate Button */}
+            {gameState.phase !== 'LOBBY' && (
+              <button
+                onClick={() => setIsWeasleyCrateOpen(true)}
+                title="Hòm Đồ Tiệm Phù Thủy Weasley"
+                className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer relative shrink-0"
+              >
+                <Package size={14} className="text-amber-300 shrink-0" />
+                <span className="text-[11px] sm:text-xs hidden md:inline">Bảo Bối Weasley</span>
+                <span className="text-[11px] hidden sm:inline md:hidden">Bảo Bối</span>
+                {(gameState.weasleyItems || []).some(i => i.count > 0) && (
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping absolute -top-0.5 -right-0.5" />
+                )}
+              </button>
+            )}
+
+            {/* Rulebook / Codex Deck Button */}
+            <button
+              onClick={() => setIsDeckOpen(true)}
+              title="Xem 27 thẻ bài & luật chơi"
+              className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0"
+            >
+              <BookOpen size={14} className="shrink-0" />
+              <span className="text-[11px] sm:text-xs hidden md:inline">Bí Kíp 27 Thẻ Bài</span>
+              <span className="text-[11px] hidden sm:inline md:hidden">Bí Kíp</span>
+            </button>
+
+
+            {/* MOD HPVN - Ultimate Edition Link */}
+            <Link
+              href="/hpvn"
+              title="MOD HPVN - Ultimate Edition: Kết hợp Classic & Chaos"
+              className="hpvn-btn-gold p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-serif font-bold flex items-center gap-1 cursor-pointer shrink-0 border border-purple-400/60"
+            >
+              <Crown size={14} className="text-purple-300 shrink-0" />
+              <span className="text-[11px] sm:text-xs text-[#ffd88f] hidden md:inline">MOD HPVN</span>
+              <span className="text-[11px] hidden sm:inline md:hidden">HPVN</span>
+            </Link>
+
+            {/* Perspective Indicator / Impersonator: CHỈ DUY NHẤT Ở CHẾ ĐỘ GIẢ LẬP MỚI MỞ CHO TẤT CẢ MỌI NGƯỜI */}
+            {gameState.players.length > 0 && (
+              <div className="flex items-center gap-1 sm:gap-1.5 bg-[#1a0e07] px-1.5 sm:px-2 py-1 rounded border border-[#7a5229] text-xs shrink-0 max-w-[100px] sm:max-w-[190px]">
+                {canSwitchPerspective ? (
+                  <>
+                    <Bot size={12} className="text-cyan-400 shrink-0" />
+                    <span className="hidden md:inline text-[11px] text-cyan-200/90 font-mono font-semibold">
+                      Góc nhìn:
+                    </span>
+                    <select
+                      value={currentPlayerId || ''}
+                      onChange={(e) => impersonatePlayer(e.target.value)}
+                      className="bg-transparent text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold focus:outline-none cursor-pointer truncate max-w-[75px] sm:max-w-[145px]"
+                      title="Chế độ giả lập: Tự do chuyển đổi góc nhìn giữa Merlin, Host và các người chơi khác"
+                    >
+                      {gameState.players.map((p, idx) => (
+                        <option key={`perspective-${p.id || idx}`} value={p.id} className="bg-[#1a0e07] text-[#ffd88f]">
+                          {p.name} {p.isGM ? '👑 (Merlin)' : (p.isBot || p.name.includes('(Bot)') || p.id.startsWith('bot_')) ? '🤖' : ''} {p.role ? `· ${p.role.name}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                ) : (
+                  <>
+                    <User size={12} className="text-[#ffd88f] shrink-0" />
+                    <span 
+                      className="text-[10px] sm:text-xs text-[#ffd88f] font-serif font-bold truncate max-w-[75px] sm:max-w-[145px]"
+                      title={`Bạn đang tham gia với tư cách: ${currentPlayer?.name}`}
+                    >
+                      {currentPlayer?.name || 'Phù thủy'}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </header>
+      )}
 
       {/* 4-Stage Flight Progress Track: Chỉ hiển thị cho Quản Trò Merlin (vì PlayerScreen đã có Zone 1 Flight HUD tích hợp siêu mượt) */}
       {gameState.phase !== 'LOBBY' && gameState.phase !== 'END' && currentPlayer?.isGM && (

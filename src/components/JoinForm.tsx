@@ -283,6 +283,44 @@ export function JoinForm() {
           </p>
         </div>
 
+        {/* VERSION 2026 BADGE & INSTANT CACHE RESET */}
+        <div className="flex items-center justify-between gap-2 px-3 py-1.5 mb-3 bg-[#160d07] border border-[#7a5229]/80 rounded-xl text-[11px] font-mono text-[#ffd88f] relative z-20 shadow-inner">
+          <div className="flex items-center gap-1.5 truncate">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="truncate">✨ Bàn Cờ Mới: 27 Thẻ Bài Ma Thuật</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                const keys = [
+                  'seven-potters-mock-state',
+                  'seven-potters-session-id',
+                  'seven-potters-room-code',
+                  'seven-potters-is-host',
+                  'seven-potters-player-name',
+                  'seven-potters-is-gm',
+                  'seven-potters-house',
+                  'seven-potters-user-tag',
+                  'seven-potters-hpvn-uid',
+                  'seven-potters-session-timestamp',
+                ];
+                keys.forEach(k => {
+                  try {
+                    sessionStorage.removeItem(k);
+                    localStorage.removeItem(k);
+                  } catch {}
+                });
+                window.location.reload();
+              }
+            }}
+            className="text-amber-400 hover:text-white underline text-[10px] shrink-0 font-bold cursor-pointer transition-colors"
+            title="Xóa cache và làm mới bàn cờ"
+          >
+            Làm mới ↻
+          </button>
+        </div>
+
         {/* HERO CARDS FAN PREVIEW */}
         <div 
           onClick={() => setIsDeckOpen(true)}

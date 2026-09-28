@@ -19,6 +19,42 @@ interface HPVNGameBoardProps {
   currentPlayerId: string;
 }
 
+const ROLE_CARD_IMAGES: Record<string, string> = {
+  HARRY_POTTER: '/cards/harry.jpg',
+  RON_WEASLEY: '/cards/ron.jpg',
+  RON_WESLEY: '/cards/ron.jpg',
+  HERMIONE_GRANGER: '/cards/hermione.jpg',
+  DUMBLEDORE: '/cards/dumbledore.jpg',
+  SNAPE: '/cards/snape.jpg',
+  LUPIN: '/cards/lupin.jpg',
+  MOODY: '/cards/moody.jpg',
+  HAGRID: '/cards/hagrid.jpg',
+  KINGSLEY: '/cards/kingsley.jpg',
+  FRED: '/cards/fred.jpg',
+  GEORGE: '/cards/george.jpg',
+  BILL: '/cards/bill.jpg',
+  TONKS: '/cards/tonks.jpg',
+  FLEUR: '/cards/fleur.jpg',
+  MCGONAGALL: '/cards/mcgonagall.jpg',
+  McGONAGALL: '/cards/mcgonagall.jpg',
+  NEVILLE: '/cards/neville.jpg',
+  VOLDEMORT: '/cards/voldemort.jpg',
+  BELLATRIX: '/cards/bellatrix.jpg',
+  LUCIUS: '/cards/lucius.jpg',
+  LUCIFUS_MALFORY: '/cards/lucius.jpg',
+  PETTIGREW: '/cards/pettigrew.jpg',
+  WORMTAIL: '/cards/pettigrew.jpg',
+  FENRIR: '/cards/greyback.jpg',
+  DRACO: '/cards/draco.jpg',
+  JESTER: '/cards/jester.jpg',
+  POLYJUICE: '/cards/potter_fake.jpg',
+  POLYJUICE_POTION: '/cards/potter_fake.jpg',
+  DOLORES: '/cards/dolores.jpg',
+  DOLORES_UMBRIDGE: '/cards/dolores.jpg',
+  MUNDUNGUS: '/cards/mundungus.jpg',
+  ARTHUR: '/cards/arthur.jpg',
+};
+
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -295,25 +331,42 @@ export default function HPVNGameBoard({ playerNames, settings, currentPlayerId }
 
           {/* Sidebar */}
           <div className="space-y-4">
-            {/* My Role */}
-            <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-4">
-              <h3 className="text-sm font-semibold text-purple-300 mb-3">VAI TRÒ CỦA BẠN</h3>
+            {/* My Role Hero Card */}
+            <div className="bg-gradient-to-b from-[#1c1208] to-[#0e0703] border-2 border-amber-500/50 rounded-2xl p-4 shadow-xl">
+              <h3 className="text-xs font-serif font-black uppercase tracking-wider text-amber-400 mb-3 flex items-center gap-1.5">
+                <Crown size={14} className="text-amber-400" /> VAI TRÒ CỦA BẠN
+              </h3>
               {currentPlayer?.role ? (
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`w-3 h-3 rounded-full ${getFactionColor(currentPlayer.role.faction)}`} />
-                    <span className="font-bold">{currentPlayer.role.name}</span>
+                  <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-amber-400/70 shadow-lg mb-3">
+                    <img
+                      src={ROLE_CARD_IMAGES[currentPlayer.role.id] || '/cards/harry.jpg'}
+                      alt={currentPlayer.role.name}
+                      className="w-full h-full object-cover object-top"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                    <div className="absolute bottom-2 left-2 right-2">
+                      <span className="text-xs font-serif font-black text-[#ffd88f] block truncate">
+                        {currentPlayer.role.name}
+                      </span>
+                      <span className="text-[10px] text-zinc-300 font-lora italic truncate block">
+                        {currentPlayer.role.title}
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-400 mb-3">{currentPlayer.role.description}</p>
+                  <div className="p-2.5 rounded-xl bg-black/60 border border-amber-500/30 text-xs text-zinc-200 font-lora mb-3">
+                    <strong className="text-amber-300 font-serif block mb-0.5">⚡ Năng lực:</strong>
+                    {currentPlayer.role.ability}
+                  </div>
                   <button
                     onClick={() => setShowRoleCard(true)}
-                    className="text-xs text-purple-400 hover:text-purple-300 underline"
+                    className="w-full py-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-black font-serif font-black text-xs rounded-xl shadow-md cursor-pointer transition-all"
                   >
-                    Xem chi tiết kỹ năng →
+                    Xem Chi Tiết Thẻ Bài →
                   </button>
                 </div>
               ) : (
-                <p className="text-slate-500 text-sm">Chưa có vai trò</p>
+                <p className="text-slate-500 text-xs font-serif">Chưa có vai trò</p>
               )}
             </div>
 
@@ -412,19 +465,33 @@ function PlayerCard({
         </div>
       )}
 
-      {/* Avatar */}
-      <div className="flex items-center gap-2 mb-2">
-        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarGradient(player.faction)} flex items-center justify-center font-bold`}>
-          {player.name[0]?.toUpperCase()}
+      {/* Avatar Card Portrait */}
+      <div className="flex items-center gap-2.5 mb-2">
+        <div className="relative w-12 h-14 rounded-xl overflow-hidden border border-amber-400/60 shadow-md shrink-0 bg-black">
+          <img
+            src={(player.role && ROLE_CARD_IMAGES[player.role.id]) || '/cards/harry.jpg'}
+            alt={player.name}
+            className="w-full h-full object-cover object-top"
+          />
+          {player.status === 'DEAD' && (
+            <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+              <Skull className="w-5 h-5 text-red-500" />
+            </div>
+          )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm truncate">{player.name}</p>
-          <div className="flex items-center gap-1">
+          <p className="font-serif font-black text-sm text-[#ffd88f] truncate">{player.name}</p>
+          <div className="flex items-center gap-1.5 mt-0.5">
             <span className={`w-2 h-2 rounded-full ${factionColor}`} />
-            <span className="text-xs text-slate-400">
-              {player.status === 'GHOST' ? '👻 Ghost' : player.status === 'DEAD' ? '💀 Dead' : '✓ Alive'}
+            <span className="text-[11px] font-mono text-zinc-400">
+              {player.status === 'GHOST' ? '👻 Ma' : player.status === 'DEAD' ? '💀 Tử trận' : '✓ Sống'}
             </span>
           </div>
+          {player.role && isCurrentPlayer && (
+            <span className="text-[10px] font-serif text-amber-300 truncate block mt-0.5 font-bold">
+              {player.role.name}
+            </span>
+          )}
         </div>
       </div>
 
@@ -601,41 +668,54 @@ function ActionPanel({
 // ============================================================================
 
 function RoleCardModal({ role, onClose }: { role: Role; onClose: () => void }) {
+  const cardImg = ROLE_CARD_IMAGES[role.id] || '/cards/harry.jpg';
+
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
-        className="bg-gradient-to-br from-slate-900 to-purple-900 border border-purple-500/50 rounded-2xl p-6 max-w-md w-full"
+        className="bg-gradient-to-b from-[#1c1208] to-[#0c0603] border-2 border-amber-400 rounded-3xl p-6 max-w-sm w-full shadow-2xl overflow-hidden relative"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-4 h-4 rounded-full ${getFactionColor(role.faction)}`} />
-            <span className="text-sm text-slate-400">{role.faction.replace('_', ' ')}</span>
+        <button 
+          onClick={onClose} 
+          className="absolute top-4 right-4 text-zinc-400 hover:text-white text-xl p-1 bg-black/50 rounded-full w-8 h-8 flex items-center justify-center z-20 cursor-pointer"
+        >
+          ✕
+        </button>
+
+        {/* Card Image */}
+        <div className="relative w-full h-64 rounded-2xl overflow-hidden border-2 border-amber-400 shadow-xl mb-4">
+          <img
+            src={cardImg}
+            alt={role.name}
+            className="w-full h-full object-cover object-top"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+          <div className="absolute bottom-3 left-3 right-3">
+            <h2 className="text-xl font-serif font-black text-[#ffd88f]">{role.name}</h2>
+            <p className="text-xs text-amber-200/80 font-lora italic">{role.title}</p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
-        <h2 className="text-2xl font-bold mb-1">{role.name}</h2>
-        <p className="text-purple-300 text-sm mb-4">{role.title}</p>
-
-        <div className="bg-slate-800/50 rounded-lg p-4 mb-4">
-          <h4 className="text-xs text-purple-400 uppercase mb-2">Mô tả</h4>
-          <p className="text-sm text-slate-300">{role.description}</p>
+        <div className="bg-black/60 rounded-xl p-3 border border-amber-500/30 mb-3 text-xs text-[#ebdcb0] font-lora leading-relaxed">
+          {role.description}
         </div>
 
-        <div className="bg-purple-900/30 rounded-lg p-4 mb-4">
-          <h4 className="text-xs text-purple-400 uppercase mb-2">Kỹ năng</h4>
-          <p className="text-sm text-white">{role.ability}</p>
+        <div className="bg-amber-950/40 rounded-xl p-3 border border-amber-400/40 mb-4">
+          <h4 className="text-[10px] font-serif font-black text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+            <Sparkles size={12} /> Năng Lực Ma Thuật
+          </h4>
+          <p className="text-xs text-zinc-100 font-lora leading-relaxed">{role.ability}</p>
         </div>
 
-        <div className="flex gap-2 text-xs text-slate-400">
-          <span className={`px-2 py-1 rounded ${role.phaseType === 'NIGHT' ? 'bg-blue-900/50' : 'bg-orange-900/50'}`}>
-            {role.phaseType}
+        <div className="flex gap-2 text-[11px] font-mono justify-center">
+          <span className={`px-2.5 py-1 rounded-full font-bold ${role.phaseType === 'NIGHT' ? 'bg-indigo-950 text-indigo-300 border border-indigo-700' : 'bg-amber-950 text-amber-300 border border-amber-700'}`}>
+            {role.phaseType === 'NIGHT' ? '🌙 Đêm' : '☀️ Ngày'}
           </span>
-          <span className="px-2 py-1 rounded bg-slate-800">
+          <span className="px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-300">
             Vote: {role.canVote ? '✓' : '✕'}
           </span>
-          <span className="px-2 py-1 rounded bg-slate-800">
+          <span className="px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-300">
             Kill: {role.canKill ? '✓' : '✕'}
           </span>
         </div>

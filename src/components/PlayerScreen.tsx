@@ -711,82 +711,102 @@ export function PlayerScreen() {
                           : 'bg-black/50 hover:bg-[#1a110a]/80 border-white/10'
                 }`}
               >
-                {/* Crosshair indicator */}
-                {isSelected && (
-                  <span className="absolute top-2 right-2 text-amber-400 animate-spin-slow">
-                    <Crosshair size={14} />
-                  </span>
-                )}
-
-                {/* Fellow Death Eater Mark */}
-                {isFellowDeathEater && (
-                  <span className="absolute top-2 left-2 text-emerald-400" title="Đồng minh Tử Thần Thực Tử">
-                    <DarkMarkCrest className="w-3.5 h-3.5" />
-                  </span>
-                )}
-
-                {/* Avatar Portrait */}
-                <div className={`w-14 h-14 rounded-full p-0.5 border-2 mb-1.5 relative overflow-hidden ${
+                {/* Authentic Chocolate Frog Tarot Card Top Art */}
+                <div className={`w-full aspect-[4/5] rounded-xl overflow-hidden border-2 mb-2 relative bg-black shadow-md ${
                   isPDead 
-                    ? 'border-gray-700 grayscale' 
+                    ? 'border-gray-800 grayscale' 
                     : isSelected 
-                      ? 'border-amber-400 ring-2 ring-amber-400/40 shadow-md' 
+                      ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-amber-950/70' 
                       : isFellowDeathEater
                         ? 'border-emerald-400'
-                        : 'border-white/20'
+                        : 'border-[#bd8436]/70 group-hover:border-[#ffd88f]'
                 }`}>
                   <Image 
                     src={portrait} 
                     alt={player.name} 
                     fill 
-                    className="object-cover rounded-full"
+                    className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
                   />
+                  {/* Subtle inner gold arch */}
+                  <div className={`pointer-events-none absolute inset-0.5 rounded-[10px] border ${
+                    isFellowDeathEater ? 'border-emerald-400/30' : 'border-[#ffd88f]/30'
+                  }`} />
+                  
+                  {/* Top Faction Ribbon */}
+                  <div className="absolute top-1 left-1 z-10">
+                    {isFellowDeathEater ? (
+                      <span className="p-1 rounded-full bg-black/80 border border-emerald-500 text-emerald-400 block shadow" title="Đồng minh Tử Thần Thực Tử">
+                        <DarkMarkCrest className="w-3.5 h-3.5" />
+                      </span>
+                    ) : (
+                      <span className="p-1 rounded-full bg-black/80 border border-[#bd8436] text-[#ffd88f] block shadow">
+                        <PhoenixCrest className="w-3.5 h-3.5" />
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Crosshair indicator */}
+                  {isSelected && (
+                    <span className="absolute top-1 right-1 z-10 p-1 rounded-full bg-amber-500 text-black animate-spin-slow shadow-lg">
+                      <Crosshair size={13} />
+                    </span>
+                  )}
+
+                  {/* Dead Memorial Overlay */}
                   {isPDead && (
-                    <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center text-red-400">
-                      <Skull size={18} />
+                    <div className="absolute inset-0 bg-black/75 backdrop-blur-[1px] flex flex-col items-center justify-center text-red-400">
+                      <Skull size={24} className="mb-1" />
+                      <span className="text-[9px] font-serif font-black tracking-widest uppercase text-red-300">Tử Trận</span>
                     </div>
                   )}
+
+                  {/* Card Bottom Tag: Role / Title */}
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-1 pt-3 text-center">
+                    <span className={`text-[10px] font-mono tracking-wider truncate block ${
+                      isFellowDeathEater ? 'text-emerald-300 font-bold' : 'text-[#ebdcb0]/90'
+                    }`}>
+                      {isFellowDeathEater 
+                        ? `${player.role?.name || 'Tử Thần'} ${player.role?.id === 'VOLDEMORT' ? '👑' : ''}`
+                        : (player.role && (isMyVote || isSelected) ? player.role.name : (player.house || 'Hogwarts'))}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Name */}
+                {/* Name Plate */}
                 <div className={`font-serif font-black text-xs truncate w-full ${
-                  isPDead ? 'line-through text-zinc-500' : isFellowDeathEater ? 'text-emerald-300' : 'text-zinc-100'
+                  isPDead ? 'line-through text-zinc-500' : isFellowDeathEater ? 'text-emerald-300' : 'text-[#ffd88f]'
                 }`}>
                   {player.name}
                 </div>
 
-                {/* Affiliation / Status Badge */}
+                {/* Status Badges & Live Counters */}
                 <div className="mt-1 flex items-center justify-center gap-1 w-full flex-wrap">
                   {isPDead ? (
-                    <span className="text-[9px] font-mono text-red-400 bg-red-950/70 px-1.5 py-0.2 rounded border border-red-900">
+                    <span className="text-[9px] font-mono text-red-400 bg-red-950/70 px-1.5 py-0.5 rounded border border-red-900">
                       Tử trận
                     </span>
                   ) : isMyVote ? (
-                    <span className="text-[9px] font-mono text-emerald-300 bg-emerald-950/90 px-1.5 py-0.2 rounded-full border border-emerald-400 font-bold flex items-center gap-1">
+                    <span className="text-[9px] font-mono text-emerald-300 bg-emerald-950/90 px-2 py-0.5 rounded-full border border-emerald-400 font-bold flex items-center gap-1">
                       <CheckCircle size={10} /> Đã chọn
                     </span>
                   ) : isSelected ? (
-                    <span className="text-[9px] font-mono text-amber-300 bg-amber-500/20 px-1.5 py-0.2 rounded-full border border-amber-400/60 font-bold">
+                    <span className="text-[9px] font-mono text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/60 font-bold">
                       🎯 Đang nhắm
                     </span>
-                  ) : isFellowDeathEater ? (
-                    <span className="text-[9px] font-mono text-emerald-300 truncate">
-                      {player.role?.name} {player.role?.id === 'VOLDEMORT' ? '👑' : ''}
-                    </span>
                   ) : (
-                    <span className="text-[9px] font-serif text-zinc-400 truncate">
-                      Phù thủy · {player.house || 'Hogwarts'}
+                    <span className="text-[9px] font-serif text-[#ebdcb0]/60">
+                      {isFellowDeathEater ? 'Đồng minh 🐍' : 'Phù thủy'}
                     </span>
                   )}
 
                   {/* Vote / Kill Counters */}
                   {voteCount > 0 && (
-                    <span className="text-[9px] font-mono text-amber-300 bg-amber-950 px-1 rounded border border-amber-600">
+                    <span className="text-[9px] font-mono text-amber-300 bg-[#3a2213] px-1.5 py-0.5 rounded border border-[#bd8436] font-bold">
                       🗳️ {voteCount}
                     </span>
                   )}
                   {killCount > 0 && (
-                    <span className="text-[9px] font-mono text-red-400 bg-red-950 px-1 rounded border border-red-800">
+                    <span className="text-[9px] font-mono text-red-300 bg-red-950 px-1.5 py-0.5 rounded border border-red-800 font-bold">
                       🗡️ {killCount}
                     </span>
                   )}

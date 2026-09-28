@@ -481,55 +481,87 @@ export function GMDashboard() {
                             : 'bg-[#220d0d] border-[#5e1919] hover:border-[#bd8436]'
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        {isDeathEater ? (
-                          <DarkMarkCrest className="w-5 h-5" />
-                        ) : (
-                          <PhoenixCrest className="w-5 h-5" />
-                        )}
-                        <span className={`font-serif font-bold text-sm ${isDead ? 'text-red-500 line-through' : 'text-[#f5eedb]'}`}>
-                          {p.name}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        {isInjured && (
-                          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border bg-amber-950 text-amber-300 border-amber-600">
-                            Bị thương
-                          </span>
-                        )}
-                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-                          isDeathEater 
-                            ? 'bg-[#042f21] text-emerald-300 border-emerald-700' 
-                            : p.role?.faction === 'NEUTRAL'
-                              ? 'bg-purple-950 text-purple-300 border-purple-700'
-                              : 'bg-[#400e0e] text-[#ffd88f] border-[#8c0c0c]'
-                        }`}>
-                          {isDeathEater ? 'Tử Thần' : p.role?.faction === 'NEUTRAL' ? 'Trung Lập' : 'Phượng Hoàng'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Role Title & Name */}
-                    <div className="text-xs text-[#ebdcb0] font-lora flex items-center justify-between mt-1">
-                      <span className="truncate max-w-[220px]">
-                        Vai trò: <strong className="text-[#ffd88f]">{p.role?.name || 'Chưa chia'}</strong>
-                      </span>
-
-                      {/* Quick Inspect Button */}
-                      {p.role && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
+                    <div className="flex gap-3 items-start">
+                      {/* Chocolate Frog Tarot Card Mini Preview */}
+                      <div 
+                        onClick={(e) => {
+                          if (p.role) {
                             e.stopPropagation();
                             setInspectedRole(p.role);
-                          }}
-                          className="text-[11px] text-[#ffd88f] hover:text-[#fff4d1] font-mono flex items-center gap-1 underline decoration-[#bd8436]/60"
-                        >
-                          <Eye size={12} /> Xem thẻ Tarot
-                        </button>
-                      )}
+                          }
+                        }}
+                        className={`relative w-12 h-16 sm:w-14 sm:h-20 rounded-xl overflow-hidden border-2 shrink-0 bg-black shadow-md cursor-pointer hover:scale-105 transition-transform ${
+                          isDead ? 'border-gray-700 grayscale' : isDeathEater ? 'border-emerald-500' : 'border-[#bd8436]'
+                        }`}
+                        title="Chạm để mở rộng thẻ bài"
+                      >
+                        <img 
+                          src={p.role?.image || '/cards/harry.jpg'} 
+                          alt={p.role?.name || p.name} 
+                          className="w-full h-full object-cover object-top"
+                        />
+                        {isDead && (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-red-500">
+                            <Skull size={16} />
+                          </div>
+                        )}
+                        <span className="absolute bottom-0 inset-x-0 bg-black/80 text-[8px] text-[#ffd88f] font-mono text-center py-0.5 truncate block">
+                          Tarot 👁️
+                        </span>
+                      </div>
+
+                      {/* Info & Badges */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <div className="flex items-center gap-1.5 truncate">
+                            {isDeathEater ? (
+                              <DarkMarkCrest className="w-4 h-4 shrink-0" />
+                            ) : (
+                              <PhoenixCrest className="w-4 h-4 shrink-0" />
+                            )}
+                            <span className={`font-serif font-bold text-sm truncate ${isDead ? 'text-red-500 line-through' : 'text-[#f5eedb]'}`}>
+                              {p.name}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1 shrink-0">
+                            {isInjured && (
+                              <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded border bg-amber-950 text-amber-300 border-amber-600">
+                                Bị thương
+                              </span>
+                            )}
+                            <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${
+                              isDeathEater 
+                                ? 'bg-[#042f21] text-emerald-300 border-emerald-700' 
+                                : p.role?.faction === 'NEUTRAL'
+                                  ? 'bg-purple-950 text-purple-300 border-purple-700'
+                                  : 'bg-[#400e0e] text-[#ffd88f] border-[#8c0c0c]'
+                            }`}>
+                              {isDeathEater ? 'Tử Thần' : p.role?.faction === 'NEUTRAL' ? 'Trung Lập' : 'Phượng Hoàng'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Role Title & Name */}
+                        <div className="text-xs text-[#ebdcb0] font-lora flex items-center justify-between mt-1">
+                          <span className="truncate max-w-[170px] sm:max-w-[220px]">
+                            Vai trò: <strong className="text-[#ffd88f]">{p.role?.name || 'Chưa chia'}</strong>
+                          </span>
+
+                          {p.role && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setInspectedRole(p.role);
+                              }}
+                              className="text-[10px] text-[#ffd88f] hover:text-[#fff4d1] font-mono flex items-center gap-1 underline decoration-[#bd8436]/60 shrink-0"
+                            >
+                              <Eye size={11} /> Chi tiết
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
                     {/* Action & Vote Tracker */}

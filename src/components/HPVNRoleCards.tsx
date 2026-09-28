@@ -22,67 +22,111 @@ interface RoleCardsProps {
 // ROLE CARD COMPONENT
 // ============================================================================
 
+const ROLE_CARD_IMAGES: Record<string, string> = {
+  HARRY_POTTER: '/cards/harry.jpg',
+  RON_WEASLEY: '/cards/ron.jpg',
+  RON_WESLEY: '/cards/ron.jpg',
+  HERMIONE_GRANGER: '/cards/hermione.jpg',
+  DUMBLEDORE: '/cards/dumbledore.jpg',
+  SNAPE: '/cards/snape.jpg',
+  LUPIN: '/cards/lupin.jpg',
+  MOODY: '/cards/moody.jpg',
+  HAGRID: '/cards/hagrid.jpg',
+  KINGSLEY: '/cards/kingsley.jpg',
+  FRED: '/cards/fred.jpg',
+  GEORGE: '/cards/george.jpg',
+  BILL: '/cards/bill.jpg',
+  TONKS: '/cards/tonks.jpg',
+  FLEUR: '/cards/fleur.jpg',
+  MCGONAGALL: '/cards/mcgonagall.jpg',
+  McGONAGALL: '/cards/mcgonagall.jpg',
+  NEVILLE: '/cards/neville.jpg',
+  VOLDEMORT: '/cards/voldemort.jpg',
+  BELLATRIX: '/cards/bellatrix.jpg',
+  LUCIUS: '/cards/lucius.jpg',
+  LUCIFUS_MALFORY: '/cards/lucius.jpg',
+  PETTIGREW: '/cards/pettigrew.jpg',
+  WORMTAIL: '/cards/pettigrew.jpg',
+  FENRIR: '/cards/greyback.jpg',
+  DRACO: '/cards/draco.jpg',
+  JESTER: '/cards/jester.jpg',
+  POLYJUICE: '/cards/potter_fake.jpg',
+  POLYJUICE_POTION: '/cards/potter_fake.jpg',
+  DOLORES: '/cards/dolores.jpg',
+  DOLORES_UMBRIDGE: '/cards/dolores.jpg',
+  MUNDUNGUS: '/cards/mundungus.jpg',
+  ARTHUR: '/cards/arthur.jpg',
+};
+
 function RoleCard({ role, onClick }: { role: Role; onClick?: () => void }) {
   const [expanded, setExpanded] = useState(false);
-
   const factionConfig = getFactionConfig(role.faction);
+  const cardImg = ROLE_CARD_IMAGES[role.id] || '/cards/harry.jpg';
 
   return (
     <div
       className={`
-        relative overflow-hidden rounded-xl border transition-all duration-300
+        relative overflow-hidden rounded-2xl border-2 transition-all duration-300
         ${factionConfig.borderColor}
-        ${factionConfig.bgColor}
-        ${onClick ? 'cursor-pointer hover:scale-105 hover:shadow-lg' : ''}
+        bg-gradient-to-b from-[#180e07] to-[#0c0603] shadow-xl
+        ${onClick ? 'cursor-pointer hover:scale-105 hover:shadow-2xl' : ''}
       `}
       onClick={() => onClick?.()}
     >
-      {/* Faction Banner */}
-      <div className={`px-3 py-1 text-xs font-medium ${factionConfig.textColor} ${factionConfig.factionBgColor}`}>
-        {factionConfig.label}
+      {/* Card Artwork Hero Banner */}
+      <div className="relative w-full h-44 overflow-hidden border-b border-amber-500/30">
+        <img
+          src={cardImg}
+          alt={role.name}
+          className="w-full h-full object-cover object-top transition-transform duration-500 hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#180e07] via-transparent to-black/40" />
+        
+        {/* Faction Pill Floating */}
+        <div className={`absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-serif font-black uppercase tracking-wider ${factionConfig.textColor} ${factionConfig.factionBgColor} border ${factionConfig.borderColor}`}>
+          {factionConfig.label}
+        </div>
+
+        {/* Phase Type Pill */}
+        <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/70 text-amber-300 border border-amber-400/50">
+          {role.phaseType === 'NIGHT' ? '🌙 Đêm' : '☀️ Ngày'}
+        </div>
       </div>
 
       <div className="p-4">
-        {/* Title & Icon */}
-        <div className="flex items-start gap-3 mb-3">
-          <div className={`w-12 h-12 rounded-lg ${factionConfig.iconBgColor} flex items-center justify-center`}>
-            {getRoleIcon(role.id)}
-          </div>
-          <div className="flex-1">
-            <h3 className="font-bold text-white leading-tight">{role.name}</h3>
-            <p className="text-xs text-slate-400">{role.title}</p>
-          </div>
+        {/* Title */}
+        <div className="mb-2">
+          <h3 className="font-serif font-black text-lg text-[#ffd88f] leading-tight">{role.name}</h3>
+          <p className="text-xs text-amber-200/70 font-lora italic">{role.title}</p>
         </div>
 
-        {/* Quick Info */}
-        <div className="flex gap-2 mb-3">
-          <span className={`text-xs px-2 py-0.5 rounded ${role.phaseType === 'NIGHT' ? 'bg-blue-900/50 text-blue-300' : 'bg-orange-900/50 text-orange-300'}`}>
-            {role.phaseType === 'NIGHT' ? '🌙 Đêm' : '☀️ Ngày'}
-          </span>
-          {role.canVote && <span className="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300">🗳️ Vote</span>}
-          {role.canKill && <span className="text-xs px-2 py-0.5 rounded bg-red-900/50 text-red-300">💀 Kill</span>}
-          {(role as any).canScan && <span className="text-xs px-2 py-0.5 rounded bg-blue-900/50 text-blue-300">🔍 Scan</span>}
-          {(role as any).canProtect && <span className="text-xs px-2 py-0.5 rounded bg-green-900/50 text-green-300">🛡️ Protect</span>}
+        {/* Badges */}
+        <div className="flex flex-wrap gap-1.5 mb-2.5">
+          {role.canVote && <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-zinc-300">🗳️ Vote</span>}
+          {role.canKill && <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-red-950/80 border border-red-700 text-red-300">💀 Kill</span>}
+          {(role as any).canScan && <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-blue-950/80 border border-blue-700 text-blue-300">🔍 Scan</span>}
+          {(role as any).canProtect && <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-950/80 border border-emerald-700 text-emerald-300">🛡️ Protect</span>}
         </div>
 
         {/* Description */}
-        <p className="text-sm text-slate-300 mb-3">{role.description}</p>
+        <p className="text-xs text-[#ebdcb0]/90 font-lora mb-3 line-clamp-2 leading-relaxed">{role.description}</p>
 
-        {/* Expand for more */}
+        {/* Ability Button & Panel */}
         <button
           onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-          className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"
+          className="text-xs text-amber-400 hover:text-white flex items-center gap-1 font-serif font-bold cursor-pointer"
         >
-          <Info className="w-3 h-3" />
-          {expanded ? 'Thu gọn' : 'Chi tiết'}
+          <Info className="w-3.5 h-3.5" />
+          <span>{expanded ? 'Thu gọn bí kíp' : 'Xem năng lực ma thuật →'}</span>
         </button>
 
-        {/* Expanded Content */}
         {expanded && (
-          <div className="mt-3 pt-3 border-t border-slate-700/50">
-            <div className="bg-black/30 rounded-lg p-3">
-              <h4 className="text-xs text-purple-400 uppercase mb-1">Kỹ năng</h4>
-              <p className="text-sm text-white">{role.ability}</p>
+          <div className="mt-3 pt-3 border-t border-amber-500/20 animate-in fade-in duration-200">
+            <div className="bg-black/60 rounded-xl p-3 border border-amber-500/30">
+              <h4 className="text-[10px] font-serif font-black uppercase text-amber-400 mb-1 flex items-center gap-1">
+                <Sparkles size={11} /> Năng Lực Ma Thuật
+              </h4>
+              <p className="text-xs text-zinc-100 font-lora leading-relaxed">{role.ability}</p>
             </div>
           </div>
         )}

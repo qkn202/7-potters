@@ -2,7 +2,7 @@
 
 /**
  * MOD HPVN - Ultimate Edition Page
- * Chế độ chơi Ultimate kết hợp Classic + Chaos
+ * Chế độ chơi Ultimate kết hợp Classic + Chaos với Thẻ Bài Ma Thuật
  */
 
 import { useState } from 'react';
@@ -10,8 +10,70 @@ import { useRouter } from 'next/navigation';
 import HPVNLobby from '@/lib/modHPVNLobby';
 import HPVNGameBoard from '@/lib/hpvnGameBoard';
 import HPVNRoleCards from '@/components/HPVNRoleCards';
-import { Crown, Sparkles, BookOpen, Play, Users, Clock, Zap, Ghost, Settings } from 'lucide-react';
-import { PhoenixCrest, DarkMarkCrest } from '@/components/ArtAssets';
+import { 
+  Crown, 
+  Sparkles, 
+  BookOpen, 
+  Play, 
+  Users, 
+  Clock, 
+  Zap, 
+  Ghost, 
+  Shield, 
+  Flame, 
+  Bot,
+  ArrowLeft 
+} from 'lucide-react';
+import { 
+  PhoenixCrest, 
+  DarkMarkCrest, 
+  DeathlyHallowsSymbol, 
+  CardCornerFlourish,
+  WaxSeal 
+} from '@/components/ArtAssets';
+
+const NEW_EXPANSION_ROLES = [
+  {
+    id: 'MCGONAGALL',
+    name: 'Minerva McGonagall',
+    title: 'Hiệu Phó Trường Hogwarts',
+    faction: 'ORDER_OF_PHOENIX',
+    img: '/cards/mcgonagall.jpg',
+    ability: 'Hóa mèo vằn bọc lót bảo vệ 1 đồng đội khỏi đòn tử sát trong đêm.',
+  },
+  {
+    id: 'NEVILLE',
+    name: 'Neville Longbottom',
+    title: 'Dũng Khí Gryffindor',
+    faction: 'ORDER_OF_PHOENIX',
+    img: '/cards/neville.jpg',
+    ability: 'Rút Lưỡi Kiếm Gryffindor thức tỉnh và giải trừ câm lặng cho đồng minh.',
+  },
+  {
+    id: 'DRACO',
+    name: 'Draco Malfoy',
+    title: 'Điệp Viên Hai Mang',
+    faction: 'NEUTRAL',
+    img: '/cards/draco.jpg',
+    ability: 'Tàng hình trước bùa soi; tự do chọn thời khắc tiết lộ phe phái để lật ngược tình thế.',
+  },
+  {
+    id: 'DOLORES',
+    name: 'Dolores Umbridge',
+    title: 'Thứ Trưởng Bộ Pháp Thuật',
+    faction: 'NEUTRAL',
+    img: '/cards/dolores.jpg',
+    ability: 'Ban hành Sắc Lệnh Giáo Dục cấm đoán 1 phù thủy thi triển phép thuật.',
+  },
+  {
+    id: 'JESTER',
+    name: 'Kẻ Hề Ma Quái',
+    title: 'Hỗn Loạn Tối Thượng',
+    faction: 'NEUTRAL',
+    img: '/cards/jester.jpg',
+    ability: 'Kích động mọi người biểu quyết Tước Đũa mình ban ngày. Thắng ngay khi bị trục xuất!',
+  },
+];
 
 export default function HPVNPage() {
   const router = useRouter();
@@ -38,330 +100,308 @@ export default function HPVNPage() {
     setMode('game');
   };
 
-  const handleBackToMenu = () => {
-    setMode('menu');
-    setGameStarted(false);
-    setPlayerNames([]);
-    setCurrentPlayerId('');
+  const handleQuickSolo = () => {
+    const quickNames = [
+      'Harry Potter (Bạn)',
+      'Ron Weasley (Bot)',
+      'Hermione (Bot)',
+      'Dumbledore (Bot)',
+      'Snape (Bot)',
+      'Voldemort (Bot)',
+      'Bellatrix (Bot)',
+      'Draco (Bot)',
+    ];
+    setPlayerNames(quickNames);
+    setCurrentPlayerId('player_0');
+    setSettings({
+      playerCount: 8,
+      hostName: 'Harry Potter',
+      roomCode: 'SOLO',
+      enableGhostVoting: true,
+      enableChaosEvents: true,
+      darkPactProtection: true,
+      minRounds: 4,
+    });
+    setGameStarted(true);
+    setMode('game');
   };
 
-  // Menu Screen
+  // =========================================================================
+  // 1. MENU SCREEN (HOGWARTS ANTIQUE CARD ROOM)
+  // =========================================================================
   if (mode === 'menu') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950 to-slate-950">
-        {/* Header */}
-        <header className="border-b border-purple-500/30 bg-black/30 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <PhoenixCrest className="w-8 h-8 text-purple-400" />
-              <div>
-                <h1 className="font-bold text-xl text-purple-200">MOD HPVN</h1>
-                <p className="text-xs text-slate-400">Ultimate Edition</p>
-              </div>
+      <div className="min-h-screen bg-[#0e0703] text-[#ebdcb0] flex flex-col justify-between selection:bg-amber-900 selection:text-white">
+        {/* Antique Gold Top Bar */}
+        <header className="sticky top-0 z-40 hpvn-header-banner px-3 sm:px-6 py-2 flex items-center justify-between backdrop-blur-md">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <PhoenixCrest className="w-7 h-7 text-amber-400 shrink-0" />
+            <div>
+              <h1 className="font-title-magical font-bold text-sm sm:text-lg text-[#ffd88f] flex items-center gap-1.5 leading-none">
+                <span>⚡ MOD HPVN</span>
+                <span className="text-[11px] font-lora italic text-[#ebdcb0]/80">· Ultimate Edition</span>
+              </h1>
+              <p className="text-[10px] font-mono text-[#bd8436] tracking-widest hidden sm:block">
+                HỆ THỐNG THẺ BÀI MA THUẬT & CHAOS EVENTS
+              </p>
             </div>
-            <button
-              onClick={() => router.push('/')}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors"
-            >
-              ← Quay lại
-            </button>
           </div>
+          <button
+            onClick={() => router.push('/')}
+            className="px-3 py-1.5 bg-[#24150c] hover:bg-[#382013] text-[#ffd88f] border border-[#7a5229] rounded-xl text-xs font-serif font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <ArrowLeft size={13} />
+            <span>Về Bàn Cờ Chính</span>
+          </button>
         </header>
 
-        {/* Hero */}
-        <main className="max-w-4xl mx-auto px-4 py-12">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-900/50 rounded-full mb-6">
-              <Sparkles className="w-4 h-4 text-yellow-400" />
-              <span className="text-purple-200 text-sm font-medium">Kết hợp Classic & Chaos</span>
+        {/* Hero Section */}
+        <main className="max-w-5xl mx-auto px-4 py-8 flex-1 w-full">
+          {/* Main Title Badge */}
+          <div className="text-center mb-8 relative">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <PhoenixCrest className="w-8 h-8 text-amber-400" />
+              <DeathlyHallowsSymbol className="w-6 h-6 text-[#bd8436]" />
+              <DarkMarkCrest className="w-8 h-8 text-emerald-400" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              MOD HPVN
-              <span className="block text-2xl text-purple-400 font-normal mt-2">Ultimate Edition</span>
+
+            <span className="text-[11px] font-mono tracking-[0.3em] uppercase text-[#ffd88f] block mb-1">
+              PHIÊN BẢN ĐẠI CHIẾN NÂNG CẤP · 24 THẺ BÀI MA THUẬT
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-title-magical font-black tracking-wide text-[#ffd88f] mb-3">
+              MOD HPVN · ULTIMATE
             </h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">
-              Trải nghiệm game 7 Potter hoàn toàn mới! Kết hợp những tính năng tốt nhất từ Classic và Chaos mode,
-              với hệ thống Ghost Voting, Chaos Events, và Dark Pact Protection.
+            <p className="text-xs sm:text-sm text-[#ebdcb0]/90 font-lora italic max-w-2xl mx-auto leading-relaxed">
+              Trải nghiệm social deduction tốc độ cao kết hợp <strong>Ghost Voting (Hồn Ma Bỏ Phiếu)</strong>, 
+              <strong> Chaos Events (Biến Cố Bầu Trời)</strong> và <strong>5 Thẻ Bài Nhân Vật Mở Rộng</strong> độc quyền!
             </p>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-            <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6">
-              <Users className="w-8 h-8 text-green-400 mb-3" />
-              <h3 className="font-bold text-white mb-2">4-20 Người Chơi</h3>
-              <p className="text-sm text-slate-400">
-                Phù hợp với mọi nhóm, từ nhóm nhỏ đến party lớn. Cân bằng tự động theo số người.
-              </p>
-            </div>
-            <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6">
-              <Clock className="w-8 h-8 text-blue-400 mb-3" />
-              <h3 className="font-bold text-white mb-2">10-25 Phút</h3>
-              <p className="text-sm text-slate-400">
-                Game nhanh, hỗn loạn, không bao giờ nhàm chán. Mỗi ván là một câu chuyện mới.
-              </p>
-            </div>
-            <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6">
-              <Zap className="w-8 h-8 text-yellow-400 mb-3" />
-              <h3 className="font-bold text-white mb-2">Chaos Events</h3>
-              <p className="text-sm text-slate-400">
-                Sự kiện bất ngờ mỗi đêm: Shield, Info, Silence hoặc không có gì. Luôn bất ngờ!
-              </p>
-            </div>
+          {/* 5-CARD EXPANSION FAN DISPLAY */}
+          <div className="relative h-32 sm:h-36 mb-8 flex items-center justify-center select-none">
+            {[
+              { img: '/cards/mcgonagall.jpg', rotate: '-16deg', x: '-90px', z: 1 },
+              { img: '/cards/neville.jpg', rotate: '-8deg', x: '-45px', z: 2 },
+              { img: '/cards/draco.jpg', rotate: '0deg', x: '0px', z: 3, center: true },
+              { img: '/cards/dolores.jpg', rotate: '8deg', x: '45px', z: 2 },
+              { img: '/cards/jester.jpg', rotate: '16deg', x: '90px', z: 1 },
+            ].map((c, i) => (
+              <div
+                key={i}
+                style={{
+                  transform: `translateX(${c.x}) rotate(${c.rotate})`,
+                  zIndex: c.z,
+                }}
+                className={`absolute w-16 sm:w-20 aspect-[3/4] rounded-xl overflow-hidden shadow-2xl border-2 transition-transform duration-300 hover:scale-110 cursor-pointer ${
+                  c.center 
+                    ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-amber-950/80 scale-105' 
+                    : 'border-[#bd8436]/70'
+                }`}
+              >
+                <img src={c.img} alt="Card" className="w-full h-full object-cover object-top" />
+              </div>
+            ))}
           </div>
 
-          {/* Role Stats */}
-          <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6 mb-8">
-            <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-              <Crown className="w-5 h-5 text-purple-400" />
-              24 Vai Trò Độc Đáo
-            </h3>
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-3xl font-bold text-green-400">15</p>
-                <p className="text-sm text-slate-400">Hội Phượng Hoàng</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-red-400">5</p>
-                <p className="text-sm text-slate-400">Tử Thần Thực Tử</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-yellow-400">4</p>
-                <p className="text-sm text-slate-400">Neutral</p>
-              </div>
-            </div>
-          </div>
+          {/* QUICK ACTION BUTTONS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto mb-10">
+            <button
+              onClick={handleQuickSolo}
+              className="py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-serif font-black text-sm sm:text-base tracking-wide flex items-center justify-center gap-2.5 shadow-[0_0_25px_rgba(245,158,11,0.4)] border-2 border-amber-200 transition-all active:scale-95 cursor-pointer"
+            >
+              <Sparkles size={18} className="text-black animate-pulse" />
+              <span>⚡ VÀO CHƠI NGAY (QUICK MATCH)</span>
+            </button>
 
-          {/* New Roles Highlight */}
-          <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border border-purple-500/30 rounded-xl p-6 mb-8">
-            <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-              Vai Trò Mới
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-black/30 rounded-lg p-4">
-                <h4 className="font-bold text-purple-300 mb-2">🧙 McGonagall</h4>
-                <p className="text-xs text-slate-400">Biến hình bảo vệ đồng minh khỏi death glare. Shield mạnh nhất game!</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4">
-                <h4 className="font-bold text-green-300 mb-2">⚔️ Neville</h4>
-                <p className="text-xs text-slate-400">Longbottom tỉnh giấc đánh thức người chơi. Reverse death glare!</p>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4">
-                <h4 className="font-bold text-red-300 mb-2">🐍 Draco</h4>
-                <p className="text-xs text-slate-400">Điệp viên hai mang. Tàng hình nhưng có thể reveal bất cứ lúc nào!</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => setMode('lobby')}
-              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-xl font-bold text-white transition-all flex items-center justify-center gap-2"
+              className="py-4 px-6 rounded-2xl bg-gradient-to-r from-[#2a170d] to-[#1a0e07] hover:bg-[#341d11] text-[#ffd88f] font-serif font-bold text-sm sm:text-base tracking-wide flex items-center justify-center gap-2.5 border-2 border-[#bd8436] transition-all active:scale-95 cursor-pointer shadow-lg"
             >
-              <Play className="w-5 h-5" />
-              Bắt Đầu Chơi
+              <Users size={18} className="text-[#ffd88f]" />
+              <span>🎮 MỞ PHÒNG CHỜ (LOBBY)</span>
             </button>
-            <button
-              onClick={() => setMode('rules')}
-              className="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-white transition-all flex items-center justify-center gap-2"
-            >
-              <BookOpen className="w-5 h-5" />
-              Xem Luật Chơi
-            </button>
+          </div>
+
+          {/* 5 NEW CHARACTER CARDS SHOWCASE */}
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-4 border-b border-[#7a5229]/60 pb-2">
+              <h3 className="font-serif font-black text-base sm:text-lg text-[#ffd88f] flex items-center gap-2">
+                <Crown size={18} className="text-amber-400" />
+                5 Thẻ Bài Nhân Vật Mới (Expansion Set)
+              </h3>
+              <button
+                onClick={() => setMode('rules')}
+                className="text-xs font-serif font-bold text-amber-400 hover:text-white flex items-center gap-1 cursor-pointer"
+              >
+                <BookOpen size={13} />
+                <span>Xem Toàn Bộ 24 Thẻ ➔</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              {NEW_EXPANSION_ROLES.map((role) => (
+                <div
+                  key={role.id}
+                  className="rounded-2xl border-2 border-[#7a5229]/80 bg-[#160d07] p-2.5 flex flex-col justify-between hover:border-[#ffd88f] transition-all hover:scale-[1.02] shadow-lg group select-none"
+                >
+                  <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden border border-[#bd8436]/60 mb-2 bg-black">
+                    <img 
+                      src={role.img} 
+                      alt={role.name} 
+                      className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute top-1 right-1">
+                      <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full border ${
+                        role.faction === 'ORDER_OF_PHOENIX'
+                          ? 'bg-amber-950/90 text-amber-300 border-amber-600'
+                          : role.faction === 'DEATH_EATERS'
+                          ? 'bg-emerald-950/90 text-emerald-300 border-emerald-600'
+                          : 'bg-purple-950/90 text-purple-300 border-purple-600'
+                      }`}>
+                        {role.faction === 'ORDER_OF_PHOENIX' ? 'Phượng Hoàng' : role.faction === 'DEATH_EATERS' ? 'Tử Thần' : 'Trung Lập'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-serif font-black text-xs text-[#ffd88f] truncate block">
+                      {role.name}
+                    </h4>
+                    <p className="text-[10px] text-[#bd8436] font-mono truncate mb-1">
+                      {role.title}
+                    </p>
+                    <p className="text-[10px] text-[#ebdcb0]/80 font-lora line-clamp-2 leading-tight">
+                      {role.ability}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* KEY GAMEPLAY PILLARS */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 mb-8">
+            <div className="p-4 rounded-2xl bg-[#140b05] border border-[#7a5229] flex items-start gap-3">
+              <div className="p-2.5 rounded-xl bg-[#28150c] border border-[#bd8436] text-amber-300 shrink-0">
+                <Ghost size={20} />
+              </div>
+              <div>
+                <h4 className="font-serif font-bold text-sm text-[#ffd88f] mb-1">Ghost Voting (0.5 Phiếu)</h4>
+                <p className="text-xs text-[#ebdcb0]/80 font-lora leading-relaxed">
+                  Người chơi đã tử trận hóa thành linh hồn bóng ma, vẫn giữ 0.5 quyền biểu quyết để hỗ trợ đồng minh!
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-[#140b05] border border-[#7a5229] flex items-start gap-3">
+              <div className="p-2.5 rounded-xl bg-[#28150c] border border-[#bd8436] text-yellow-300 shrink-0">
+                <Zap size={20} />
+              </div>
+              <div>
+                <h4 className="font-serif font-bold text-sm text-[#ffd88f] mb-1">Chaos Events Hàng Đêm</h4>
+                <p className="text-xs text-[#ebdcb0]/80 font-lora leading-relaxed">
+                  Sấm chớp, Khiên chắn cổ xưa (Shield), Lộ danh tính (Info) hoặc Câm lặng (Silence) xảy ra ngẫu nhiên.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-[#140b05] border border-[#7a5229] flex items-start gap-3">
+              <div className="p-2.5 rounded-xl bg-[#28150c] border border-[#bd8436] text-emerald-300 shrink-0">
+                <Shield size={20} />
+              </div>
+              <div>
+                <h4 className="font-serif font-bold text-sm text-[#ffd88f] mb-1">Dark Pact Protection</h4>
+                <p className="text-xs text-[#ebdcb0]/80 font-lora leading-relaxed">
+                  Khế ước hắc ám bảo vệ ít nhất 1 Tử Thần Thực Tử sống sót qua Vòng 1, bảo đảm ván đấu luôn kịch tính.
+                </p>
+              </div>
+            </div>
           </div>
         </main>
       </div>
     );
   }
 
-  // Rules Screen
+  // =========================================================================
+  // 2. RULES & CARDS VIEW
+  // =========================================================================
   if (mode === 'rules') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950 to-slate-950">
-        <header className="border-b border-purple-500/30 bg-black/30 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <PhoenixCrest className="w-8 h-8 text-purple-400" />
-              <div>
-                <h1 className="font-bold text-xl text-purple-200">MOD HPVN</h1>
-                <p className="text-xs text-slate-400">Luật Chơi</p>
-              </div>
+      <div className="min-h-screen bg-[#0e0703] text-[#ebdcb0] flex flex-col justify-between">
+        <header className="sticky top-0 z-40 hpvn-header-banner px-3 sm:px-6 py-2 flex items-center justify-between backdrop-blur-md">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <PhoenixCrest className="w-7 h-7 text-amber-400 shrink-0" />
+            <div>
+              <h1 className="font-title-magical font-bold text-sm sm:text-lg text-[#ffd88f]">
+                MOD HPVN · Sổ Tay Thẻ Bài & Luật Chơi
+              </h1>
             </div>
-            <button
-              onClick={() => setMode('menu')}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors"
-            >
-              ← Quay lại
-            </button>
           </div>
+          <button
+            onClick={() => setMode('menu')}
+            className="px-3 py-1.5 bg-[#24150c] hover:bg-[#382013] text-[#ffd88f] border border-[#7a5229] rounded-xl text-xs font-serif font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <ArrowLeft size={13} />
+            <span>Quay Lại Menu</span>
+          </button>
         </header>
 
-        <main className="max-w-4xl mx-auto px-4 py-8">
+        <main className="max-w-5xl mx-auto px-4 py-8 flex-1 w-full">
+          <div className="mb-6 flex items-center justify-between">
+            <button
+              onClick={() => setShowRoleCards(!showRoleCards)}
+              className="hpvn-btn-gold px-4 py-2 rounded-xl text-xs font-serif font-bold flex items-center gap-2 cursor-pointer"
+            >
+              <BookOpen size={14} />
+              <span>{showRoleCards ? 'Xem Văn Bản Tóm Tắt' : 'Xem Thẻ Bài Đồ Họa (Tarot Cards)'}</span>
+            </button>
+            <button
+              onClick={handleQuickSolo}
+              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-serif font-black rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
+            >
+              <Sparkles size={14} />
+              <span>Chơi Thử Ngay ➔</span>
+            </button>
+          </div>
+
           {showRoleCards ? (
-            <div>
-              <button
-                onClick={() => setShowRoleCards(false)}
-                className="mb-6 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors"
-              >
-                ← Quay lại luật chơi
-              </button>
-              <HPVNRoleCards />
-            </div>
+            <HPVNRoleCards />
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-6">
               {/* Overview */}
-              <section className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6">
-                <h2 className="text-2xl font-bold text-white mb-4">Tổng Quan</h2>
-                <div className="space-y-4 text-slate-300">
-                  <p>
-                    <strong className="text-purple-300">MOD HPVN - Ultimate Edition</strong> là chế độ chơi kết hợp
-                    những tính năng tốt nhất từ Classic và Chaos mode, mang đến trải nghiệm social deduction
-                    hoàn toàn mới.
-                  </p>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li><strong>4-20 người chơi</strong> với cân bằng tự động</li>
-                    <li><strong>10-25 phút</strong> mỗi ván game</li>
-                    <li><strong>24 vai trò</strong> độc đáo từ Harry Potter</li>
-                    <li><strong>Ghost Voting</strong> - Người chết vẫn có thể vote</li>
-                    <li><strong>Chaos Events</strong> - Bất ngờ mỗi đêm</li>
-                    <li><strong>Dark Pact</strong> - 4T được bảo vệ Round 1</li>
-                  </ul>
-                </div>
-              </section>
-
-              {/* Win Conditions */}
-              <section className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6">
-                <h2 className="text-2xl font-bold text-white mb-4">Điều Kiện Thắng</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-green-900/30 border border-green-700/50 rounded-lg p-4">
-                    <h3 className="font-bold text-green-400 mb-2">🏛️ Hội Phượng Hoàng Thắng</h3>
-                    <ul className="text-sm text-slate-300 space-y-1 list-disc list-inside">
-                      <li>Tất cả Tử Thần Thực Tử bị loại</li>
-                      <li>Harry Potter còn sống khi hết round tối thiểu</li>
-                      <li>Voldemort bị giết</li>
-                    </ul>
+              <section className="hpvn-panel-gold rounded-2xl p-5">
+                <h3 className="text-xl font-serif font-black text-[#ffd88f] mb-3">
+                  📜 Cốt Lõi Vận Hành MOD HPVN
+                </h3>
+                <p className="text-xs sm:text-sm text-[#ebdcb0]/90 font-lora leading-relaxed mb-4">
+                  Chế độ chơi kết hợp cơ chế không chiến và các bùa chú hỗn loạn. Mỗi ván diễn ra theo 5 giai đoạn:
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs font-serif font-bold">
+                  <div className="p-2.5 rounded-xl bg-[#24150c] border border-[#bd8436] text-[#ffd88f]">
+                    🌙 1. Đêm Ma Thuật
                   </div>
-                  <div className="bg-red-900/30 border border-red-700/50 rounded-lg p-4">
-                    <h3 className="font-bold text-red-400 mb-2">💀 Tử Thần Thực Tử Thắng</h3>
-                    <ul className="text-sm text-slate-300 space-y-1 list-disc list-inside">
-                      <li>HPH ≤ 4T (sau round tối thiểu)</li>
-                      <li>Harry Potter bị giết</li>
-                      <li>Tất cả HPH bị loại</li>
-                    </ul>
+                  <div className="p-2.5 rounded-xl bg-[#24150c] border border-[#bd8436] text-[#ffd88f]">
+                    🎲 2. Biến Cố Chaos
                   </div>
-                  <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-4">
-                    <h3 className="font-bold text-yellow-400 mb-2">🃏 Jester Thắng</h3>
-                    <p className="text-sm text-slate-300">
-                      Jester thắng nếu bị treo cổ (lynched) bất kỳ lúc nào trong game.
-                    </p>
+                  <div className="p-2.5 rounded-xl bg-[#24150c] border border-[#bd8436] text-[#ffd88f]">
+                    💀 3. Phán Quyết Tử Thần
                   </div>
-                  <div className="bg-purple-900/30 border border-purple-700/50 rounded-lg p-4">
-                    <h3 className="font-bold text-purple-400 mb-2">⚖️ Polyjuice Thắng</h3>
-                    <p className="text-sm text-slate-300">
-                      Polyjuice thắng nếu sống đến cuối game với ít nhất 2 người còn sống.
-                    </p>
+                  <div className="p-2.5 rounded-xl bg-[#24150c] border border-[#bd8436] text-[#ffd88f]">
+                    👻 4. Hồn Ma Thức Tỉnh
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-[#24150c] border border-[#bd8436] text-[#ffd88f]">
+                    🗳️ 5. Biểu Quyết Tước Đũa
                   </div>
                 </div>
               </section>
 
-              {/* Game Phases */}
-              <section className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6">
-                <h2 className="text-2xl font-bold text-white mb-4">Các Pha Game</h2>
-                <div className="space-y-4">
-                  <div className="flex gap-4 items-start">
-                    <div className="w-10 h-10 bg-blue-900/50 rounded-lg flex items-center justify-center shrink-0">
-                      <span className="text-xl">🌙</span>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white">Pha Đêm (Night)</h3>
-                      <p className="text-sm text-slate-400">Người chơi thực hiện hành động bí mật: giết, soi, bảo vệ, v.v. Mỗi hành động có 20 giây.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 items-start">
-                    <div className="w-10 h-10 bg-yellow-900/50 rounded-lg flex items-center justify-center shrink-0">
-                      <span className="text-xl">🎲</span>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white">Pha Sự Kiện (Chaos Event)</h3>
-                      <p className="text-sm text-slate-400">Sự kiện ngẫu nhiên xảy ra: Shield (bảo vệ), Info (thông tin), Silence (im lặng), hoặc None (không có gì).</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 items-start">
-                    <div className="w-10 h-10 bg-red-900/50 rounded-lg flex items-center justify-center shrink-0">
-                      <span className="text-xl">💀</span>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white">Pha Giải Quyết (Death Resolution)</h3>
-                      <p className="text-sm text-slate-400">Người chơi bị giết được tiết lộ. Họ có thể chia sẻ thông tin cuối cùng.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 items-start">
-                    <div className="w-10 h-10 bg-blue-800/50 rounded-lg flex items-center justify-center shrink-0">
-                      <span className="text-xl">👻</span>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white">Pha Ma Hiểu (Ghost Revelation)</h3>
-                      <p className="text-sm text-slate-400">Người chơi đã chết có thể vote với sức mạnh 0.5. Ghosts ảnh hưởng đến kết quả!</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 items-start">
-                    <div className="w-10 h-10 bg-orange-900/50 rounded-lg flex items-center justify-center shrink-0">
-                      <span className="text-xl">🗳️</span>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white">Pha Biểu Quyết (Vote)</h3>
-                      <p className="text-sm text-slate-400">Người chơi bỏ phiếu treo cổ. Người có nhiều phiếu nhất bị treo. Có thể bỏ phiếu trắng.</p>
-                    </div>
-                  </div>
-                </div>
+              {/* Expansion Roles View */}
+              <section className="hpvn-panel rounded-2xl p-5">
+                <h3 className="text-xl font-serif font-black text-[#ffd88f] mb-4">
+                  🎭 Danh Mục 24 Vai Trò Ma Thuật
+                </h3>
+                <HPVNRoleCards />
               </section>
-
-              {/* Special Features */}
-              <section className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6">
-                <h2 className="text-2xl font-bold text-white mb-4">Tính Năng Đặc Biệt</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-4">
-                    <h3 className="font-bold text-blue-400 mb-2">👻 Ghost Voting</h3>
-                    <p className="text-sm text-slate-300">
-                      Người chơi đã chết vẫn có thể vote với sức mạnh 0.5.
-                      Họ không bị loại hoàn toàn và vẫn ảnh hưởng đến kết quả!
-                    </p>
-                  </div>
-                  <div className="bg-purple-900/30 border border-purple-700/50 rounded-lg p-4">
-                    <h3 className="font-bold text-purple-400 mb-2">🛡️ Dark Pact Protection</h3>
-                    <p className="text-sm text-slate-300">
-                      Ở Round 1, Tử Thần Thực Tử được bảo vệ bởi Dark Pact.
-                      Ít nhất 1 4T sẽ sống đến Round 2 để đảm bảo game không kết thúc quá sớm.
-                    </p>
-                  </div>
-                  <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-4">
-                    <h3 className="font-bold text-yellow-400 mb-2">🎲 Chaos Events</h3>
-                    <p className="text-sm text-slate-300">
-                      Mỗi đêm có 50% không có sự kiện, 20% Shield, 15% Info, 15% Silence.
-                      Không ai biết trước được!
-                    </p>
-                  </div>
-                  <div className="bg-green-900/30 border border-green-700/50 rounded-lg p-4">
-                    <h3 className="font-bold text-green-400 mb-2">⚖️ Dynamic Balance</h3>
-                    <p className="text-sm text-slate-300">
-                      Tỷ lệ HPH/4T tự động điều chỉnh theo số người chơi để đảm bảo game luôn cân bằng.
-                    </p>
-                  </div>
-                </div>
-              </section>
-
-              {/* Role Cards Link */}
-              <div className="text-center">
-                <button
-                  onClick={() => setShowRoleCards(true)}
-                  className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-xl font-bold text-white transition-all inline-flex items-center gap-2"
-                >
-                  <BookOpen className="w-5 h-5" />
-                  Xem Tất Cả Thẻ Vai Trò (24 vai)
-                </button>
-              </div>
             </div>
           )}
         </main>
@@ -369,29 +409,31 @@ export default function HPVNPage() {
     );
   }
 
-  // Lobby Screen
+  // =========================================================================
+  // 3. LOBBY SCREEN
+  // =========================================================================
   if (mode === 'lobby' && !gameStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950 to-slate-950">
-        <header className="border-b border-purple-500/30 bg-black/30 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <PhoenixCrest className="w-8 h-8 text-purple-400" />
-              <div>
-                <h1 className="font-bold text-xl text-purple-200">MOD HPVN</h1>
-                <p className="text-xs text-slate-400">Phòng Chờ</p>
-              </div>
+      <div className="min-h-screen bg-[#0e0703] text-[#ebdcb0] flex flex-col justify-between">
+        <header className="sticky top-0 z-40 hpvn-header-banner px-3 sm:px-6 py-2 flex items-center justify-between backdrop-blur-md">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <PhoenixCrest className="w-7 h-7 text-amber-400 shrink-0" />
+            <div>
+              <h1 className="font-title-magical font-bold text-sm sm:text-lg text-[#ffd88f]">
+                MOD HPVN · Sảnh Đón Tiếp Phù Thủy
+              </h1>
             </div>
-            <button
-              onClick={() => setMode('menu')}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors"
-            >
-              ← Quay lại
-            </button>
           </div>
+          <button
+            onClick={() => setMode('menu')}
+            className="px-3 py-1.5 bg-[#24150c] hover:bg-[#382013] text-[#ffd88f] border border-[#7a5229] rounded-xl text-xs font-serif font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <ArrowLeft size={13} />
+            <span>Quay Lại Menu</span>
+          </button>
         </header>
 
-        <main className="max-w-4xl mx-auto px-4 py-8">
+        <main className="max-w-4xl mx-auto px-4 py-8 flex-1 w-full">
           <HPVNLobby
             onStartGame={handleStartGame}
             onBack={() => setMode('menu')}
@@ -401,7 +443,9 @@ export default function HPVNPage() {
     );
   }
 
-  // Game Screen
+  // =========================================================================
+  // 4. GAME SCREEN
+  // =========================================================================
   if (mode === 'game' && gameStarted) {
     return (
       <HPVNGameBoard

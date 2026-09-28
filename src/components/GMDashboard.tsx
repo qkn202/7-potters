@@ -542,7 +542,7 @@ export function GMDashboard() {
               )}
 
               <p className="text-sm text-[#ffd88f] font-lora">
-                Trận đấu đã khép lại. Merlin có thể bấm &ldquo;Trở Lại Phòng Chờ (Ván Tiếp Theo)&rdquo; ở cột bên phải để chuẩn bị ván mới (bảo lưu phòng &amp; chống chia trùng 4T).
+                Trận đấu đã khép lại. Merlin có thể bấm &ldquo;Hủy Phòng &amp; Bắt Đầu Lại&rdquo; ở cột bên phải để chuẩn bị ván mới (bảo lưu phòng &amp; chống chia trùng 4T).
               </p>
             </div>
           )}
@@ -800,18 +800,42 @@ export function GMDashboard() {
               <div ref={logsEndRef} />
             </div>
 
-            {/* Return To Lobby Section */}
+            {/* Reset / Cancel Game Section */}
             <div className="mt-4 pt-4 border-t border-[#7a5229]/50">
-              <button
-                onClick={() => returnToLobby()}
-                className="w-full py-3 px-4 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-700 hover:brightness-110 active:scale-95 text-black font-serif font-black rounded-xl flex items-center justify-center gap-2 transition-all border-2 border-amber-300 text-xs shadow-[0_0_15px_rgba(245,158,11,0.3)] cursor-pointer uppercase tracking-wider"
-              >
-                <RotateCcw size={15} className="text-black" />
-                <span>Trở Lại Phòng Chờ (Ván Tiếp Theo)</span>
-              </button>
-              <p className="text-[10px] text-[#ffd88f]/80 text-center font-lora mt-2">
-                ✨ Bảo lưu phòng chơi &amp; đảm bảo lần chơi thứ 2 không chia trùng người làm 4T
-              </p>
+              {confirmReset ? (
+                <div className="bg-red-950/80 border border-red-800 p-4 rounded-xl text-center space-y-3">
+                  <p className="text-red-300 text-xs font-lora">
+                    Bạn có chắc muốn hủy diễn biến ván này để chia bài ván mới?
+                  </p>
+                  <p className="text-[10px] text-[#ffd88f]/80 font-lora">
+                    ✨ Dữ liệu người chơi được bảo lưu — ván sau cam kết 100% không trùng người làm 4T
+                  </p>
+                  <div className="flex justify-center gap-2">
+                    <button
+                      onClick={() => {
+                        returnToLobby();
+                        setConfirmReset(false);
+                      }}
+                      className="px-3.5 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded-lg text-xs font-serif font-bold cursor-pointer"
+                    >
+                      Xác nhận Hủy &amp; Bắt Đầu Lại
+                    </button>
+                    <button
+                      onClick={() => setConfirmReset(false)}
+                      className="px-3 py-1.5 bg-[#26150c] hover:bg-[#3a2213] text-[#ebdcb0] rounded-lg text-xs cursor-pointer"
+                    >
+                      Hủy bỏ
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmReset(true)}
+                  className="w-full py-2.5 px-4 bg-red-950/60 hover:bg-red-900/60 text-red-300 rounded-xl flex items-center justify-center gap-2 transition-all border border-red-900/60 text-xs font-serif font-bold cursor-pointer"
+                >
+                  <RefreshCw size={14} /> Hủy Phòng &amp; Bắt Đầu Lại
+                </button>
+              )}
             </div>
           </div>
         </div>

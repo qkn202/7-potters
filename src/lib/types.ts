@@ -102,6 +102,8 @@ export interface MatchEvent {
   timestamp?: number;
 }
 
+export type GameMode = 'CLASSIC' | 'MOD_HPVN' | 'CUSTOM';
+
 export interface GameState {
   players: Player[];
   phase: GamePhase;
@@ -124,6 +126,8 @@ export interface GameState {
   activeFX?: ActiveVisualFX | null;
   previousRoleMap?: Record<string, string>;
   roleHistory?: Record<string, RoleHistoryEntry>;
+  gameMode?: GameMode;
+  customRoles?: string[];
 }
 
 export interface InterruptState {

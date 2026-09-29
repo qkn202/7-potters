@@ -3,11 +3,15 @@
 > **Boardgame chiến thuật ẩn vai thời gian thực (Social Deduction & Hidden Role Strategy) dành cho cộng đồng Harry Potter Việt Nam (HPVN).**  
 > Dựa trên chiến dịch lịch sử trong tập 7: *Harry Potter và Bảo bối Tử thần* — Cuộc không chiến trên bầu trời đêm để di tản Harry Potter từ số 4 Privet Drive (Little Whinging, Surrey) về nơi trú ẩn an toàn Trang Trại Hang Sóc (The Burrow).
 
-### 🔄 Cập Nhật Mới Nhất: Trở Về Phòng Chờ & Chống Trùng 4T Ván 2 Tuyệt Đối
-Nâng cấp nút "Trở Về Phòng Chờ" bảo lưu phòng chơi, tích hợp thuật toán snapshot lịch sử vai trò và khóa cứng hoán đổi (Hard Swap) cam kết 0% chia lặp người làm Tử Thần Thực Tử ở ván tiếp theo! Đồng bộ mượt mà cho mọi nhà mạng (Viettel, VNPT, FPT, 4G). **[Xem chi tiết →](#-17-nút-trở-về-phòng-chờ--thuật-toán-chống-chia-trùng-4t-ván-2)**
+### 🎴 Cập Nhật Mới Nhất: 3 Chế Độ Chơi & Tùy Biến Thẻ Bài Cho Merlin
+Tại phòng chờ, Merlin (Quản trò / Chủ phòng) có toàn quyền lựa chọn giữa 3 Chế Độ Chơi:
+1. **Cổ Điển (Classic - 22 Thẻ Gốc):** 17 Hội Phượng Hoàng & 5 Tử Thần Thực Tử.
+2. **MOD HPVN (27 Thẻ Mở Rộng):** Đầy đủ 27 vai trò với Minerva McGonagall, Neville Longbottom, Draco Malfoy, Dolores Umbridge và Jester.
+3. **Tùy Biến (Custom Deck Picker):** Merlin tự tay chọn chính xác danh sách nhân vật sẽ xuất hiện trong game thay vì random toàn bộ 27 vai trò. Tích hợp bộ lọc phe, tìm kiếm nhanh, nút mẫu 1 chạm và kiểm tra số lượng theo số người chơi.
+*Cả 3 chế độ đều tích hợp thuật toán snapshot lịch sử vai trò và khóa cứng hoán đổi (Hard Swap) cam kết 0% chia lặp người làm Tử Thần Thực Tử ở ván tiếp theo!*
 
-### 🎮 Chế Độ Chơi Mới: MOD HPVN - Ultimate Edition
-Kết hợp tinh hoa từ Classic & Chaos Mode! 4-20 người chơi, 10-25 phút, Ghost Voting, Chaos Events, Dark Pact Protection. **[Xem chi tiết →](#-7-mod-hpvn---ultimate-edition)**
+### 🔄 Trở Về Phòng Chờ & Chống Trùng 4T Ván 2 Tuyệt Đối
+Nâng cấp nút "Trở Về Phòng Chờ" bảo lưu phòng chơi, tích hợp thuật toán snapshot lịch sử vai trò và khóa cứng hoán đổi (Hard Swap) cam kết 0% chia lặp người làm Tử Thần Thực Tử ở ván tiếp theo! Đồng bộ mượt mà cho mọi nhà mạng (Viettel, VNPT, FPT, 4G). **[Xem chi tiết →](#-17-nút-trở-về-phòng-chờ--thuật-toán-chống-chia-trùng-4t-ván-2)**
 
 ### 🛠️ Cập Nhật Trước: Sửa Lỗi Game Logic P0/P1
 Audit và fix các lỗi nghiêm trọng: George Peru Darkness, self-target validation, vote re-submit warning, vote permission enforcement, double execution fix. **[Xem chi tiết →](#-15-sửa-lỗi-game-logic-p0p1-bug-fixes)**
@@ -331,6 +335,29 @@ Giải quyết triệt để vấn đề các thao tác action và bỏ phiếu 
   - Khi mạng di động 4G chập chờn hoặc chuyển trạm phát sóng dẫn đến WebRTC / WebSocket tạo lại kết nối tạm thời với ID ngẫu nhiên: Client tự động đối soát với danh sách phòng của Host qua `deviceId` và tên người chơi để khôi phục đúng slot, bảo toàn vai trò và quyền hành động.
 - **Phản Hồi Trạng Thái Hai Chiều (Bidirectional Action Feedback):**
   - Khi Host tiếp nhận hoặc từ chối một action, phản hồi kết quả trực quan lập tức gửi về client để hiển thị thông báo tức thì, không để người chơi ở trạng thái chờ đợi hoang mang.
+
+---
+
+### 🎴 19. Bảng Điều Khiển 3 Chế Độ Chơi & Bộ Chọn Thẻ Tùy Biến (Custom Role Picker)
+
+Tại phòng chờ (`Lobby`), Quản Trò Merlin (Host/GM) được trang bị bảng chọn chế độ chơi trực quan và bộ công cụ tùy biến thẻ bài trước khi khai mạc trận đấu:
+
+- **1. Chế Độ Cổ Điển (`CLASSIC` - 22 Thẻ Gốc):**
+  - Giữ đúng luật chơi gốc của Bảy Potter: 17 thẻ Hội Phượng Hoàng và 5 thẻ Tử Thần Thực Tử.
+  - Phù hợp cho các ván đấu truyền thống chuẩn nguyên tác.
+- **2. Chế Độ MOD HPVN (`MOD_HPVN` - 27 Thẻ Mở Rộng):**
+  - Kích hoạt toàn bộ 27 nhân vật: bổ sung thêm Minerva McGonagall, Neville Longbottom, Draco Malfoy, Dolores Umbridge và Jester.
+  - Phù hợp cho các ván đấu đông người hoặc muốn trải nghiệm sự biến hóa hỗn loạn đầy bất ngờ.
+- **3. Chế Độ Tùy Biến (`CUSTOM` - Merlin Tự Chọn Thẻ):**
+  - Merlin có toàn quyền quyết định **chính xác những nhân vật nào sẽ xuất hiện trong ván đấu** thay vì để hệ thống chia ngẫu nhiên từ toàn bộ 27 thẻ.
+  - **Giao diện Modal Chọn Thẻ Chuyên Nghiệp (`CustomRolesModal`):**
+    - Hiển thị đầy đủ 27 thẻ bài với phân loại màu sắc phe phái, số hiệu thẻ, huy hiệu, năng lực chiến thuật và ảnh đại diện.
+    - Tìm kiếm nhanh tên nhân vật hoặc từ khóa kỹ năng.
+    - Bộ lọc nhanh theo Phe: Hội Phượng Hoàng, Tử Thần Thực Tử, Trung Lập.
+    - Nút mẫu tiện lợi 1 chạm: **"Chuẩn N Người"** (tự động chọn tỷ lệ phe tối ưu theo số người trong phòng), **"Cổ Điển (22 Thẻ)"**, **"Toàn Bộ (27 Thẻ)"**, **"Bỏ Chọn Hết"**.
+    - Cảnh báo trực quan nếu số lượng thẻ được chọn ít hơn số lượng người chơi trong phòng.
+  - **Đảm bảo tính công bằng & Chống lặp 4T:** Dù ở chế độ Tùy Biến, thuật toán chia bài vẫn kiểm tra bảo lưu lịch sử và kích hoạt cơ chế khóa cứng chống trùng lặp người làm 4T ở ván kế tiếp.
+  - **Đồng bộ thời gian thực:** Chế độ chơi và số lượng thẻ đã chọn được đồng bộ tức thì qua Firebase Floo Network tới màn hình chờ của tất cả người chơi trong phòng.
 
 ---
 

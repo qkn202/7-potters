@@ -23,7 +23,8 @@ import {
   Radio,
   Wifi,
   WifiOff,
-  Flame
+  Flame,
+  Sliders
 } from 'lucide-react';
 import { 
   PhoenixCrest, 
@@ -33,8 +34,11 @@ import {
   DeathlyHallowsSymbol 
 } from './ArtAssets';
 import { CardDeckModal } from './CardDeckModal';
+import { CustomRolesModal } from './CustomRolesModal';
 import { openFlooDrawer } from './FlooChatDrawer';
 import { getHouseStyle } from '@/lib/flooFirebase';
+import { GameMode } from '@/lib/types';
+import { ROLES } from '@/lib/roles';
 
 export function Lobby() {
   const { 
@@ -48,14 +52,20 @@ export function Lobby() {
     roomCode,
     isHost,
     connStatus,
-    offlinePlayerIds
+    offlinePlayerIds,
+    setGameMode,
+    setCustomRoles,
   } = useGame();
 
   const [isDeckOpen, setIsDeckOpen] = useState(false);
+  const [isCustomRolesOpen, setIsCustomRolesOpen] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
-  const [isQrOpen, setIsQrOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isQrOpen, setIsQrOpen] = useState(false);
+
+  const gameMode: GameMode = gameState.gameMode || 'CLASSIC';
+  const customRoles: string[] = gameState.customRoles || [];
   
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
   const isGM = currentPlayer?.isGM;
@@ -465,9 +475,95 @@ export function Lobby() {
                   </div>
                 </div>
 
-                <p className="text-xs text-[#ebdcb0] font-lora leading-relaxed mb-6">
-                  Bạn đang nắm quyền điều phối chiến dịch. Thêm bot thử nghiệm nếu cần, sau đó xáo bộ thẻ và ấn bắt đầu chiến dịch.
+                <p className="text-xs text-[#ebdcb0] font-lora leading-relaxed mb-4">
+                  Bạn đang nắm quyền điều phối chiến dịch. Chọn chế độ chơi, thêm bot thử nghiệm nếu cần, sau đó xáo bộ thẻ và khai mạc trận đấu.
                 </p>
+
+                {/* Game Mode Selector */}
+                <div className="mb-5 p-3.5 bg-[#120803]/85 rounded-xl border border-[#7a5229]/60 shadow-inner">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-[#ffd88f] font-bold flex items-center gap-1.5">
+                      <Sparkles size={13} className="text-[#ffd88f]" />
+                      Chế Độ Chơi:
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#2a170d] text-[#ebdcb0] border border-[#7a5229]/60">
+                      {gameMode === 'CLASSIC' ? '22 Thẻ' : gameMode === 'MOD_HPVN' ? '27 Thẻ' : `${customRoles.length > 0 ? customRoles.length : 22} Thẻ Tùy Biến`}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setGameMode('CLASSIC')}
+                      className={`py-2 px-1 text-center rounded-lg border text-xs font-serif font-bold transition-all cursor-pointer ${
+                        gameMode === 'CLASSIC'
+                          ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ffd88f] shadow-md shadow-[#bd8436]/20'
+                          : 'bg-[#1a0e07] text-[#ebdcb0]/80 border-[#5a3a1f] hover:border-[#bd8436]/60 hover:text-[#ffd88f]'
+                      }`}
+                    >
+                      <div className="text-[11px] sm:text-xs">Cổ Điển</div>
+                      <div className="text-[9px] opacity-75 font-mono">22 Thẻ Gốc</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setGameMode('MOD_HPVN')}
+                      className={`py-2 px-1 text-center rounded-lg border text-xs font-serif font-bold transition-all cursor-pointer ${
+                        gameMode === 'MOD_HPVN'
+                          ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ffd88f] shadow-md shadow-[#bd8436]/20'
+                          : 'bg-[#1a0e07] text-[#ebdcb0]/80 border-[#5a3a1f] hover:border-[#bd8436]/60 hover:text-[#ffd88f]'
+                      }`}
+                    >
+                      <div className="text-[11px] sm:text-xs">MOD HPVN</div>
+                      <div className="text-[9px] opacity-75 font-mono">27 Thẻ Mở Rộng</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGameMode('CUSTOM');
+                        if (!customRoles || customRoles.length === 0) {
+                          setCustomRoles(Object.keys(ROLES));
+                        }
+                      }}
+                      className={`py-2 px-1 text-center rounded-lg border text-xs font-serif font-bold transition-all cursor-pointer ${
+                        gameMode === 'CUSTOM'
+                          ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ffd88f] shadow-md shadow-[#bd8436]/20'
+                          : 'bg-[#1a0e07] text-[#ebdcb0]/80 border-[#5a3a1f] hover:border-[#bd8436]/60 hover:text-[#ffd88f]'
+                      }`}
+                    >
+                      <div className="text-[11px] sm:text-xs">Tùy Biến</div>
+                      <div className="text-[9px] opacity-75 font-mono">Chọn Thẻ</div>
+                    </button>
+                  </div>
+
+                  {gameMode === 'CUSTOM' && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-2.5 pt-2.5 border-t border-[#5a3a1f]"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setIsCustomRolesOpen(true)}
+                        className="w-full py-2 px-3 bg-[#2a170d] hover:bg-[#3d2314] text-[#ffd88f] border border-[#bd8436] rounded-lg text-xs font-serif font-bold flex items-center justify-between cursor-pointer transition-colors shadow-sm"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <Sliders size={13} className="text-[#ffd88f]" />
+                          Chọn Nhân Vật Sẽ Xuất Hiện:
+                        </span>
+                        <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-[#120803] border border-[#bd8436]/60 text-[#ffd88f]">
+                          {customRoles.length > 0 ? `${customRoles.length}/27 thẻ` : '27 thẻ'}
+                        </span>
+                      </button>
+                      {customRoles.length > 0 && customRoles.length < nonGmPlayers.length && (
+                        <p className="text-[10px] text-amber-400 font-mono mt-1 text-center">
+                          ⚠️ Cần chọn tối thiểu {nonGmPlayers.length} thẻ cho {nonGmPlayers.length} người chơi!
+                        </p>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
 
                 <div className="space-y-3">
                   <button
@@ -518,16 +614,28 @@ export function Lobby() {
                 Merlin đang tập hợp các phù thủy và chuẩn bị chia sẻ thẻ bài định mệnh. Vui lòng giữ yên lặng trong sảnh!
               </p>
               
-              <div className="p-3 bg-[#120803] rounded-xl border border-[#5a3a1f] text-[11px] text-[#ebdcb0] font-mono max-w-xs">
-                {hasAssignedRoles ? (
-                  <span className="text-emerald-400 font-bold flex items-center justify-center gap-1">
-                    <CheckCircle size={14} /> Bạn đã được chia thẻ bài! Chờ khai mạc...
+              <div className="p-3.5 bg-[#120803] rounded-xl border border-[#5a3a1f] text-[11px] text-[#ebdcb0] font-mono max-w-xs w-full space-y-2">
+                <div className="flex items-center justify-between border-b border-[#3d2314] pb-2 text-[10px]">
+                  <span className="text-[#ebdcb0]/70 uppercase tracking-wider">Chế độ phòng:</span>
+                  <span className="text-[#ffd88f] font-bold px-2 py-0.5 rounded bg-[#2a170d] border border-[#7a5229]/60">
+                    {gameMode === 'CLASSIC' 
+                      ? '📜 Cổ Điển (22 Thẻ)' 
+                      : gameMode === 'MOD_HPVN' 
+                      ? '✨ MOD HPVN (27 Thẻ)' 
+                      : `🛠️ Tùy Biến (${customRoles.length > 0 ? customRoles.length : 22} Thẻ)`}
                   </span>
-                ) : (
-                  <span className="text-[#ffd88f] flex items-center justify-center gap-1">
-                    ⏳ Đang chờ chia thẻ bài...
-                  </span>
-                )}
+                </div>
+                <div>
+                  {hasAssignedRoles ? (
+                    <span className="text-emerald-400 font-bold flex items-center justify-center gap-1 pt-1">
+                      <CheckCircle size={14} /> Bạn đã được chia thẻ bài! Chờ khai mạc...
+                    </span>
+                  ) : (
+                    <span className="text-[#ffd88f] flex items-center justify-center gap-1 pt-1">
+                      ⏳ Đang chờ chia thẻ bài...
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -595,6 +703,15 @@ export function Lobby() {
       <CardDeckModal
         isOpen={isDeckOpen}
         onClose={() => setIsDeckOpen(false)}
+      />
+
+      {/* Custom Roles Picker Modal */}
+      <CustomRolesModal
+        isOpen={isCustomRolesOpen}
+        onClose={() => setIsCustomRolesOpen(false)}
+        selectedRoleIds={customRoles}
+        onSave={(roleIds: string[]) => setCustomRoles(roleIds)}
+        playerCount={nonGmPlayers.length}
       />
     </div>
   );

@@ -39,6 +39,7 @@ import {
   type FlooUserProfile 
 } from '@/lib/flooFirebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { GameMode } from '@/lib/types';
 
 type JoinMode = 'create' | 'join' | 'mock';
 type AuthTab = 'hpvn' | 'guest';
@@ -50,6 +51,7 @@ export function JoinForm() {
   const [mode, setMode] = useState<JoinMode>('create');
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [isGM, setIsGM] = useState(true);
+  const [selectedGameMode, setSelectedGameMode] = useState<GameMode>('CLASSIC');
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -218,13 +220,13 @@ export function JoinForm() {
 
       // Execute room entry
       if (mode === 'create') {
-        await createRoom(finalName, isGM, extraData);
+        await createRoom(finalName, isGM, { ...extraData, gameMode: selectedGameMode });
       } else if (mode === 'join') {
         // Người tham gia phòng vào chơi luôn là Người Chơi (không thể là GM)
         await joinRoom(cleanCode, finalName, false, extraData);
       } else {
         // Single-device / Mock mode
-        joinGame(finalName, isGM, extraData);
+        joinGame(finalName, isGM, { ...extraData, gameMode: selectedGameMode });
       }
     } catch (err: any) {
       console.error('[JoinForm] Submit error:', err);
@@ -608,6 +610,65 @@ export function JoinForm() {
                 }}
                 className="w-4 h-4 rounded border-[#7a5229] text-[#bd8436] focus:ring-[#bd8436] bg-[#120803] pointer-events-none"
               />
+            </div>
+          )}
+
+          {/* Game Mode Selector in JoinForm when creating room */}
+          {mode !== 'join' && (
+            <div className="p-3.5 rounded-xl bg-[#180e07] border border-[#7a5229]/70 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-serif font-bold text-[#ffd88f] flex items-center gap-1.5">
+                  <Sparkles size={14} className="text-[#ffd88f]" />
+                  Chế Độ Chơi:
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#120803] text-[#ebdcb0] border border-[#7a5229]/60">
+                  {selectedGameMode === 'CLASSIC' ? '22 Thẻ Gốc' : selectedGameMode === 'MOD_HPVN' ? '27 Thẻ Mở Rộng' : 'Tùy Biến Thẻ'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedGameMode('CLASSIC')}
+                  className={`py-2 px-1 text-center rounded-lg border text-xs font-serif font-bold transition-all cursor-pointer ${
+                    selectedGameMode === 'CLASSIC'
+                      ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ffd88f] shadow-md shadow-[#bd8436]/20'
+                      : 'bg-[#120803] text-[#ebdcb0]/80 border-[#5a3a1f] hover:border-[#bd8436]/60 hover:text-[#ffd88f]'
+                  }`}
+                >
+                  <div className="text-[11px] sm:text-xs">Cổ Điển</div>
+                  <div className="text-[9px] opacity-75 font-mono">22 Thẻ</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedGameMode('MOD_HPVN')}
+                  className={`py-2 px-1 text-center rounded-lg border text-xs font-serif font-bold transition-all cursor-pointer ${
+                    selectedGameMode === 'MOD_HPVN'
+                      ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ffd88f] shadow-md shadow-[#bd8436]/20'
+                      : 'bg-[#120803] text-[#ebdcb0]/80 border-[#5a3a1f] hover:border-[#bd8436]/60 hover:text-[#ffd88f]'
+                  }`}
+                >
+                  <div className="text-[11px] sm:text-xs">MOD HPVN</div>
+                  <div className="text-[9px] opacity-75 font-mono">27 Thẻ</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedGameMode('CUSTOM')}
+                  className={`py-2 px-1 text-center rounded-lg border text-xs font-serif font-bold transition-all cursor-pointer ${
+                    selectedGameMode === 'CUSTOM'
+                      ? 'bg-gradient-to-b from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ffd88f] shadow-md shadow-[#bd8436]/20'
+                      : 'bg-[#120803] text-[#ebdcb0]/80 border-[#5a3a1f] hover:border-[#bd8436]/60 hover:text-[#ffd88f]'
+                  }`}
+                >
+                  <div className="text-[11px] sm:text-xs">Tùy Biến</div>
+                  <div className="text-[9px] opacity-75 font-mono">Chọn Thẻ</div>
+                </button>
+              </div>
+              <p className="text-[10px] text-[#ebdcb0]/70 font-mono italic">
+                * Sau khi vào phòng chờ, Merlin có toàn quyền đổi chế độ hoặc chọn danh sách thẻ xuất hiện.
+              </p>
             </div>
           )}
 

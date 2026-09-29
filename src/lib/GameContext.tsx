@@ -16,9 +16,9 @@ export interface GameContextType {
   hostDisconnectedAt: number | null;
   disconnectCountdown: number | null;
 
-  createRoom: (name: string, isGM: boolean, extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }) => Promise<string>;
+  createRoom: (name: string, isGM: boolean, extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string; gameMode?: GameMode; customRoles?: string[] }) => Promise<string>;
   joinRoom: (roomCode: string, name: string, isGM: boolean, extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }) => Promise<boolean>;
-  joinGame: (name: string, isGM: boolean, extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }) => void;
+  joinGame: (name: string, isGM: boolean, extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string; gameMode?: GameMode; customRoles?: string[] }) => void;
   leaveGame: () => void;
   startGame: () => void;
   setPhase: (phase: GamePhase) => void;
@@ -2340,7 +2340,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const createRoom = async (
     name: string, 
     isGM: boolean, 
-    extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }
+    extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string; gameMode?: GameMode; customRoles?: string[] }
   ): Promise<string> => {
     // Generate a 4-letter uppercase code e.g. "POT7"
     const code = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -2398,6 +2398,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       const initialHostState: GameState = {
         ...DEFAULT_STATE,
+        gameMode: extra?.gameMode || 'CLASSIC',
+        customRoles: extra?.customRoles || [],
         players: [hostPlayer],
         logs: [`Hệ thống: Phòng ${code} đã được tạo bởi ${name} (${isGM ? 'Merlin' : 'Chủ phòng'}).`],
       };
@@ -2487,7 +2489,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const joinGame = (
     name: string, 
     isGM: boolean,
-    extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string }
+    extra?: { house?: string; userTag?: string; hpvnUid?: string; avatarUrl?: string; gameMode?: GameMode; customRoles?: string[] }
   ) => {
     const existingPlayer = gameState.players.find(p => p.name === name && p.isGM === isGM);
     
@@ -2529,6 +2531,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     
     updateState(prev => ({
       ...prev,
+      gameMode: extra?.gameMode || prev.gameMode || 'CLASSIC',
+      customRoles: extra?.customRoles || prev.customRoles || [],
       players: [...prev.players, newPlayer],
       logs: [...prev.logs, `${name} (${isGM ? 'Merlin' : 'Phù thủy'}) đã gia nhập phòng!`],
     }));

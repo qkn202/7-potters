@@ -185,6 +185,118 @@ export function Lobby() {
           </button>
         </div>
 
+        {/* Game Mode Selector Header Banner (Very prominent for Merlin & Players) */}
+        <div className="mt-5 p-4 rounded-2xl bg-gradient-to-r from-[#24140a]/95 via-[#1a0e07]/95 to-[#24140a]/95 border-2 border-[#bd8436] shadow-xl text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#7a5229]/60">
+            <div className="flex items-center gap-2">
+              <Sparkles size={18} className="text-[#ffd88f] animate-pulse shrink-0" />
+              <div>
+                <h4 className="font-title font-bold text-sm sm:text-base text-[#ffd88f] tracking-wide flex items-center gap-2">
+                  Chế Độ Trận Đấu {hasControl ? '(Merlin Lựa Chọn)' : ''}
+                </h4>
+                <p className="text-[11px] text-[#ebdcb0]/70 font-mono">
+                  {gameMode === 'CLASSIC' 
+                    ? '📜 Cổ Điển: 22 vai trò chuẩn nguyên tác (17 HPH, 5 TTTT)' 
+                    : gameMode === 'MOD_HPVN' 
+                    ? '✨ MOD HPVN: 27 vai trò mở rộng (Thêm McGonagall, Neville, Draco, Dolores, Jester)' 
+                    : `🛠️ Tùy Biến: ${customRoles.length > 0 ? customRoles.length : 22}/27 nhân vật do Merlin tự tay chỉ định`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-[#120803] text-[#ffd88f] border border-[#bd8436]/60 font-bold shrink-0">
+                {gameMode === 'CLASSIC' ? '22 Thẻ Gốc' : gameMode === 'MOD_HPVN' ? '27 Thẻ Mở Rộng' : `${customRoles.length > 0 ? customRoles.length : 22} Thẻ Tùy Biến`}
+              </span>
+            </div>
+          </div>
+
+          {hasControl ? (
+            <div className="mt-3 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setGameMode('CLASSIC')}
+                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                    gameMode === 'CLASSIC'
+                      ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ffd88f] shadow-lg shadow-[#bd8436]/30 font-bold scale-[1.01]'
+                      : 'bg-[#120803]/80 text-[#ebdcb0] border-[#5a3a1f] hover:border-[#bd8436] hover:text-[#ffd88f]'
+                  }`}
+                >
+                  <div className="font-serif font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5">
+                    <span>📜 Cổ Điển</span>
+                  </div>
+                  <div className="text-[10px] opacity-80 font-mono mt-0.5">22 Thẻ Gốc Chuẩn</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setGameMode('MOD_HPVN')}
+                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                    gameMode === 'MOD_HPVN'
+                      ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ffd88f] shadow-lg shadow-[#bd8436]/30 font-bold scale-[1.01]'
+                      : 'bg-[#120803]/80 text-[#ebdcb0] border-[#5a3a1f] hover:border-[#bd8436] hover:text-[#ffd88f]'
+                  }`}
+                >
+                  <div className="font-serif font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5">
+                    <span>✨ MOD HPVN</span>
+                  </div>
+                  <div className="text-[10px] opacity-80 font-mono mt-0.5">27 Thẻ Đầy Đủ</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGameMode('CUSTOM');
+                    if (!customRoles || customRoles.length === 0) {
+                      setCustomRoles(Object.keys(ROLES));
+                    }
+                  }}
+                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                    gameMode === 'CUSTOM'
+                      ? 'bg-gradient-to-r from-[#bd8436] to-[#7a5229] text-[#120803] border-[#ffd88f] shadow-lg shadow-[#bd8436]/30 font-bold scale-[1.01]'
+                      : 'bg-[#120803]/80 text-[#ebdcb0] border-[#5a3a1f] hover:border-[#bd8436] hover:text-[#ffd88f]'
+                  }`}
+                >
+                  <div className="font-serif font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5">
+                    <span>🛠️ Tùy Biến (Custom)</span>
+                  </div>
+                  <div className="text-[10px] opacity-80 font-mono mt-0.5">Merlin Tự Chọn Thẻ</div>
+                </button>
+              </div>
+
+              {gameMode === 'CUSTOM' && (
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2 bg-[#120803]/90 p-3 rounded-xl border border-[#bd8436]">
+                  <div className="text-xs font-serif text-[#ebdcb0]">
+                    <span className="text-[#ffd88f] font-bold">Danh sách thẻ tùy biến:</span> Đã chọn{' '}
+                    <strong className="text-amber-300 font-mono text-sm">{customRoles.length > 0 ? customRoles.length : 22}</strong>/27 thẻ bài
+                    {customRoles.length > 0 && customRoles.length < nonGmPlayers.length && (
+                      <span className="text-amber-400 font-mono text-[11px] block sm:inline sm:ml-2">
+                        ⚠️ Cần tối thiểu {nonGmPlayers.length} thẻ cho {nonGmPlayers.length} người chơi!
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsCustomRolesOpen(true)}
+                    className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-[#bd8436] to-[#7a5229] hover:brightness-110 text-[#120803] font-serif font-black text-xs rounded-lg flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-all shrink-0"
+                  >
+                    <Sliders size={14} />
+                    <span>Chọn Nhân Vật Sẽ Xuất Hiện ({customRoles.length > 0 ? customRoles.length : 22}/27)</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="mt-2 text-xs text-[#ebdcb0]/80 font-lora">
+              Quản trò Merlin đang thiết lập trận đấu ở chế độ{' '}
+              <strong className="text-[#ffd88f]">
+                {gameMode === 'CLASSIC' ? 'Cổ Điển' : gameMode === 'MOD_HPVN' ? 'MOD HPVN' : 'Tùy Biến Nhân Vật'}
+              </strong>.
+            </div>
+          )}
+        </div>
+
         {/* Campaign Faction Balance Preview Widget */}
         <div className="mt-5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-[#210c08]/90 via-[#180f14]/90 to-[#081a14]/90 border border-[#7a5229] shadow-xl relative overflow-hidden text-left">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-[#5c3e1e]/60">

@@ -197,7 +197,16 @@ const isProtectAction = (actionName: string): boolean => normalizeAction(actionN
 const isHagridEscortAction = (actionName: string): boolean => normalizeAction(actionName) === 'bảo kê';
 const isKingsleyAction = (actionName: string): boolean => {
   const n = normalizeAction(actionName);
-  return n === 'chỉ huy ứng cứu' || n === 'ứng cứu' || n === 'cứu sống' || n === 'chỉ huy phản công' || n === 'kingsley kích hoạt';
+  return (
+    n === 'chỉ huy ứng cứu' ||
+    n === 'ứng cứu' ||
+    n === 'cứu sống' ||
+    n === 'chỉ huy phản công' ||
+    n === 'kingsley kích hoạt' ||
+    n.includes('chỉ huy') ||
+    n.includes('ứng cứu') ||
+    n.includes('kingsley')
+  );
 };
 const isSectumsempraAction = (actionName: string): boolean => {
   const n = normalizeAction(actionName);
@@ -1161,9 +1170,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         return prev;
       }
 
-      // Check if actor is affected by Fred's Fainting Fancy candy (can only vote, no other actions)
+      // Check if actor is affected by Fred's Fainting Fancy candy (can only vote, no other actions; Kingsley immune)
       const isFaintedByCandy = Boolean(prev.skillStates[`${actorId}_FRED_CANDY_R${prev.round}`]);
-      if (isFaintedByCandy && actionName !== 'NONE') {
+      if (isFaintedByCandy && !isKingsley && actionName !== 'NONE') {
         setSkillToast('⚠️ Bạn đang bị ngất xỉu do Kẹo Ngất Xỉu của Fred Weasley! Không thể thi triển kỹ năng đêm nay!');
         return prev;
       }
@@ -3514,8 +3523,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         const isKingsley = player.role?.id === 'KINGSLEY_SHACKLEBOLT';
         const isSectumSilenced = Boolean(gameState.skillStates[`${playerId}_SECTUMSEMPRA_SILENCED_R${gameState.round}`]);
         const isPotterFakeSilenced = Boolean(gameState.skillStates[`${playerId}_POTTERFAKE_SILENCED_R${gameState.round}`]);
-        if ((isSectumSilenced || isPotterFakeSilenced) && !isKingsley && action.actionName !== 'NONE') {
-          const reason = isSectumSilenced ? 'bùa lạc Sectumsempra' : 'Bùa Cấm Cửa của Potter Fake';
+        const isFaintedByCandy = Boolean(gameState.skillStates[`${playerId}_FRED_CANDY_R${gameState.round}`]);
+        if ((isSectumSilenced || isPotterFakeSilenced || isFaintedByCandy) && !isKingsley && action.actionName !== 'NONE') {
+          const reason = isSectumSilenced ? 'bùa lạc Sectumsempra' : isFaintedByCandy ? 'Kẹo Ngất Xỉu của Fred' : 'Bùa Cấm Cửa của Potter Fake';
           summary.push(`${player.name} bị SILENCED bởi ${reason} nên không thể thi triển kỹ năng đêm nay!`);
           return;
         }
@@ -3630,6 +3640,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             summary.push(`⚔️ SECTUMSEMPRA CAN THIỆP! Trong bóng đêm, bùa chém của Severus Snape đã rạch nát đòn tấn công của Tử Thần Thực Tử, cứu sống ${victim.name} trong gang tấc!`);
           } else if (gameState.skillStates[`${deathEaterTargetId}_MCGONAGALL_SHIELD_R${gameState.round}`]) {
             summary.push(`🐾 BỌC LÓT HÓA MÈO! Giáo sư McGonagall đã hóa hình bảo vệ ${victim.name}, giúp mục tiêu né đòn ám sát trong bóng đêm!`);
+          } else if (victim.role?.id === 'KINGSLEY_SHACKLEBOLT' && isKingsleyActive) {
+            summary.push(`🛡️ THẦN SÁNG PHẢN ĐÒN! Chúa Tể Voldemort / Tử Thần Thực Tử nhắm vào Kingsley Shacklebolt, nhưng Thần Sáng Hoàng Gia đang trong thế trận sẵn sàng đã lập tức vung đũa hộ mệnh đánh bạt đòn ám sát chí mạng, bảo toàn tính mạng an toàn tuyệt đối!`);
           } else {
             let escortShielded = false;
             let ronShielded = false;
@@ -3787,11 +3799,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (fallenOrderMemberIds.length > 0) {
-          // Cứu sống 1 thành viên Hội bị TTTT hạ sát (100% success)
-          const rescuedId = fallenOrderMemberIds[0];
+          // Ưu tiên cứu bản thân Kingsley nếu bằng cách nào đó Kingsley lọt vào deadPlayers, nếu không thì cứu đồng đội HPH ngã xuống đầu tiên
+          const kingsleyId = gameState.players.find(p => p.role?.id === 'KINGSLEY_SHACKLEBOLT')?.id;
+          const rescuedId = (kingsleyId && fallenOrderMemberIds.includes(kingsleyId)) 
+            ? kingsleyId 
+            : fallenOrderMemberIds[0];
           const rescuedPlayer = gameState.players.find(p => p.id === rescuedId);
           deadPlayers = deadPlayers.filter(id => id !== rescuedId);
-          summary.push(`🛡️ [THÀNH CÔNG - 100%] Thần Sáng Kingsley Shacklebolt đã kịp thời xuất hiện, tung bùa hộ mệnh giải cứu ${rescuedPlayer?.name || 'đồng đội'} thoát chết trong gang tấc và hồi phục an toàn!`);
+          if (rescuedId === kingsleyId) {
+            summary.push(`🛡️ [THÀNH CÔNG - 100%] Thần Sáng Kingsley Shacklebolt đã thi triển bùa phản phệ cực hạn, tự cứu sống bản thân an toàn và tiếp tục chỉ huy phi đội!`);
+          } else {
+            summary.push(`🛡️ [THÀNH CÔNG - 100%] Thần Sáng Kingsley Shacklebolt đã kịp thời xuất hiện, tung bùa hộ mệnh giải cứu ${rescuedPlayer?.name || 'đồng đội'} thoát chết trong gang tấc và hồi phục an toàn!`);
+          }
         }
       }
 

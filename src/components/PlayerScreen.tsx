@@ -51,7 +51,16 @@ const isEscortAction = (actionName: string): boolean => normalizeAction(actionNa
 const isProtectAction = (actionName: string): boolean => normalizeAction(actionName) === 'bảo vệ';
 const isKingsleyAction = (actionName: string): boolean => {
   const n = normalizeAction(actionName);
-  return n === 'chỉ huy ứng cứu' || n === 'ứng cứu' || n === 'cứu sống' || n === 'chỉ huy phản công' || n === 'kingsley kích hoạt';
+  return (
+    n === 'chỉ huy ứng cứu' ||
+    n === 'ứng cứu' ||
+    n === 'cứu sống' ||
+    n === 'chỉ huy phản công' ||
+    n === 'kingsley kích hoạt' ||
+    n.includes('chỉ huy') ||
+    n.includes('ứng cứu') ||
+    n.includes('kingsley')
+  );
 };
 const isSectumsempraAction = (actionName: string): boolean => {
   const n = normalizeAction(actionName);
@@ -1088,6 +1097,10 @@ export function PlayerScreen() {
                           <span className="text-emerald-300 font-extrabold text-base">
                             🚫 Án Binh Bất Động (Không Ám Sát Đêm Nay)
                           </span>
+                        ) : isKingsleyAction(myAction.actionName) ? (
+                          <span className="text-amber-300 font-extrabold text-base flex items-center gap-1.5">
+                            🛡️ Chỉ Huy Ứng Cứu (100% Bảo Vệ Bản Thân & Cứu Sống Đồng Đội)
+                          </span>
                         ) : (
                           <>
                             {isVoteAction(myAction.actionName) ? 'Biểu quyết Tước Đũa' : `Hành động: ${myAction.actionName}`}:{' '}
@@ -1460,23 +1473,29 @@ export function PlayerScreen() {
                         <button
                           onClick={() => {
                             playerAction('chỉ huy ứng cứu', 'ALL');
-                            setToastMessage('✓ Đã chỉ huy toàn quân sẵn sàng ứng cứu đêm nay (100% cứu sống 1 thành viên Hội bị ám sát).');
+                            setToastMessage('✓ Đã chỉ huy toàn quân sẵn sàng ứng cứu đêm nay (100% cứu sống đồng đội & bảo vệ bản thân).');
                             setTimeout(() => setToastMessage(null), 3500);
                           }}
                           disabled={isDead}
-                          className="flex-1 py-3 px-4 rounded-xl hpvn-btn-gold flex items-center justify-between sm:justify-start gap-3 shadow-lg disabled:opacity-40"
+                          className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-between sm:justify-start gap-3 shadow-lg disabled:opacity-40 transition-all cursor-pointer ${
+                            isKingsleyAction(myAction?.actionName || '')
+                              ? 'bg-gradient-to-r from-amber-600 via-amber-700 to-yellow-600 text-white border-2 border-yellow-300 ring-2 ring-yellow-400/50 shadow-[0_0_20px_rgba(251,191,36,0.5)]'
+                              : 'hpvn-btn-gold'
+                          }`}
                         >
                           <div className="p-2 rounded-lg bg-black/40 border border-amber-400/40 text-[#ffd88f] shrink-0">
-                            <Shield size={20} />
+                            <Shield size={20} className={isKingsleyAction(myAction?.actionName || '') ? 'animate-pulse text-yellow-200' : ''} />
                           </div>
                           <div className="flex flex-col text-left min-w-0">
                             <span className="font-serif font-black text-xs sm:text-sm tracking-wide text-[#ffd88f] truncate">
                               {isKingsleyAction(myAction?.actionName || '')
-                                ? '✓ Đã Kích Hoạt Ứng Cứu Đêm Nay'
+                                ? '✓ ĐANG BẬT: CHỈ HUY ỨNG CỨU (100%)'
                                 : 'Chỉ Huy Ứng Cứu (100%)'}
                             </span>
                             <span className="text-[10px] sm:text-[11px] font-lora text-amber-200/80 font-normal truncate">
-                              Sẵn sàng thế trận: 100% cứu sống 1 thành viên Hội bị ám sát trong đêm
+                              {isKingsleyAction(myAction?.actionName || '')
+                                ? 'Thế trận đang bật: 100% phản đòn bảo vệ bản thân & cứu sống đồng đội Hội Phượng Hoàng'
+                                : 'Sẵn sàng thế trận: 100% cứu sống 1 thành viên Hội bị ám sát trong đêm'}
                             </span>
                           </div>
                         </button>
@@ -1540,10 +1559,15 @@ export function PlayerScreen() {
                               setTimeout(() => setToastMessage(null), 3500);
                               return;
                             }
+                            const isCurrentlyKingsleyActive = isKingsleyAction(myAction?.actionName || '');
                             playerAction('bay hộ tống', effectiveTargetId);
                             setSelectedTarget(effectiveTargetId);
                             const tName = gameState.players.find(p => p.id === effectiveTargetId)?.name;
-                            setToastMessage(`✓ Đã xác nhận Bay Hộ Tống sát cánh cùng: ${tName}!`);
+                            if (isCurrentlyKingsleyActive) {
+                              setToastMessage(`⚠️ ĐÃ ĐỔI: Chuyển từ Chỉ Huy Ứng Cứu sang Bay Hộ Tống cùng: ${tName}!`);
+                            } else {
+                              setToastMessage(`✓ Đã xác nhận Bay Hộ Tống sát cánh cùng: ${tName}!`);
+                            }
                             setTimeout(() => setToastMessage(null), 3500);
                           }
                         }}
@@ -1659,7 +1683,12 @@ export function PlayerScreen() {
                 {myAction && (
                   <span className="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/90 px-3 py-1 rounded-full border border-emerald-500/80 flex items-center gap-1.5">
                     <CheckCircle size={13} className="text-emerald-400" />
-                    Đã lưu: {myAction.targetId === 'NONE' ? 'Án Binh (Không Giết)' : (myVotedTarget?.name || 'Mục tiêu')}
+                    Đã lưu:{' '}
+                    {myAction.targetId === 'NONE'
+                      ? 'Án Binh (Không Giết)'
+                      : isKingsleyAction(myAction.actionName)
+                        ? '🛡️ Chỉ Huy Ứng Cứu (100%)'
+                        : (myVotedTarget?.name || 'Mục tiêu')}
                   </span>
                 )}
                 {selectedTarget && selectedTarget !== myAction?.targetId && (
@@ -2012,13 +2041,40 @@ export function PlayerScreen() {
                     <span>Bảo Vệ</span>
                   </button>
                 )}
+                {/* Kingsley Quick Action on Mobile Sticky Bar */}
+                {me.role?.id === 'KINGSLEY_SHACKLEBOLT' && (
+                  <button
+                    onClick={() => {
+                      if (!isDead) {
+                        playerAction('chỉ huy ứng cứu', 'ALL');
+                        setToastMessage('✓ Đã kích hoạt thế trận Chỉ Huy Ứng Cứu (100% cứu sống đồng đội & bảo vệ bản thân)!');
+                        setTimeout(() => setToastMessage(null), 3500);
+                      }
+                    }}
+                    disabled={isDead}
+                    className={`px-3 py-2 rounded-xl font-serif font-bold text-xs flex items-center gap-1 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed border ${
+                      isKingsleyAction(myAction?.actionName || '')
+                        ? 'bg-gradient-to-r from-amber-600 to-yellow-600 text-white border-yellow-300 shadow-[0_0_10px_rgba(251,191,36,0.6)]'
+                        : 'bg-[#2a1a08] text-[#ffd88f] border-amber-500 hover:bg-[#3d250c]'
+                    }`}
+                  >
+                    <Shield size={13} className={isKingsleyAction(myAction?.actionName || '') ? 'animate-pulse text-yellow-200' : ''} />
+                    <span>{isKingsleyAction(myAction?.actionName || '') ? '✓ Đang Ứng Cứu' : 'Bật Ứng Cứu'}</span>
+                  </button>
+                )}
+
                 {effectiveTargetId !== me.id && (
                   <button
                     onClick={() => {
                       if (effectiveTargetId && !isDead && effectiveTargetPlayer?.status !== 'DEAD') {
+                        const isCurrentlyKingsleyActive = isKingsleyAction(myAction?.actionName || '');
                         playerAction('bay hộ tống', effectiveTargetId);
                         setSelectedTarget(effectiveTargetId);
-                        setToastMessage(`✓ Đã lưu mục tiêu Bay Hộ Tống: ${effectiveTargetPlayer.name}!`);
+                        if (isCurrentlyKingsleyActive) {
+                          setToastMessage(`⚠️ ĐÃ ĐỔI: Chuyển sang Bay Hộ Tống: ${effectiveTargetPlayer.name}!`);
+                        } else {
+                          setToastMessage(`✓ Đã lưu mục tiêu Bay Hộ Tống: ${effectiveTargetPlayer.name}!`);
+                        }
                         setTimeout(() => setToastMessage(null), 3500);
                       }
                     }}

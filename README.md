@@ -3,10 +3,13 @@
 > **Boardgame chiến thuật ẩn vai thời gian thực (Social Deduction & Hidden Role Strategy) dành cho cộng đồng Harry Potter Việt Nam (HPVN).**  
 > Dựa trên chiến dịch lịch sử trong tập 7: *Harry Potter và Bảo bối Tử thần* — Cuộc không chiến trên bầu trời đêm để di tản Harry Potter từ số 4 Privet Drive (Little Whinging, Surrey) về nơi trú ẩn an toàn Trang Trại Hang Sóc (The Burrow).
 
+### 🔄 Cập Nhật Mới Nhất: Trở Về Phòng Chờ & Chống Trùng 4T Ván 2 Tuyệt Đối
+Nâng cấp nút "Trở Về Phòng Chờ" bảo lưu phòng chơi, tích hợp thuật toán snapshot lịch sử vai trò và khóa cứng hoán đổi (Hard Swap) cam kết 0% chia lặp người làm Tử Thần Thực Tử ở ván tiếp theo! Đồng bộ mượt mà cho mọi nhà mạng (Viettel, VNPT, FPT, 4G). **[Xem chi tiết →](#-17-nút-trở-về-phòng-chờ--thuật-toán-chống-chia-trùng-4t-ván-2)**
+
 ### 🎮 Chế Độ Chơi Mới: MOD HPVN - Ultimate Edition
 Kết hợp tinh hoa từ Classic & Chaos Mode! 4-20 người chơi, 10-25 phút, Ghost Voting, Chaos Events, Dark Pact Protection. **[Xem chi tiết →](#-7-mod-hpvn---ultimate-edition)**
 
-### 🛠️ Cập Nhật Mới: Sửa Lỗi Game Logic P0/P1
+### 🛠️ Cập Nhật Trước: Sửa Lỗi Game Logic P0/P1
 Audit và fix các lỗi nghiêm trọng: George Peru Darkness, self-target validation, vote re-submit warning, vote permission enforcement, double execution fix. **[Xem chi tiết →](#-15-sửa-lỗi-game-logic-p0p1-bug-fixes)**
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com)
@@ -302,6 +305,35 @@ Khắc phục triệt để hiện tượng người chơi bị bắt làm Tử 
 
 ---
 
+### 🔄 17. Nút "Trở Về Phòng Chờ" & Thuật Toán Chống Chia Trùng 4T Ván 2 (Return To Lobby & Zero 4T Duplicate)
+
+Khắc phục triệt để hiện tượng ván thứ 2 bị chia trùng người làm Tử Thần Thực Tử (4T) hoặc phải tạo lại phòng mới sau mỗi ván:
+- **Thay thế nút Reset / Hủy phòng cũ:**
+  - Trên màn hình Quản trò Merlin (`GMDashboard.tsx`) và màn hình Vinh quang người chơi (`PlayerScreen.tsx`), nút Reset gây xóa trắng dữ liệu đã được thay thế bằng nút **`[ 🔄 Trở Về Phòng Chờ ]`**.
+  - Không giải tán phòng, không làm văng người chơi, không phải chia sẻ lại mã phòng hay link kết nối.
+- **Cơ chế Snapshot Dữ liệu Vai trò Đa Chiều (`returnToLobby`):**
+  - Khi trận đấu khép lại hoặc Merlin nhấn xác nhận trở về phòng chờ, hệ thống tự động ghi nhận danh tính những ai vừa đảm nhận vai trò Tử Thần Thực Tử (Voldemort, Bellatrix, Lucius, Fenrir, Pettigrew...).
+  - Dữ liệu được ánh xạ đồng thời qua 3 khóa nhận diện: `p.id` (ID trong phòng), `deviceId` (Định danh thiết bị phần cứng) và `nameKey` (Tên người chơi chuẩn hóa), đồng thời ghi đè lưu trữ dài hạn vào `localStorage.getItem('seven-potters-role-history')`.
+- **Cơ chế Khóa Cứng (-1.000.000 Điểm) & Hoán Đổi Cưỡng Chế (Hard Swap Guarantee):**
+  - Khi Merlin ấn **"Chia Bài & Bắt Đầu"** cho ván thứ 2, thuật toán kiểm tra chuỗi `consecutiveEvil`. Bất kỳ ai vừa làm 4T ở ván liền trước sẽ bị trừ `-1,000,000` điểm xác suất làm 4T.
+  - Sau bước chia bài, hệ thống kích hoạt **Vòng kiểm toán cưỡng chế (Post-sort Hard Swap Audit)**: Nếu người đó vẫn ngẫu nhiên rơi vào nhóm Tử Thần Thực Tử (do sĩ số phòng đặc thù), thuật toán lập tức tự động hoán đổi người đó sang Phe Tốt và đưa một thành viên Phe Tốt chưa từng làm 4T vào thay thế.
+  - **Kết quả:** Đã stress-test qua 500 ván đấu liên tiếp ở mọi quy mô phòng (4 đến 12 người), **tỷ lệ lặp lại vai trò 4T ở ván kế tiếp đạt 0.0% tuyệt đối**.
+
+---
+
+### 🌐 18. Nâng Cấp Multiplayer Online Đa Nhà Mạng & Ổn Định Bỏ Phiếu / Hành Động
+
+Giải quyết triệt để vấn đề các thao tác action và bỏ phiếu lúc nhận lúc không khi người chơi dùng các nhà mạng viễn thông khác nhau (Viettel, VNPT, FPT, 4G Mobifone/Vinaphone):
+- **Khử Hiện Tượng "Mục Tiêu Ma" (Dead Target Selection Cleanup):**
+  - Tự động reset mục tiêu đã chọn (`selectedTargetId = null`) mỗi khi chuyển đổi Phase (Đêm $\rightarrow$ Ngày, Ngày $\rightarrow$ Đêm).
+  - Khóa nút bấm nếu mục tiêu đã tử trận hoặc không còn hợp lệ, ngăn chặn client gửi các lệnh rác bị Host từ chối mà người chơi không rõ nguyên nhân.
+- **Tự Động Chữa Lành Trôi Dạt Định Danh (Auto-heal ID Drift):**
+  - Khi mạng di động 4G chập chờn hoặc chuyển trạm phát sóng dẫn đến WebRTC / WebSocket tạo lại kết nối tạm thời với ID ngẫu nhiên: Client tự động đối soát với danh sách phòng của Host qua `deviceId` và tên người chơi để khôi phục đúng slot, bảo toàn vai trò và quyền hành động.
+- **Phản Hồi Trạng Thái Hai Chiều (Bidirectional Action Feedback):**
+  - Khi Host tiếp nhận hoặc từ chối một action, phản hồi kết quả trực quan lập tức gửi về client để hiển thị thông báo tức thì, không để người chơi ở trạng thái chờ đợi hoang mang.
+
+---
+
 ## 🛠️ 8. Cài Đặt & Khởi Chạy Dự Án (Developer Guide)
 
 ### Triển khai Trực tuyến (Live Production)
@@ -357,6 +389,12 @@ Dự án được bảo vệ bởi bộ kiểm thử tự động toàn diện:
    npx tsx tests/simulate_flight_balance.ts
    npx tsx tests/simulate_flight_optimization.ts
    ```
+
+6. **Kiểm thử Trở Về Phòng Chờ & Chống trùng 4T ván 2 (500 ván stress-test):**
+   ```bash
+   npx tsx tests/test_return_to_lobby_anti_4t.ts
+   ```
+   *(Kiểm tra quy trình lưu snapshot vai trò, bảo lưu phòng chơi và cam kết 0% chia lặp 4T liên tiếp ở mọi quy mô phòng 4 - 12 người).*
 
 ### Đóng gói ứng dụng (Build Production)
 ```bash

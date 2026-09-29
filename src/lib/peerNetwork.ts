@@ -484,30 +484,29 @@ export class SevenPottersNetwork {
       console.warn('[7-Potters] Broadcast failed: channel is null for', msg.type);
       return false;
     }
-    try {
-      const res = await this.channel.send({
-        type: 'broadcast',
-        event: 'game_message',
-        payload: msg,
-      });
-      if (res === 'ok') {
-        return true;
-      }
-      console.warn(`[7-Potters] Broadcast returned status "${res}" for ${msg.type}. Retrying once in 200ms...`);
-      await new Promise(r => setTimeout(r, 200));
-      if (this.channel) {
-        const retryRes = await this.channel.send({
+    const maxRetries = 3;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const res = await this.channel.send({
           type: 'broadcast',
           event: 'game_message',
           payload: msg,
         });
-        return retryRes === 'ok';
+        if (res === 'ok') {
+          return true;
+        }
+        console.warn(`[7-Potters] Broadcast attempt ${attempt}/${maxRetries} returned status "${res}" for ${msg.type}.`);
+        if (attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, attempt * 250));
+        }
+      } catch (err) {
+        console.error(`[7-Potters] Broadcast exception attempt ${attempt}/${maxRetries} for ${msg.type}:`, err);
+        if (attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, attempt * 250));
+        }
       }
-      return false;
-    } catch (err) {
-      console.error(`[7-Potters] Broadcast exception for ${msg.type}:`, err);
-      return false;
     }
+    return false;
   }
 
   private handleIncomingMessage(msg: NetworkMessage) {

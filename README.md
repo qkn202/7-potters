@@ -3,18 +3,21 @@
 > **Boardgame chiến thuật ẩn vai thời gian thực (Social Deduction & Hidden Role Strategy) dành cho cộng đồng Harry Potter Việt Nam (HPVN).**  
 > Dựa trên chiến dịch lịch sử trong tập 7: *Harry Potter và Bảo bối Tử thần* — Cuộc không chiến trên bầu trời đêm để di tản Harry Potter từ số 4 Privet Drive (Little Whinging, Surrey) về nơi trú ẩn an toàn Trang Trại Hang Sóc (The Burrow).
 
-### 🎴 Cập Nhật Mới Nhất: 3 Chế Độ Chơi & Tùy Biến Thẻ Bài Cho Merlin
+### 🛡️ Cập Nhật Sửa Lỗi Mới Nhất (29/09/2026 - 12:28): Khắc Phục Lỗi Kỹ Năng Kingsley Shacklebolt
+Khắc phục triệt để lỗi người chơi bật skill Kingsley nhưng vẫn bị phe Tử Thần Thực Tử (4T) hạ sát trong đêm:
+- **Phản Đòn Thần Sáng Trực Diện (100% Sống Sót):** Kingsley đang trong thế trận ứng cứu sẽ đánh bạt đòn ám sát của 4T ngay lập tức, không bị rơi vào danh sách tử nạn `deadPlayers` và không bị in thông báo giả tử trận.
+- **Bảo Vệ Đồng Đội Trong Double Kill:** Khi 4T ám sát kép (Bellatrix / Phục kích Chặng 3), Kingsley tự thủ an toàn và vẫn cứu sống đồng đội Hội Phượng Hoàng ngã xuống cùng đêm.
+- **Chống Ghi Đè Nhầm Hành Động:** Nút "Chỉ Huy Ứng Cứu" phát sáng vàng kim khi bật; thanh ghim Mobile Sticky Bar bổ sung nút kích hoạt nhanh; cảnh báo rõ ràng khi người chơi chuyển sang Bay Hộ Tống.
+- **Miễn Nhiễm Câm Lặng:** Miễn nhiễm tuyệt đối trước bùa lạc Sectumsempra, Bùa Cấm Cửa Potter Fake và Kẹo Ngất Xỉu Fred Weasley. **[Xem chi tiết bản vá →](#-20-bản-vá-lỗi-kỹ-năng-kingsley-shacklebolt--phản-đòn-thần-sáng-29092026)**
+
+### 🎴 Cập Nhật: 3 Chế Độ Chơi & Tùy Biến Thẻ Bài Cho Merlin (29/09/2026)
 Tại phòng chờ, Merlin (Quản trò / Chủ phòng) có toàn quyền lựa chọn giữa 3 Chế Độ Chơi:
 1. **Cổ Điển (Classic - 22 Thẻ Gốc):** 17 Hội Phượng Hoàng & 5 Tử Thần Thực Tử.
 2. **MOD HPVN (27 Thẻ Mở Rộng):** Đầy đủ 27 vai trò với Minerva McGonagall, Neville Longbottom, Draco Malfoy, Dolores Umbridge và Jester.
 3. **Tùy Biến (Custom Deck Picker):** Merlin tự tay chọn chính xác danh sách nhân vật sẽ xuất hiện trong game thay vì random toàn bộ 27 vai trò. Tích hợp bộ lọc phe, tìm kiếm nhanh, nút mẫu 1 chạm và kiểm tra số lượng theo số người chơi.
-*Cả 3 chế độ đều tích hợp thuật toán snapshot lịch sử vai trò và khóa cứng hoán đổi (Hard Swap) cam kết 0% chia lặp người làm Tử Thần Thực Tử ở ván tiếp theo!*
 
-### 🔄 Trở Về Phòng Chờ & Chống Trùng 4T Ván 2 Tuyệt Đối
+### 🔄 Trở Về Phòng Chờ & Chống Trùng 4T Ván 2 Tuyệt Đối (29/09/2026)
 Nâng cấp nút "Trở Về Phòng Chờ" bảo lưu phòng chơi, tích hợp thuật toán snapshot lịch sử vai trò và khóa cứng hoán đổi (Hard Swap) cam kết 0% chia lặp người làm Tử Thần Thực Tử ở ván tiếp theo! Đồng bộ mượt mà cho mọi nhà mạng (Viettel, VNPT, FPT, 4G). **[Xem chi tiết →](#-17-nút-trở-về-phòng-chờ--thuật-toán-chống-chia-trùng-4t-ván-2)**
-
-### 🛠️ Cập Nhật Trước: Sửa Lỗi Game Logic P0/P1
-Audit và fix các lỗi nghiêm trọng: George Peru Darkness, self-target validation, vote re-submit warning, vote permission enforcement, double execution fix. **[Xem chi tiết →](#-15-sửa-lỗi-game-logic-p0p1-bug-fixes)**
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-7--potters-181717?logo=github)](https://github.com/qkn202/7-potters.git)
@@ -361,6 +364,56 @@ Tại phòng chờ (`Lobby`), Quản Trò Merlin (Host/GM) được trang bị b
 
 ---
 
+### 🛡️ 20. Bản Vá Lỗi Kỹ Năng Kingsley Shacklebolt & Phản Đòn Thần Sáng (29/09/2026 - 12:28)
+
+- **Thời gian cập nhật:** 12:28 Ngày 29/09/2026 (GMT+7).
+- **Mã Commit:** `ec40229` (Nhánh `main`).
+- **Môi trường triển khai:** [https://seven-potters.vercel.app](https://seven-potters.vercel.app).
+
+#### 1. Báo Cáo Lỗi & Hiện Tượng Thực Tế
+Người chơi nhận vai **Kingsley Shacklebolt** (Thần Sáng Hoàng Gia), trong lượt Ban Đêm đã bấm kích hoạt kỹ năng **"Chỉ Huy Ứng Cứu"**, tuy nhiên khi rạng sáng phân giải, Kingsley vẫn bị phe Tử Thần Thực Tử (4T) hạ sát dẫn đến tử trận.
+
+#### 2. Phân Tích Nguyên Nhân Gốc Rễ (Root Cause Analysis)
+Qua rà soát chuyên sâu mã nguồn phân giải ban đêm (`calculateResolution` trong `GameContext.tsx`) và giao diện người chơi (`PlayerScreen.tsx`), đã xác định 2 nguyên nhân cốt lõi:
+1. **Lỗi Ghi Đè Hành Động Ngoài Giao Diện (Action Overwrite):**
+   - Trên giao diện máy tính và thanh ghim đáy màn hình điện thoại (Mobile Sticky Bar), nút **"Bay Hộ Tống"** nằm liền kề với kỹ năng của Kingsley.
+   - Khi người chơi đã bấm "Chỉ Huy Ứng Cứu", sau đó chạm vào một người chơi bất kỳ trong danh sách để xem thông tin, hệ thống tự động gán `effectiveTargetId`. Nếu người chơi vô tình bấm vào nút "Hộ Tống", hành động `chỉ huy ứng cứu` bị **ghi đè âm thầm** thành `bay hộ tống` (do mỗi người chỉ lưu 1 `pendingAction`). Trạng thái ứng cứu của Kingsley bị vô hiệu hóa mà người chơi không hay biết.
+2. **Lỗi Thứ Tự Phân Giải Ám Sát & Kịch Bản Double Kill:**
+   - Trong engine phân giải trước đây, Kingsley không nằm trong danh sách kiểm tra khiên bảo vệ trực diện (cùng cấp với Dumbledore hay Snape). Khi bị 4T nhắm bắn, Kingsley bị đẩy thẳng vào danh sách tử nạn `deadPlayers`, sau đó mới chờ cứu sống ở cuối đêm.
+   - **Đặc biệt nguy hiểm:** Khi 4T kích hoạt **Double Kill (Bellatrix báo thù / Phục kích Chặng 3)** hoặc có người chơi bay hộ tống hy sinh chắn gió (Hagrid / Hộ vệ), danh sách `fallenOrderMemberIds` có từ 2 người trở lên. Thuật toán lấy phần tử đầu tiên `[0]` để cứu, khiến Kingsley (ở vị trí thứ hai) **không được cứu sống và tử trận oan uổng**!
+   - Nhật ký buổi sáng in ra dòng chữ nhầm lẫn: *"Tử Thần Thực Tử đã hạ sát Kingsley Shacklebolt!"*.
+
+#### 3. Các Thành Phần Đã Sửa Đổi & Khắc Phục Triệt Để
+1. **Phản Đòn Thần Sáng Trực Diện (Auror Combat Stance - `src/lib/GameContext.tsx`):**
+   - Đưa kiểm tra trực tiếp vào chuỗi phòng ngự ban đêm:
+     ```typescript
+     else if (victim.role?.id === 'KINGSLEY_SHACKLEBOLT' && isKingsleyActive) {
+       summary.push(`🛡️ THẦN SÁNG PHẢN ĐÒN! Chúa Tể Voldemort / Tử Thần Thực Tử nhắm vào Kingsley Shacklebolt, nhưng Thần Sáng Hoàng Gia đang trong thế trận sẵn sàng đã lập tức vung đũa hộ mệnh đánh bạt đòn ám sát chí mạng, bảo toàn tính mạng an toàn tuyệt đối!`);
+     }
+     ```
+   - Kingsley phản đòn thành công 100%, **không bao giờ bị thêm vào `deadPlayers`** và không bị ghi log tử trận.
+2. **Bảo Toàn Bản Thân & Cứu Sống Đồng Đội:**
+   - Khi có Double Kill, Kingsley tự thủ thành công VÀ vẫn cứu sống tiếp 1 thành viên Hội Phượng Hoàng ngã xuống cùng đêm.
+   - Tại khối phân giải cứu sống dự phòng, Kingsley được ưu tiên cứu chính mình đầu tiên nếu có bất kỳ hiệu ứng gián tiếp nào đưa Kingsley vào danh sách tử nạn.
+3. **Cải Tiến Giao Diện & Chống Ghi Đè Nhầm (`src/components/PlayerScreen.tsx`):**
+   - Nút "Chỉ Huy Ứng Cứu" chuyển màu vàng kim rực sáng kèm hiệu ứng khiên đập nhịp khi đang hoạt động: `✓ ĐANG BẬT: CHỈ HUY ỨNG CỨU (100%)`.
+   - Hộp xác nhận trạng thái phiếu bầu ghi rõ: `🛡️ Chỉ Huy Ứng Cứu (100% Bảo Vệ Bản Thân & Cứu Sống Đồng Đội)`.
+   - Bổ sung nút kích hoạt nhanh trên thanh ghim Mobile Sticky Bar.
+   - Khi người chơi chủ động chuyển sang Bay Hộ Tống, hệ thống hiển thị thông báo cảnh báo rõ ràng: `⚠️ ĐÃ ĐỔI: Chuyển từ Chỉ Huy Ứng Cứu sang Bay Hộ Tống cùng: [Tên người chơi]`.
+4. **Miễn Nhiễm Hoàn Toàn Bùa Câm Lặng & Kẹo Choáng:**
+   - Kingsley miễn nhiễm 100% với bùa lạc Sectumsempra, Bùa Cấm Cửa của Potter Fake và Kẹo Ngất Xỉu của Fred Weasley.
+
+#### 4. Kết Quả Kiểm Thử (Automated Tests)
+- Cập nhật **Test 14** trong `tests/test_game_mechanics.ts` bao phủ 5 kịch bản:
+  - `✓ 14.1`: Đêm an toàn, thế trận ứng cứu sẵn sàng.
+  - `✓ 14.2`: 4T ám sát trực diện Kingsley ➔ Phản đòn 100%, không vào danh sách tử trận.
+  - `✓ 14.3`: Double Kill nhắm vào Kingsley + Harry ➔ Kingsley tự thủ VÀ cứu sống Harry (cả 2 đều sống sót).
+  - `✓ 14.4`: Đồng đội Hội bị giết ➔ Kingsley cứu sống thành công 100%.
+  - `✓ 14.5`: Miễn nhiễm mọi loại bùa câm lặng & ngất xỉu.
+- **Toàn bộ 22/22 bộ test suites đều đạt kết quả PASS 100%.**
+
+---
+
 ## 🛠️ 8. Cài Đặt & Khởi Chạy Dự Án (Developer Guide)
 
 ### Triển khai Trực tuyến (Live Production)
@@ -387,11 +440,11 @@ Mở trình duyệt tại [http://localhost:3000](http://localhost:3000) để t
 ### Kiểm thử hệ thống tự động (Automated Test Suites)
 Dự án được bảo vệ bởi bộ kiểm thử tự động toàn diện:
 
-1. **Kiểm thử 19 cơ chế Boardgame & Thuật toán công bằng:**
+1. **Kiểm thử 22 cơ chế Boardgame & Thuật toán công bằng:**
    ```bash
    npx tsx tests/test_game_mechanics.ts
    ```
-   *(Kiểm tra toàn bộ 19/19 test cases: Hang Sóc, Tia Lửa Vàng, Bột Bóng Tối, Kẹo Ngất Xỉu, Bay Hộ Tống, Gương Sirius, Khử xung đột, Chia bài chống lặp, Nút Án Binh, Kingsley 50%, Snape Sectumsempra & Bế quan bí thuật, Pettigrew ngửi mùi & Nợ mạng & Thoát chết hóa chuột, Bắt tay liên phòng, Chuyển tab Device ID, và Stress test phòng 4 - 15 người qua 700+ ván).*
+   *(Kiểm tra toàn bộ 22/22 test cases: Hang Sóc, Tia Lửa Vàng, Bột Bóng Tối, Kẹo Ngất Xỉu, Bay Hộ Tống, Gương Sirius, Khử xung đột, Chia bài chống lặp, Nút Án Binh, Kingsley Phản Đòn & Cứu Sống 100%, Snape Sectumsempra & Bế quan bí thuật, Pettigrew ngửi mùi & Nợ mạng & Thoát chết hóa chuột, Bắt tay liên phòng, Chuyển tab Device ID, Lupin hồi sinh rạng sáng, Ghi nhận Biên niên sử và Stress test phòng 4 - 15 người qua 700+ ván).*
 
 2. **Kiểm thử 8 kịch bản Multiplayer & Đồng bộ mạng thời gian thực:**
    ```bash

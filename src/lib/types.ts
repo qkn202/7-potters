@@ -160,6 +160,8 @@ export type NetworkMessageType =
   | 'HOST_DISCONNECTED'
   | 'HOST_RECONNECTED'
   | 'PING'
+  | 'CLIENT_HEARTBEAT'
+  | 'CLIENT_PONG'
   | 'REQUEST_STATE_SYNC';
 
 export interface NetworkMessage {

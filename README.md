@@ -3,8 +3,16 @@
 > **Boardgame chiến thuật ẩn vai thời gian thực (Social Deduction & Hidden Role Strategy) dành cho cộng đồng Harry Potter Việt Nam (HPVN).**  
 > Dựa trên chiến dịch lịch sử trong tập 7: *Harry Potter và Bảo bối Tử thần* — Cuộc không chiến trên bầu trời đêm để di tản Harry Potter từ số 4 Privet Drive (Little Whinging, Surrey) về nơi trú ẩn an toàn Trang Trại Hang Sóc (The Burrow).
 
-### 🛡️ Cập Nhật Sửa Lỗi Mới Nhất (29/09/2026 - 12:28): Khắc Phục Lỗi Kỹ Năng Kingsley Shacklebolt
-Khắc phục triệt để lỗi người chơi bật skill Kingsley nhưng vẫn bị phe Tử Thần Thực Tử (4T) hạ sát trong đêm:
+### 🛡️ Cập Nhật Sửa Lỗi Mới Nhất (29/09/2026 - 13:40): Khắc Phục Triệt Để Lỗi "Không Thể Gửi Hành Động / Xài Skill Không Nhận Lệnh"
+Khắc phục triệt để lỗi khi người chơi sử dụng kỹ năng bất kỳ trong đêm (Chỉ Huy Ứng Cứu, Bay Hộ Tống, Ám sát, Bảo vệ, Soi danh tính...) thì bị báo lỗi mạng hoặc không nhận lệnh:
+- **Thực Thi Tức Thời (Optimistic UI Update):** Khi bấm bất kỳ skill nào, giao diện trên thiết bị lập tức đổi trạng thái `✓ Đã Bật / ✓ Đang Hộ Tống` ngay lập tức (zero-latency) mà không cần chờ gói tin mạng quay vòng về từ Merlin.
+- **Hàng Đợi Gửi Đảm Bảo (Reliable Action Outbox Queue):** Lệnh hành động được lưu vào Outbox Queue và tự động gửi ngầm lặp lại mỗi 1.5s cho đến khi Merlin xác nhận. Triệt tiêu hoàn toàn thông báo lỗi đỏ gây gián đoạn trận đấu.
+- **Giữ Nhịp Tim Hai Chiều (Two-Way Heartbeat Ping/Pong):** Cả Host và Client đều liên tục phát tín hiệu keepalive mỗi 10-12s, ngăn các nhà mạng di động 4G/Wifi và trình duyệt mobile ngắt kết nối WebSocket trong lúc người chơi đang đọc bài hay bàn luận.
+- **Tự Phục Hồi Kênh Phòng Realtime (Self-Healing Channel):** Tự động phát hiện khi kết nối Supabase bị gián đoạn để kết nối lại tức thì (`ensureConnected`) mà không làm mất vai trò hay lượt hành động.
+- **Phản Hồi Từ Chối Chuẩn Xác (ACTION_REJECTED Sync):** Nếu hành động vi phạm luật (tự chọn chính mình, đang bị câm lặng...), thông báo nhắc nhở sẽ gửi trực tiếp về máy của người chơi thay vì chỉ hiện trên máy Quản trò.
+
+### 🛡️ Cập Nhật Sửa Lỗi (29/09/2026 - 12:28): Khắc Phục Lỗi Kỹ Năng Kingsley Shacklebolt
+Khắc phục lỗi người chơi bật skill Kingsley nhưng vẫn bị phe Tử Thần Thực Tử (4T) hạ sát trong đêm:
 - **Phản Đòn Thần Sáng Trực Diện (100% Sống Sót):** Kingsley đang trong thế trận ứng cứu sẽ đánh bạt đòn ám sát của 4T ngay lập tức, không bị rơi vào danh sách tử nạn `deadPlayers` và không bị in thông báo giả tử trận.
 - **Bảo Vệ Đồng Đội Trong Double Kill:** Khi 4T ám sát kép (Bellatrix / Phục kích Chặng 3), Kingsley tự thủ an toàn và vẫn cứu sống đồng đội Hội Phượng Hoàng ngã xuống cùng đêm.
 - **Chống Ghi Đè Nhầm Hành Động:** Nút "Chỉ Huy Ứng Cứu" phát sáng vàng kim khi bật; thanh ghim Mobile Sticky Bar bổ sung nút kích hoạt nhanh; cảnh báo rõ ràng khi người chơi chuyển sang Bay Hộ Tống.

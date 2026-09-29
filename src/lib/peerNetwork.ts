@@ -76,9 +76,16 @@ export class SevenPottersNetwork {
             senderId: this.myPlayerId,
             payload: { timestamp: Date.now() },
           });
+        } else {
+          // Client sends periodic heartbeat to keep WebSocket socket connection warm across NATs
+          this.broadcast({
+            type: 'CLIENT_HEARTBEAT',
+            senderId: this.myPlayerId,
+            payload: { timestamp: Date.now() },
+          }).catch(() => {});
         }
       }
-    }, 12000);
+    }, 10000);
   }
 
   private stopHeartbeat() {
@@ -168,13 +175,28 @@ export class SevenPottersNetwork {
                 payload: { timestamp: Date.now() },
               });
               resolve(this.roomCode);
+            } else {
+              this.onConnectionStatusChange?.('CONNECTED');
+              this.channel?.track({
+                id: this.myPlayerId,
+                name: hostPlayer.name,
+                isHost: true,
+                isGM: hostPlayer.isGM,
+                onlineAt: Date.now(),
+              }).catch(() => {});
             }
-          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             if (!isSettled) {
               isSettled = true;
               clearTimeout(timeout);
               this.onConnectionStatusChange?.('ERROR', 'Lỗi kết nối kênh phòng.');
               reject(new Error(`Supabase host channel ${status}`));
+            } else {
+              console.warn(`[7-Potters Host] Channel status changed to ${status}. Auto-reconnecting...`);
+              this.onConnectionStatusChange?.('DISCONNECTED', 'Mất kết nối tạm thời, đang tự động kết nối lại...');
+              setTimeout(() => {
+                this.ensureConnected();
+              }, 1200);
             }
           }
         });
@@ -311,13 +333,28 @@ export class SevenPottersNetwork {
               });
 
               resolve();
+            } else {
+              this.onConnectionStatusChange?.('CONNECTED');
+              this.channel?.track({
+                id: this.myPlayerId,
+                name: player.name,
+                isHost: false,
+                isGM: player.isGM,
+                onlineAt: Date.now(),
+              }).catch(() => {});
             }
-          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             if (!isSettled) {
               isSettled = true;
               clearTimeout(timeout);
               this.onConnectionStatusChange?.('ERROR', 'Không thể kết nối kênh phòng.');
               reject(new Error(`Supabase client ${status}`));
+            } else {
+              console.warn(`[7-Potters Client] Channel status changed to ${status}. Auto-reconnecting...`);
+              this.onConnectionStatusChange?.('DISCONNECTED', 'Mất kết nối tạm thời, đang tự động kết nối lại...');
+              setTimeout(() => {
+                this.ensureConnected();
+              }, 1200);
             }
           }
         });
@@ -330,6 +367,35 @@ export class SevenPottersNetwork {
         }
       }
     });
+  }
+
+  public async ensureConnected(): Promise<boolean> {
+    if (this.channel && this.channel.state === 'joined' && this.isSocketHealthy()) {
+      return true;
+    }
+
+    try {
+      const realtime = (this.supabase as any)?.realtime;
+      if (realtime && typeof realtime.connect === 'function') {
+        realtime.connect();
+      }
+
+      if (this.channel && (this.channel.state === 'closed' || this.channel.state === 'leaving')) {
+        return new Promise<boolean>((resolve) => {
+          const timeout = setTimeout(() => resolve(this.channel?.state === 'joined'), 3500);
+          this.channel?.subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              clearTimeout(timeout);
+              resolve(true);
+            }
+          });
+        });
+      }
+      return this.channel ? this.channel.state === 'joined' : false;
+    } catch (e) {
+      console.warn('[7-Potters] ensureConnected error:', e);
+      return false;
+    }
   }
 
   public async reconnectHostIfNeeded(hostPlayer?: Player): Promise<void> {
@@ -484,9 +550,15 @@ export class SevenPottersNetwork {
       console.warn('[7-Potters] Broadcast failed: channel is null for', msg.type);
       return false;
     }
+
+    if (this.channel.state !== 'joined' || !this.isSocketHealthy()) {
+      await this.ensureConnected();
+    }
+
     const maxRetries = 3;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
+        if (!this.channel) return false;
         const res = await this.channel.send({
           type: 'broadcast',
           event: 'game_message',
@@ -497,12 +569,14 @@ export class SevenPottersNetwork {
         }
         console.warn(`[7-Potters] Broadcast attempt ${attempt}/${maxRetries} returned status "${res}" for ${msg.type}.`);
         if (attempt < maxRetries) {
-          await new Promise(r => setTimeout(r, attempt * 250));
+          await this.ensureConnected();
+          await new Promise(r => setTimeout(r, attempt * 200));
         }
       } catch (err) {
         console.error(`[7-Potters] Broadcast exception attempt ${attempt}/${maxRetries} for ${msg.type}:`, err);
         if (attempt < maxRetries) {
-          await new Promise(r => setTimeout(r, attempt * 250));
+          await this.ensureConnected();
+          await new Promise(r => setTimeout(r, attempt * 200));
         }
       }
     }
@@ -520,6 +594,19 @@ export class SevenPottersNetwork {
         this.hostPresent = true;
         this.hostDisconnectedAt = null;
         this.onHostReconnected?.();
+      }
+      // Send client pong to keep WebSocket connection active
+      this.broadcast({
+        type: 'CLIENT_PONG',
+        senderId: this.myPlayerId,
+        payload: { timestamp: Date.now() },
+      }).catch(() => {});
+      return;
+    }
+
+    if (msg?.type === 'CLIENT_HEARTBEAT' || msg?.type === 'CLIENT_PONG') {
+      if (msg.senderId) {
+        this.onPeerJoined?.(msg.senderId);
       }
       return;
     }

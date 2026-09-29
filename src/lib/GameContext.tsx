@@ -1095,6 +1095,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const evictionTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
   // Player ID alias map for seamless reconnects and target resolution
   const idAliasMapRef = useRef<Record<string, string>>({});
+  // Reliable Action Outbox: keeps unconfirmed actions and continuously retries until Host acknowledges
+  const pendingActionOutboxRef = useRef<{
+    actionName: string;
+    targetId: string;
+    timestamp: number;
+    attempts: number;
+  } | null>(null);
 
   const sanitizePlayers = (players: any[]): Player[] => {
     if (!Array.isArray(players)) return [];
@@ -1166,27 +1173,35 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const isSectumSilenced = Boolean(prev.skillStates[`${actorId}_SECTUMSEMPRA_SILENCED_R${prev.round}`]);
       const isKingsley = prev.players.find(p => p.id === actorId)?.role?.id === 'KINGSLEY_SHACKLEBOLT';
       if (isSectumSilenced && !isKingsley && actionName !== 'NONE') {
-        setSkillToast('⚠️ Bạn đang bị thương do trúng bùa lạc Sectumsempra (mất một bên tai) nên không thể thi triển kỹ năng!');
+        const rejectMsg = '⚠️ Bạn đang bị thương do trúng bùa lạc Sectumsempra (mất một bên tai) nên không thể thi triển kỹ năng!';
+        if (actorId === currentPlayerIdRef.current) setSkillToast(rejectMsg);
+        else if (netRef.current && isHostRef.current) netRef.current.sendActionRejected(actorId, rejectMsg);
         return prev;
       }
 
       // Check if actor is affected by Fred's Fainting Fancy candy (can only vote, no other actions; Kingsley immune)
       const isFaintedByCandy = Boolean(prev.skillStates[`${actorId}_FRED_CANDY_R${prev.round}`]);
       if (isFaintedByCandy && !isKingsley && actionName !== 'NONE') {
-        setSkillToast('⚠️ Bạn đang bị ngất xỉu do Kẹo Ngất Xỉu của Fred Weasley! Không thể thi triển kỹ năng đêm nay!');
+        const rejectMsg = '⚠️ Bạn đang bị ngất xỉu do Kẹo Ngất Xỉu của Fred Weasley! Không thể thi triển kỹ năng đêm nay!';
+        if (actorId === currentPlayerIdRef.current) setSkillToast(rejectMsg);
+        else if (netRef.current && isHostRef.current) netRef.current.sendActionRejected(actorId, rejectMsg);
         return prev;
       }
 
       // Check if actor is affected by Potter Fake silenced (Kingsley immune)
       const isPotterFakeSilenced = Boolean(prev.skillStates[`${actorId}_POTTERFAKE_SILENCED_R${prev.round}`]);
       if (isPotterFakeSilenced && !isKingsley && actionName !== 'NONE') {
-        setSkillToast('⚠️ Bạn đang bị SILENCED bởi Bùa Cấm Cửa của Potter Fake! Không thể thi triển kỹ năng!');
+        const rejectMsg = '⚠️ Bạn đang bị SILENCED bởi Bùa Cấm Cửa của Potter Fake! Không thể thi triển kỹ năng!';
+        if (actorId === currentPlayerIdRef.current) setSkillToast(rejectMsg);
+        else if (netRef.current && isHostRef.current) netRef.current.sendActionRejected(actorId, rejectMsg);
         return prev;
       }
 
       // Check Peter Pettigrew's Life Debt constraint against Harry Potter
       if (me.role?.id === 'PETER_PETTIGREW' && isKillAction(actionName) && target?.role?.id === 'HARRY_POTTER') {
-        setSkillToast('⚠️ BÀN TAY BẠC PHẢN PHỆ! Do Món Nợ Sinh Mệnh với Harry Potter ở Lều Hét, bàn tay của bạn bị co giật và không thể giương đũa ám sát Kẻ Được Chọn! Hãy để Voldemort hoặc đồng minh khác ra tay!');
+        const rejectMsg = '⚠️ BÀN TAY BẠC PHẢN PHỆ! Do Món Nợ Sinh Mệnh với Harry Potter ở Lều Hét, bàn tay của bạn bị co giật và không thể giương đũa ám sát Kẻ Được Chọn! Hãy để Voldemort hoặc đồng minh khác ra tay!';
+        if (actorId === currentPlayerIdRef.current) setSkillToast(rejectMsg);
+        else if (netRef.current && isHostRef.current) netRef.current.sendActionRejected(actorId, rejectMsg);
         return {
           ...prev,
           logs: [...prev.logs, `Hệ thống: [Peter Pettigrew] Bàn tay bạc phản phệ do Món Nợ Sinh Mệnh! Không thể hạ sát Harry Potter.`]
@@ -1196,11 +1211,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       // Check Remus Lupin revive constraints
       if (me.role?.id === 'REMUS_LUPIN' && isReviveAction(actionName)) {
         if (prev.skillStates[`${me.id}_LUPIN`]) {
-          setSkillToast('⚠️ Bạn đã dùng hết Thuốc Hồi Sinh quý giá trong trận này!');
+          const rejectMsg = '⚠️ Bạn đã dùng hết Thuốc Hồi Sinh quý giá trong trận này!';
+          if (actorId === currentPlayerIdRef.current) setSkillToast(rejectMsg);
+          else if (netRef.current && isHostRef.current) netRef.current.sendActionRejected(actorId, rejectMsg);
           return prev;
         }
         if (target && target.status !== 'DEAD') {
-          setSkillToast('⚠️ Thuốc Hồi Sinh chỉ có thể dùng cho đồng đội đã ngã xuống!');
+          const rejectMsg = '⚠️ Thuốc Hồi Sinh chỉ có thể dùng cho đồng đội đã ngã xuống!';
+          if (actorId === currentPlayerIdRef.current) setSkillToast(rejectMsg);
+          else if (netRef.current && isHostRef.current) netRef.current.sendActionRejected(actorId, rejectMsg);
           return prev;
         }
       }
@@ -1213,7 +1232,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const isReviveActionCheck = isReviveAction(actionName);
 
       if ((isProtectActionCheck || isSnapeShieldCheck || isEscortActionCheck || isReviveActionCheck) && target && target.id === me.id) {
-        setSkillToast('⚠️ Không thể chọn chính mình làm mục tiêu!');
+        const rejectMsg = '⚠️ Không thể chọn chính mình làm mục tiêu!';
+        if (actorId === currentPlayerIdRef.current) setSkillToast(rejectMsg);
+        else if (netRef.current && isHostRef.current) netRef.current.sendActionRejected(actorId, rejectMsg);
         return prev;
       }
 
@@ -1223,11 +1244,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         const isFainted = Boolean(prev.skillStates[`${me.id}_FRED_CANDY_R${prev.round}`]);
         const isPettigrewSilenced = Boolean(prev.skillStates[`${me.id}_VOTE_SILENCED_R${prev.round}`]);
         if (isFainted) {
-          setSkillToast('⚠️ Bạn đang ngất xỉu do Kẹo Ngất Xỉu Cấp Tốc! Không thể bỏ phiếu!');
+          const rejectMsg = '⚠️ Bạn đang ngất xỉu do Kẹo Ngất Xỉu Cấp Tốc! Không thể bỏ phiếu!';
+          if (actorId === currentPlayerIdRef.current) setSkillToast(rejectMsg);
+          else if (netRef.current && isHostRef.current) netRef.current.sendActionRejected(actorId, rejectMsg);
           return prev;
         }
         if (isPettigrewSilenced) {
-          setSkillToast('⚠️ Bạn đang bị phong ấn bởi Peter Pettigrew! Không thể bỏ phiếu!');
+          const rejectMsg = '⚠️ Bạn đang bị phong ấn bởi Peter Pettigrew! Không thể bỏ phiếu!';
+          if (actorId === currentPlayerIdRef.current) setSkillToast(rejectMsg);
+          else if (netRef.current && isHostRef.current) netRef.current.sendActionRejected(actorId, rejectMsg);
           return prev;
         }
       }
@@ -1999,8 +2024,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
                   setCurrentPlayerId(me.id);
                   currentPlayerIdRef.current = me.id;
                   setStorageItem('seven-potters-session-id', me.id);
+                  if (netRef.current) {
+                    netRef.current.myPlayerId = me.id;
+                  }
                 }
               }
+
+              // Check if player's pending action in outbox has been confirmed by Host in this synced state
+              if (myId && pendingActionOutboxRef.current) {
+                const confirmedAction = syncedState.pendingActions?.[myId];
+                if (confirmedAction && confirmedAction.actionName === pendingActionOutboxRef.current.actionName) {
+                  pendingActionOutboxRef.current = null;
+                  setSkillToast('✓ Merlin đã xác nhận hành động của bạn!');
+                  setTimeout(() => setSkillToast(null), 3000);
+                }
+              }
+
               if (me && me.role) {
                 const myKey = getPlayerKey(me);
                 const myHist = syncedState.roleHistory?.[myKey];
@@ -2043,10 +2082,25 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             netRef.current.requestStateSync();
           }
         } else if (msg.type === 'ACTION_REJECTED') {
-          // Server rejected an action, show reason to player
-          const { reason, targetId } = msg.payload || {};
+          // Server rejected an action, notify player and roll back optimistic state
+          const { reason } = msg.payload || {};
           if (reason) {
             setSkillToast(`⚠️ ${reason}`);
+            pendingActionOutboxRef.current = null;
+            const myId = currentPlayerIdRef.current;
+            if (myId) {
+              setGameState(prev => {
+                const nextPending = { ...prev.pendingActions };
+                delete nextPending[myId];
+                const nextEscort = { ...prev.escortPairs };
+                delete nextEscort[myId];
+                return {
+                  ...prev,
+                  pendingActions: nextPending,
+                  escortPairs: nextEscort,
+                };
+              });
+            }
           }
         }
       }
@@ -2228,6 +2282,44 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener('online', handleVisibilityOrResume);
       window.removeEventListener('offline', handleOffline);
     };
+  }, []);
+
+  // Reliable Action Outbox background flusher:
+  // Ensures unconfirmed client actions are safely delivered to Host even across network drops
+  useEffect(() => {
+    const outboxInterval = setInterval(() => {
+      const outbox = pendingActionOutboxRef.current;
+      if (!outbox) return;
+
+      const myId = currentPlayerIdRef.current;
+      if (!myId) return;
+
+      // Check if Host's authoritative state already recorded this action
+      const confirmedAction = stateRef.current.pendingActions[myId];
+      if (confirmedAction && confirmedAction.actionName === outbox.actionName) {
+        pendingActionOutboxRef.current = null;
+        setSkillToast('✓ Merlin đã ghi nhận hành động của bạn!');
+        setTimeout(() => setSkillToast(null), 3000);
+        return;
+      }
+
+      // If action is older than 45 seconds and round has progressed, expire it
+      if (Date.now() - outbox.timestamp > 45000) {
+        pendingActionOutboxRef.current = null;
+        return;
+      }
+
+      // In multiplayer client mode, re-transmit action to Host
+      if (netRef.current && !isHostRef.current) {
+        outbox.attempts++;
+        if (netRef.current.myPlayerId !== myId) {
+          netRef.current.myPlayerId = myId;
+        }
+        netRef.current.sendAction(outbox.actionName, outbox.targetId).catch(() => {});
+      }
+    }, 1500);
+
+    return () => clearInterval(outboxInterval);
   }, []);
 
   // On mount: check localStorage / sessionStorage to restore session
@@ -3173,29 +3265,53 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // 1. Optimistic Local State Update: immediately update client UI so player sees instant feedback
+    const normalizedAction = actionName.toLowerCase().trim();
+    const isEscort = normalizedAction === 'bay hộ tống';
+    const effectiveTargetId = (targetId === 'ALL' || targetId === 'NONE') 
+      ? targetId 
+      : (idAliasMapRef.current[targetId] || targetId);
+    const target = (effectiveTargetId === 'ALL' || effectiveTargetId === 'NONE') 
+      ? null 
+      : stateRef.current.players.find(p => p.id === effectiveTargetId || p.id === targetId);
+
+    setGameState(prev => {
+      const newEscortPairs = { ...(prev.escortPairs || {}) };
+      if (isEscort && target) {
+        newEscortPairs[me.id] = target.id;
+      } else {
+        delete newEscortPairs[me.id];
+      }
+      return {
+        ...prev,
+        pendingActions: {
+          ...prev.pendingActions,
+          [me.id]: { actionName: normalizedAction, targetId: effectiveTargetId }
+        },
+        escortPairs: newEscortPairs,
+      };
+    });
+
     if (netRef.current && !isHostRef.current) {
-      // Client: Send action to Host with transmission check and automatic retry
-      setSkillToast('⏳ Đang gửi hành động đến Merlin...');
+      if (netRef.current.myPlayerId !== me.id) {
+        netRef.current.myPlayerId = me.id;
+      }
+
+      // Enqueue action in persistent outbox queue
+      pendingActionOutboxRef.current = {
+        actionName: normalizedAction,
+        targetId: effectiveTargetId,
+        timestamp: Date.now(),
+        attempts: 1,
+      };
+
+      setSkillToast('⏳ Đang đồng bộ hành động với Merlin...');
       netRef.current.sendAction(actionName, targetId).then(ok => {
         if (ok) {
           setSkillToast('⏳ Đang chờ Merlin xác nhận...');
         } else {
-          setSkillToast('⚠️ Mạng chập chờn! Đang kết nối lại và gửi lại...');
-          if (roomCodeRef.current && me) {
-            netRef.current?.reconnectClient(roomCodeRef.current, me, true).then(reconnected => {
-              if (reconnected && netRef.current) {
-                netRef.current.sendAction(actionName, targetId).then(reOk => {
-                  if (reOk) {
-                    setSkillToast('✓ Đã kết nối lại và gửi hành động thành công!');
-                  } else {
-                    setSkillToast('❌ Không thể gửi hành động. Vui lòng kiểm tra lại mạng 4G/Wifi!');
-                  }
-                });
-              } else {
-                setSkillToast('❌ Mất kết nối tới phòng. Vui lòng kiểm tra lại mạng 4G/Wifi!');
-              }
-            });
-          }
+          // Outbox will seamlessly retry in background; notify gently without disruptive error popup
+          console.log('[7-Potters] Initial sendAction queued. Outbox retrying in background...');
         }
       });
       return;
@@ -3212,7 +3328,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
    */
   const executeInstantSkill = (actionName: string, targetId: string) => {
     if (netRef.current && !isHostRef.current) {
-      netRef.current.sendInstantSkill(actionName, targetId);
+      const myId = currentPlayerIdRef.current || currentPlayerId;
+      if (myId && netRef.current.myPlayerId !== myId) {
+        netRef.current.myPlayerId = myId;
+      }
+      setSkillToast(`⏳ Đang niệm chú ${actionName} đến Merlin...`);
+      netRef.current.sendInstantSkill(actionName, targetId).then(ok => {
+        if (!ok) {
+          setTimeout(() => {
+            netRef.current?.sendInstantSkill(actionName, targetId);
+          }, 600);
+        }
+      });
       return 'Đã gửi câu chú đến Merlin...';
     }
 

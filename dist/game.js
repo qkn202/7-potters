@@ -565,22 +565,25 @@ function drawGreatHall(t){
 
 }
 
-let cameraX=0,cameraZoom=1,cameraLevel=-1;
+let cameraX=0,cameraY=0,cameraZoom=1,cameraLevel=-1;
 function draw(t){
   const s=state,l=levels[s?.level||0];
 
   const active=!!s&&s.status!=='lobby',team=s?.players||[];
   const minX=team.length?Math.min(...team.map(p=>p.x)):0,maxX=team.length?Math.max(...team.map(p=>p.x+30)):0;
+  const minY=team.length?Math.min(...team.map(p=>p.y)):526;
   const targetZoom=active?Math.min(1,1000/Math.max(1000,maxX-minX+220)):1;
-  if(cameraLevel!==s?.level||!active){cameraX=0;cameraZoom=targetZoom;cameraLevel=s?.level;particles=[];}
+  const targetY=active&&minY<380?Math.min(125,(380-minY)*.65):0;
+  if(cameraLevel!==s?.level||!active){cameraX=0;cameraY=0;cameraZoom=targetZoom;cameraLevel=s?.level;particles=[];}
   cameraZoom+=(targetZoom-cameraZoom)*.08;
+  cameraY+=(targetY-cameraY)*.08;
   const viewWidth=1200/cameraZoom;
   const targetX=active?Math.max(0,Math.min(l.width-viewWidth,(minX+maxX)/2-viewWidth*.43)):0;
   cameraX+=(targetX-cameraX)*.09;
   // Scenery scrolls more slowly than the physical route.
   ctx.save();const drift=cameraX*.28;ctx.translate(-drift%1200,0);
   drawMapScene(l.map,t);ctx.translate(1200,0);drawMapScene(l.map,t);ctx.restore();
-  ctx.save();ctx.translate(-cameraX*cameraZoom,570*(1-cameraZoom));ctx.scale(cameraZoom,cameraZoom);
+  ctx.save();ctx.translate(-cameraX*cameraZoom,570*(1-cameraZoom)+cameraY);ctx.scale(cameraZoom,cameraZoom);
   for(const [i,stop] of l.stops.entries()){
     line(stop.x,570,stop.x,400,'#ac9161',3);rect(stop.x-12,395,240,48,'#20332eee');
     ctx.textAlign='left';ctx.fillStyle='#edd4a0';ctx.font='bold 15px Georgia';ctx.fillText(`${i+1}/${l.stops.length} · ${stop.label}`,stop.x,416);ctx.font='12px Arial';ctx.fillStyle='#b6c9b8';ctx.fillText(stop.instruction,stop.x,433);

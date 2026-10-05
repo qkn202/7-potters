@@ -41,16 +41,16 @@ levels.forEach((l,index)=>{
  routes[index].forEach((kind,i)=>{
   const x=180+i*stride;l.stops.push({x,label:chapterNames[index][i],kind,instruction:stopNames[kind]});
   if(i)l.checkpoints.push(x-80);
-  if(kind==='steps'){l.platforms.push([x+180,526,100,44],[x+280,485,110,85],[x+390,445,120,125],[x+550,455,140,18],[x+740,490,110,18],[x+920,460,120,18],[x+1100,500,110,18],[x+1280,470,120,18],[x+1460,505,120,18],[x+1640,485,110,18]);}
-  if(kind==='pumpkin'||kind==='bowling'){l.pumpkins.push([x+300,526,100],[x+600,526,90],[x+1100,526,105],[x+1450,526,95]);if(kind==='bowling')l.pumpkins.push([x+430,526,75],[x+780,526,80],[x+1260,526,75],[x+1600,526,85]);l.platforms.push([x+380,490,120,18],[x+680,495,120,18],[x+1180,490,120,18],[x+1520,495,120,18]);}
-  if(kind==='gap'||kind==='bouncegap'){gap(x+335,x+430+(index%2)*5);l.platforms.push([x+510,505,110,18],[x+720,485,110,18],[x+940,510,110,18]);gap(x+1150,x+1260+(index%2)*10);l.platforms.push([x+1380,500,120,18],[x+1580,485,110,18]);if(kind==='bouncegap')l.springs.push([x+255,570,75],[x+1075,570,75]);}
-  if(kind==='bounce'){l.springs.push([x+200,570,80],[x+580,570,85],[x+1020,570,80],[x+1420,570,85]);l.platforms.push([x+310,460,140,18],[x+690,480,120,18],[x+1130,460,140,18],[x+1540,480,120,18]);}
-  if(kind==='wind'||kind==='icewind'){l.fans.push([x+200,425,180,1],[x+600,435,160,1],[x+1050,425,180,1],[x+1450,435,160,1]);l.platforms.push([x+420,505,110,18],[x+820,490,110,18],[x+1260,505,110,18],[x+1650,495,110,18]);}
-  if(kind==='ice'||kind==='icewind'){l.iceZones.push([x+140,x+850],[x+1050,x+1750]);l.pumpkins.push([x+450,526,90],[x+1350,526,90]);l.platforms.push([x+520,495,110,18],[x+1420,495,110,18]);}
-  if(kind==='bridge'){gap(x+250,x+560);l.seesaws.push([x+220,550,360]);l.movers.push([x+720,505,110,18,40]);gap(x+980,x+1290);l.seesaws.push([x+950,550,360]);l.movers.push([x+1440,500,110,18,40]);}
-  if(kind==='rotor'){l.rotors.push([x+280,500,65],[x+680,495,70],[x+1120,500,65],[x+1520,495,70]);l.platforms.push([x+390,510,110,18],[x+790,500,110,18],[x+1230,510,110,18],[x+1630,500,110,18]);}
-  if(kind==='conveyor'){l.conveyors.push([x+140,x+850],[x+1050,x+1750]);l.platforms.push([x+420,505,110,18],[x+880,526,140,44],[x+1320,505,110,18]);}
-  if(kind==='finale'){l.springs.push([x+150,570,80],[x+1050,570,80]);l.pumpkins.push([x+400,526,90],[x+1300,526,90]);l.rotors.push([x+650,490,65],[x+1550,490,65]);l.iceZones.push([x+240,x+750],[x+1150,x+1650]);l.platforms.push([x+480,495,110,18],[x+1380,495,110,18]);}
+  if(kind==='steps'){l.platforms.push([x+160,510,95,60],[x+250,455,95,115],[x+340,400,95,170],[x+430,345,110,225],[x+570,340,140,18]);gap(x+730,x+860);l.platforms.push([x+750,410,110,18],[x+910,350,110,18],[x+1080,410,110,18],[x+1250,350,110,18],[x+1420,430,110,18],[x+1580,490,110,18],[x+1690,460,100,18]);}
+  if(kind==='pumpkin'||kind==='bowling'){l.pumpkins.push([x+300,526,100],[x+600,526,90],[x+1100,526,105],[x+1450,526,95]);if(kind==='bowling')l.pumpkins.push([x+430,526,75],[x+780,526,80],[x+1260,526,75],[x+1600,526,85]);l.platforms.push([x+380,460,120,18],[x+680,420,120,18],[x+1180,450,120,18],[x+1520,410,120,18]);}
+  if(kind==='gap'||kind==='bouncegap'){gap(x+335,x+430+(index%2)*5);l.platforms.push([x+490,440,110,18],[x+700,380,110,18],[x+920,440,110,18]);gap(x+1150,x+1260+(index%2)*10);l.platforms.push([x+1360,430,120,18],[x+1580,390,110,18]);if(kind==='bouncegap')l.springs.push([x+245,570,85],[x+1065,570,85]);}
+  if(kind==='bounce'){l.springs.push([x+180,570,80],[x+620,570,85],[x+1080,570,80],[x+1480,570,85]);l.platforms.push([x+280,360,140,18],[x+680,340,120,18],[x+1160,350,140,18],[x+1560,360,120,18]);}
+  if(kind==='wind'||kind==='icewind'){l.fans.push([x+200,410,180,1],[x+600,410,160,1],[x+1050,410,180,1],[x+1450,410,160,1]);l.platforms.push([x+400,460,110,18],[x+800,410,110,18],[x+1240,460,110,18],[x+1630,420,110,18]);}
+  if(kind==='ice'||kind==='icewind'){l.iceZones.push([x+140,x+850],[x+1050,x+1750]);l.pumpkins.push([x+450,526,90],[x+1350,526,90]);l.platforms.push([x+520,440,110,18],[x+1420,430,110,18]);}
+  if(kind==='bridge'){gap(x+230,x+580);l.seesaws.push([x+210,545,390]);l.movers.push([x+740,460,110,18,45]);gap(x+980,x+1330);l.seesaws.push([x+960,545,390]);l.movers.push([x+1480,450,110,18,45]);}
+  if(kind==='rotor'){l.rotors.push([x+280,470,75],[x+680,455,75],[x+1120,470,75],[x+1520,455,75]);l.platforms.push([x+380,460,110,18],[x+780,420,110,18],[x+1220,460,110,18],[x+1620,420,110,18]);}
+  if(kind==='conveyor'){l.conveyors.push([x+140,x+850],[x+1050,x+1750]);l.platforms.push([x+400,460,110,18],[x+860,510,140,60],[x+1300,440,110,18]);}
+  if(kind==='finale'){l.springs.push([x+150,570,80],[x+1050,570,80]);l.pumpkins.push([x+400,526,90],[x+1300,526,90]);l.rotors.push([x+650,460,75],[x+1550,460,75]);l.iceZones.push([x+240,x+750],[x+1150,x+1650]);l.platforms.push([x+480,430,110,18],[x+1380,410,110,18]);}
  });
  l.platforms.push([floorStart,570,l.width-floorStart,90]);l.key=[l.width-330,520];l.door=[l.width-115,498];
  l.hint='12 chặng thử thách! Cùng chạy, nhảy và kéo bạn. Cờ nghỉ lưu khi cả đội đi qua.';

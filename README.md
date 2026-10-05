@@ -42,11 +42,18 @@
 
 ---
 
-## 🎮 Hai chế độ chơi
+## 🎮 Ba chế độ chơi linh hoạt
 
-### 1. Chung bàn phím (Local Co-op 2–8 người)
-- Chạy trực tiếp 100% trong trình duyệt (offline hoàn toàn, không cần server).
-- Phù hợp chơi nhóm bạn bè quây quần bên một chiếc laptop hoặc máy bàn.
+### 1. Trực tuyến toàn cầu (Supabase Realtime Cloud) — Khuyên dùng
+- **Kết nối đám mây không cần máy chủ riêng:** Tích hợp trực tiếp với dự án Supabase Realtime dùng chung từ các game Hogwarts (*7-potters*, *hogwarts-duel-3d*).
+- **Mã phòng 6 ký tự & Link mời tức thì:** Chủ phòng tạo phòng sẽ có mã 6 ký tự hoặc link trực tiếp dạng `https://hogwarts-park.vercel.app/?room=MÃ_PHÒNG`. Người bạn mở link sẽ tự động vào sảnh chờ.
+- **Sảnh chờ trực tuyến toàn cầu (Live Room Browser):** Danh sách các phòng đang mở trên Supabase Realtime hiển thị trực tiếp ở sảnh, cho phép bạn bè vào ngay chỉ với 1 cú click `Vào ngay ✦`.
+- **Đồng bộ thời gian thực & Host Migration:** Mô phỏng vật lý 60 FPS độ trễ thấp qua Supabase Realtime WebSockets. Nếu chủ phòng ngắt kết nối, quyền Host tự động chuyển giao mượt mà cho gia tinh tiếp theo mà không làm gián đoạn ván đấu.
+- **Khán đài trực tuyến (Spectator Mode):** Khán giả tham gia cổ vũ mà không chiếm vị trí trong 8 gia tinh.
+
+### 2. Chung bàn phím (Local Co-op 2–8 người)
+- Chạy trực tiếp 100% trong trình duyệt (offline hoàn toàn, không cần internet).
+- Phù hợp chơi nhóm bạn bè quây quần bên một chiếc máy tính.
 - Hỗ trợ phím riêng biệt cho cả 8 gia tinh:
   - **P1:** `A` `D` `W` + `X` (ném bạn) / `Space` (nhảy)
   - **P2:** `←` `→` `↑` + `/`
@@ -58,11 +65,9 @@
   - **P8:** `7` `9` `8` + `0`
 - Hỗ trợ nút điều khiển cảm ứng (Touch Controls) cho màn hình chạm hoặc tablet.
 
-### 2. Phòng LAN / Trực tuyến (SSE Server)
-- Chủ phòng tạo phòng và chia sẻ mã phòng 6 ký tự.
-- Người chơi khác mở tab mới hoặc thiết bị cùng mạng Wi-Fi nhập mã để tham gia.
-- Server Node.js điều phối vật lý tập trung với Server-Sent Events (`/api/events`) đồng bộ 60 FPS.
-- **Chế độ khán giả (Spectator Mode):** Người chơi có thể bấm *Xem phòng này* để theo dõi trận đấu mà không chiếm slot gia tinh.
+### 3. Mạng LAN nội bộ (Local Server port 3017)
+- Dành cho mạng văn phòng hoặc mạng Wi-Fi gia đình không có kết nối internet ra ngoài.
+- Khởi chạy bằng `npm start`, server Node.js quản lý phòng và truyền phát Server-Sent Events (`/api/events`).
 
 ---
 

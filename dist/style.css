@@ -12,3 +12,18 @@
 #lan-map-select{display:block;width:100%;padding:10px;margin:7px 0 12px;border:1px solid #8b7955;border-radius:8px;background:#20332e;color:#edddb8;font:inherit}#lan-map-select[hidden],#lan-map-label[hidden]{display:none}
 
 .score-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 22px;background:#122320;border-top:1px solid #36483e;color:#b7c7b4;font-size:12px}.score-bar strong{color:#f4d289;font-size:19px;margin-left:10px;font-variant-numeric:tabular-nums}#run-clock{font-variant-numeric:tabular-nums}.score-result{display:flex;flex-direction:column;gap:5px;margin:10px 0}#score-stars{font-size:26px;letter-spacing:5px;color:#ebc979}#result-score{font-size:42px;line-height:1;color:#f0d394}.score-result>span{font-size:9px;letter-spacing:2px;color:#b8c6aa}#score-breakdown{display:grid;grid-template-columns:1fr auto;text-align:left;gap:7px;margin:15px 0;font-size:12px;color:#b9c8ae}#score-breakdown dd{margin:0;color:#e6cc95;text-align:right}#score-best{font-size:11px;color:#e4c991}#result{overflow-y:auto;align-items:safe center;padding:14px 0}#result .waiting-card{padding:18px 28px}#result h2{font-size:30px;margin:10px 0}#result .gold-btn{margin-top:10px}@media(max-width:650px){.score-bar{padding:8px 12px;font-size:10px}.score-bar strong{font-size:16px;margin-left:5px}#result-score{font-size:34px}#score-breakdown{font-size:11px;gap:5px}}
+
+/* Supabase Realtime Online Lobby & Global Rooms */
+.online-rooms-section{margin:14px 0 10px;background:#0d1916;border:1px solid #2e453b;border-radius:6px;padding:10px;text-align:left}
+.rooms-header{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#c7d8be;font-weight:bold;letter-spacing:0.5px;margin-bottom:8px}
+.status-badge{font-size:9px;padding:2px 6px;border-radius:10px;background:#152e25;color:#79ddb2;border:1px solid #275d49}
+.status-badge.connecting{background:#332812;color:#e5bd57;border-color:#634f24}
+.online-rooms-list{max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.no-rooms-msg{font-size:11px;color:#839783;text-align:center;padding:8px 4px}
+.room-item{display:flex;justify-content:space-between;align-items:center;background:#142822;border:1px solid #325244;border-radius:4px;padding:6px 8px;gap:8px}
+.room-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.room-code-tag{color:#f3d48d;font-size:12px;letter-spacing:1px}
+.room-info span{font-size:10px;color:#d1ded0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.room-info small{font-size:9px;color:#8da48c}
+.join-quick-btn{background:#39523b;border:1px solid #a3b98c;color:#faebd0;border-radius:4px;font-size:11px;font-weight:bold;padding:5px 8px;cursor:pointer;white-space:nowrap}
+.join-quick-btn:hover{background:#4e6f51;border-color:#edd18a}

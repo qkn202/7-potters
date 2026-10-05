@@ -4,13 +4,621 @@ const E=window.ElfEngine,levels=E.levels,colors=['#b65344','#72884f','#5d8cac','
 let state=null,session=null,source=null,localRoom=null,count=2,keys={},pulses={},paused=false,lastSend=0,pending=false,sound=false,audioCtx=null,lastStatus='',lastKey=false, lastFrame=performance.now(),accumulator=0,localHudAt=0,shownControls=0,lastDeaths=0,lastPranks=0,lastBumps=0,lastCheckpoint=80,lastLevel=-1,lastDanglingCount=0;
 const mappings=[['KeyA','KeyD','KeyW','KeyX'],['ArrowLeft','ArrowRight','ArrowUp','Slash'],['KeyJ','KeyL','KeyI','KeyO'],['KeyF','KeyH','KeyT','KeyY'],['KeyZ','KeyC','KeyS','KeyV'],['KeyB','KeyM','KeyN','Comma'],['Digit1','Digit3','Digit2','Digit4'],['Digit7','Digit9','Digit8','Digit0']];
 const controlLabels=['A D W · X','← → ↑ · /','J L I · O','F H T · Y','Z C S · V','B M N · ,','1 3 2 · 4','7 9 8 · 0'];
+
+const SUPABASE_URL = 'https://fxucyrofcsuqtlkukcrx.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_zEiG2Py5kDmGhkTgw0uWIA_We0rOCGu';
+
+const SupabaseNet = {
+  client: null,
+  roomChannel: null,
+  lobbyChannel: null,
+  broadcastChannel: null,
+  roomCode: '',
+  isHost: false,
+  role: 'player',
+  playerId: '',
+  playerName: 'Dobby',
+  openRooms: new Map(),
+  onlineRoom: null,
+
+  init() {
+    if (this.client) return;
+    this.playerId = sessionStorage.getItem('sockbound-player-id');
+    if (!this.playerId) {
+      this.playerId = 'elf_' + Math.random().toString(36).slice(2, 9);
+      sessionStorage.setItem('sockbound-player-id', this.playerId);
+    }
+    if (window.supabase) {
+      try {
+        this.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          realtime: { params: { eventsPerSecond: 40 } }
+        });
+        this.initLobby();
+      } catch (err) {
+        console.warn('[SupabaseNet] Init error:', err);
+      }
+    }
+  },
+
+  initLobby() {
+    if (!this.client || this.lobbyChannel) return;
+    try {
+      this.lobbyChannel = this.client.channel('sockbound-global-lobby', {
+        config: { presence: { key: this.playerId } }
+      });
+
+      this.lobbyChannel.on('presence', { event: 'sync' }, () => {
+        const pstate = this.lobbyChannel.presenceState();
+        this.openRooms.clear();
+        for (const k in pstate) {
+          const list = pstate[k];
+          if (list && list.length) {
+            for (const r of list) {
+              if (r.roomCode && r.isHost && r.status === 'lobby') {
+                this.openRooms.set(r.roomCode, r);
+              }
+            }
+          }
+        }
+        this.renderLobbyRooms();
+      });
+
+      this.lobbyChannel.on('broadcast', { event: 'room_event' }, ({ payload }) => {
+        if (!payload) return;
+        if (payload.action === 'room_opened' && payload.room?.code) {
+          this.openRooms.set(payload.room.code, payload.room);
+          this.renderLobbyRooms();
+        } else if (payload.action === 'room_closed' && payload.room?.code) {
+          this.openRooms.delete(payload.room.code);
+          this.renderLobbyRooms();
+        }
+      });
+
+      this.lobbyChannel.subscribe((status) => {
+        const badge = $('supabase-status');
+        if (badge) {
+          badge.textContent = status === 'SUBSCRIBED' ? '🟢 Supabase Online' : '🟡 Đang kết nối';
+          badge.className = 'status-badge ' + (status === 'SUBSCRIBED' ? 'connected' : 'connecting');
+        }
+      });
+    } catch (e) {
+      console.warn('[SupabaseNet] Lobby error:', e);
+    }
+  },
+
+  renderLobbyRooms() {
+    const listEl = $('online-rooms-list');
+    if (!listEl) return;
+    const rooms = Array.from(this.openRooms.values()).filter(r => r.code !== this.roomCode);
+    if (rooms.length === 0) {
+      listEl.innerHTML = '<div class="no-rooms-msg">Chưa có phòng nào. Hãy tạo phòng mới!</div>';
+      return;
+    }
+    listEl.innerHTML = '';
+    rooms.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'room-item';
+      const lvlName = levels[r.level || 0]?.name || 'Hogwarts';
+      item.innerHTML = `
+        <div class="room-info">
+          <strong class="room-code-tag">${r.code}</strong>
+          <span>${r.hostName || 'Gia tinh'} · ${lvlName}</span>
+          <small>${r.playerCount || 1}/8 gia tinh</small>
+        </div>
+        <button class="join-quick-btn" data-code="${r.code}">Vào ngay ✦</button>
+      `;
+      item.querySelector('button').onclick = () => {
+        $('online-code').value = r.code;
+        enterOnline('join', r.code);
+      };
+      listEl.appendChild(item);
+    });
+  },
+
+  announceRoom(status = 'lobby') {
+    if (!this.lobbyChannel || !this.isHost) return;
+    try {
+      this.lobbyChannel.track({
+        roomCode: this.roomCode,
+        isHost: true,
+        hostName: this.playerName,
+        level: this.onlineRoom ? this.onlineRoom.level : 0,
+        playerCount: this.onlineRoom ? this.onlineRoom.players.length : 1,
+        status: status,
+        createdAt: Date.now()
+      });
+      this.lobbyChannel.send({
+        type: 'broadcast',
+        event: 'room_event',
+        payload: {
+          action: status === 'closed' ? 'room_closed' : 'room_opened',
+          room: {
+            code: this.roomCode,
+            hostName: this.playerName,
+            level: this.onlineRoom ? this.onlineRoom.level : 0,
+            playerCount: this.onlineRoom ? this.onlineRoom.players.length : 1
+          }
+        }
+      });
+    } catch (e) {}
+  },
+
+  async createRoom(name, level = 0) {
+    this.init();
+    this.playerName = name || 'Dobby';
+    this.role = 'player';
+    this.isHost = true;
+
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    this.roomCode = code;
+
+    this.onlineRoom = {
+      code: code,
+      host: this.playerId,
+      players: [
+        { id: this.playerId, name: this.playerName, house: 0, connected: true, keys: {} }
+      ],
+      spectators: [],
+      level: level,
+      status: 'lobby',
+      deaths: 0,
+      checkpoint: 80,
+      checkpointsPassed: 0,
+      runDeaths: 0,
+      key: false,
+      gateOpen: true,
+      teamRespawn: 0,
+      ropeLength: 185,
+      ropeMax: 300,
+      ticks: 0,
+      pranks: 0,
+      bumps: 0,
+      variant: 0
+    };
+
+    session = { id: this.playerId, code: code, role: 'player', name: this.playerName, isOnline: true };
+    sessionStorage.setItem('sockbound-session', JSON.stringify(session));
+
+    await this.setupRoomChannel(true);
+    this.announceRoom('lobby');
+
+    state = E.snapshot(this.onlineRoom);
+    receive(state);
+    toast(`Đã tạo phòng Online ${code}! Hãy gửi mã hoặc link cho bạn bè.`);
+    return code;
+  },
+
+  async joinRoom(code, name, role = 'player') {
+    this.init();
+    this.playerName = name || 'Dobby';
+    this.role = role;
+    this.isHost = false;
+    this.roomCode = code.toUpperCase().trim();
+    this.onlineRoom = null;
+
+    session = { id: this.playerId, code: this.roomCode, role: role, name: this.playerName, isOnline: true };
+    sessionStorage.setItem('sockbound-session', JSON.stringify(session));
+
+    const ok = await this.setupRoomChannel(false);
+    if (!ok && this.client) {
+      throw new Error(`Không thể kết nối phòng ${this.roomCode}. Vui lòng thử lại.`);
+    }
+
+    toast(role === 'spectator' ? `Đang xem trực tiếp phòng ${this.roomCode}…` : `Đã vào phòng ${this.roomCode}! Chờ chủ phòng bắt đầu…`);
+  },
+
+  async setupRoomChannel(isHost) {
+    if (this.roomChannel) {
+      try { this.client?.removeChannel(this.roomChannel); } catch (e) {}
+      this.roomChannel = null;
+    }
+    if (this.broadcastChannel) {
+      try { this.broadcastChannel.close(); } catch (e) {}
+      this.broadcastChannel = null;
+    }
+
+    const chanName = `sockbound-room-${this.roomCode}`;
+
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        this.broadcastChannel = new BroadcastChannel(chanName);
+        this.broadcastChannel.onmessage = (e) => this.handleMessage(e.data);
+      } catch (err) {}
+    }
+
+    if (!this.client) return true;
+
+    return new Promise((resolve) => {
+      try {
+        this.roomChannel = this.client.channel(chanName, {
+          config: {
+            presence: { key: this.playerId },
+            broadcast: { ack: false, self: false }
+          }
+        });
+
+        this.roomChannel.on('presence', { event: 'sync' }, () => {
+          this.handlePresenceSync();
+        });
+
+        this.roomChannel.on('presence', { event: 'leave' }, ({ key }) => {
+          this.handlePlayerLeave(key);
+        });
+
+        this.roomChannel.on('broadcast', { event: 'state' }, ({ payload }) => {
+          if (!this.isHost && payload) {
+            $('connection').hidden = true;
+            receive(payload);
+          }
+        });
+
+        this.roomChannel.on('broadcast', { event: 'input' }, ({ payload }) => {
+          if (this.isHost && payload && this.onlineRoom) {
+            const p = this.onlineRoom.players.find(x => x.id === payload.id);
+            if (p) p.keys = payload.keys || {};
+          }
+        });
+
+        this.roomChannel.on('broadcast', { event: 'action' }, ({ payload }) => {
+          this.handleAction(payload);
+        });
+
+        this.roomChannel.subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            $('connection').hidden = true;
+            await this.roomChannel.track({
+              id: this.playerId,
+              name: this.playerName,
+              role: this.role,
+              isHost: this.isHost,
+              joinedAt: Date.now()
+            });
+            if (!this.isHost) {
+              this.sendAction({ type: 'request_state', senderId: this.playerId, name: this.playerName, role: this.role });
+            }
+            resolve(true);
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            $('connection').hidden = false;
+            resolve(false);
+          }
+        });
+      } catch (err) {
+        console.warn('[SupabaseNet] Channel setup error:', err);
+        resolve(false);
+      }
+    });
+  },
+
+  handleMessage(data) {
+    if (!data || data.senderId === this.playerId) return;
+    if (data.event === 'state' && !this.isHost && data.payload) {
+      receive(data.payload);
+    } else if (data.event === 'input' && this.isHost && data.payload && this.onlineRoom) {
+      const p = this.onlineRoom.players.find(x => x.id === data.payload.id);
+      if (p) p.keys = data.payload.keys || {};
+    } else if (data.event === 'action' && data.payload) {
+      this.handleAction(data.payload);
+    }
+  },
+
+  handlePresenceSync() {
+    if (!this.roomChannel) return;
+    const pState = this.roomChannel.presenceState();
+    const joinedUsers = [];
+    for (const k in pState) {
+      const arr = pState[k];
+      if (arr && arr.length) joinedUsers.push(arr[0]);
+    }
+
+    if (this.isHost && this.onlineRoom) {
+      const activePlayers = joinedUsers.filter(u => u.role === 'player');
+      activePlayers.forEach((u) => {
+        let p = this.onlineRoom.players.find(x => x.id === u.id);
+        if (!p && this.onlineRoom.players.length < 8) {
+          p = { id: u.id, name: u.name || 'Gia tinh', house: this.onlineRoom.players.length % 4, connected: true, keys: {} };
+          this.onlineRoom.players.push(p);
+          toast(`${p.name} vừa bước vào phòng!`);
+        } else if (p) {
+          p.connected = true;
+          p.name = u.name || p.name;
+        }
+      });
+      this.onlineRoom.spectators = joinedUsers.filter(u => u.role === 'spectator').map(u => ({ id: u.id, name: u.name, connected: true }));
+      const snap = E.snapshot(this.onlineRoom);
+      receive(snap);
+      this.broadcastState(snap);
+      this.announceRoom(this.onlineRoom.status);
+    } else {
+      const hostPresent = joinedUsers.some(u => u.isHost);
+      if (!hostPresent && joinedUsers.length > 0) {
+        const players = joinedUsers.filter(u => u.role === 'player');
+        if (players.length > 0) {
+          players.sort((a, b) => a.id.localeCompare(b.id));
+          if (players[0].id === this.playerId) {
+            this.becomeHost();
+          }
+        }
+      }
+    }
+  },
+
+  handlePlayerLeave(key) {
+    if (this.isHost && this.onlineRoom) {
+      const p = this.onlineRoom.players.find(x => x.id === key);
+      if (p) {
+        if (this.onlineRoom.status === 'lobby') {
+          this.onlineRoom.players = this.onlineRoom.players.filter(x => x.id !== key);
+          this.onlineRoom.players.forEach((x, i) => x.house = i % 4);
+        } else {
+          p.connected = false;
+        }
+        const snap = E.snapshot(this.onlineRoom);
+        receive(snap);
+        this.broadcastState(snap);
+        this.announceRoom(this.onlineRoom.status);
+      }
+    }
+  },
+
+  becomeHost() {
+    this.isHost = true;
+    toast('Chủ phòng đã rời đi. Bạn hiện là Chủ phòng mới! 👑');
+    if (state) {
+      this.onlineRoom = {
+        code: this.roomCode,
+        host: this.playerId,
+        players: state.players.map(p => ({
+          ...p,
+          connected: p.id === this.playerId || p.connected,
+          keys: {}
+        })),
+        spectators: [],
+        level: state.level || 0,
+        status: state.status || 'lobby',
+        deaths: state.deaths || 0,
+        checkpoint: state.checkpoint || 80,
+        ticks: state.ticks || 0,
+        key: state.key || false,
+        ropeLength: state.ropeLength || 185,
+        ropeMax: state.ropeMax || 300,
+        pranks: state.pranks || 0,
+        bumps: state.bumps || 0,
+        variant: state.variant || 0
+      };
+    }
+    if (this.roomChannel) {
+      this.roomChannel.track({
+        id: this.playerId,
+        name: this.playerName,
+        role: this.role,
+        isHost: true,
+        joinedAt: Date.now()
+      });
+    }
+    this.announceRoom(this.onlineRoom ? this.onlineRoom.status : 'lobby');
+    if (this.onlineRoom) {
+      const snap = E.snapshot(this.onlineRoom);
+      receive(snap);
+      this.broadcastState(snap);
+    }
+  },
+
+  handleAction(action) {
+    if (!action) return;
+    if (this.isHost && action.type === 'request_state') {
+      if (this.onlineRoom) {
+        if (action.role === 'player' && !this.onlineRoom.players.some(p => p.id === action.senderId)) {
+          if (this.onlineRoom.players.length < 8) {
+            this.onlineRoom.players.push({
+              id: action.senderId,
+              name: action.name || 'Gia tinh',
+              house: this.onlineRoom.players.length % 4,
+              connected: true,
+              keys: {}
+            });
+            toast(`${action.name || 'Gia tinh'} vừa bước vào phòng!`);
+          }
+        }
+        const snap = E.snapshot(this.onlineRoom);
+        receive(snap);
+        this.broadcastState(snap);
+        this.announceRoom(this.onlineRoom.status);
+      }
+    } else if (!this.isHost) {
+      if (action.type === 'start') {
+        tone(330);
+      } else if (action.type === 'retry') {
+        tone(440);
+      }
+    }
+  },
+
+  broadcastState(snap) {
+    if (this.roomChannel) {
+      try {
+        this.roomChannel.send({
+          type: 'broadcast',
+          event: 'state',
+          payload: snap
+        });
+      } catch (e) {}
+    }
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({
+          senderId: this.playerId,
+          event: 'state',
+          payload: snap
+        });
+      } catch (e) {}
+    }
+  },
+
+  sendInput(keys) {
+    const payload = { id: this.playerId, keys };
+    if (this.roomChannel) {
+      try {
+        this.roomChannel.send({
+          type: 'broadcast',
+          event: 'input',
+          payload
+        });
+      } catch (e) {}
+    }
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({
+          senderId: this.playerId,
+          event: 'input',
+          payload
+        });
+      } catch (e) {}
+    }
+  },
+
+  sendAction(action) {
+    if (this.roomChannel) {
+      try {
+        this.roomChannel.send({
+          type: 'broadcast',
+          event: 'action',
+          payload: action
+        });
+      } catch (e) {}
+    }
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({
+          senderId: this.playerId,
+          event: 'action',
+          payload: action
+        });
+      } catch (e) {}
+    }
+  },
+
+  startHostGame(level) {
+    if (!this.isHost || !this.onlineRoom) return;
+    this.onlineRoom.level = level;
+    E.init(this.onlineRoom);
+    this.onlineRoom.status = 'playing';
+    const snap = E.snapshot(this.onlineRoom);
+    receive(snap);
+    this.broadcastState(snap);
+    this.sendAction({ type: 'start', level });
+    this.announceRoom('playing');
+    tone(330);
+  },
+
+  retryHostGame() {
+    if (!this.isHost || !this.onlineRoom) return;
+    E.init(this.onlineRoom);
+    this.onlineRoom.status = 'playing';
+    const snap = E.snapshot(this.onlineRoom);
+    receive(snap);
+    this.broadcastState(snap);
+    this.sendAction({ type: 'retry' });
+    tone(440);
+  },
+
+  nextHostGame() {
+    if (!this.isHost || !this.onlineRoom) return;
+    this.onlineRoom.status = 'lobby';
+    const snap = E.snapshot(this.onlineRoom);
+    receive(snap);
+    this.broadcastState(snap);
+    this.sendAction({ type: 'next' });
+    this.announceRoom('lobby');
+  },
+
+  leave() {
+    this.announceRoom('closed');
+    if (this.roomChannel) {
+      try {
+        this.roomChannel.untrack();
+        this.client?.removeChannel(this.roomChannel);
+      } catch (e) {}
+      this.roomChannel = null;
+    }
+    if (this.broadcastChannel) {
+      try { this.broadcastChannel.close(); } catch (e) {}
+      this.broadcastChannel = null;
+    }
+    this.onlineRoom = null;
+    this.isHost = false;
+    this.roomCode = '';
+  }
+};
+
 function tone(freq=440,time=.09){if(!sound)return;try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(.045,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+time);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+time);}catch{}}
 function toast(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').hidden=true,3500);}
 async function api(action,data={}){const res=await fetch('/api/'+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...session,...data})});const value=await res.json();if(!res.ok)throw Error(value.error||'Không thể kết nối máy chủ.');return value;}
 function showError(e){$('error').textContent=e.message;toast(e.message);}
-function toggleMode(local){$('local-tab').classList.toggle('active',local);$('lan-tab').classList.toggle('active',!local);$('local-setup').hidden=!local;$('lan-setup').hidden=local;$('error').textContent='';}
+function toggleMode(mode){
+  const isOnline = mode === 'online';
+  const isLocal = mode === 'local';
+  const isLan = mode === 'lan';
+  $('online-tab')?.classList.toggle('active', isOnline);
+  $('local-tab')?.classList.toggle('active', isLocal);
+  $('lan-tab')?.classList.toggle('active', isLan);
+  if($('online-setup')) $('online-setup').hidden = !isOnline;
+  if($('local-setup')) $('local-setup').hidden = !isLocal;
+  if($('lan-setup')) $('lan-setup').hidden = !isLan;
+  $('error').textContent = '';
+  if(isOnline && typeof SupabaseNet !== 'undefined') SupabaseNet.init();
+}
 levels.forEach((level,index)=>{const option=document.createElement('option');option.value=index;option.textContent=String(index+1).padStart(2,'0')+' · '+level.name;$('map-select').append(option);$('lan-map-select').append(option.cloneNode(true));});
-$('local-tab').onclick=()=>toggleMode(true);$('lan-tab').onclick=()=>toggleMode(false);
+$('online-tab')?.addEventListener('click', ()=>toggleMode('online'));
+$('local-tab')?.addEventListener('click', ()=>toggleMode('local'));
+$('lan-tab')?.addEventListener('click', ()=>toggleMode('lan'));
+
+if($('online-name')){
+  $('online-name').value = localStorage.getItem('sockbound-name') || 'Dobby';
+  $('online-name').oninput = e => {
+    localStorage.setItem('sockbound-name', e.target.value.trim());
+    if($('name')) $('name').value = e.target.value;
+  };
+}
+if($('name')){
+  $('name').value = localStorage.getItem('sockbound-name') || 'Dobby';
+  $('name').oninput = e => {
+    localStorage.setItem('sockbound-name', e.target.value.trim());
+    if($('online-name')) $('online-name').value = e.target.value;
+  };
+}
+
+async function enterOnline(action, customCode){
+  if(pending) return;
+  pending = true;
+  const btn = action === 'create' ? $('online-create') : action === 'spectate' ? $('online-spectate') : $('online-join');
+  if(btn) btn.disabled = true;
+  const name = ($('online-name')?.value.trim() || 'Dobby');
+  const code = (customCode || $('online-code')?.value.trim().toUpperCase() || '');
+  try{
+    if(action === 'create'){
+      await SupabaseNet.createRoom(name, Number($('map-select').value || 0));
+    } else if(action === 'join'){
+      if(!code) throw new Error('Vui lòng nhập mã phòng 6 ký tự.');
+      await SupabaseNet.joinRoom(code, name, 'player');
+    } else if(action === 'spectate'){
+      if(!code) throw new Error('Vui lòng nhập mã phòng cần xem.');
+      await SupabaseNet.joinRoom(code, name, 'spectator');
+    }
+  }catch(err){
+    showError(err);
+  }finally{
+    pending = false;
+    if(btn) btn.disabled = false;
+  }
+}
+
+$('online-create')?.addEventListener('click', ()=>enterOnline('create'));
+$('online-join')?.addEventListener('click', ()=>enterOnline('join'));
+$('online-code')?.addEventListener('keydown', e=>{if(e.key==='Enter') enterOnline('join');});
+$('online-spectate')?.addEventListener('click', ()=>enterOnline('spectate'));
+
 document.querySelectorAll('[data-count]').forEach(b=>b.onclick=()=>{count=Number(b.dataset.count);document.querySelectorAll('[data-count]').forEach(x=>x.classList.toggle('active',x===b));});
 $('local-start').onclick=()=>{localRoom={code:'LOCAL',host:'p0',players:Array.from({length:count},(_,i)=>({id:'p'+i,name:['Dobby','Winky','Kreacher','Hokey','Topsy','Tipsy','Binky','Pip'][i],house:i,connected:true})),level:Number($('map-select').value),deaths:0,status:'lobby'};session={id:'p0',code:'LOCAL'};E.init(localRoom);keys={};pulses={};paused=false;lastStatus='';receive(E.snapshot(localRoom));tone(330);};
 async function enter(action){if(pending)return;pending=true;const button=$(action);button.disabled=true;try{session=await api(action,{name:$('name').value,code:$('code').value.trim()});sessionStorage.setItem('sockbound-session',JSON.stringify(session));connect();}catch(e){showError(e);}finally{pending=false;button.disabled=false;}}
@@ -26,7 +634,7 @@ function scoreUI(s,watching){
  $('score-best').textContent='';if(watching)return;
  try{const key=`sockbound-best-${s.level}-${s.players.length}`,previous=Number(localStorage.getItem(key)||0),best=Math.max(previous,points.total||0);if(lastStatus!=='won'&&best>previous)localStorage.setItem(key,String(best));$('score-best').textContent=`Kỷ lục trên máy này · ${s.players.length} người: ${best.toLocaleString('vi-VN')} điểm`;}catch{}
 }
-function receive(s){state=s;const watching=session?.role==='spectator',ended=s.status==='ended',local=!!localRoom,host=!watching&&s.host===session?.id,waiting=s.status==='lobby',won=s.status==='won';$('lobby').hidden=true;$('ended').hidden=!ended;$('spectator-badge').hidden=!watching;$('exit').textContent=watching?'Thoát xem':'Rời phòng';document.querySelector('.control-guide').hidden=watching;$('waiting').hidden=!waiting;$('result').hidden=!won;$('exit').hidden=false;$('retry').hidden=waiting||!host;$('pause').hidden=waiting||watching||ended;$('start').hidden=!host;$('lan-map-select').hidden=!host;$('lan-map-label').hidden=!host;$('start').disabled=s.players.filter(p=>p.connected).length<2;$('room-code').textContent=s.code;$('chapter').textContent=String(s.level+1).padStart(2,'0');$('level-title').textContent=levels[s.level].name;$('sock-status').textContent=s.key?'🧦 Đã tìm được vớ':'♧ Tìm chiếc vớ';$('sock-status').style.color=s.key?'#e8c885':'';$('hint').textContent=waiting?'Mời bạn bè vào phòng. Hành trình cần ít nhất 2 gia tinh.':levels[s.level].hint;$('death-count').textContent=s.deaths?`${s.deaths} lần vấp · vẫn cùng nhau`:'Dây đàn hồi · X ném bạn';$('wait-note').textContent=host?(s.players.length<2?'Cần ít nhất 2 gia tinh.':'Mọi người đã sẵn sàng? Chủ phòng bắt đầu nhé.'):'Đợi chủ phòng bắt đầu…';$('room-label').textContent=local?`✧ ${count} gia tinh · chung bàn phím`:`PHÒNG ${s.code} · ${s.players.length}/8 GIA TINH · ${s.spectatorCount||0} khán giả`;
+function receive(s){state=s;const watching=session?.role==='spectator',ended=s.status==='ended',local=!!localRoom,online=!!session?.isOnline,host=!watching&&(local?true:online?SupabaseNet.isHost:s.host===session?.id),waiting=s.status==='lobby',won=s.status==='won';$('lobby').hidden=true;$('ended').hidden=!ended;$('spectator-badge').hidden=!watching;$('exit').textContent=watching?'Thoát xem':'Rời phòng';document.querySelector('.control-guide').hidden=watching;$('waiting').hidden=!waiting;$('result').hidden=!won;$('exit').hidden=false;$('retry').hidden=waiting||!host;$('pause').hidden=waiting||watching||ended;$('start').hidden=!host;$('lan-map-select').hidden=!host;$('lan-map-label').hidden=!host;$('start').disabled=s.players.filter(p=>p.connected).length<2;$('room-code').textContent=s.code;$('chapter').textContent=String(s.level+1).padStart(2,'0');$('level-title').textContent=levels[s.level].name;$('sock-status').textContent=s.key?'🧦 Đã tìm được vớ':'♧ Tìm chiếc vớ';$('sock-status').style.color=s.key?'#e8c885':'';$('hint').textContent=waiting?'Mời bạn bè vào phòng. Hành trình cần ít nhất 2 gia tinh.':levels[s.level].hint;$('death-count').textContent=s.deaths?`${s.deaths} lần vấp · vẫn cùng nhau`:'Dây đàn hồi · X ném bạn';$('wait-note').textContent=host?(s.players.length<2?'Cần ít nhất 2 gia tinh.':'Mọi người đã sẵn sàng? Chủ phòng bắt đầu nhé.'):'Đợi chủ phòng bắt đầu…';$('room-label').textContent=local?`✧ ${count} gia tinh · chung bàn phím`:(online?`ONLINE SUPABASE · PHÒNG ${s.code} · ${s.players.length}/8 GIA TINH · ${s.spectatorCount||0} khán giả`:`PHÒNG ${s.code} · ${s.players.length}/8 GIA TINH · ${s.spectatorCount||0} khán giả`);
  scoreUI(s,watching);
  document.querySelector('.stage').classList.toggle('playing',!waiting);
  if(waiting){const members=$('members');members.replaceChildren();for(let i=0;i<8;i++){const p=s.players[i],el=document.createElement('div');el.className='member'+(p?'':' empty');const icon=document.createElement('b');icon.textContent=p?'✦':'+';icon.style.color=colors[(p?.house??i)%4];el.append(icon,document.createTextNode(p?p.name:'Chờ bạn'));if(p){const small=document.createElement('small');small.textContent=!p.connected?'Mất kết nối':p.id===s.host?'Chủ phòng':'Đã tham gia';el.append(small);}members.append(el);}}
@@ -39,20 +647,30 @@ function receive(s){state=s;const watching=session?.role==='spectator',ended=s.s
  if(local&&shownControls!==count){shownControls=count;document.querySelector('.control-guide').innerHTML='<span class="local-controls">'+controlLabels.slice(0,count).map((label,i)=>'<span>P'+(i+1)+': <b>'+label+'</b></span>').join('')+'<span class="control-legend">Đi · nhảy · ném bạn</span></span>'; }
 }
 $('spectate').onclick=()=>enter('spectate');$('create').onclick=()=>enter('create');$('join').onclick=()=>enter('join');$('code').onkeydown=e=>{if(e.key==='Enter')enter('join');};
-$('start').onclick=()=>api('start',{level:Number($('lan-map-select').value)}).catch(showError);
-$('retry').onclick=()=>{keys={};pulses={};paused=false;if(localRoom){E.init(localRoom);receive(E.snapshot(localRoom));}else api('retry').catch(showError);};
-$('next').onclick=()=>{keys={};pulses={};if(localRoom){localRoom=null;session=null;state=null;$('result').hidden=true;$('score-bar').hidden=true;$('lobby').hidden=false;$('exit').hidden=true;$('retry').hidden=true;$('pause').hidden=true;document.querySelector('.stage').classList.remove('playing');toggleMode(true);}else api('next').catch(showError);};
-$('exit').onclick=async()=>{if(!localRoom&&session)try{await api('leave');}catch{}source?.close();source=null;localRoom=null;state=null;session=null;sessionStorage.removeItem('sockbound-session');location.reload();};
+$('start').onclick=()=>{const lvl=Number($('lan-map-select').value);if(session?.isOnline){SupabaseNet.startHostGame(lvl);}else{api('start',{level:lvl}).catch(showError);}};
+$('retry').onclick=()=>{keys={};pulses={};paused=false;if(localRoom){E.init(localRoom);receive(E.snapshot(localRoom));}else if(session?.isOnline){SupabaseNet.retryHostGame();}else api('retry').catch(showError);};
+$('next').onclick=()=>{keys={};pulses={};if(localRoom){localRoom=null;session=null;state=null;$('result').hidden=true;$('score-bar').hidden=true;$('lobby').hidden=false;$('exit').hidden=true;$('retry').hidden=true;$('pause').hidden=true;document.querySelector('.stage').classList.remove('playing');toggleMode('online');}else if(session?.isOnline){SupabaseNet.nextHostGame();}else api('next').catch(showError);};
+$('exit').onclick=async()=>{if(session?.isOnline){SupabaseNet.leave();}else if(!localRoom&&session){try{await api('leave');}catch{}}source?.close();source=null;localRoom=null;state=null;session=null;sessionStorage.removeItem('sockbound-session');location.reload();};
 $('back-lobby').onclick=()=>$('exit').click();
 $('pause').onclick=()=>{paused=!paused;keys={};pulses={};$('pause').textContent=paused?'▶':'Ⅱ';toast(paused?(localRoom?'Tạm dừng. Bấm ▶ để tiếp tục.':'Bạn đang dừng điều khiển. Đồng đội vẫn tiếp tục.'): 'Tiếp tục cuộc phiêu lưu.');};
-$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(state.code);$('copy-label').textContent='ĐÃ SAO CHÉP';setTimeout(()=>$('copy-label').textContent='SAO CHÉP MÃ',1800);}catch{toast('Mã phòng: '+state.code);}};
+$('copy').onclick=async()=>{const isOnline=!!session?.isOnline,shareUrl=`${location.origin}/?room=${state.code}`,copyText=isOnline?shareUrl:state.code;try{await navigator.clipboard.writeText(copyText);$('copy-label').textContent=isOnline?'ĐÃ SAO CHÉP LINK':'ĐÃ SAO CHÉP MÃ';setTimeout(()=>$('copy-label').textContent='SAO CHÉP MÃ',1800);toast(isOnline?`Đã sao chép link phòng: ${shareUrl}`:`Đã sao chép mã phòng: ${state.code}`);}catch{toast('Mã phòng: '+state.code);}};
+if($('lan-map-select')) $('lan-map-select').onchange=()=>{if(session?.isOnline&&SupabaseNet.isHost&&SupabaseNet.onlineRoom){SupabaseNet.onlineRoom.level=Number($('lan-map-select').value);const snap=E.snapshot(SupabaseNet.onlineRoom);receive(snap);SupabaseNet.broadcastState(snap);SupabaseNet.announceRoom(SupabaseNet.onlineRoom.status);}};
 $('help').onclick=()=>{keys={};pulses={};$('help-dialog').showModal();};$('close-help').onclick=()=>$('help-dialog').close();$('help-dialog').onclick=e=>{if(e.target===$('help-dialog'))$('help-dialog').close();};
 $('sound').onclick=()=>{sound=!sound;$('sound').style.color=sound?'#e6c782':'';$('sound').setAttribute('aria-label',sound?'Tắt âm thanh':'Bật âm thanh');$('sound').title=sound?'Tắt âm thanh':'Bật âm thanh';tone(523);};
 function pressed(key){return !!keys[key]||performance.now()<(pulses[key]||0);}
 const actionKeys=new Set(mappings.flatMap(m=>m.slice(2)).concat('Space'));
 const gameKeys=new Set([...mappings.flat(),'Space']);addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)||$('help-dialog').open)return;if(gameKeys.has(e.code)&&state?.status==='playing'&&session?.role!=='spectator'){e.preventDefault();if(actionKeys.has(e.code)&&!e.repeat)pulses[e.code]=performance.now()+140;keys[e.code]=true;}});addEventListener('keyup',e=>{delete keys[e.code];});addEventListener('blur',()=>{keys={};pulses={};if(session&&!localRoom&&session.role!=='spectator')api('input',{left:false,right:false,jump:false,toss:false}).catch(()=>{});});document.addEventListener('visibilitychange',()=>{if(document.hidden)keys={};pulses={};});
 document.querySelectorAll('[data-key]').forEach(button=>{const key={left:'KeyA',right:'KeyD',jump:'KeyW',toss:'KeyX'}[button.dataset.key];button.onpointerdown=e=>{e.preventDefault();button.setPointerCapture(e.pointerId);if(actionKeys.has(key))pulses[key]=performance.now()+140;keys[key]=true;};button.onpointerup=button.onpointercancel=button.onlostpointercapture=()=>{delete keys[key];};});
-setInterval(()=>{if(!session||localRoom||session.role==='spectator'||state?.status!=='playing')return;const left=!paused&&(keys.KeyA||keys.ArrowLeft),right=!paused&&(keys.KeyD||keys.ArrowRight),jump=!paused&&(pressed("KeyW")||pressed("ArrowUp")||pressed("Space"));api('input',{left:!!left,right:!!right,jump:!!jump,toss:!!(!paused&&(pressed("KeyX")||pressed("Slash")))}).catch(()=>{});},70);
+setInterval(()=>{
+  if(!session||localRoom||session.role==='spectator'||state?.status!=='playing')return;
+  const left=!paused&&(keys.KeyA||keys.ArrowLeft),right=!paused&&(keys.KeyD||keys.ArrowRight),jump=!paused&&(pressed("KeyW")||pressed("ArrowUp")||pressed("Space")),toss=!paused&&(pressed("KeyX")||pressed("Slash"));
+  const inputData={left:!!left,right:!!right,jump:!!jump,toss:!!toss};
+  if(session.isOnline){
+    if(!SupabaseNet.isHost) SupabaseNet.sendInput(inputData);
+  } else {
+    api('input',inputData).catch(()=>{});
+  }
+},50);
 // --- UPGRADED GRAPHICS ENGINE: HIGH-FIDELITY PROCEDURAL ART & PARTICLES ---
 const scarfColors=[['#800b14','#e5b73b'],['#154726','#b8c6b9'],['#0d2346','#cd8b38'],['#f4c430','#2d2926']];
 let particles=[];
@@ -907,7 +1525,72 @@ function draw(t){
     ctx.fillText('Tạm dừng điều khiển',600,300);
   }
 }
-function loop(now){const delta=Math.min(now-lastFrame,100);lastFrame=now;if(localRoom&&localRoom.status==='playing'&&!paused&&!$('help-dialog').open){accumulator+=delta;while(accumulator>=1000/60){localRoom.players.forEach((p,i)=>{const [left,right,jump,toss]=mappings[i];p.keys={left:!!keys[left],right:!!keys[right],jump:!!(pressed(jump)||(i===0&&pressed("Space"))),toss:pressed(toss)};});E.tick(localRoom);accumulator-=1000/60;}state=E.snapshot(localRoom);if(now-localHudAt>100||state.status!==lastStatus){receive(state);localHudAt=now;}}draw(now/1000);requestAnimationFrame(loop);}requestAnimationFrame(loop);
-try{const saved=JSON.parse(sessionStorage.getItem('sockbound-session'));if(saved?.token){session=saved;connect();}}catch{}const fromURL=new URLSearchParams(location.search).get('room');if(fromURL){toggleMode(false);$('code').value=fromURL.slice(0,6).toUpperCase();}if(new URLSearchParams(location.search).get('watch')){toggleMode(false);$('code').value=new URLSearchParams(location.search).get('watch').slice(0,6).toUpperCase();}
+function loop(now){
+  const delta=Math.min(now-lastFrame,100);
+  lastFrame=now;
+  if(localRoom&&localRoom.status==='playing'&&!paused&&!$('help-dialog').open){
+    accumulator+=delta;
+    while(accumulator>=1000/60){
+      localRoom.players.forEach((p,i)=>{
+        const [left,right,jump,toss]=mappings[i];
+        p.keys={left:!!keys[left],right:!!keys[right],jump:!!(pressed(jump)||(i===0&&pressed("Space"))),toss:pressed(toss)};
+      });
+      E.tick(localRoom);
+      accumulator-=1000/60;
+    }
+    state=E.snapshot(localRoom);
+    if(now-localHudAt>100||state.status!==lastStatus){receive(state);localHudAt=now;}
+  }
+  if(session?.isOnline&&SupabaseNet.isHost&&SupabaseNet.onlineRoom&&SupabaseNet.onlineRoom.status==='playing'&&!paused&&!$('help-dialog').open){
+    accumulator+=delta;
+    while(accumulator>=1000/60){
+      const hp = SupabaseNet.onlineRoom.players.find(p => p.id === SupabaseNet.playerId);
+      if(hp){
+        const left=!paused&&(keys.KeyA||keys.ArrowLeft),right=!paused&&(keys.KeyD||keys.ArrowRight),jump=!paused&&(pressed("KeyW")||pressed("ArrowUp")||pressed("Space")),toss=!paused&&(pressed("KeyX")||pressed("Slash"));
+        hp.keys = { left: !!left, right: !!right, jump: !!jump, toss: !!toss };
+      }
+      E.tick(SupabaseNet.onlineRoom);
+      accumulator-=1000/60;
+    }
+    state=E.snapshot(SupabaseNet.onlineRoom);
+    if(now-localHudAt>50||state.status!==lastStatus){
+      receive(state);
+      SupabaseNet.broadcastState(state);
+      localHudAt=now;
+    }
+  }
+  draw(now/1000);
+  requestAnimationFrame(loop);
+}requestAnimationFrame(loop);
+try{
+  const saved=JSON.parse(sessionStorage.getItem('sockbound-session'));
+  if(saved?.isOnline&&saved.code){
+    session=saved;
+    toggleMode('online');
+    SupabaseNet.joinRoom(saved.code, saved.name||'Dobby', saved.role||'player').catch(()=>{});
+  } else if(saved?.token){
+    session=saved;
+    toggleMode('lan');
+    connect();
+  } else {
+    toggleMode('online');
+  }
+}catch{
+  toggleMode('online');
+}
+const fromURL=new URLSearchParams(location.search).get('room');
+if(fromURL){
+  toggleMode('online');
+  if($('online-code')) $('online-code').value=fromURL.slice(0,6).toUpperCase();
+  if($('code')) $('code').value=fromURL.slice(0,6).toUpperCase();
+  setTimeout(()=>enterOnline('join', fromURL.slice(0,6).toUpperCase()), 400);
+}
+const fromWatch=new URLSearchParams(location.search).get('watch');
+if(fromWatch){
+  toggleMode('online');
+  if($('online-code')) $('online-code').value=fromWatch.slice(0,6).toUpperCase();
+  if($('code')) $('code').value=fromWatch.slice(0,6).toUpperCase();
+  setTimeout(()=>enterOnline('spectate', fromWatch.slice(0,6).toUpperCase()), 400);
+}
 const urlLevel=new URLSearchParams(location.search).get('level');if(urlLevel!==null&&$('map-select')){const targetLvl=Math.max(0,Math.min(levels.length-1,Number(urlLevel)));$('map-select').value=targetLvl;if($('lan-map-select'))$('lan-map-select').value=targetLvl;}
 if(document.modelContext?.registerTool){try{document.modelContext.registerTool({name:'read_sockbound_room',description:'Read the current Sockbound game room, players, and level.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:()=>state?{code:state.code,status:state.status,level:state.level+1,players:state.players.map(p=>p.name)}:{status:'start-screen'}});}catch{}}

@@ -1,0 +1,4769 @@
+{
+  "lego_harry_potter_harry_potter2019-1st_task.glb": {
+    "file": "lego_harry_potter_harry_potter2019-1st_task.glb",
+    "objects": [
+      {
+        "name": "Sketchfab_model",
+        "type": "EMPTY",
+        "parent": null,
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "type": "EMPTY",
+        "parent": "Sketchfab_model",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Object_2",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23193399608135223,
+          0.11767600476741791,
+          0.06669601052999496
+        ],
+        "vertices": 338,
+        "polygons": 608,
+        "materials": [
+          "Arms"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11596699804067612,
+          -0.2685549855232239,
+          -0.034157998859882355
+        ],
+        "bbox_max": [
+          0.11596699804067612,
+          -0.15087899565696716,
+          0.032538000494241714
+        ]
+      },
+      {
+        "name": "Object_3",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.09533599764108658,
+          0.04252598062157631,
+          0.028103003278374672
+        ],
+        "vertices": 20,
+        "polygons": 16,
+        "materials": [
+          "Glasses"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.04766799882054329,
+          -0.3496989905834198,
+          -0.046404000371694565
+        ],
+        "bbox_max": [
+          0.04766799882054329,
+          -0.3071730136871338,
+          -0.01830100081861019
+        ]
+      },
+      {
+        "name": "Object_4",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23747800290584564,
+          0.05744700878858566,
+          0.07445700466632843
+        ],
+        "vertices": 492,
+        "polygons": 904,
+        "materials": [
+          "Hands"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11873900145292282,
+          -0.18997199833393097,
+          -0.07230699807405472
+        ],
+        "bbox_max": [
+          0.11873900145292282,
+          -0.1325249969959259,
+          0.00215000007301569
+        ]
+      },
+      {
+        "name": "Object_5",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.026933999732136726,
+          0.05684701353311539,
+          0.0014119968982413411
+        ],
+        "vertices": 120,
+        "polygons": 114,
+        "materials": [
+          "Medium_Nougat"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.013466999866068363,
+          -0.3591110110282898,
+          -0.04458199813961983
+        ],
+        "bbox_max": [
+          0.013466999866068363,
+          -0.302264004945755,
+          -0.04317000135779381
+        ]
+      },
+      {
+        "name": "Object_6",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.10418800264596939,
+          0.1119920164346695,
+          0.09158400446176529
+        ],
+        "vertices": 625,
+        "polygons": 633,
+        "materials": [
+          "Head"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.052094001322984695,
+          -0.38689500093460083,
+          -0.04405700042843819
+        ],
+        "bbox_max": [
+          0.052094001322984695,
+          -0.27490299940109253,
+          0.047527000308036804
+        ]
+      },
+      {
+        "name": "Object_7",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.13305701315402985,
+          0.07418800890445709
+        ],
+        "vertices": 278,
+        "polygons": 396,
+        "materials": [
+          "Torso"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.28588899970054626,
+          -0.029335999861359596
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04485199972987175
+        ]
+      },
+      {
+        "name": "Object_8",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.12206999957561493,
+          0.001999002182856202
+        ],
+        "vertices": 118,
+        "polygons": 200,
+        "materials": [
+          "Torso_Back"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.27490198612213135,
+          0.04485199972987175
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04685100167989731
+        ]
+      },
+      {
+        "name": "Object_9",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.10418800264596939,
+          0.08302301913499832,
+          0.05145300552248955
+        ],
+        "vertices": 117,
+        "polygons": 179,
+        "materials": [
+          "Head_Back"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.052094001322984695,
+          -0.37096500396728516,
+          0.008036999963223934
+        ],
+        "bbox_max": [
+          0.052094001322984695,
+          -0.28794199228286743,
+          0.05948999896645546
+        ]
+      },
+      {
+        "name": "Object_10",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1511240005493164,
+          0.14106102287769318,
+          0.07635500282049179
+        ],
+        "vertices": 2040,
+        "polygons": 1892,
+        "materials": [
+          "Legs"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.0755620002746582,
+          -0.1409910023212433,
+          -0.03315100073814392
+        ],
+        "bbox_max": [
+          0.0755620002746582,
+          7.000000186963007e-05,
+          0.04320399835705757
+        ]
+      },
+      {
+        "name": "Object_11",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1372079998254776,
+          0.07940700650215149,
+          0.07618700712919235
+        ],
+        "vertices": 398,
+        "polygons": 412,
+        "materials": [
+          "material"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.0686039999127388,
+          -0.15246599912643433,
+          -0.02927500009536743
+        ],
+        "bbox_max": [
+          0.0686039999127388,
+          -0.07305900007486343,
+          0.046911999583244324
+        ]
+      },
+      {
+        "name": "Object_12",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.142316997051239,
+          0.13641302287578583,
+          0.13819001615047455
+        ],
+        "vertices": 2555,
+        "polygons": 4850,
+        "materials": [
+          "Black"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.06693799793720245,
+          -0.41561999917030334,
+          -0.05952699854969978
+        ],
+        "bbox_max": [
+          0.07537899911403656,
+          -0.2792069911956787,
+          0.07866299897432327
+        ]
+      },
+      {
+        "name": "Object_13",
+        "type": "MESH",
+        "parent": "Harry Potter(2019-Final Task).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.031651001423597336,
+          0.0050290231592953205,
+          0.0017229991499334574
+        ],
+        "vertices": 64,
+        "polygons": 60,
+        "materials": [
+          "White"
+        ],
+        "uv_layers": [],
+        "bbox_min": [
+          -0.015079000033438206,
+          -0.33713701367378235,
+          -0.04434499889612198
+        ],
+        "bbox_max": [
+          0.016572000458836555,
+          -0.3321079909801483,
+          -0.042621999979019165
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "Arms",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.2015562504529953,
+            0.0006070539820939302,
+            0.013702083379030228,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Black",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Glasses",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_1",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Hands",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Head",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_2",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Head_Back",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_2",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Legs",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "material",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Medium_Nougat",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_3",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_5",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso_Back",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_6",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "White",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.9046611785888672,
+            0.9046611785888672,
+            0.9046611785888672,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      }
+    ],
+    "textures": []
+  },
+  "lego_harry_potter_voldemort_2005.glb": {
+    "file": "lego_harry_potter_voldemort_2005.glb",
+    "objects": [
+      {
+        "name": "Sketchfab_model",
+        "type": "EMPTY",
+        "parent": null,
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "type": "EMPTY",
+        "parent": "Sketchfab_model",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Object_2",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23193399608135223,
+          0.11767600476741791,
+          0.06669601052999496
+        ],
+        "vertices": 338,
+        "polygons": 608,
+        "materials": [
+          "Arms"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11596699804067612,
+          -0.2685549855232239,
+          -0.034157998859882355
+        ],
+        "bbox_max": [
+          0.11596699804067612,
+          -0.15087899565696716,
+          0.032538000494241714
+        ]
+      },
+      {
+        "name": "Object_3",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.26623499393463135,
+          0.3046870231628418,
+          0.1406860202550888
+        ],
+        "vertices": 397,
+        "polygons": 612,
+        "materials": [
+          "Cape"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.1341550052165985,
+          -0.28199100494384766,
+          -0.06322699785232544
+        ],
+        "bbox_max": [
+          0.13208000361919403,
+          0.02269599959254265,
+          0.07745900005102158
+        ]
+      },
+      {
+        "name": "Object_4",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.10418800264596939,
+          0.1119920164346695,
+          0.10354701429605484
+        ],
+        "vertices": 752,
+        "polygons": 812,
+        "materials": [
+          "Head"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.052094001322984695,
+          -0.38689500093460083,
+          -0.04405700042843819
+        ],
+        "bbox_max": [
+          0.052094001322984695,
+          -0.27490299940109253,
+          0.05948999896645546
+        ]
+      },
+      {
+        "name": "Object_5",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.09013199806213379,
+          0.05670902878046036,
+          0.026144003495573997
+        ],
+        "vertices": 340,
+        "polygons": 356,
+        "materials": [
+          "Dark_Grey"
+        ],
+        "uv_layers": [],
+        "bbox_min": [
+          -0.045065999031066895,
+          -0.3573850095272064,
+          -0.04500399902462959
+        ],
+        "bbox_max": [
+          0.045065999031066895,
+          -0.30067598819732666,
+          -0.018859999254345894
+        ]
+      },
+      {
+        "name": "Object_6",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23747800290584564,
+          0.05744700878858566,
+          0.07445700466632843
+        ],
+        "vertices": 492,
+        "polygons": 904,
+        "materials": [
+          "Hands"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11873900145292282,
+          -0.18997199833393097,
+          -0.07230699807405472
+        ],
+        "bbox_max": [
+          0.11873900145292282,
+          -0.1325249969959259,
+          0.00215000007301569
+        ]
+      },
+      {
+        "name": "Object_7",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1511240005493164,
+          0.14106102287769318,
+          0.07635500282049179
+        ],
+        "vertices": 2040,
+        "polygons": 1892,
+        "materials": [
+          "Legs"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.0755620002746582,
+          -0.1409910023212433,
+          -0.03315100073814392
+        ],
+        "bbox_max": [
+          0.0755620002746582,
+          7.000000186963007e-05,
+          0.04320399835705757
+        ]
+      },
+      {
+        "name": "Object_8",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1372079998254776,
+          0.07940700650215149,
+          0.07618700712919235
+        ],
+        "vertices": 398,
+        "polygons": 412,
+        "materials": [
+          "material"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.0686039999127388,
+          -0.15246599912643433,
+          -0.02927500009536743
+        ],
+        "bbox_max": [
+          0.0686039999127388,
+          -0.07305900007486343,
+          0.046911999583244324
+        ]
+      },
+      {
+        "name": "Object_9",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.13305701315402985,
+          0.07418800890445709
+        ],
+        "vertices": 278,
+        "polygons": 396,
+        "materials": [
+          "Torso"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.28588899970054626,
+          -0.029335999861359596
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04485199972987175
+        ]
+      },
+      {
+        "name": "Object_10",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.12206999957561493,
+          0.001999002182856202
+        ],
+        "vertices": 118,
+        "polygons": 200,
+        "materials": [
+          "Torso_Back"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.27490198612213135,
+          0.04485199972987175
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04685100167989731
+        ]
+      },
+      {
+        "name": "Object_11",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0539419986307621,
+          0.03960800543427467,
+          0.007076003588736057
+        ],
+        "vertices": 216,
+        "polygons": 214,
+        "materials": [
+          "Black"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.02697099931538105,
+          -0.3433069884777069,
+          -0.04514700174331665
+        ],
+        "bbox_max": [
+          0.02697099931538105,
+          -0.30369898676872253,
+          -0.03807099908590317
+        ]
+      },
+      {
+        "name": "Object_12",
+        "type": "MESH",
+        "parent": "Voldemort(2005).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.04724999889731407,
+          0.010864020325243473,
+          0.004527003038674593
+        ],
+        "vertices": 28,
+        "polygons": 24,
+        "materials": [
+          "RedGlow"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.023624999448657036,
+          -0.3414590060710907,
+          -0.04396900162100792
+        ],
+        "bbox_max": [
+          0.023624999448657036,
+          -0.3305949866771698,
+          -0.039441999047994614
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "Arms",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Black",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Cape",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_1",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          },
+          {
+            "name": "Image_2",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          },
+          {
+            "name": "Image_3",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.5,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Dark_Grey",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.07421357184648514,
+            0.08228270709514618,
+            0.09305896610021591,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Hands",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.9046611785888672,
+            0.9046611785888672,
+            0.9046611785888672,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Head",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.5088813304901123,
+            0.5647115111351013,
+            0.41788506507873535,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Legs",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "material",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "RedGlow",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_4",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          },
+          {
+            "name": "Image_4",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso_Back",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      }
+    ],
+    "textures": []
+  },
+  "lego_harry_potter_professor_lupin_2004.glb": {
+    "file": "lego_harry_potter_professor_lupin_2004.glb",
+    "objects": [
+      {
+        "name": "Sketchfab_model",
+        "type": "EMPTY",
+        "parent": null,
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "type": "EMPTY",
+        "parent": "Sketchfab_model",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Object_2",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23193399608135223,
+          0.11767600476741791,
+          0.06669601052999496
+        ],
+        "vertices": 338,
+        "polygons": 608,
+        "materials": [
+          "Arms"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11596699804067612,
+          -0.2685549855232239,
+          -0.034157998859882355
+        ],
+        "bbox_max": [
+          0.11596699804067612,
+          -0.15087899565696716,
+          0.032538000494241714
+        ]
+      },
+      {
+        "name": "Object_3",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.13407599925994873,
+          0.11588199436664581,
+          0.16163800656795502
+        ],
+        "vertices": 1111,
+        "polygons": 1942,
+        "materials": [
+          "Dark_Orange"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.06489299982786179,
+          -0.41242098808288574,
+          -0.07226099818944931
+        ],
+        "bbox_max": [
+          0.06918299943208694,
+          -0.2965390086174011,
+          0.08937700092792511
+        ]
+      },
+      {
+        "name": "Object_4",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23747800290584564,
+          0.05744700878858566,
+          0.07445700466632843
+        ],
+        "vertices": 492,
+        "polygons": 904,
+        "materials": [
+          "Hands"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11873900145292282,
+          -0.18997199833393097,
+          -0.07230699807405472
+        ],
+        "bbox_max": [
+          0.11873900145292282,
+          -0.1325249969959259,
+          0.00215000007301569
+        ]
+      },
+      {
+        "name": "Object_5",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.25146499276161194,
+          0.2709350287914276,
+          0.12658701837062836
+        ],
+        "vertices": 52,
+        "polygons": 70,
+        "materials": [
+          "Cape"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.12560999393463135,
+          -0.2844240069389343,
+          -0.03596099838614464
+        ],
+        "bbox_max": [
+          0.1258549988269806,
+          -0.01348899956792593,
+          0.09062600135803223
+        ]
+      },
+      {
+        "name": "Object_6",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1372079998254776,
+          0.07940700650215149,
+          0.07618700712919235
+        ],
+        "vertices": 398,
+        "polygons": 412,
+        "materials": [
+          "material"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.0686039999127388,
+          -0.15246599912643433,
+          -0.02927500009536743
+        ],
+        "bbox_max": [
+          0.0686039999127388,
+          -0.07305900007486343,
+          0.046911999583244324
+        ]
+      },
+      {
+        "name": "Object_7",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.13305701315402985,
+          0.07418800890445709
+        ],
+        "vertices": 278,
+        "polygons": 396,
+        "materials": [
+          "Torso"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.28588899970054626,
+          -0.029335999861359596
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04485199972987175
+        ]
+      },
+      {
+        "name": "Object_8",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.10418800264596939,
+          0.1119920164346695,
+          0.10354701429605484
+        ],
+        "vertices": 752,
+        "polygons": 812,
+        "materials": [
+          "Head"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.052094001322984695,
+          -0.38689500093460083,
+          -0.04405700042843819
+        ],
+        "bbox_max": [
+          0.052094001322984695,
+          -0.27490299940109253,
+          0.05948999896645546
+        ]
+      },
+      {
+        "name": "Object_9",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.04072599858045578,
+          0.008985013701021671,
+          0.004062999505549669
+        ],
+        "vertices": 48,
+        "polygons": 44,
+        "materials": [
+          "Light_Bluish_Grey"
+        ],
+        "uv_layers": [],
+        "bbox_min": [
+          -0.02036299929022789,
+          -0.3197770118713379,
+          -0.044847000390291214
+        ],
+        "bbox_max": [
+          0.02036299929022789,
+          -0.3107919991016388,
+          -0.04078400135040283
+        ]
+      },
+      {
+        "name": "Object_10",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.12206999957561493,
+          0.001999002182856202
+        ],
+        "vertices": 118,
+        "polygons": 200,
+        "materials": [
+          "Torso_Back"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.27490198612213135,
+          0.04485199972987175
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04685100167989731
+        ]
+      },
+      {
+        "name": "Object_11",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1511240005493164,
+          0.14106102287769318,
+          0.07635500282049179
+        ],
+        "vertices": 2040,
+        "polygons": 1892,
+        "materials": [
+          "Legs"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.0755620002746582,
+          -0.1409910023212433,
+          -0.03315100073814392
+        ],
+        "bbox_max": [
+          0.0755620002746582,
+          7.000000186963007e-05,
+          0.04320399835705757
+        ]
+      },
+      {
+        "name": "Object_12",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.05304599925875664,
+          0.04505300894379616,
+          0.007066999562084675
+        ],
+        "vertices": 372,
+        "polygons": 376,
+        "materials": [
+          "Black"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.02652299962937832,
+          -0.34842899441719055,
+          -0.044909000396728516
+        ],
+        "bbox_max": [
+          0.02652299962937832,
+          -0.3033759891986847,
+          -0.037842001765966415
+        ]
+      },
+      {
+        "name": "Object_13",
+        "type": "MESH",
+        "parent": "Professor Lupin.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.033918000757694244,
+          0.005027980078011751,
+          0.0018040018621832132
+        ],
+        "vertices": 64,
+        "polygons": 60,
+        "materials": [
+          "White"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.016207000240683556,
+          -0.3360289931297302,
+          -0.04363600164651871
+        ],
+        "bbox_max": [
+          0.01771100051701069,
+          -0.33100101351737976,
+          -0.04183200001716614
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "Arms",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.0015176349552348256,
+            0.03560131415724754,
+            0.007499032188206911,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Black",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              8,
+              8
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Cape",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_1",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          },
+          {
+            "name": "Image_2",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          },
+          {
+            "name": "Image_3",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.5,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Dark_Orange",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.28314873576164246,
+            0.0802198201417923,
+            0.011612244881689548,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Hands",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_4",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Head",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_5",
+            "size": [
+              512,
+              512
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Legs",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.0015176349552348256,
+            0.03560131415724754,
+            0.007499032188206911,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Light_Bluish_Grey",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.366252601146698,
+            0.3613067865371704,
+            0.37123769521713257,
+            1.0
+          ],
+          "roughness": 0.3499999940395355,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "material",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.0015176349552348256,
+            0.03560131415724754,
+            0.007499032188206911,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_7",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso_Back",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.0015176349552348256,
+            0.03560131415724754,
+            0.007499032188206911,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "White",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_8",
+            "size": [
+              8,
+              8
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      }
+    ],
+    "textures": []
+  },
+  "lego_harry_potter_mad-eye_moody_2018.glb": {
+    "file": "lego_harry_potter_mad-eye_moody_2018.glb",
+    "objects": [
+      {
+        "name": "Sketchfab_model",
+        "type": "EMPTY",
+        "parent": null,
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "type": "EMPTY",
+        "parent": "Sketchfab_model",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Object_2",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23193399608135223,
+          0.11767600476741791,
+          0.06669601052999496
+        ],
+        "vertices": 338,
+        "polygons": 608,
+        "materials": [
+          "Arms"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11596699804067612,
+          -0.2685549855232239,
+          -0.038892000913619995
+        ],
+        "bbox_max": [
+          0.11596699804067612,
+          -0.15087899565696716,
+          0.027804000303149223
+        ]
+      },
+      {
+        "name": "Object_3",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.006847999058663845,
+          0.00768700335174799,
+          0.0027449990157037973
+        ],
+        "vertices": 32,
+        "polygons": 30,
+        "materials": [
+          "Blue"
+        ],
+        "uv_layers": [],
+        "bbox_min": [
+          0.013515000231564045,
+          -0.33867499232292175,
+          -0.04718799889087677
+        ],
+        "bbox_max": [
+          0.02036299929022789,
+          -0.33098798990249634,
+          -0.044443000108003616
+        ]
+      },
+      {
+        "name": "Object_4",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.022183001041412354,
+          0.008123994804918766,
+          0.007733003236353397
+        ],
+        "vertices": 31,
+        "polygons": 38,
+        "materials": [
+          "Dark_Tan"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.027844000607728958,
+          -0.3458999991416931,
+          -0.04882200062274933
+        ],
+        "bbox_max": [
+          -0.005661000031977892,
+          -0.3377760052680969,
+          -0.041088998317718506
+        ]
+      },
+      {
+        "name": "Object_5",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.13305701315402985,
+          0.07418800890445709
+        ],
+        "vertices": 278,
+        "polygons": 396,
+        "materials": [
+          "Torso"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.28588899970054626,
+          -0.03407000005245209
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04011800140142441
+        ]
+      },
+      {
+        "name": "Object_6",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1372079998254776,
+          0.07940700650215149,
+          0.07618700712919235
+        ],
+        "vertices": 398,
+        "polygons": 412,
+        "materials": [
+          "material"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.0686039999127388,
+          -0.15246599912643433,
+          -0.034008998423814774
+        ],
+        "bbox_max": [
+          0.0686039999127388,
+          -0.07305900007486343,
+          0.04217800125479698
+        ]
+      },
+      {
+        "name": "Object_7",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23747800290584564,
+          0.05744700878858566,
+          0.07445700466632843
+        ],
+        "vertices": 492,
+        "polygons": 904,
+        "materials": [
+          "Hands"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11873900145292282,
+          -0.18997199833393097,
+          -0.07704100012779236
+        ],
+        "bbox_max": [
+          0.11873900145292282,
+          -0.1325249969959259,
+          -0.0025839998852461576
+        ]
+      },
+      {
+        "name": "Object_8",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1511240005493164,
+          0.14106102287769318,
+          0.07635500282049179
+        ],
+        "vertices": 2040,
+        "polygons": 1892,
+        "materials": [
+          "Legs"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.0755620002746582,
+          -0.1409910023212433,
+          -0.03788499906659126
+        ],
+        "bbox_max": [
+          0.0755620002746582,
+          7.000000186963007e-05,
+          0.03847000002861023
+        ]
+      },
+      {
+        "name": "Object_9",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.02251499891281128,
+          0.012809010222554207,
+          0.0033349995501339436
+        ],
+        "vertices": 59,
+        "polygons": 55,
+        "materials": [
+          "Medium_Nougat"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.019147999584674835,
+          -0.3133530020713806,
+          -0.04882499948143959
+        ],
+        "bbox_max": [
+          0.003367000026628375,
+          -0.30054399371147156,
+          -0.045490000396966934
+        ]
+      },
+      {
+        "name": "Object_10",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.10418800264596939,
+          0.1119920164346695,
+          0.10354701429605484
+        ],
+        "vertices": 752,
+        "polygons": 812,
+        "materials": [
+          "Head"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.052094001322984695,
+          -0.38689500093460083,
+          -0.04879099875688553
+        ],
+        "bbox_max": [
+          0.052094001322984695,
+          -0.27490299940109253,
+          0.05475600063800812
+        ]
+      },
+      {
+        "name": "Object_11",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.12206999957561493,
+          0.0019989984575659037
+        ],
+        "vertices": 118,
+        "polygons": 200,
+        "materials": [
+          "Torso_Back"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.27490198612213135,
+          0.04011800140142441
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04211699962615967
+        ]
+      },
+      {
+        "name": "Object_12",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.14955399930477142,
+          0.13486801087856293,
+          0.14235201478004456
+        ],
+        "vertices": 1874,
+        "polygons": 2696,
+        "materials": [
+          "material_10"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07372500002384186,
+          -0.41273099184036255,
+          -0.06928300112485886
+        ],
+        "bbox_max": [
+          0.07582899928092957,
+          -0.2778629958629608,
+          0.0730689987540245
+        ]
+      },
+      {
+        "name": "Object_13",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.03507000207901001,
+          0.034649018198251724,
+          0.006042999215424061
+        ],
+        "vertices": 136,
+        "polygons": 138,
+        "materials": [
+          "Black"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.024726999923586845,
+          -0.33772701025009155,
+          -0.04915099963545799
+        ],
+        "bbox_max": [
+          0.010343000292778015,
+          -0.3030779957771301,
+          -0.043108001351356506
+        ]
+      },
+      {
+        "name": "Object_14",
+        "type": "MESH",
+        "parent": "Mad-eye Moody(2018).obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.03673999756574631,
+          0.005439997185021639,
+          0.0020719992462545633
+        ],
+        "vertices": 64,
+        "polygons": 60,
+        "materials": [
+          "White"
+        ],
+        "uv_layers": [],
+        "bbox_min": [
+          -0.017980000004172325,
+          -0.33772599697113037,
+          -0.04728100076317787
+        ],
+        "bbox_max": [
+          0.01875999942421913,
+          -0.33228600025177,
+          -0.04520900174975395
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "Arms",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Black",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_1",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Blue",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.019382361322641373,
+            0.08650045841932297,
+            0.38642942905426025,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Dark_Tan",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Hands",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_2",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Head",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_3",
+            "size": [
+              512,
+              512
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Legs",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_5",
+            "size": [
+              512,
+              512
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "material",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_4",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "material_10",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            0.6653872728347778,
+            0.5028864741325378,
+            0.2015562504529953,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Medium_Nougat",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_6",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_8",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso_Back",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_9",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "White",
+        "use_nodes": true,
+        "textures": [],
+        "principled": {
+          "base_color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "roughness": 0.6000000238418579,
+          "metallic": 0.0
+        }
+      }
+    ],
+    "textures": []
+  },
+  "lego_harry_potter_tom_riddle_classic.glb": {
+    "file": "lego_harry_potter_tom_riddle_classic.glb",
+    "objects": [
+      {
+        "name": "Sketchfab_model",
+        "type": "EMPTY",
+        "parent": null,
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "type": "EMPTY",
+        "parent": "Sketchfab_model",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Object_2",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.13407599925994873,
+          0.11588199436664581,
+          0.16163800656795502
+        ],
+        "vertices": 1111,
+        "polygons": 1942,
+        "materials": [
+          "Black"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.06489299982786179,
+          -0.41242098808288574,
+          -0.07226099818944931
+        ],
+        "bbox_max": [
+          0.06918299943208694,
+          -0.2965390086174011,
+          0.08937700092792511
+        ]
+      },
+      {
+        "name": "Object_3",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23193399608135223,
+          0.11767600476741791,
+          0.06669601052999496
+        ],
+        "vertices": 338,
+        "polygons": 608,
+        "materials": [
+          "Arms"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11596699804067612,
+          -0.2685549855232239,
+          -0.034157998859882355
+        ],
+        "bbox_max": [
+          0.11596699804067612,
+          -0.15087899565696716,
+          0.032538000494241714
+        ]
+      },
+      {
+        "name": "Object_4",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23747800290584564,
+          0.05744700878858566,
+          0.07445700466632843
+        ],
+        "vertices": 492,
+        "polygons": 904,
+        "materials": [
+          "Hands"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11873900145292282,
+          -0.18997199833393097,
+          -0.07230699807405472
+        ],
+        "bbox_max": [
+          0.11873900145292282,
+          -0.1325249969959259,
+          0.00215000007301569
+        ]
+      },
+      {
+        "name": "Object_5",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.25146499276161194,
+          0.2709350287914276,
+          0.12658701837062836
+        ],
+        "vertices": 52,
+        "polygons": 70,
+        "materials": [
+          "Cape"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.12560999393463135,
+          -0.2844240069389343,
+          -0.03596099838614464
+        ],
+        "bbox_max": [
+          0.1258549988269806,
+          -0.01348899956792593,
+          0.09062600135803223
+        ]
+      },
+      {
+        "name": "Object_6",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.10418800264596939,
+          0.1119920164346695,
+          0.10354701429605484
+        ],
+        "vertices": 752,
+        "polygons": 812,
+        "materials": [
+          "Head"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.052094001322984695,
+          -0.38689500093460083,
+          -0.04405700042843819
+        ],
+        "bbox_max": [
+          0.052094001322984695,
+          -0.27490299940109253,
+          0.05948999896645546
+        ]
+      },
+      {
+        "name": "Object_7",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1511240005493164,
+          0.14106102287769318,
+          0.07635500282049179
+        ],
+        "vertices": 2040,
+        "polygons": 1892,
+        "materials": [
+          "Legs"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.0755620002746582,
+          -0.1409910023212433,
+          -0.03315100073814392
+        ],
+        "bbox_max": [
+          0.0755620002746582,
+          7.000000186963007e-05,
+          0.04320399835705757
+        ]
+      },
+      {
+        "name": "Object_8",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.12206999957561493,
+          0.001999002182856202
+        ],
+        "vertices": 118,
+        "polygons": 200,
+        "materials": [
+          "Torso_Back"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.27490198612213135,
+          0.04485199972987175
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04685100167989731
+        ]
+      },
+      {
+        "name": "Object_9",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.13305701315402985,
+          0.07418800890445709
+        ],
+        "vertices": 278,
+        "polygons": 396,
+        "materials": [
+          "Torso"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.28588899970054626,
+          -0.029335999861359596
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04485199972987175
+        ]
+      },
+      {
+        "name": "Object_10",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1372079998254776,
+          0.07940700650215149,
+          0.07618700712919235
+        ],
+        "vertices": 398,
+        "polygons": 412,
+        "materials": [
+          "material"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.0686039999127388,
+          -0.15246599912643433,
+          -0.02927500009536743
+        ],
+        "bbox_max": [
+          0.0686039999127388,
+          -0.07305900007486343,
+          0.046911999583244324
+        ]
+      },
+      {
+        "name": "Object_11",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.04552000015974045,
+          0.04892200976610184,
+          0.005545001942664385
+        ],
+        "vertices": 300,
+        "polygons": 300,
+        "materials": [
+          "Black"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.02336600050330162,
+          -0.3533709943294525,
+          -0.044909000396728516
+        ],
+        "bbox_max": [
+          0.022153999656438828,
+          -0.3044489920139313,
+          -0.03936399891972542
+        ]
+      },
+      {
+        "name": "Object_12",
+        "type": "MESH",
+        "parent": "Tom Riddle.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0316770002245903,
+          0.0050290231592953205,
+          0.0017249996308237314
+        ],
+        "vertices": 64,
+        "polygons": 60,
+        "materials": [
+          "White"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.01508999988436699,
+          -0.33833301067352295,
+          -0.04393099993467331
+        ],
+        "bbox_max": [
+          0.016587000340223312,
+          -0.3333039879798889,
+          -0.04220600053668022
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "Arms",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Black",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_1",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Cape",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_2",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          },
+          {
+            "name": "Image_3",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          },
+          {
+            "name": "Image_4",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.5,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Hands",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_5",
+            "size": [
+              8,
+              8
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Head",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_5",
+            "size": [
+              8,
+              8
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Legs",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "material",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_7",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso_Back",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "White",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_8",
+            "size": [
+              8,
+              8
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      }
+    ],
+    "textures": []
+  },
+  "lego_harry_potter_death_eater_2019.glb": {
+    "file": "lego_harry_potter_death_eater_2019.glb",
+    "objects": [
+      {
+        "name": "Sketchfab_model",
+        "type": "EMPTY",
+        "parent": null,
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "01de8d71ae954414bafc5286616005f3.obj.cleaner.materialmerger.gles",
+        "type": "EMPTY",
+        "parent": "Sketchfab_model",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Object_2",
+        "type": "MESH",
+        "parent": "01de8d71ae954414bafc5286616005f3.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23193399608135223,
+          0.11767600476741791,
+          0.06669601052999496
+        ],
+        "vertices": 338,
+        "polygons": 608,
+        "materials": [
+          "Arms"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11596699804067612,
+          -0.2685549855232239,
+          -0.034157998859882355
+        ],
+        "bbox_max": [
+          0.11596699804067612,
+          -0.15087899565696716,
+          0.032538000494241714
+        ]
+      },
+      {
+        "name": "Object_3",
+        "type": "MESH",
+        "parent": "01de8d71ae954414bafc5286616005f3.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.12089800089597702,
+          0.17453999817371368,
+          0.16987501084804535
+        ],
+        "vertices": 630,
+        "polygons": 710,
+        "materials": [
+          "Black"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.06044900044798851,
+          -0.4850099980831146,
+          -0.05077600106596947
+        ],
+        "bbox_max": [
+          0.06044900044798851,
+          -0.31047001481056213,
+          0.11909899860620499
+        ]
+      },
+      {
+        "name": "Object_4",
+        "type": "MESH",
+        "parent": "01de8d71ae954414bafc5286616005f3.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.15232199430465698,
+          0.15270601212978363,
+          0.15232300758361816
+        ],
+        "vertices": 287,
+        "polygons": 512,
+        "materials": [
+          "Black"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07616099715232849,
+          -0.15289700031280518,
+          -0.02893799915909767
+        ],
+        "bbox_max": [
+          0.07616099715232849,
+          -0.00019099999917671084,
+          0.1233849972486496
+        ]
+      },
+      {
+        "name": "Object_5",
+        "type": "MESH",
+        "parent": "01de8d71ae954414bafc5286616005f3.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.23747800290584564,
+          0.05744700878858566,
+          0.07445700466632843
+        ],
+        "vertices": 492,
+        "polygons": 904,
+        "materials": [
+          "Hands"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.11873900145292282,
+          -0.18997199833393097,
+          -0.07230699807405472
+        ],
+        "bbox_max": [
+          0.11873900145292282,
+          -0.1325249969959259,
+          0.00215000007301569
+        ]
+      },
+      {
+        "name": "Object_6",
+        "type": "MESH",
+        "parent": "01de8d71ae954414bafc5286616005f3.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.10418800264596939,
+          0.1119920164346695,
+          0.09158400446176529
+        ],
+        "vertices": 625,
+        "polygons": 633,
+        "materials": [
+          "Head"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.052094001322984695,
+          -0.38689500093460083,
+          -0.04405700042843819
+        ],
+        "bbox_max": [
+          0.052094001322984695,
+          -0.27490299940109253,
+          0.047527000308036804
+        ]
+      },
+      {
+        "name": "Object_7",
+        "type": "MESH",
+        "parent": "01de8d71ae954414bafc5286616005f3.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.10418800264596939,
+          0.08302301913499832,
+          0.05145300552248955
+        ],
+        "vertices": 117,
+        "polygons": 179,
+        "materials": [
+          "Head_Back"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.052094001322984695,
+          -0.37096500396728516,
+          0.008036999963223934
+        ],
+        "bbox_max": [
+          0.052094001322984695,
+          -0.28794199228286743,
+          0.05948999896645546
+        ]
+      },
+      {
+        "name": "Object_8",
+        "type": "MESH",
+        "parent": "01de8d71ae954414bafc5286616005f3.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.13305701315402985,
+          0.07418800890445709
+        ],
+        "vertices": 278,
+        "polygons": 396,
+        "materials": [
+          "Torso"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.28588899970054626,
+          -0.029335999861359596
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04485199972987175
+        ]
+      },
+      {
+        "name": "Object_9",
+        "type": "MESH",
+        "parent": "01de8d71ae954414bafc5286616005f3.obj.cleaner.materialmerger.gles",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.1475840061903,
+          0.12206999957561493,
+          0.001999002182856202
+        ],
+        "vertices": 118,
+        "polygons": 200,
+        "materials": [
+          "Torso_Back"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ],
+        "bbox_min": [
+          -0.07379200309515,
+          -0.27490198612213135,
+          0.04485199972987175
+        ],
+        "bbox_max": [
+          0.07379200309515,
+          -0.1528320014476776,
+          0.04685100167989731
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "Arms",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Black",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Hands",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Head",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_1",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Head_Back",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_0",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_2",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      },
+      {
+        "name": "Torso_Back",
+        "use_nodes": true,
+        "textures": [
+          {
+            "name": "Image_3",
+            "size": [
+              256,
+              256
+            ],
+            "channels": 4,
+            "filepath": ""
+          }
+        ],
+        "principled": {
+          "base_color": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.25,
+          "metallic": 0.0
+        }
+      }
+    ],
+    "textures": []
+  }
+}

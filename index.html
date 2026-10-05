@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"/>
+  <meta name="theme-color" content="#0a0b12"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>CLB Đấu Tay Đôi Hogwarts 3D · Single Player Campaign</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;800;900&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/dueling.css"/>
+</head>
+<body>
+  <!-- Canvas WebGL 3D -->
+  <div id="webgl-container"></div>
+
+  <!-- Lớp chớp sáng màn hình khi trúng đòn uy lực (Impact Flash) -->
+  <div id="impact-flash"></div>
+
+  <!-- Lớp Canvas 2D vẽ bùa chú tương tác trên màn hình -->
+  <canvas id="wand-canvas"></canvas>
+
+  <!-- Lớp hiển thị sát thương nổi (Floating Combat Numbers) -->
+  <div id="combat-text-layer"></div>
+
+  <!-- ======================================================================
+       MAIN MENU SCREEN (GIAO DIỆN SẢNH CHỜ & CHỌN CHẾ ĐỘ CHƠI)
+       ====================================================================== -->
+  <div id="main-menu-overlay" class="main-menu-overlay">
+    <div class="menu-backdrop-blur"></div>
+    <div class="menu-content-wrapper">
+      <!-- Grand Hogwarts Title & Crest -->
+      <header class="menu-main-header">
+        <div class="menu-crest-badge">
+          <span class="crest-spark">⚡</span>
+          <span class="crest-title-roman">HOGWARTS</span>
+          <span class="crest-spark">⚡</span>
+        </div>
+        <h1 class="menu-game-title">ĐẤU TAY ĐÔI PHÙ THỦY</h1>
+        <p class="menu-game-desc">CLB Đấu Đũa Phép · Học Viện Hogwarts · 3D WebGPU & Realtime P2P</p>
+      </header>
+
+      <!-- 2 Game Mode Choice Cards -->
+      <div class="menu-modes-row">
+        <!-- MODE 1: SINGLE PLAYER (CAMPAIGN AI) -->
+        <div class="mode-card single-player-card" id="card-mode-single">
+          <div class="mode-card-glow"></div>
+          <div class="mode-card-header">
+            <span class="mode-pill-tag tag-single">CHƠI ĐƠN · CHIẾN DỊCH</span>
+            <div class="mode-character-faces">
+              <div class="mode-face-wrap">
+                <img src="/assets/dueling/avatar_harry.png" class="mode-face-img" alt="Harry" id="menu-player-face"/>
+                <span class="mode-face-sub" id="menu-player-name-badge">Harry</span>
+              </div>
+              <span class="mode-vs-badge">VS</span>
+              <div class="mode-face-wrap">
+                <img src="/assets/dueling/avatar_voldemort.png" class="mode-face-img" alt="Voldemort" id="menu-enemy-face"/>
+                <span class="mode-face-sub" id="menu-enemy-name-badge">Voldemort</span>
+              </div>
+            </div>
+            <h2 class="mode-title-text" id="menu-match-title">HARRY POTTER VS LORD VOLDEMORT</h2>
+            <p class="mode-subtitle-text" id="menu-match-sub">Chọn nhân vật của bạn & đối thủ thách đấu</p>
+          </div>
+
+          <!-- CHARACTER SELECTION SECTION (6 GLB DUELISTS) -->
+          <div class="character-select-section">
+            <!-- 1. Player Duelist Choice -->
+            <div class="char-select-block">
+              <div class="char-select-label">
+                <span class="char-label-icon">🧙‍♂️</span>
+                <span class="char-label-text">PHÙ THỦY CỦA BẠN:</span>
+                <span class="char-selected-name" id="label-player-char-name">Harry Potter (Gryffindor)</span>
+              </div>
+              <div class="char-selector-row" id="player-char-selector">
+                <button class="char-thumb-btn active" data-char="harry" title="Harry Potter · Gryffindor">
+                  <div class="char-thumb-ring"><img src="/assets/dueling/avatar_harry.png" class="char-thumb-img" alt="Harry"/><span class="char-thumb-house">🦁</span></div>
+                  <span class="char-thumb-name">Harry</span>
+                </button>
+                <button class="char-thumb-btn" data-char="ron" title="Ron Weasley · Gryffindor">
+                  <div class="char-thumb-ring"><img src="/assets/dueling/avatar_ron.png" class="char-thumb-img" alt="Ron"/><span class="char-thumb-house">🦁</span></div>
+                  <span class="char-thumb-name">Ron</span>
+                </button>
+                <button class="char-thumb-btn" data-char="moody" title="Alastor Moody · Thần Sáng Auror">
+                  <div class="char-thumb-ring"><img src="/assets/dueling/avatar_moody.png" class="char-thumb-img" alt="Moody"/><span class="char-thumb-house">👁️</span></div>
+                  <span class="char-thumb-name">Moody</span>
+                </button>
+                <button class="char-thumb-btn" data-char="lupin" title="Remus Lupin · Giáo Sư DADA">
+                  <div class="char-thumb-ring"><img src="/assets/dueling/avatar_lupin.png" class="char-thumb-img" alt="Lupin"/><span class="char-thumb-house">🐺</span></div>
+                  <span class="char-thumb-name">Lupin</span>
+                </button>
+                <button class="char-thumb-btn" data-char="death_eater" title="Tử Thần Thực Tử · Môn Đồ Hắc Ám">
+                  <div class="char-thumb-ring"><img src="/assets/dueling/avatar_death_eater.png" class="char-thumb-img" alt="Death Eater"/><span class="char-thumb-house">💀</span></div>
+                  <span class="char-thumb-name">Tử Thần</span>
+                </button>
+                <button class="char-thumb-btn" data-char="tom_riddle" title="Tom Riddle · Người Thừa Kế">
+                  <div class="char-thumb-ring"><img src="/assets/dueling/avatar_tom_riddle.png" class="char-thumb-img" alt="Tom Riddle"/><span class="char-thumb-house">🐍</span></div>
+                  <span class="char-thumb-name">Riddle</span>
+                </button>
+                <button class="char-thumb-btn" data-char="voldemort" title="Lord Voldemort · Chúa Tể Hắc Ám">
+                  <div class="char-thumb-ring"><img src="/assets/dueling/avatar_voldemort.png" class="char-thumb-img" alt="Voldemort"/><span class="char-thumb-house">🪄</span></div>
+                  <span class="char-thumb-name">Voldy</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Gauntlet Ladder (5-Stage Random Escalating Duel) -->
+            <div class="char-select-block gauntlet-preview-block">
+              <div class="char-select-label gauntlet-select-label">
+                <div class="gauntlet-lbl-left">
+                  <span class="char-label-icon">⚔️</span>
+                  <span class="char-label-text">HÀNH TRÌNH 5 ẢI THỬ THÁCH:</span>
+                </div>
+                <button type="button" id="btn-reroll-gauntlet" class="reroll-gauntlet-btn" title="Đổi ngẫu nhiên danh sách 5 đối thủ">
+                  <span class="reroll-icon">🎲</span>
+                  <span class="reroll-text">Đổi Đối Thủ</span>
+                </button>
+              </div>
+              <div class="gauntlet-track-container" id="gauntlet-ladder-preview">
+                <!-- Dynamically populated with 5 gauntlet cards -->
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-play-single" class="mode-cta-button cta-gold">
+            <span class="cta-icon">⚡</span>
+            <span class="cta-text">CHINH PHỤC 5 ẢI ĐẤU ĐŨA</span>
+          </button>
+        </div>
+
+        <!-- MODE 2: MULTIPLAYER ONLINE (REALTIME P2P) -->
+        <div class="mode-card multiplayer-card" id="card-mode-multiplayer">
+          <div class="mode-card-glow multi-glow"></div>
+          <div class="mode-card-header">
+            <span class="mode-pill-tag tag-multi">TRỰC TUYẾN · 2 NGƯỜI CHƠI</span>
+            <div class="mode-multi-duelists">
+              <span class="wand-clash-symbol">🪄⚡🪄</span>
+            </div>
+            <h2 class="mode-title-text">ĐẤU ONLINE 2 NGƯỜI</h2>
+            <p class="mode-subtitle-text">Đối kháng thời gian thực qua mạng P2P WebRTC</p>
+          </div>
+
+          <p class="mode-summary-p">
+            Thách đấu bạn bè thi thố tài năng vung đũa! Kết nối siêu tốc, đồng bộ né đòn và thi triển bùa chú tay đôi trực tiếp không cần cài đặt.
+          </p>
+
+          <!-- BỘ 4 PHÁP THUẬT XUẤT TRẬN (LOBBY DECK SELECTION - CHỌN 4/9 BÙA CHÚ) -->
+          <div class="multiplayer-deck-section" id="multiplayer-deck-section">
+            <div class="deck-header-row">
+              <div class="deck-header-left">
+                <span class="deck-header-icon">⚡</span>
+                <span class="deck-header-title">BỘ 4 PHÁP THUẬT XUẤT TRẬN</span>
+              </div>
+              <span id="deck-counter-badge" class="deck-counter-badge counter-full">4 / 4 BÙA ĐÃ CHỌN</span>
+            </div>
+
+            <!-- 4 Active Equipped Slots Preview -->
+            <div class="equipped-slots-strip" id="equipped-slots-strip">
+              <!-- Dynamically populated with 4 slots by MultiplayerDeckManager -->
+            </div>
+
+            <!-- 9 Spells Selection Pool -->
+            <div class="deck-pool-box">
+              <div class="deck-pool-title-bar">
+                <span class="deck-pool-hint">KHO 9 BÙA HOGWARTS (NHẤP ĐỂ CHỌN / THAY ĐỔI):</span>
+              </div>
+              <div class="deck-pool-grid" id="deck-pool-grid">
+                <!-- Dynamically populated with 9 spell cards by MultiplayerDeckManager -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Multiplayer Mode Sub-Tabs -->
+          <div class="multiplayer-lobby-panel">
+            <div class="lobby-tabs-row">
+              <button id="tab-host-btn" class="lobby-tab-btn active-tab">TẠO PHÒNG MỚI</button>
+              <button id="tab-join-btn" class="lobby-tab-btn">VÀO PHÒNG CÓ SẴN</button>
+            </div>
+
+            <!-- Host Room View -->
+            <div id="lobby-host-view" class="lobby-view-pane active-pane">
+              <div class="room-code-badge-box">
+                <span class="code-box-lbl">MÃ PHÒNG CỦA BẠN:</span>
+                <div class="code-box-display">
+                  <span id="display-room-code" class="code-text-val">HOGW-8821</span>
+                  <button id="btn-copy-room-code" class="copy-small-btn" title="Sao chép mã phòng">📋 Copy Mã</button>
+                  <button id="btn-copy-room-link" class="copy-small-btn link-btn" title="Sao chép link mời">🔗 Link Mời</button>
+                </div>
+              </div>
+              <div id="host-lobby-status" class="lobby-status-banner">
+                <span class="spinner-ring"></span>
+                <span id="host-status-msg" class="lobby-status-msg">Nhấn Mở Phòng để đón bạn bè...</span>
+              </div>
+              <button id="btn-start-hosting" class="mode-cta-button cta-azure">
+                <span class="cta-icon">🏰</span>
+                <span id="btn-host-text">MỞ PHÒNG & CHỜ BẠN BÈ</span>
+              </button>
+            </div>
+
+            <!-- Join Room View -->
+            <div id="lobby-join-view" class="lobby-view-pane">
+              <div class="room-input-container">
+                <label for="input-join-code" class="join-input-lbl">NHẬP MÃ PHÒNG (HOẶC MỞ LINK MỜI):</label>
+                <div class="join-input-row">
+                  <input type="text" id="input-join-code" class="join-room-field" placeholder="VD: HOGW-8821" maxlength="12" spellcheck="false"/>
+                </div>
+              </div>
+              <div id="join-lobby-status" class="lobby-status-banner hidden">
+                <span class="spinner-ring"></span>
+                <span id="join-status-msg" class="lobby-status-msg">Đang kết nối tới chủ phòng...</span>
+              </div>
+              <button id="btn-join-room" class="mode-cta-button cta-emerald">
+                <span class="cta-icon">⚔️</span>
+                <span>KẾT NỐI VÀO ĐẤU</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- SẢNH CHỜ PHÒNG ĐANG MỞ (LOBBY OPEN ROOMS BROWSER) -->
+          <div class="lobby-open-rooms-section" id="lobby-open-rooms-section">
+            <div class="open-rooms-header">
+              <div class="open-rooms-title">
+                <span class="open-rooms-icon">🏰</span>
+                <span class="open-rooms-label">SẢNH CHỜ: PHÒNG ĐANG ĐỢI ĐỐI THỦ</span>
+                <span id="open-rooms-count-badge" class="open-rooms-badge">0 phòng</span>
+              </div>
+              <button id="btn-refresh-open-rooms" class="btn-refresh-rooms" title="Làm mới danh sách">
+                <span class="refresh-icon">🔄</span> Làm Mới
+              </button>
+            </div>
+            <div class="open-rooms-list" id="open-rooms-list-container">
+              <div class="open-rooms-empty" id="open-rooms-empty-state">
+                <span>Chưa có phòng nào đang mở. Bấm "Mở Phòng" để tạo phòng đón bạn bè!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu Bottom Bar -->
+      <footer class="menu-bottom-footer">
+        <div class="menu-settings-row">
+          <button id="menu-sound-btn" class="menu-setting-btn">
+            <span id="menu-sound-icon">🔊</span>
+            <span id="menu-sound-text">ÂM THANH: BẬT</span>
+          </button>
+          <button id="menu-camera-btn" class="menu-setting-btn">
+            <span>🎥</span>
+            <span id="menu-camera-text">GÓC MÁY: ĐIỆN ẢNH</span>
+          </button>
+        </div>
+        <div class="menu-copyright">
+          <span>⚡ Three.js 2.5D WebGPU / WebGL2 · CLB Đấu Tay Đôi Hogwarts v2.0</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Giao diện In-game HUD tương tác -->
+  <div id="hud-overlay" class="hud-overlay hidden">
+    <!-- TOP BAR: Character Avatars, Name Titles, Dual HP/MP Bars, Center Chronometer -->
+    <header class="hud-top">
+      <!-- Player: Harry Potter (Gryffindor) -->
+      <div class="duelist-hud-card player-hud-group">
+        <div class="hud-avatar-bracket player-bracket">
+          <div class="hud-avatar-frame player-frame" title="Harry Potter">
+            <img src="/assets/dueling/avatar_harry.png" class="hud-avatar-img" alt="Harry Potter"/>
+            <span class="avatar-house-icon">🦁</span>
+          </div>
+          <span class="avatar-level-badge">LV.7</span>
+        </div>
+        <div class="duelist-info-wrap player-info">
+          <div class="duelist-header-row">
+            <span class="duelist-name" id="player-display-name">HARRY POTTER</span>
+            <span class="house-tag-badge gryffindor-tag">GRYFFINDOR</span>
+          </div>
+          <!-- HP Bar with Ghost Trail -->
+          <div class="stat-bar-group">
+            <div class="bar-label-row">
+              <span class="bar-type-title hp-title">❤️ SINH LỰC</span>
+              <span class="stat-value-text hp-value-text" id="player-hp-text">100%</span>
+            </div>
+            <div class="stat-bar-container hp-bar-container player-hp">
+              <div class="bar-track">
+                <div id="player-hp-ghost" class="bar-ghost hp-ghost" style="width: 100%"></div>
+                <div id="player-hp-bar" class="bar-fill player-green-fill" style="width: 100%">
+                  <div class="bar-specular"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Mana Bar with Magic Shimmer -->
+          <div class="stat-bar-group mp-group">
+            <div class="bar-label-row">
+              <span class="bar-type-title mp-title">💎 PHÁP LỰC</span>
+              <span class="stat-value-text mp-value-text" id="player-mp-text">100 / 100 MP</span>
+            </div>
+            <div class="stat-bar-container mp-bar-container player-mp">
+              <div class="bar-track">
+                <div id="player-mp-bar" class="bar-fill player-mana-fill" style="width: 100%">
+                  <div class="bar-specular"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER: Duel Astronomical Chronometer & Mode Pill -->
+      <div class="center-duel-header">
+        <div class="duel-time-plaque">
+          <div class="clock-ornament-left">✦</div>
+          <div class="clock-display-wrap">
+            <span class="clock-caps-title">HOGWARTS DUEL</span>
+            <span id="duel-clock" class="duel-clock-text">02:00</span>
+          </div>
+          <div class="clock-ornament-right">✦</div>
+        </div>
+        <div class="center-meta-row">
+          <span id="duel-mode-pill" class="duel-mode-pill">SOLO AI</span>
+        </div>
+        <div class="center-hud-actions">
+          <button id="btn-open-char-swap" class="hud-menu-btn char-swap-btn" title="Đổi Phù Thủy Đấu Nhanh">
+            <span class="btn-menu-icon">🎭</span>
+            <span>ĐỔI TƯỚNG</span>
+          </button>
+          <button id="btn-return-menu" class="hud-menu-btn" title="Về Menu Chính">
+            <span class="btn-menu-icon">🏠</span>
+            <span>MENU</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Opponent: Lord Voldemort (Slytherin) -->
+      <div class="duelist-hud-card enemy-hud-group">
+        <div class="duelist-info-wrap enemy-info">
+          <div class="duelist-header-row enemy-header-row">
+            <span class="house-tag-badge slytherin-tag">SLYTHERIN</span>
+            <span class="duelist-name" id="enemy-display-name">LORD VOLDEMORT</span>
+          </div>
+          <!-- HP Bar with Ghost Trail -->
+          <div class="stat-bar-group">
+            <div class="bar-label-row enemy-bar-label">
+              <span class="stat-value-text hp-value-text" id="enemy-hp-text">100%</span>
+              <span class="bar-type-title hp-title">SINH LỰC 💀</span>
+            </div>
+            <div class="stat-bar-container hp-bar-container enemy-hp">
+              <div class="bar-track">
+                <div id="enemy-hp-ghost" class="bar-ghost hp-ghost" style="width: 100%"></div>
+                <div id="enemy-hp-bar" class="bar-fill enemy-red-fill" style="width: 100%">
+                  <div class="bar-specular"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Mana Bar with Dark Magic Shimmer -->
+          <div class="stat-bar-group mp-group">
+            <div class="bar-label-row enemy-bar-label">
+              <span class="stat-value-text mp-value-text" id="enemy-mp-text">100 / 100 MP</span>
+              <span class="bar-type-title mp-title">MA LỰC 🔮</span>
+            </div>
+            <div class="stat-bar-container mp-bar-container enemy-mp">
+              <div class="bar-track">
+                <div id="enemy-mp-bar" class="bar-fill enemy-mana-fill" style="width: 100%">
+                  <div class="bar-specular"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hud-avatar-bracket enemy-bracket">
+          <div class="hud-avatar-frame enemy-frame" title="Lord Voldemort">
+            <img src="/assets/dueling/avatar_voldemort.png" class="hud-avatar-img" alt="Lord Voldemort"/>
+            <span class="avatar-house-icon">🐍</span>
+          </div>
+          <span class="avatar-level-badge enemy-badge">DARK</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- BANNER TRẬN ĐẤU (Bắt đầu, Thắng, Thua) -->
+    <div id="match-banner" class="match-banner hidden">
+      <div id="banner-title" class="banner-title">CHUẨN BỊ...</div>
+      <div id="banner-sub" class="banner-sub">Cúi chào đối thủ và sẵn sàng đũa phép!</div>
+    </div>
+
+    <!-- FLOATING 3D GESTURE NOTIFICATION (Show upon casting) -->
+    <div id="gesture-toast" class="gesture-toast hidden">
+      <div id="toast-title" class="toast-title">PERFECT TRACE!</div>
+      <div id="toast-sub" class="toast-sub">Expelliarmus +120% Sát thương chí mạng</div>
+    </div>
+
+    <!-- CẢNH BÁO ĐỐI THỦ XUẤT CHIÊU (AI Telegraph) -->
+    <div id="enemy-telegraph" class="enemy-telegraph hidden">
+      <span class="enemy-avatar-mini">🐍</span>
+      <span id="enemy-cast-text">VOLDEMORT ĐANG NIỆM CHÚ: AVADA KEDAVRA!</span>
+    </div>
+
+    <!-- TRẠNG THÁI ĐỐI THỦ BỊ KHỐNG CHẾ (Enemy Crowd Control Status) -->
+    <div id="enemy-cc-status" class="enemy-cc-status hidden">
+      <div class="enemy-cc-inner">
+        <span id="enemy-cc-icon" class="enemy-cc-icon">🧊</span>
+        <div class="enemy-cc-text-group">
+          <div class="enemy-cc-title-row">
+            <span class="enemy-cc-badge">KHỐNG CHẾ</span>
+            <span id="enemy-cc-title" class="enemy-cc-title">HÓA ĐÁ TOÀN THÂN</span>
+          </div>
+          <span id="enemy-cc-desc" class="enemy-cc-desc">Đối thủ bị ngắt niệm chiêu &amp; khóa đũa phép</span>
+        </div>
+        <div class="enemy-cc-timer-badge">
+          <span id="enemy-cc-timer-val" class="enemy-cc-timer-val">2.5s</span>
+        </div>
+      </div>
+      <div class="enemy-cc-progress-track">
+        <div id="enemy-cc-progress-bar" class="enemy-cc-progress-bar" style="width: 100%"></div>
+      </div>
+    </div>
+
+    <!-- PRIORI INCANTATEM CLASH STRUGGLE HUD (Triggered during QTE) -->
+    <div id="clash-hud" class="clash-hud-panel hidden">
+      <div class="clash-badge">⚡ PRIORI INCANTATEM (GIẰNG CO BÙA CHÚ) ⚡</div>
+      <div class="clash-instruction">CLICK LIÊN TỤC VÀO NÚT HOẶC MÀN HÌNH ĐỂ ĐẨY QUẢ CẦU VỀ ĐỐI THỦ!</div>
+      <div class="clash-meter-bar">
+        <div id="clash-glow-marker" class="clash-glow-marker" style="left: 50%"></div>
+      </div>
+      <button id="clash-mash-btn" class="clash-mash-btn">BƠM NĂNG LƯỢNG (CLICK!)</button>
+    </div>
+
+    <!-- MODAL VƯỢT ẢI (INTERMISSION MODAL BETWEEN ROUNDS 1-4) -->
+    <div id="round-clear-modal" class="round-clear-modal hidden">
+      <div class="modal-card round-clear-card">
+        <div class="round-clear-header">
+          <div class="round-clear-badge">
+            <span class="clear-star">⭐</span>
+            <span id="round-clear-badge-text">ẢI 1/5 HOÀN THÀNH</span>
+            <span class="clear-star">⭐</span>
+          </div>
+          <h2 id="round-clear-title" class="round-clear-title">CHIẾN THẮNG TUYỆT ĐỐI!</h2>
+          <p id="round-clear-sub" class="round-clear-sub">Bạn đã hạ gục Ronald Weasley và mở khóa ải tiếp theo!</p>
+        </div>
+
+        <!-- Recovery Blessing Banner -->
+        <div class="recovery-blessing-box">
+          <div class="recovery-icon">✨</div>
+          <div class="recovery-info">
+            <span class="recovery-title">PHƯỚC LÀNH PHỤC HỒI CHIẾN TRƯỜNG</span>
+            <span class="recovery-desc">❤️ Hồi phục <strong>+40 HP</strong> &nbsp;·&nbsp; 💎 Nạp đầy <strong>+50 MP</strong></span>
+          </div>
+        </div>
+
+        <!-- Next Opponent Preview Card -->
+        <div class="next-opponent-box">
+          <div class="next-opponent-header">
+            <span class="next-lbl">⚔️ ĐỐI THỦ ẢI TIẾP THEO:</span>
+            <span id="next-stage-badge" class="next-stage-badge tier-apprentice">ẢI 2 · TẬP SỰ</span>
+          </div>
+          <div class="next-opponent-card-inner">
+            <div class="next-avatar-ring">
+              <img id="next-opponent-img" src="/assets/dueling/avatar_ron.png" class="next-avatar-img" alt="Next Opponent" />
+              <span id="next-opponent-house-icon" class="next-house-icon">🦁</span>
+            </div>
+            <div class="next-opponent-meta">
+              <div class="next-name-row">
+                <span id="next-opponent-name" class="next-opponent-name">RON WEASLEY</span>
+                <span id="next-opponent-house" class="house-tag-badge gryffindor-tag">GRYFFINDOR</span>
+              </div>
+              <div class="next-opponent-stats-row">
+                <span class="stat-pill"><span class="stat-dot hp-dot"></span> <span id="next-opponent-hp">100 HP</span></span>
+                <span class="stat-pill"><span class="stat-dot reflex-dot"></span> <span id="next-opponent-reflex">Casting: 1.6s</span></span>
+                <span class="stat-pill"><span class="stat-dot dodge-dot"></span> <span id="next-opponent-dodge">Né: 35%</span></span>
+              </div>
+              <div id="next-opponent-specialty" class="next-opponent-specialty">Chuyên môn: Bùa Đẩy Lùi Flipendo & Quả Cảm Gryffindor</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Intermission Actions & Auto-advance Countdown -->
+        <div class="round-clear-actions">
+          <button id="btn-next-round" class="modal-btn gold-btn btn-pulse-gold">
+            <span class="action-icon">⚔️</span>
+            <span id="btn-next-round-text">TIẾP TỤC ẢI 2 (5s)</span>
+          </button>
+          <button id="btn-intermission-menu" class="modal-btn secondary-btn">
+            <span>🏠 Về Menu</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL KẾT THÚC TRẬN ĐẤU (Victory / Defeat) -->
+    <div id="end-match-modal" class="end-match-modal hidden">
+      <div class="modal-card">
+        <div id="modal-crest" class="modal-crest">🏆</div>
+        <h2 id="modal-title" class="modal-title">CHIẾN THẮNG HUY HOÀNG!</h2>
+        <p id="modal-desc" class="modal-desc">Bạn đã đánh bại Chúa Tể Voldemort và bảo vệ thành công Hogwarts!</p>
+        <div class="modal-stats">
+          <div class="stat-item"><span class="stat-label">Thời gian:</span> <span id="stat-time">45s</span></div>
+          <div class="stat-item"><span class="stat-label">Bùa xuất sắc:</span> <span id="stat-perfect">4</span></div>
+          <div class="stat-item"><span class="stat-label">Giằng co thắng:</span> <span id="stat-clash">1</span></div>
+        </div>
+        <div class="modal-actions">
+          <button id="restart-match-btn" class="modal-btn gold-btn">ĐẤU LẠI ẢI NÀY</button>
+          <button id="btn-restart-gauntlet" class="modal-btn azure-btn hidden">🔄 BẮT ĐẦU TỪ ẢI 1</button>
+          <button id="modal-menu-btn" class="modal-btn secondary-btn">🏠 VỀ MENU CHÍNH</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL ĐỔI NHÂN VẬT TRONG TRẬN (IN-GAME CHARACTER SWAP MODAL) -->
+    <div id="char-swap-modal" class="char-swap-modal hidden">
+      <div class="modal-card char-swap-card">
+        <div class="modal-header-row">
+          <div class="modal-header-title">
+            <span class="modal-icon">🎭</span>
+            <h2 class="modal-title">CHỌN PHÙ THỦY ĐẤU TAY ĐÔI</h2>
+          </div>
+          <button id="btn-close-char-swap" class="close-modal-x" title="Đóng modal">✕</button>
+        </div>
+        <p class="char-swap-sub">Đổi ngay nhân vật người chơi hoặc đối thủ trong trận đấu</p>
+
+        <div class="swap-sections-container">
+          <!-- 1. Player Pick -->
+          <div class="swap-section">
+            <div class="swap-section-title">
+              <span>🧙‍♂️</span>
+              <span>PHÙ THỦY CỦA BẠN (NGƯỜI CHƠI)</span>
+            </div>
+            <div class="char-selector-row" id="ingame-player-selector">
+              <button class="char-thumb-btn active" data-char="harry" title="Harry Potter · Gryffindor">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_harry.png" class="char-thumb-img" alt="Harry"/><span class="char-thumb-house">🦁</span></div>
+                <span class="char-thumb-name">Harry</span>
+              </button>
+              <button class="char-thumb-btn" data-char="ron" title="Ron Weasley · Gryffindor">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_ron.png" class="char-thumb-img" alt="Ron"/><span class="char-thumb-house">🦁</span></div>
+                <span class="char-thumb-name">Ron</span>
+              </button>
+              <button class="char-thumb-btn" data-char="moody" title="Alastor Moody · Thần Sáng Auror">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_moody.png" class="char-thumb-img" alt="Moody"/><span class="char-thumb-house">👁️</span></div>
+                <span class="char-thumb-name">Moody</span>
+              </button>
+              <button class="char-thumb-btn" data-char="lupin" title="Remus Lupin · DADA">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_lupin.png" class="char-thumb-img" alt="Lupin"/><span class="char-thumb-house">🐺</span></div>
+                <span class="char-thumb-name">Lupin</span>
+              </button>
+              <button class="char-thumb-btn" data-char="death_eater" title="Tử Thần Thực Tử">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_death_eater.png" class="char-thumb-img" alt="Death Eater"/><span class="char-thumb-house">💀</span></div>
+                <span class="char-thumb-name">Tử Thần</span>
+              </button>
+              <button class="char-thumb-btn" data-char="tom_riddle" title="Tom Riddle · Người Thừa Kế">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_tom_riddle.png" class="char-thumb-img" alt="Tom Riddle"/><span class="char-thumb-house">🐍</span></div>
+                <span class="char-thumb-name">Riddle</span>
+              </button>
+              <button class="char-thumb-btn" data-char="voldemort" title="Lord Voldemort">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_voldemort.png" class="char-thumb-img" alt="Voldemort"/><span class="char-thumb-house">🪄</span></div>
+                <span class="char-thumb-name">Voldy</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Opponent Pick -->
+          <div class="swap-section">
+            <div class="swap-section-title enemy-swap-title">
+              <span>⚔️</span>
+              <span>ĐỐI THỦ THÁCH ĐẤU (AI)</span>
+            </div>
+            <div class="char-selector-row enemy-selector-row" id="ingame-opponent-selector">
+              <button class="char-thumb-btn active" data-char="voldemort" title="Lord Voldemort">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_voldemort.png" class="char-thumb-img" alt="Voldemort"/><span class="char-thumb-house">🪄</span></div>
+                <span class="char-thumb-name">Voldy</span>
+              </button>
+              <button class="char-thumb-btn" data-char="tom_riddle" title="Tom Riddle">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_tom_riddle.png" class="char-thumb-img" alt="Tom Riddle"/><span class="char-thumb-house">🐍</span></div>
+                <span class="char-thumb-name">Riddle</span>
+              </button>
+              <button class="char-thumb-btn" data-char="death_eater" title="Tử Thần Thực Tử">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_death_eater.png" class="char-thumb-img" alt="Death Eater"/><span class="char-thumb-house">💀</span></div>
+                <span class="char-thumb-name">Tử Thần</span>
+              </button>
+              <button class="char-thumb-btn" data-char="lupin" title="Remus Lupin">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_lupin.png" class="char-thumb-img" alt="Lupin"/><span class="char-thumb-house">🐺</span></div>
+                <span class="char-thumb-name">Lupin</span>
+              </button>
+              <button class="char-thumb-btn" data-char="moody" title="Alastor Moody">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_moody.png" class="char-thumb-img" alt="Moody"/><span class="char-thumb-house">👁️</span></div>
+                <span class="char-thumb-name">Moody</span>
+              </button>
+              <button class="char-thumb-btn" data-char="harry" title="Harry Potter">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_harry.png" class="char-thumb-img" alt="Harry"/><span class="char-thumb-house">🦁</span></div>
+                <span class="char-thumb-name">Harry</span>
+              </button>
+              <button class="char-thumb-btn" data-char="ron" title="Ron Weasley">
+                <div class="char-thumb-ring"><img src="/assets/dueling/avatar_ron.png" class="char-thumb-img" alt="Ron"/><span class="char-thumb-house">🦁</span></div>
+                <span class="char-thumb-name">Ron</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="swap-actions-row">
+          <button id="btn-apply-char-swap" class="modal-btn gold-btn">
+            <span>⚡ ĐỔI PHÙ THỦY NGAY</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM BAR: Freehand Gesture Casting HUD & Hint -->
+    <footer class="hud-bottom">
+      <!-- NÚT PHÁP ĐIỂN Ở GÓC MÀN HÌNH (Spell Grimoire Floating Corner Button) -->
+      <button id="btn-toggle-grimoire" class="grimoire-corner-btn" title="Mở Pháp Điển Thủ Ấn Phép Thuật (Phím tắt: G)">
+        <span class="grimoire-btn-icon">📖</span>
+        <span class="grimoire-btn-text">PHÁP ĐIỂN</span>
+        <span class="grimoire-btn-key">G</span>
+      </button>
+
+      <!-- TRẠNG THÁI NGƯỜI CHƠI BỊ KHỐNG CHẾ (Player Crowd Control Floating Status) -->
+      <div id="player-cc-overlay" class="player-cc-overlay hidden">
+        <div class="player-cc-inner">
+          <div class="player-cc-icon-wrap">
+            <span id="player-cc-icon" class="player-cc-icon">🔒</span>
+            <div class="player-cc-pulse"></div>
+          </div>
+          <div class="player-cc-text-group">
+            <div class="player-cc-title-row">
+              <span class="player-cc-alert-pill">⚠️ BỊ KHỐNG CHẾ</span>
+              <span id="player-cc-title" class="player-cc-title">HÓA ĐÁ TOÀN THÂN</span>
+            </div>
+            <div id="player-cc-desc" class="player-cc-desc">Đũa phép bị khóa cứng · Không thể thi triển phép thuật!</div>
+          </div>
+          <div class="player-cc-timer-box">
+            <span class="player-cc-timer-label">KHÓA PHÉP</span>
+            <span id="player-cc-timer-val" class="player-cc-timer-val">2.5s</span>
+          </div>
+        </div>
+        <div class="player-cc-progress-track">
+          <div id="player-cc-progress-bar" class="player-cc-progress-bar" style="width: 100%"></div>
+        </div>
+      </div>
+
+      <!-- MOBILE QUICK DODGE CONTROLS (Active in Portrait Mode) -->
+      <div id="mobile-dodge-bar" class="mobile-dodge-bar">
+        <button id="mobile-dodge-left" class="mobile-dodge-btn" title="Né trái">
+          <span class="dodge-icon">◀</span>
+          <span class="dodge-label">NÉ TRÁI</span>
+        </button>
+        <button id="mobile-dodge-duck" class="mobile-dodge-btn dodge-duck-btn" title="Cúi né đòn">
+          <span class="dodge-icon">▼</span>
+          <span class="dodge-label">CÚI NÉ</span>
+        </button>
+        <button id="mobile-dodge-right" class="mobile-dodge-btn" title="Né phải">
+          <span class="dodge-label">NÉ PHẢI</span>
+          <span class="dodge-icon">▶</span>
+        </button>
+      </div>
+
+      <!-- SPELL COOLDOWN DOCK (Thanh Trạng Thái Hồi Chiêu Ma Thuật) -->
+      <div id="spell-cooldown-dock" class="spell-cooldown-dock" title="Bấm phím [1-9] hoặc click ô để thi triển · Bùa càng mạnh hồi chiêu càng lâu">
+        <!-- 1. Expelliarmus (CD: 3.0s, Mana: 15) -->
+        <button class="dock-slot" data-spell="expelliarmus" title="[1] Expelliarmus · Tước Khí Giới (Hồi: 3.0s · 15 MP)">
+          <div class="dock-slot-glow" style="--dock-glow: #f5cf73;"></div>
+          <div class="dock-rune-box">
+            <svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none">
+              <path d="M12 5 L22 13 L10 17 L21 27" stroke="#f5cf73" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="5" r="1.6" fill="#ffffff"/>
+              <circle cx="21" cy="27" r="1.6" fill="#f5cf73"/>
+            </svg>
+          </div>
+          <span class="dock-hotkey">1</span>
+          <span class="dock-mana-cost">15</span>
+          <div class="dock-cd-sweep"></div>
+          <span class="dock-cd-timer"></span>
+        </button>
+
+        <!-- 2. Protego (CD: 4.0s, Mana: 12) -->
+        <button class="dock-slot" data-spell="protego" title="[2] Protego · Khiên Chắn Ma Thuật (Hồi: 4.0s · 12 MP)">
+          <div class="dock-slot-glow" style="--dock-glow: #70a1ff;"></div>
+          <div class="dock-rune-box">
+            <svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none">
+              <path d="M5 24 C8 11, 24 11, 27 24" stroke="#70a1ff" stroke-width="2.8" stroke-linecap="round"/>
+              <circle cx="16" cy="13.5" r="1.8" fill="#ffffff"/>
+            </svg>
+          </div>
+          <span class="dock-hotkey">2</span>
+          <span class="dock-mana-cost">12</span>
+          <div class="dock-cd-sweep"></div>
+          <span class="dock-cd-timer"></span>
+        </button>
+
+        <!-- 3. Stupefy (CD: 6.0s, Mana: 14) -->
+        <button class="dock-slot" data-spell="stupefy" title="[3] Stupefy · Bùa Choáng Váng (Hồi: 6.0s · 14 MP)">
+          <div class="dock-slot-glow" style="--dock-glow: #ff4757;"></div>
+          <div class="dock-rune-box">
+            <svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none">
+              <path d="M5 16 C9 9, 13 23, 16 16 C19 9, 23 23, 27 16" stroke="#ff4757" stroke-width="2.6" stroke-linecap="round"/>
+              <circle cx="5" cy="16" r="1.5" fill="#ffffff"/>
+              <circle cx="27" cy="16" r="1.5" fill="#ff4757"/>
+            </svg>
+          </div>
+          <span class="dock-hotkey">3</span>
+          <span class="dock-mana-cost">14</span>
+          <div class="dock-cd-sweep"></div>
+          <span class="dock-cd-timer"></span>
+        </button>
+
+        <!-- 4. Obliviate (CD: 6.5s, Mana: 18) -->
+        <button class="dock-slot" data-spell="obliviate" title="[4] Obliviate · Xóa Trí Nhớ (Hồi: 6.5s · 18 MP)">
+          <div class="dock-slot-glow" style="--dock-glow: #00d2d3;"></div>
+          <div class="dock-rune-box">
+            <svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="10" stroke="#00d2d3" stroke-width="2.6"/>
+              <circle cx="16" cy="6" r="1.6" fill="#ffffff"/>
+            </svg>
+          </div>
+          <span class="dock-hotkey">4</span>
+          <span class="dock-mana-cost">18</span>
+          <div class="dock-cd-sweep"></div>
+          <span class="dock-cd-timer"></span>
+        </button>
+
+        <!-- 5. Petrificus Totalus (CD: 8.0s, Mana: 20) -->
+        <button class="dock-slot" data-spell="petrificus" title="[5] Petrificus Totalus · Tê Liệt Toàn Thân (Hồi: 8.0s · 20 MP)">
+          <div class="dock-slot-glow" style="--dock-glow: #a4b0be;"></div>
+          <div class="dock-rune-box">
+            <svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none">
+              <line x1="16" y1="5" x2="16" y2="27" stroke="#a4b0be" stroke-width="3" stroke-linecap="round"/>
+              <path d="M11 21 L16 27 L21 21" stroke="#a4b0be" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="16" cy="5" r="1.5" fill="#ffffff"/>
+            </svg>
+          </div>
+          <span class="dock-hotkey">5</span>
+          <span class="dock-mana-cost">20</span>
+          <div class="dock-cd-sweep"></div>
+          <span class="dock-cd-timer"></span>
+        </button>
+
+        <!-- 6. Sectumsempra (CD: 9.0s, Mana: 22) -->
+        <button class="dock-slot" data-spell="sectumsempra" title="[6] Sectumsempra · Lưỡi Đao Hắc Ám (Hồi: 9.0s · 22 MP)">
+          <div class="dock-slot-glow" style="--dock-glow: #e84118;"></div>
+          <div class="dock-rune-box">
+            <svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none">
+              <line x1="5" y1="16" x2="27" y2="16" stroke="#e84118" stroke-width="3" stroke-linecap="round"/>
+              <path d="M21 11 L27 16 L21 21" stroke="#e84118" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="5" cy="16" r="1.5" fill="#ffffff"/>
+            </svg>
+          </div>
+          <span class="dock-hotkey">6</span>
+          <span class="dock-mana-cost">22</span>
+          <div class="dock-cd-sweep"></div>
+          <span class="dock-cd-timer"></span>
+        </button>
+
+        <!-- 7. Confringo (CD: 10.0s, Mana: 26) -->
+        <button class="dock-slot" data-spell="confringo" title="[7] Confringo · Bùa Nổ Rực Lửa (Hồi: 10.0s · 26 MP)">
+          <div class="dock-slot-glow" style="--dock-glow: #ffa502;"></div>
+          <div class="dock-rune-box">
+            <svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none">
+              <polygon points="16,6 27,25 5,25" stroke="#ffa502" stroke-width="2.6" stroke-linejoin="round"/>
+              <circle cx="16" cy="6" r="1.6" fill="#ffffff"/>
+            </svg>
+          </div>
+          <span class="dock-hotkey">7</span>
+          <span class="dock-mana-cost">26</span>
+          <div class="dock-cd-sweep"></div>
+          <span class="dock-cd-timer"></span>
+        </button>
+
+        <!-- 8. Expecto Patronum (CD: 14.0s, Mana: 40) -->
+        <button class="dock-slot" data-spell="expecto_patronum" title="[8/P] Expecto Patronum · Thần Hộ Mệnh (Hồi: 14.0s · 40 MP)">
+          <div class="dock-slot-glow" style="--dock-glow: #ffffff;"></div>
+          <div class="dock-rune-box">
+            <svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none">
+              <path d="M19 19 A7 7 0 1 1 15 12 L27 5" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="27" cy="5" r="1.6" fill="#ffeaa7"/>
+            </svg>
+          </div>
+          <span class="dock-hotkey">8</span>
+          <span class="dock-mana-cost">40</span>
+          <div class="dock-cd-sweep"></div>
+          <span class="dock-cd-timer"></span>
+        </button>
+
+        <!-- 9. Avada Kedavra (CD: 20.0s, Mana: 55) -->
+        <button class="dock-slot ultimate-slot" data-spell="avadakedavra" title="[9/K] Avada Kedavra · Lời Nguyền Tử Thần (Hồi: 20.0s · 55 MP)">
+          <div class="dock-slot-glow" style="--dock-glow: #2ed573;"></div>
+          <div class="dock-rune-box">
+            <svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none">
+              <path d="M11 5 L22 11 L9 17 L23 22 L11 27" stroke="#2ed573" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="11" cy="5" r="1.6" fill="#ffffff"/>
+              <circle cx="11" cy="27" r="1.6" fill="#2ed573"/>
+            </svg>
+          </div>
+          <span class="dock-hotkey">9</span>
+          <span class="dock-mana-cost">55</span>
+          <div class="dock-cd-sweep"></div>
+          <span class="dock-cd-timer"></span>
+        </button>
+      </div>
+
+      <div class="hud-controls-hint">
+        <span class="hint-icon">🎮</span>
+        <span class="hint-text"><strong>A/D</strong>: Né · <strong>S/Space</strong>: Cúi · Vẽ ký hiệu hoặc phím <strong>[1-9]</strong> để xuất chiêu · Bấm <strong>📖 Pháp Điển [G]</strong></span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- SPELL GRIMOIRE MODAL (Bảng Ký Hiệu Thủ Ấn Phép Thuật & Hồi Chiêu) -->
+  <div id="spell-grimoire-modal" class="grimoire-modal hidden">
+    <div class="grimoire-backdrop" id="grimoire-backdrop"></div>
+    <div class="grimoire-card">
+      <div class="grimoire-header">
+        <div class="grimoire-title-group">
+          <span class="grimoire-title-icon">📜</span>
+          <div>
+            <h2 class="grimoire-title">PHÁP ĐIỂN THỦ ẤN & HỒI CHIÊU HOGWARTS</h2>
+            <div class="grimoire-subtitle">Vẽ thủ ấn hoặc phím tắt [1-9] để xuất chiêu. Bùa càng uy lực thời gian hồi chiêu càng lâu!</div>
+          </div>
+        </div>
+        <button id="grimoire-close-btn" class="grimoire-close-btn" title="Đóng Pháp Điển">✕</button>
+      </div>
+
+      <div class="grimoire-grid">
+        <!-- 1. Expelliarmus (CD: 3.0s) -->
+        <div class="grimoire-item" data-spell="expelliarmus">
+          <div class="grimoire-item-header">
+            <div class="grimoire-rune-box" style="--rune-glow: #f5cf73;">
+              <svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none">
+                <path d="M12 5 L22 13 L10 17 L21 27" stroke="#f5cf73" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="5" r="1.6" fill="#ffffff"/>
+                <circle cx="21" cy="27" r="1.6" fill="#f5cf73"/>
+              </svg>
+            </div>
+            <div class="grimoire-item-meta">
+              <span class="grimoire-spell-name">Expelliarmus [1]</span>
+              <span class="grimoire-spell-sub">Tước Khí Giới</span>
+            </div>
+            <div class="grimoire-tags-group">
+              <span class="grimoire-cd-tag">⏳ 3.0s</span>
+              <span class="grimoire-mana-tag">15💎</span>
+            </div>
+          </div>
+          <div class="grimoire-item-desc">Vẽ nét <strong>Tia Sét ⚡</strong>: zic-zắc 2 góc gập dứt khoát từ trên xuống.</div>
+          <div class="grimoire-live-cd hidden">
+            <span class="grimoire-live-cd-icon">⏳</span>
+            <span class="grimoire-live-cd-text">HỒI CHIÊU</span>
+            <span class="grimoire-live-cd-num">3.0s</span>
+          </div>
+        </div>
+
+        <!-- 2. Protego (CD: 4.0s) -->
+        <div class="grimoire-item" data-spell="protego">
+          <div class="grimoire-item-header">
+            <div class="grimoire-rune-box" style="--rune-glow: #70a1ff;">
+              <svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none">
+                <path d="M5 24 C8 11, 24 11, 27 24" stroke="#70a1ff" stroke-width="2.8" stroke-linecap="round"/>
+                <circle cx="16" cy="13.5" r="1.8" fill="#ffffff"/>
+              </svg>
+            </div>
+            <div class="grimoire-item-meta">
+              <span class="grimoire-spell-name">Protego [2]</span>
+              <span class="grimoire-spell-sub">Khiên Chắn Ma Thuật</span>
+            </div>
+            <div class="grimoire-tags-group">
+              <span class="grimoire-cd-tag">⏳ 4.0s</span>
+              <span class="grimoire-mana-tag">12💎</span>
+            </div>
+          </div>
+          <div class="grimoire-item-desc">Vẽ nét <strong>Vòm Khiên 🛡️</strong>: đường cong hình vòm hướng lên trên để dựng khiên.</div>
+          <div class="grimoire-live-cd hidden">
+            <span class="grimoire-live-cd-icon">⏳</span>
+            <span class="grimoire-live-cd-text">HỒI CHIÊU</span>
+            <span class="grimoire-live-cd-num">4.0s</span>
+          </div>
+        </div>
+
+        <!-- 3. Stupefy (CD: 6.0s) -->
+        <div class="grimoire-item" data-spell="stupefy">
+          <div class="grimoire-item-header">
+            <div class="grimoire-rune-box" style="--rune-glow: #ff4757;">
+              <svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none">
+                <path d="M5 16 C9 9, 13 23, 16 16 C19 9, 23 23, 27 16" stroke="#ff4757" stroke-width="2.6" stroke-linecap="round"/>
+                <circle cx="5" cy="16" r="1.5" fill="#ffffff"/>
+                <circle cx="27" cy="16" r="1.5" fill="#ff4757"/>
+              </svg>
+            </div>
+            <div class="grimoire-item-meta">
+              <span class="grimoire-spell-name">Stupefy [3]</span>
+              <span class="grimoire-spell-sub">Bùa Choáng Váng</span>
+            </div>
+            <div class="grimoire-tags-group">
+              <span class="grimoire-cd-tag">⏳ 6.0s</span>
+              <span class="grimoire-mana-tag">14💎</span>
+            </div>
+          </div>
+          <div class="grimoire-item-desc">Vẽ nét <strong>Làn Sóng 💫</strong>: đường lượn sóng ngang ~ gây choáng đối thủ lập tức.</div>
+          <div class="grimoire-live-cd hidden">
+            <span class="grimoire-live-cd-icon">⏳</span>
+            <span class="grimoire-live-cd-text">HỒI CHIÊU</span>
+            <span class="grimoire-live-cd-num">6.0s</span>
+          </div>
+        </div>
+
+        <!-- 4. Obliviate (CD: 6.5s) -->
+        <div class="grimoire-item" data-spell="obliviate">
+          <div class="grimoire-item-header">
+            <div class="grimoire-rune-box" style="--rune-glow: #00d2d3;">
+              <svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="10" stroke="#00d2d3" stroke-width="2.6"/>
+                <circle cx="16" cy="6" r="1.6" fill="#ffffff"/>
+              </svg>
+            </div>
+            <div class="grimoire-item-meta">
+              <span class="grimoire-spell-name">Obliviate [4]</span>
+              <span class="grimoire-spell-sub">Xoá Trí Nhớ</span>
+            </div>
+            <div class="grimoire-tags-group">
+              <span class="grimoire-cd-tag">⏳ 6.5s</span>
+              <span class="grimoire-mana-tag">18💎</span>
+            </div>
+          </div>
+          <div class="grimoire-item-desc">Vẽ nét <strong>Vòng Tròn ◯ 🌀</strong>: vòng tròn khép kín làm nhiễu loạn tâm trí đối phương.</div>
+          <div class="grimoire-live-cd hidden">
+            <span class="grimoire-live-cd-icon">⏳</span>
+            <span class="grimoire-live-cd-text">HỒI CHIÊU</span>
+            <span class="grimoire-live-cd-num">6.5s</span>
+          </div>
+        </div>
+
+        <!-- 5. Petrificus Totalus (CD: 8.0s) -->
+        <div class="grimoire-item" data-spell="petrificus">
+          <div class="grimoire-item-header">
+            <div class="grimoire-rune-box" style="--rune-glow: #a4b0be;">
+              <svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none">
+                <line x1="16" y1="5" x2="16" y2="27" stroke="#a4b0be" stroke-width="3" stroke-linecap="round"/>
+                <path d="M11 21 L16 27 L21 21" stroke="#a4b0be" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="16" cy="5" r="1.5" fill="#ffffff"/>
+              </svg>
+            </div>
+            <div class="grimoire-item-meta">
+              <span class="grimoire-spell-name">Petrificus [5]</span>
+              <span class="grimoire-spell-sub">Tê Liệt Toàn Thân</span>
+            </div>
+            <div class="grimoire-tags-group">
+              <span class="grimoire-cd-tag">⏳ 8.0s</span>
+              <span class="grimoire-mana-tag">20💎</span>
+            </div>
+          </div>
+          <div class="grimoire-item-desc">Vẽ nét <strong>Đâm Dọc 🔒</strong>: vạch thẳng dọc ┃ cắm xuống dưới để phong ấn đối thủ.</div>
+          <div class="grimoire-live-cd hidden">
+            <span class="grimoire-live-cd-icon">⏳</span>
+            <span class="grimoire-live-cd-text">HỒI CHIÊU</span>
+            <span class="grimoire-live-cd-num">8.0s</span>
+          </div>
+        </div>
+
+        <!-- 6. Sectumsempra (CD: 9.0s) -->
+        <div class="grimoire-item" data-spell="sectumsempra">
+          <div class="grimoire-item-header">
+            <div class="grimoire-rune-box" style="--rune-glow: #e84118;">
+              <svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none">
+                <line x1="5" y1="16" x2="27" y2="16" stroke="#e84118" stroke-width="3" stroke-linecap="round"/>
+                <path d="M21 11 L27 16 L21 21" stroke="#e84118" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="5" cy="16" r="1.5" fill="#ffffff"/>
+              </svg>
+            </div>
+            <div class="grimoire-item-meta">
+              <span class="grimoire-spell-name">Sectumsempra [6]</span>
+              <span class="grimoire-spell-sub">Lưỡi Đao Hắc Ám</span>
+            </div>
+            <div class="grimoire-tags-group">
+              <span class="grimoire-cd-tag">⏳ 9.0s</span>
+              <span class="grimoire-mana-tag">22💎</span>
+            </div>
+          </div>
+          <div class="grimoire-item-desc">Vẽ nét <strong>Chém Ngang 🩸</strong>: vạch thẳng ngang ━ dứt khoát gây sát thương lớn.</div>
+          <div class="grimoire-live-cd hidden">
+            <span class="grimoire-live-cd-icon">⏳</span>
+            <span class="grimoire-live-cd-text">HỒI CHIÊU</span>
+            <span class="grimoire-live-cd-num">9.0s</span>
+          </div>
+        </div>
+
+        <!-- 7. Confringo (CD: 10.0s) -->
+        <div class="grimoire-item" data-spell="confringo">
+          <div class="grimoire-item-header">
+            <div class="grimoire-rune-box" style="--rune-glow: #ffa502;">
+              <svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none">
+                <polygon points="16,6 27,25 5,25" stroke="#ffa502" stroke-width="2.6" stroke-linejoin="round"/>
+                <circle cx="16" cy="6" r="1.6" fill="#ffffff"/>
+              </svg>
+            </div>
+            <div class="grimoire-item-meta">
+              <span class="grimoire-spell-name">Confringo [7]</span>
+              <span class="grimoire-spell-sub">Bùa Nổ Rực Lửa</span>
+            </div>
+            <div class="grimoire-tags-group">
+              <span class="grimoire-cd-tag">⏳ 10.0s</span>
+              <span class="grimoire-mana-tag">26💎</span>
+            </div>
+          </div>
+          <div class="grimoire-item-desc">Vẽ nét <strong>Tam Giác △ 💥</strong>: hình tam giác khép kín tạo vụ nổ lửa hủy diệt.</div>
+          <div class="grimoire-live-cd hidden">
+            <span class="grimoire-live-cd-icon">⏳</span>
+            <span class="grimoire-live-cd-text">HỒI CHIÊU</span>
+            <span class="grimoire-live-cd-num">10.0s</span>
+          </div>
+        </div>
+
+        <!-- 8. Expecto Patronum (CD: 14.0s) -->
+        <div class="grimoire-item" data-spell="expecto_patronum">
+          <div class="grimoire-item-header">
+            <div class="grimoire-rune-box" style="--rune-glow: #ffffff;">
+              <svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none">
+                <path d="M19 19 A7 7 0 1 1 15 12 L27 5" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="27" cy="5" r="1.6" fill="#ffeaa7"/>
+              </svg>
+            </div>
+            <div class="grimoire-item-meta">
+              <span class="grimoire-spell-name">Expecto Patronum [8]</span>
+              <span class="grimoire-spell-sub">Thần Hộ Mệnh</span>
+            </div>
+            <div class="grimoire-tags-group">
+              <span class="grimoire-cd-tag">⏳ 14.0s</span>
+              <span class="grimoire-mana-tag">40💎</span>
+            </div>
+          </div>
+          <div class="grimoire-item-desc">Vẽ nét <strong>Vòng Xoáy Hất Lên ◯↗ 🦌</strong>: cung tròn hất vút lên góc trời.</div>
+          <div class="grimoire-live-cd hidden">
+            <span class="grimoire-live-cd-icon">⏳</span>
+            <span class="grimoire-live-cd-text">HỒI CHIÊU</span>
+            <span class="grimoire-live-cd-num">14.0s</span>
+          </div>
+        </div>
+
+        <!-- 9. Avada Kedavra (CD: 20.0s) -->
+        <div class="grimoire-item ultimate-item" data-spell="avadakedavra">
+          <div class="grimoire-item-header">
+            <div class="grimoire-rune-box" style="--rune-glow: #2ed573;">
+              <svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none">
+                <path d="M11 5 L22 11 L9 17 L23 22 L11 27" stroke="#2ed573" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="11" cy="5" r="1.6" fill="#ffffff"/>
+                <circle cx="11" cy="27" r="1.6" fill="#2ed573"/>
+              </svg>
+            </div>
+            <div class="grimoire-item-meta">
+              <span class="grimoire-spell-name">Avada Kedavra [9]</span>
+              <span class="grimoire-spell-sub">Lời Nguyền Tử Thần</span>
+            </div>
+            <div class="grimoire-tags-group">
+              <span class="grimoire-cd-tag ultimate-cd-tag">⏳ 20.0s</span>
+              <span class="grimoire-mana-tag ultimate-tag">55💎</span>
+            </div>
+          </div>
+          <div class="grimoire-item-desc">Vẽ nét <strong>Sét Tử Thần 💀</strong>: zic-zắc 3+ lần gập dứt khoát kết liễu kẻ thù.</div>
+          <div class="grimoire-live-cd hidden">
+            <span class="grimoire-live-cd-icon">⏳</span>
+            <span class="grimoire-live-cd-text">HỒI CHIÊU</span>
+            <span class="grimoire-live-cd-num">20.0s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/dueling.ts"></script>
+</body>
+</html>

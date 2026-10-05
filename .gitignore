@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+dist-ssr/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment & local files
+.env*
+*.local
+.DS_Store
+
+# Vercel
+.vercel/
+
+# Temporary test captures (keep docs/screenshots for repo docs)
+screenshot_*.png
+test_hud_*.png
+test_*.png
+.tempmediaStorage/

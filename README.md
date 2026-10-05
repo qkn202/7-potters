@@ -3,7 +3,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-brightgreen.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-0-blue.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-19%2F19%20Passing-success.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-23%2F23%20Passing-success.svg)]()
 
 > **Một chiếc vớ. Cả đội tự do.**  
 > Party game co-op vui nhộn 2–8 người chơi lấy cảm hứng từ lối chơi gắn kết của *PICO PARK* kết hợp thế giới phù thủy Hogwarts. Nhân vật chính là những chú gia tinh nhỏ bé cùng nhau vượt qua các chướng ngại vật ma thuật để tìm chiếc vớ tự do.  
@@ -17,12 +17,17 @@
 - **8 phòng chơi độc nhất:** Phòng sinh hoạt chung, Đại Sảnh Đường, Lớp học Bùa chú, Nhà kính Thảo dược, Cầu thang di động, Nhà bếp gia tinh, Phòng Chứa Bí Mật, Sân lâu đài Hogwarts.
 - **Chiều dài bản đồ mở rộng quy mô lớn:** Mỗi chặng kéo dài hơn 1,800px; chiều rộng toàn bộ mỗi map đạt từ **22,000px đến 25,000px**, camera cuộn mượt mà theo tâm đội qua từng phân đoạn phong phú.
 - **Nâng tầm độ khó và độ cao (High Vertical Climbing):** Các bậc đá và chòi tháp được nâng cao tới `y = 340` (vách tường cao hơn 230px), đòi hỏi cả đội phải leo bậc thang liên hoàn hoặc dùng lò xo nảy cao.
-- **Vực sâu mở rộng đầy thử thách (Wider Chasms & Deep Abysses):** Các vực thẳm được kéo dài từ 240px đến 390px, bắc qua bởi cầu gỗ bập bênh bập bùng, các đảo đá lơ lửng giữa không trung và bệ đá di động (elevators) nâng hạ liên tục theo chu kỳ.
+- **Vực sâu mở rộng đầy thử thách (Wider Chasms & Deep Abysses):** Các vực thẳm được kéo dài từ **340px đến 440px**, bắc qua bởi cầu gỗ bập bênh chòng chành, các đảo đá lơ lửng giữa không trung và bệ đá di động (elevators) nâng hạ liên tục theo chu kỳ.
 - **12 chặng dừng theo cốt truyện (Authored Chapters):** Mỗi phòng gồm 12 phân đoạn địa hình đặc thù (tổng cộng 96 phân đoạn trên toàn game).
 - **11 trạm cờ lưu điểm (Checkpoints):** Thiết kế khoảng cách rộng rãi, an toàn cho cả đội hình 2 đến 8 gia tinh.
 - **Bán kính bắt vớ nâng lên 80px:** Gia tinh nhảy qua không trung vẫn chộp vớ nhạy và đã tay.
 
 ### 2. Cơ chế phối hợp & Vật lý hài hước
+- **Chồng người & Cõng bạn cùng nhảy (Head Stacking & Carry):**
+  - Đứng trên đầu bạn để di chuyển: Người đứng trên vai sẽ di chuyển mượt mà theo bước chạy của người bên dưới (`Head Riding`).
+  - Cõng nhau cùng nhảy: Khi người ở dưới nhảy lên, người ở trên được nâng bổng theo cùng vận tốc, hoàn toàn không bị nhảy xuyên qua đầu.
+  - Bệ phóng nhảy cao (Boost Jump): Người đứng trên đầu có thể nhảy tiếp để phi thân lên những bờ vực hoặc bậc tường đá cao ngất ngưởng.
+- **Chặn xuyên thân người (Solid Body Collision):** Các gia tinh không bị đi xuyên lồng vào nhau khi chạy ngang, tạo sự va chạm và gắn kết vật lý thực tế giữa các thành viên.
 - **Dây xích đàn hồi (Elastic Rope Tether):** Dây bắt đầu căng ở 185px và giãn tối đa 300px. Khi một người nhảy lên, lực căng dây có thể kéo bổng người bên dưới vượt chướng ngại vật.
 - **Treo lơ lửng & Kéo bạn qua vực (Chained Together Dangling & Hauling):** Khi 1 hoặc nhiều gia tinh trượt chân rớt xuống vực, cả đội **KHÔNG** bị chết! Dây xích sẽ giữ các bạn lơ lửng bên dưới bờ vực. Đồng đội đứng vững trên nền đất có thể ấn di chuyển ngược chiều hoặc nhảy để kéo bổng cả nhóm lên bờ vực an toàn. Chỉ khi **TẤT CẢ** thành viên trong đội cùng lọt xuống vực thì cả đội mới hồi sinh tại cờ checkpoint gần nhất.
 - **Chống kẹt gia tinh (Collision Unblock):** Khi nhiều người dồn lại ở mép vực hoặc trạm cờ, người di chuyển rời xa đồng đội được giải phóng ngay lập tức, không bị kẹt chùm.
@@ -30,9 +35,12 @@
 - **Địa hình ma thuật phong phú:**
   - 🧈 **Sàn bơ trơn trượt (Butter Slides):** Tăng quán tính trượt dài, đòi hỏi cả đội phối hợp ghìm dây.
   - 💨 **Quạt gió ngược chiều (Wind Fans):** Đẩy lùi những gia tinh tiến lẻ loi, cần cả đội cùng dồn sức.
-  - ⚖️ **Cầu bập bênh (Tilting Seesaws):** Cầu gỗ dài tới 390px bắc qua vực thẳm; một người làm đối trọng cho bạn leo qua.
+  - ⚖️ **Cầu bập bênh (Tilting Seesaws):** Cầu gỗ dài tới 460px bắc qua vực thẳm 440px; một người làm đối trọng cho bạn leo qua.
   - 📦 **Băng chuyền đảo chiều (Conveyors):** Băng chuyền chuyển hướng nhịp nhàng theo chu kỳ.
-  - 🎃 **Vật cản đường va chạm đẩy lùi (Obstacle Knockback):** Bí ngô nảy và cánh cửa xoay ma thuật chặn đường vật lý thực thụ. Khi chạm vào, gia tinh sẽ **bị đẩy dội lùi lại phía sau** kèm hiệu ứng sao văng và xoay vòng, triệt tiêu đà chạy tới chứ không bị mất máu hay tự động lướt xuyên qua. Người chơi bắt buộc phải căn nhịp nhảy vượt qua.
+  - 🎃 **Vật cản đường va chạm đẩy lùi chuẩn xác (Non-penetrating Obstacle Knockback):**
+    - **Bí ngô nảy (Jack-o'-Lanterns):** Chặn đứng đà chạy tới, dội ngược gia tinh về phía sau nếu chỉ chạy bộ đâm đầu vào bí ngô. Người chơi **bắt buộc phải căn nhịp nhấn phím Nhảy** để bay bổng vượt qua. Cơ chế chống xuyên thấu (solid barrier) ngăn tuyệt đối việc bị hút hay bắn xuyên qua quả bí ngô.
+    - **Cánh cửa xoay ma thuật (Rotating Doors / Rotors):** Quét va chạm toàn diện cả 2 cánh quạt từ trục quay đến đầu mút (Full Blade Segment Collision). Cánh quạt quét trúng tầm thân người sẽ cản đường và đánh văng người chơi về phía sau; người chơi phải canh nhịp cửa nâng lên cao để luồn qua.
+    - **Khối đá & Bậc thang (Solid Blocks & Stepped Towers):** Khóa va chạm mép tiếp xúc (Solid Face Clamping), chống hiện tượng lọt người vào trong lòng khối đá khi bị dây kéo hoặc đồng đội xô đẩy.
 
 ### 3. Đồ họa Procedural & Hiệu ứng sắc nét
 - Đồ họa Canvas 2D vẽ theo phong cách vẽ tay thủ công với bảng màu phù thủy Hogwarts ấm cúng.
@@ -107,29 +115,32 @@ npm start
 ### Chọn nhanh màn chơi qua URL
 Bạn có thể mở trực tiếp bất kỳ màn chơi nào qua tham số query `?level=N` (từ 0 đến 7):
 - `http://localhost:3017/?level=0` : Màn 1 — Phòng sinh hoạt chung
-- `http://localhost:3017/?level=7` : Màn 8 — Chòi canh Rừng Cấm (12 chặng, dài 14,320px)
+- `http://localhost:3017/?level=7` : Màn 8 — Sân lâu đài Hogwarts (12 chặng, dài hơn 24,000px)
 
 ---
 
 ## 🧪 Kiểm thử chất lượng (Test Suite)
 
-Dự án có bộ kiểm thử tự động toàn diện bao quát physics, va chạm, mạng LAN, camera và kịch bản 56 phòng chơi:
+Dự án sở hữu bộ kiểm thử tự động toàn diện bao quát physics, va chạm, mạng LAN, camera và kịch bản 56 phòng chơi:
 
 ```sh
 # Kiểm tra cú pháp toàn bộ file nguồn
 npm run check
 
-# Chạy test suite 19 bài kiểm thử
+# Chạy test suite 23 bài kiểm thử
 npm test
 ```
 
-Tất cả 19 bài kiểm thử đều vượt qua 100%:
-- Nhảy, ném bạn, chồng người, dây xích đàn hồi.
-- Chướng ngại vật bí ngô, cửa xoay, quạt gió, đệm nảy, băng chuyền, cầu bập bênh.
-- Mô phỏng giải thuật tự động vượt chướng ngại vật cho toàn bộ **8 phòng × nhóm từ 2 đến 8 người chơi** (56 tổ hợp).
-- API máy chủ LAN: tạo phòng, vào phòng, ngắt kết nối, chuyển host, SSE streaming, khán giả.
-- Cơ chế đu dây vực sâu (dangling & hauling).
-- Bảng điểm và tiêu chuẩn 11 checkpoints 5,000 điểm.
+Tất cả **23 bài kiểm thử** đều vượt qua 100%:
+- **Cơ chế nhảy, cõng nhau & chồng vai (Stacking & Carry):** Kiểm tra người dưới nhảy nhấc bổng người trên, chặn xuyên đầu và giữ chân đứng vững.
+- **Kháng xuyên thấu vật cản (Non-penetrating Obstacles):** Kiểm tra gia tinh chạy vào bí ngô nảy và cửa xoay rotor luôn bị cản lại và dội ngược, không thể đi lọt qua nếu không nhảy.
+- **Khóa va chạm khối đá & tiếp đất an toàn:** Ngăn chặn lọt vào trong lòng bậc thang hoặc rơi lọt sàn ở tốc độ cao.
+- **Dây xích đàn hồi & Kéo bạn bên bờ vực (Dangling & Hauling):** Đu dây vực sâu và lực kéo bổng đồng đội.
+- **Kỹ năng ném bạn (Teammate Toss):** Bảo toàn động lượng khi phóng bạn qua hố sâu.
+- **Chướng ngại vật động:** Quạt gió steampunk, đệm lò xo BOING, băng chuyền đổi chiều, cầu bập bênh theo chu kỳ.
+- **Mô phỏng giải thuật tự động vượt chướng ngại vật:** Vượt qua toàn bộ **8 phòng × nhóm từ 2 đến 8 người chơi** (56 tổ hợp).
+- **Mạng trực tuyến Supabase Realtime & Máy chủ LAN:** Tạo phòng, sảnh chờ, chuyển host (host migration), SSE streaming và chế độ khán giả (spectator).
+- **Hệ thống tính điểm:** Bảng điểm 11 checkpoints, tìm vớ và tiêu chuẩn 3 sao 5,000 điểm.
 
 ---
 

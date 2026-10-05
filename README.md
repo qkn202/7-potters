@@ -15,7 +15,7 @@
 
 ### 1. Hành trình sử thi 12 chặng (Expanded Scale)
 - **8 phòng chơi độc nhất:** Phòng sinh hoạt chung, Đại Sảnh Đường, Lớp học Bùa chú, Nhà kính Thảo dược, Cầu thang di động, Nhà bếp gia tinh, Phòng Chứa Bí Mật, Sân lâu đài Hogwarts.
-- **Chiều dài bản đồ mở rộng gấp đôi:** Chiều rộng mỗi map đạt từ **12,220px đến 14,320px** (trước đây ~6,700px), camera cuộn mượt mà theo tâm đội.
+- **Chiều dài bản đồ mở rộng quy mô lớn:** Mỗi chặng kéo dài hơn 1,800px; chiều rộng toàn bộ mỗi map đạt từ **22,000px đến 25,000px**, camera cuộn mượt mà theo tâm đội qua từng phân đoạn phong phú.
 - **12 chặng dừng theo cốt truyện (Authored Chapters):** Mỗi phòng gồm 12 phân đoạn địa hình đặc thù (tổng cộng 96 phân đoạn trên toàn game).
 - **11 trạm cờ lưu điểm (Checkpoints):** Thiết kế khoảng cách rộng rãi, an toàn cho cả đội hình 2 đến 8 gia tinh.
 - **Bán kính bắt vớ nâng lên 80px:** Gia tinh nhảy qua không trung vẫn chộp vớ nhạy và đã tay.
@@ -30,7 +30,7 @@
   - 💨 **Quạt gió ngược chiều (Wind Fans):** Đẩy lùi những gia tinh tiến lẻ loi, cần cả đội cùng dồn sức.
   - ⚖️ **Cầu bập bênh (Tilting Seesaws):** Thay đổi góc nghiêng theo thời gian; một người làm đối trọng cho bạn leo qua.
   - 📦 **Băng chuyền đảo chiều (Conveyors):** Băng chuyền chuyển hướng nhịp nhàng theo chu kỳ.
-  - 🎃 **Bí ngô nảy & Cửa xoay ma thuật:** Hất tung các gia tinh va chạm mà không gây chết tức tưởi.
+  - 🎃 **Vật cản đường va chạm đẩy lùi (Obstacle Knockback):** Bí ngô nảy và cánh cửa xoay ma thuật chặn đường vật lý thực thụ. Khi chạm vào, gia tinh sẽ **bị đẩy dội lùi lại phía sau** kèm hiệu ứng sao văng và xoay vòng, triệt tiêu đà chạy tới chứ không bị mất máu hay tự động lướt xuyên qua. Người chơi bắt buộc phải căn nhịp nhảy vượt qua.
 
 ### 3. Đồ họa Procedural & Hiệu ứng sắc nét
 - Đồ họa Canvas 2D vẽ theo phong cách vẽ tay thủ công với bảng màu phù thủy Hogwarts ấm cúng.

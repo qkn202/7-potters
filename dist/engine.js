@@ -34,23 +34,23 @@ const chapterNames=[
  ['Cống sân lâu đài','Gió giật tai dài','Sân phủ sương trơn','Bậc đá tường thành','Bí ngô đá bóng','Cầu gỗ chòng chành','Hào sâu trắc trở','Cối xay gió cổ','Băng chuyền lát đá','Đệm hoa chuông BOING','Bão tuyết sân thượng','Vớ dưới ánh trăng']
 ];
 levels.forEach((l,index)=>{
- const stride=960+index*25;l.width=180+stride*12+520;l.platforms=[];l.pumpkins=[];l.rotors=[];l.fans=[];l.springs=[];l.iceZones=[];l.seesaws=[];l.movers=[];l.checkpoints=[];l.stops=[];l.conveyors=[];
+ const stride=1800+index*30;l.width=180+stride*12+520;l.platforms=[];l.pumpkins=[];l.rotors=[];l.fans=[];l.springs=[];l.iceZones=[];l.seesaws=[];l.movers=[];l.checkpoints=[];l.stops=[];l.conveyors=[];
  delete l.ice;delete l.moving;delete l.seesaw;
  let floorStart=0;
  const gap=(a,b)=>{l.platforms.push([floorStart,570,a-floorStart,90]);floorStart=b;};
  routes[index].forEach((kind,i)=>{
   const x=180+i*stride;l.stops.push({x,label:chapterNames[index][i],kind,instruction:stopNames[kind]});
   if(i)l.checkpoints.push(x-80);
-  if(kind==='steps'){l.platforms.push([x+165,526,100,44],[x+265,490,110,80],[x+375,526,100,44],[x+540,510,110,18],[x+720,490,95,18]);}
-  if(kind==='pumpkin'||kind==='bowling'){l.pumpkins.push([x+300,526,110],[x+540,526,95]);if(kind==='bowling')l.pumpkins.push([x+415,526,70],[x+670,526,85]);l.platforms.push([x+375,493,100,18],[x+620,505,95,18]);}
-  if(kind==='gap'||kind==='bouncegap'){gap(x+335,x+435+(index%3)*10);l.platforms.push([x+510,505,100,18]);if(kind==='bouncegap')l.springs.push([x+215,570,80]);}
-  if(kind==='bounce'){l.springs.push([x+190,570,80],[x+460,570,95]);l.platforms.push([x+290,465,140,18],[x+590,490,95,18]);}
-  if(kind==='wind'||kind==='icewind'){l.fans.push([x+180,425,160,1],[x+470,440,145,1]);l.platforms.push([x+375,505,95,18]);}
-  if(kind==='ice'||kind==='icewind'){l.iceZones.push([x+130,x+720]);l.pumpkins.push([x+420,526,100]);}
-  if(kind==='bridge'){gap(x+230,x+520);l.seesaws.push([x+205,550,345]);l.movers.push([x+595,505,95,18,40]);}
-  if(kind==='rotor'){l.rotors.push([x+270,500,65],[x+530,495,72]);l.platforms.push([x+370,510,95,18]);}
-  if(kind==='conveyor'){l.conveyors.push([x+130,x+720]);l.platforms.push([x+390,505,100,18]);}
-  if(kind==='finale'){l.springs.push([x+120,570,80]);l.pumpkins.push([x+370,526,100]);l.rotors.push([x+590,490,65]);l.iceZones.push([x+230,x+620]);}
+  if(kind==='steps'){l.platforms.push([x+180,526,100,44],[x+280,485,110,85],[x+390,445,120,125],[x+550,455,140,18],[x+740,490,110,18],[x+920,460,120,18],[x+1100,500,110,18],[x+1280,470,120,18],[x+1460,505,120,18],[x+1640,485,110,18]);}
+  if(kind==='pumpkin'||kind==='bowling'){l.pumpkins.push([x+300,526,100],[x+600,526,90],[x+1100,526,105],[x+1450,526,95]);if(kind==='bowling')l.pumpkins.push([x+430,526,75],[x+780,526,80],[x+1260,526,75],[x+1600,526,85]);l.platforms.push([x+380,490,120,18],[x+680,495,120,18],[x+1180,490,120,18],[x+1520,495,120,18]);}
+  if(kind==='gap'||kind==='bouncegap'){gap(x+335,x+430+(index%2)*5);l.platforms.push([x+510,505,110,18],[x+720,485,110,18],[x+940,510,110,18]);gap(x+1150,x+1260+(index%2)*10);l.platforms.push([x+1380,500,120,18],[x+1580,485,110,18]);if(kind==='bouncegap')l.springs.push([x+255,570,75],[x+1075,570,75]);}
+  if(kind==='bounce'){l.springs.push([x+200,570,80],[x+580,570,85],[x+1020,570,80],[x+1420,570,85]);l.platforms.push([x+310,460,140,18],[x+690,480,120,18],[x+1130,460,140,18],[x+1540,480,120,18]);}
+  if(kind==='wind'||kind==='icewind'){l.fans.push([x+200,425,180,1],[x+600,435,160,1],[x+1050,425,180,1],[x+1450,435,160,1]);l.platforms.push([x+420,505,110,18],[x+820,490,110,18],[x+1260,505,110,18],[x+1650,495,110,18]);}
+  if(kind==='ice'||kind==='icewind'){l.iceZones.push([x+140,x+850],[x+1050,x+1750]);l.pumpkins.push([x+450,526,90],[x+1350,526,90]);l.platforms.push([x+520,495,110,18],[x+1420,495,110,18]);}
+  if(kind==='bridge'){gap(x+250,x+560);l.seesaws.push([x+220,550,360]);l.movers.push([x+720,505,110,18,40]);gap(x+980,x+1290);l.seesaws.push([x+950,550,360]);l.movers.push([x+1440,500,110,18,40]);}
+  if(kind==='rotor'){l.rotors.push([x+280,500,65],[x+680,495,70],[x+1120,500,65],[x+1520,495,70]);l.platforms.push([x+390,510,110,18],[x+790,500,110,18],[x+1230,510,110,18],[x+1630,500,110,18]);}
+  if(kind==='conveyor'){l.conveyors.push([x+140,x+850],[x+1050,x+1750]);l.platforms.push([x+420,505,110,18],[x+880,526,140,44],[x+1320,505,110,18]);}
+  if(kind==='finale'){l.springs.push([x+150,570,80],[x+1050,570,80]);l.pumpkins.push([x+400,526,90],[x+1300,526,90]);l.rotors.push([x+650,490,65],[x+1550,490,65]);l.iceZones.push([x+240,x+750],[x+1150,x+1650]);l.platforms.push([x+480,495,110,18],[x+1380,495,110,18]);}
  });
  l.platforms.push([floorStart,570,l.width-floorStart,90]);l.key=[l.width-330,520];l.door=[l.width-115,498];
  l.hint='12 chặng thử thách! Cùng chạy, nhảy và kéo bạn. Cờ nghỉ lưu khi cả đội đi qua.';
@@ -69,7 +69,7 @@ function tick(room){if(room.status!=='playing')return;const l=levels[room.level]
  const solids=solidsFor(room);room.movingY=solids.find(b=>b.moving)?.y;const obs=obstacles(room);
  const anyGrounded=ps.some(p=>p.ground&&p.y<580);
  for(const p of [...ps].sort((a,b)=>b.y-a.y)){
-  p.invincible=Math.max(0,p.invincible-1);p.spin=Math.max(0,p.spin-1);p.tossCooldown=Math.max(0,p.tossCooldown-1);
+  p.invincible=Math.max(0,p.invincible-1);p.spin=Math.max(0,p.spin-1);p.tossCooldown=Math.max(0,p.tossCooldown-1);p.bumpCooldown=Math.max(0,(p.bumpCooldown||0)-1);
   p.dangling=!p.ground&&p.y>545&&anyGrounded;
   if(p.dangling){p.y=Math.min(H+50,p.y);if(p.y>=H+50)p.vy=Math.min(0,p.vy);}
   for(const moving of solids.filter(b=>b.moving)){const prevY=moving.baseY+Math.sin((room.ticks-1)/90+moving.x)*moving.amp;if(p.ground&&Math.abs(p.y+PH-prevY)<4&&p.x+PW>moving.x&&p.x<moving.x+moving.w)p.y+=moving.y-prevY;}
@@ -88,7 +88,41 @@ function tick(room){if(room.status!=='playing')return;const l=levels[room.level]
   for(const b of solids){if(p.x+PW<=b.x||p.x>=b.x+b.w)continue;const y=top(b,p);if(p.vy>=0&&oldY+PH<=y+8&&p.y+PH>=y){p.y=y-PH;p.vy=0;p.ground=true;}else if(!b.slope&&p.vy<0&&oldY>=b.y+b.h&&p.y<b.y+b.h){p.y=b.y+b.h;p.vy=0;}}
   for(const q of ps){if(q===p||(room.key&&p.x>l.door[0]-120&&q.x>l.door[0]-120))continue;if(p.x+PW>q.x+3&&p.x<q.x+PW-3&&p.vy>=0&&oldY+PH<=q.y+8&&p.y+PH>=q.y){p.y=q.y-PH;p.vy=0;p.ground=true;}}
   for(const[x,y,w]of l.springs||[]){if(p.ground&&p.x+PW>x&&p.x<x+w&&Math.abs(p.y+PH-y)<5){p.vy=-16;p.ground=false;p.spin=28;}}
-  if(!p.invincible){for(const b of obs.pumpkins){if(overlap({x:p.x,y:p.y,w:PW,h:PH},b)){p.kickX=p.x+15<b.x+20?-10:10;p.vy=-9;p.spin=40;p.invincible=40;room.bumps++;}}for(const b of obs.rotors){const ex=b.x+Math.sin(b.angle)*b.r,ey=b.y+Math.cos(b.angle)*b.r;if(Math.hypot(p.x+15-ex,p.y+22-ey)<43){p.kickX=Math.sin(b.angle)>0?11:-11;p.vy=-10;p.spin=45;p.invincible=40;room.bumps++;}}}
+  for(const b of obs.pumpkins){
+    if(overlap({x:p.x,y:p.y,w:PW,h:PH},b)){
+      const fromLeft=(p.x+PW/2)<=(b.x+b.w/2);
+      if(fromLeft){
+        p.x=Math.max(8,b.x-PW-6);
+        p.vx=Math.min(-5,p.vx);
+        p.kickX=-14;
+      }else{
+        p.x=Math.min(l.width-PW-8,b.x+b.w+6);
+        p.vx=Math.max(5,p.vx);
+        p.kickX=14;
+      }
+      p.vy=-8;
+      p.spin=35;
+      if(!p.bumpCooldown){p.bumpCooldown=10;room.bumps++;}
+    }
+  }
+  for(const b of obs.rotors){
+    const ex=b.x+Math.sin(b.angle)*b.r,ey=b.y+Math.cos(b.angle)*b.r;
+    if(Math.hypot(p.x+15-ex,p.y+22-ey)<43){
+      const fromLeft=(p.x+15)<=ex;
+      if(fromLeft){
+        p.x=Math.max(8,p.x-18);
+        p.vx=Math.min(-5,p.vx);
+        p.kickX=-15;
+      }else{
+        p.x=Math.min(l.width-PW-8,p.x+18);
+        p.vx=Math.max(5,p.vx);
+        p.kickX=15;
+      }
+      p.vy=-8.5;
+      p.spin=40;
+      if(!p.bumpCooldown){p.bumpCooldown=10;room.bumps++;}
+    }
+  }
   if(!room.key&&Math.hypot(p.x+15-l.key[0],p.y+22-l.key[1])<80)room.key=true;
  }
  for(const q of ps){

@@ -133,10 +133,16 @@ function tick(room){if(room.status!=='playing')return;const l=levels[room.level]
   if(k.toss&&!p.tossHeld&&!p.tossCooldown){const q=ps.filter(q=>q!==p&&!q.dead&&Math.hypot(q.x-p.x,q.y-p.y)<85).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))[0];if(q){q.kickX=p.facing*11;q.vy=-12.5;q.ground=false;q.spin=45;p.kickX=-p.facing*3;p.tossCooldown=55;room.pranks++;}}p.tossHeld=!!k.toss;
   for(const[x,y,w,direction]of l.fans||[]){if(p.x+PW>x&&p.x<x+w&&p.y+PH>y&&p.y<570){p.kickX=Math.max(-9,Math.min(9,p.kickX+direction*.7));if(p.y>y)p.vy-=.85;}}
   for(const[a,b]of l.conveyors){if(p.ground&&p.x+PW>a&&p.x<b)p.kickX=Math.max(-7,Math.min(7,p.kickX+Math.sin(room.ticks/130)*.7));}
-  for(const q of ps){if(q!==p&&Math.abs(p.y+PH-q.y)<=4&&p.x+PW>q.x+3&&p.x<q.x+PW-3)p.x+=(q.vx+(q.kickX||0));}
   for(const q of ps){if(q!==p&&Math.abs(p.y+PH-q.y)<=4&&p.x+PW>q.x+3&&p.x<q.x+PW-3)p.x+=(q.vx+(q.kickX||0))*0.7;}
   const dx=p.vx+p.kickX,oldX=p.x;p.x=Math.max(8,Math.min(l.width-PW-8,p.x+dx));
-  for(const b of solids){if(b.slope)continue;if(overlap({x:p.x,y:p.y,w:PW,h:PH},b)&&(oldX+PW<=b.x+1||oldX>=b.x+b.w-1)){p.x=dx>0?b.x-PW:b.x+b.w;p.kickX=-p.kickX*.2;p.vx=0;}}
+  for(const b of solids){
+    if(b.slope)continue;
+    if(overlap({x:p.x,y:p.y,w:PW,h:PH},b)){
+      const fromLeft=(oldX+PW/2)<=(b.x+b.w/2);
+      if(fromLeft){p.x=b.x-PW;p.kickX=Math.min(0,p.kickX*-.2);p.vx=0;}
+      else{p.x=b.x+b.w;p.kickX=Math.max(0,p.kickX*-.2);p.vx=0;}
+    }
+  }
   for(const q of ps){
     if(q===p||(room.key&&p.x>l.door[0]-120&&q.x>l.door[0]-120))continue;
     if(p.y+PH<=q.y+2||q.y+PH<=p.y+2)continue;
@@ -145,7 +151,7 @@ function tick(room){if(room.status!=='playing')return;const l=levels[room.level]
     }
   }
   const oldY=p.y;p.vy=Math.min(15,p.vy+.62);p.y+=p.vy;p.ground=false;
-  for(const b of solids){if(p.x+PW<=b.x||p.x>=b.x+b.w)continue;const y=top(b,p);if(p.vy>=0&&oldY+PH<=y+8&&p.y+PH>=y){p.y=y-PH;p.vy=0;p.ground=true;}else if(!b.slope&&p.vy<0&&oldY>=b.y+b.h&&p.y<b.y+b.h){p.y=b.y+b.h;p.vy=0;}}
+  for(const b of solids){if(p.x+PW<=b.x||p.x>=b.x+b.w)continue;const y=top(b,p);if(p.vy>=0&&oldY+PH<=y+12&&p.y+PH>=y){p.y=y-PH;p.vy=0;p.ground=true;}else if(!b.slope&&p.vy<0&&oldY>=b.y+b.h-4&&p.y<b.y+b.h){p.y=b.y+b.h;p.vy=0;}}
   for(const q of ps){
     if(q===p||(room.key&&p.x>l.door[0]-120&&q.x>l.door[0]-120))continue;
     if(p.x+PW>q.x+3&&p.x<q.x+PW-3){
@@ -163,35 +169,40 @@ function tick(room){if(room.status!=='playing')return;const l=levels[room.level]
   for(const[x,y,w]of l.springs||[]){if(p.ground&&p.x+PW>x&&p.x<x+w&&Math.abs(p.y+PH-y)<5){p.vy=-16;p.ground=false;p.spin=28;}}
   for(const b of obs.pumpkins){
     if(overlap({x:p.x,y:p.y,w:PW,h:PH},b)){
-      const fromLeft=(p.x+PW/2)<=(b.x+b.w/2);
+      const fromLeft=(oldX+PW/2)<=(b.x+b.w/2);
       if(fromLeft){
-        p.x=Math.max(8,b.x-PW-6);
-        p.vx=Math.min(-5,p.vx);
+        p.x=Math.max(8,b.x-PW-4);
+        p.vx=Math.min(-5,-Math.abs(p.vx)-2);
         p.kickX=-14;
       }else{
-        p.x=Math.min(l.width-PW-8,b.x+b.w+6);
-        p.vx=Math.max(5,p.vx);
+        p.x=Math.min(l.width-PW-8,b.x+b.w+4);
+        p.vx=Math.max(5,Math.abs(p.vx)+2);
         p.kickX=14;
       }
-      p.vy=-8;
+      p.vy=-3.5;
       p.spin=35;
       if(!p.bumpCooldown){p.bumpCooldown=10;room.bumps++;}
     }
   }
   for(const b of obs.rotors){
-    const ex=b.x+Math.sin(b.angle)*b.r,ey=b.y+Math.cos(b.angle)*b.r;
-    if(Math.hypot(p.x+15-ex,p.y+22-ey)<43){
-      const fromLeft=(p.x+15)<=ex;
+    const sA=Math.sin(b.angle),cA=Math.cos(b.angle);
+    const x1=b.x-sA*b.r,y1=b.y-cA*b.r,x2=b.x+sA*b.r,y2=b.y+cA*b.r;
+    const rx=x2-x1,ry=y2-y1,lenSq=rx*rx+ry*ry;
+    const px=p.x+15,py=p.y+22;
+    const u=Math.max(0,Math.min(1,((px-x1)*rx+(py-y1)*ry)/lenSq));
+    const cx=x1+u*rx,cy=y1+u*ry;
+    if(Math.hypot(px-cx,py-cy)<28){
+      const fromLeft=(oldX+15)<=b.x;
       if(fromLeft){
-        p.x=Math.max(8,p.x-18);
-        p.vx=Math.min(-5,p.vx);
+        p.x=Math.max(8,b.x-PW-4);
+        p.vx=Math.min(-5,-Math.abs(p.vx)-2);
         p.kickX=-15;
       }else{
-        p.x=Math.min(l.width-PW-8,p.x+18);
-        p.vx=Math.max(5,p.vx);
+        p.x=Math.min(l.width-PW-8,b.x+16);
+        p.vx=Math.max(5,Math.abs(p.vx)+2);
         p.kickX=15;
       }
-      p.vy=-8.5;
+      p.vy=-4;
       p.spin=40;
       if(!p.bumpCooldown){p.bumpCooldown=10;room.bumps++;}
     }

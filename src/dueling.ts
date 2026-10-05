@@ -1198,7 +1198,7 @@ class HogwartsSinglePlayerGame {
   private playerInnerShieldMesh!: THREE.Mesh
   private playerShieldRim!: THREE.Mesh
   private playerShieldRing!: THREE.Mesh
-  private playerShieldRippleTarget!: THREE.Mesh
+  private playerShieldRing2!: THREE.Mesh
   private playerRuneMesh!: THREE.Mesh
   private playerRuneInnerMesh!: THREE.Mesh
 
@@ -1206,7 +1206,7 @@ class HogwartsSinglePlayerGame {
   private enemyInnerShieldMesh!: THREE.Mesh
   private enemyShieldRim!: THREE.Mesh
   private enemyShieldRing!: THREE.Mesh
-  private enemyShieldRippleTarget!: THREE.Mesh
+  private enemyShieldRing2!: THREE.Mesh
   private enemyRuneMesh!: THREE.Mesh
   private enemyRuneInnerMesh!: THREE.Mesh
   private projectiles: Projectile[] = []
@@ -3660,9 +3660,11 @@ class HogwartsSinglePlayerGame {
       if (origin.z > -1 && this.playerShieldMesh) {
         ;(this.playerShieldMesh.material as THREE.MeshBasicMaterial).opacity = 1.0
         if (this.playerShieldRing) (this.playerShieldRing.material as THREE.MeshBasicMaterial).opacity = 1.0
+        if (this.playerShieldRing2) (this.playerShieldRing2.material as THREE.MeshBasicMaterial).opacity = 1.0
       } else if (origin.z <= -1 && this.enemyShieldMesh) {
         ;(this.enemyShieldMesh.material as THREE.MeshBasicMaterial).opacity = 1.0
         if (this.enemyShieldRing) (this.enemyShieldRing.material as THREE.MeshBasicMaterial).opacity = 1.0
+        if (this.enemyShieldRing2) (this.enemyShieldRing2.material as THREE.MeshBasicMaterial).opacity = 1.0
       }
     }
 
@@ -5353,13 +5355,17 @@ class HogwartsSinglePlayerGame {
 
   // --- Dynamic Full-Body 360° Shields ---
   private buildShieldMeshes() {
-    // 1. Full-Body Spherical Forcefield (Radius 1.68m enclosing Harry from head to toe at -0.90, -0.05, 2.15)
-    const playerShieldGeo = new THREE.SphereGeometry(1.68, 36, 28)
-    const playerInnerGeo = new THREE.SphereGeometry(1.60, 28, 24)
-    const playerRimGeo = new THREE.SphereGeometry(1.72, 36, 28)
-    const playerRingGeo = new THREE.RingGeometry(1.62, 1.74, 48)
+    // 1. Full-Body Spherical Forcefield (Radius 2.30m enclosing Harry 100% from head, raised wand, to cape and floor)
+    const playerShieldGeo = new THREE.SphereGeometry(2.30, 48, 36)
+    const playerInnerGeo = new THREE.SphereGeometry(2.18, 36, 28)
+    const playerRimGeo = new THREE.SphereGeometry(2.32, 48, 36)
+    const playerRingGeo = new THREE.RingGeometry(2.26, 2.38, 64)
+    const playerRing2Geo = new THREE.RingGeometry(2.24, 2.36, 64)
 
-    // Outer Hexagonal Crystal Shield (Matching Sketch 4)
+    const playerCenterY = -0.20
+    const pBase = new THREE.Vector3(this.playerBasePos.x, playerCenterY, this.playerBasePos.z)
+
+    // Outer Hexagonal Crystal Shield
     const playerMat = new THREE.MeshBasicMaterial({
       map: this.vfxTextures.shieldHex,
       color: 0x38b6ff,
@@ -5370,7 +5376,8 @@ class HogwartsSinglePlayerGame {
       depthWrite: false,
     })
     this.playerShieldMesh = new THREE.Mesh(playerShieldGeo, playerMat)
-    this.playerShieldMesh.position.set(-0.95, -0.05, 1.45)
+    this.playerShieldMesh.position.copy(pBase)
+    this.playerShieldMesh.renderOrder = 20
     this.scene.add(this.playerShieldMesh)
 
     // Radiant Silhouette / Fresnel Rim Glow
@@ -5383,25 +5390,9 @@ class HogwartsSinglePlayerGame {
       depthWrite: false,
     })
     this.playerShieldRim = new THREE.Mesh(playerRimGeo, playerRimMat)
-    this.playerShieldRim.position.set(-0.95, -0.05, 1.45)
+    this.playerShieldRim.position.copy(pBase)
+    this.playerShieldRim.renderOrder = 22
     this.scene.add(this.playerShieldRim)
-
-    // Concentric Deflection Ripple Target on Front Shield Face
-    const dirToDraco = new THREE.Vector3(0.55 - (-0.95), 0, -3.4 - 1.45).normalize()
-    const frontPos = new THREE.Vector3(-0.95, -0.05, 1.45).add(dirToDraco.clone().multiplyScalar(1.67))
-    const playerRippleMat = new THREE.MeshBasicMaterial({
-      map: this.vfxTextures.shieldRippleTarget,
-      color: 0x66f0ff,
-      transparent: true,
-      opacity: 0,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    })
-    this.playerShieldRippleTarget = new THREE.Mesh(new THREE.PlaneGeometry(1.75, 1.75), playerRippleMat)
-    this.playerShieldRippleTarget.position.copy(frontPos)
-    this.playerShieldRippleTarget.lookAt(new THREE.Vector3(0.55, -0.05, -3.4))
-    this.scene.add(this.playerShieldRippleTarget)
 
     // Inner crystalline sphere for rich 3D volumetric depth
     const playerInnerMat = new THREE.MeshBasicMaterial({
@@ -5413,10 +5404,11 @@ class HogwartsSinglePlayerGame {
       depthWrite: false,
     })
     this.playerInnerShieldMesh = new THREE.Mesh(playerInnerGeo, playerInnerMat)
-    this.playerInnerShieldMesh.position.set(-0.95, -0.05, 1.45)
+    this.playerInnerShieldMesh.position.copy(pBase)
+    this.playerInnerShieldMesh.renderOrder = 18
     this.scene.add(this.playerInnerShieldMesh)
 
-    // Equator Energy Ring
+    // Equator Energy Ring 1 (Horizontal)
     const playerRingMat = new THREE.MeshBasicMaterial({
       map: this.vfxTextures.shockwave,
       color: 0x66ccff,
@@ -5428,11 +5420,29 @@ class HogwartsSinglePlayerGame {
     })
     this.playerShieldRing = new THREE.Mesh(playerRingGeo, playerRingMat)
     this.playerShieldRing.rotation.x = Math.PI / 2
-    this.playerShieldRing.position.set(-0.95, -0.05, 1.45)
+    this.playerShieldRing.position.copy(pBase)
+    this.playerShieldRing.renderOrder = 24
     this.scene.add(this.playerShieldRing)
 
-    // Player Ground Outer Runic Circle (diameter 3.8m on marble floor y = -0.835)
-    const runeOuterGeo = new THREE.PlaneGeometry(3.8, 3.8)
+    // Equator Energy Ring 2 (Inclined Gyroscopic Latitude Band)
+    const playerRing2Mat = new THREE.MeshBasicMaterial({
+      map: this.vfxTextures.shockwave,
+      color: 0x00e1ff,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })
+    this.playerShieldRing2 = new THREE.Mesh(playerRing2Geo, playerRing2Mat)
+    this.playerShieldRing2.rotation.x = Math.PI / 2.35
+    this.playerShieldRing2.rotation.y = 0.45
+    this.playerShieldRing2.position.copy(pBase)
+    this.playerShieldRing2.renderOrder = 24
+    this.scene.add(this.playerShieldRing2)
+
+    // Player Ground Outer Runic Circle (diameter 4.8m on marble floor y = -0.835)
+    const runeOuterGeo = new THREE.PlaneGeometry(4.8, 4.8)
     const playerRuneMat = new THREE.MeshBasicMaterial({
       map: this.vfxTextures.runeCircle,
       color: 0x38b6ff,
@@ -5444,11 +5454,12 @@ class HogwartsSinglePlayerGame {
     })
     this.playerRuneMesh = new THREE.Mesh(runeOuterGeo, playerRuneMat)
     this.playerRuneMesh.rotation.x = -Math.PI / 2
-    this.playerRuneMesh.position.set(-0.95, -0.835, 1.45)
+    this.playerRuneMesh.position.set(this.playerBasePos.x, -0.835, this.playerBasePos.z)
+    this.playerRuneMesh.renderOrder = 5
     this.scene.add(this.playerRuneMesh)
 
-    // Player Ground Inner Runic Star Ring (diameter 2.5m)
-    const runeInnerGeo = new THREE.PlaneGeometry(2.5, 2.5)
+    // Player Ground Inner Runic Star Ring (diameter 3.2m)
+    const runeInnerGeo = new THREE.PlaneGeometry(3.2, 3.2)
     const playerRuneInnerMat = new THREE.MeshBasicMaterial({
       map: this.vfxTextures.runeCircleInner,
       color: 0x66d9ff,
@@ -5460,14 +5471,19 @@ class HogwartsSinglePlayerGame {
     })
     this.playerRuneInnerMesh = new THREE.Mesh(runeInnerGeo, playerRuneInnerMat)
     this.playerRuneInnerMesh.rotation.x = -Math.PI / 2
-    this.playerRuneInnerMesh.position.set(-0.95, -0.834, 1.45)
+    this.playerRuneInnerMesh.position.set(this.playerBasePos.x, -0.834, this.playerBasePos.z)
+    this.playerRuneInnerMesh.renderOrder = 6
     this.scene.add(this.playerRuneInnerMesh)
 
-    // 2. Enemy (Voldemort) Full-Body Spherical Forcefield (Radius 1.48m enclosing Voldemort at 0.55, -0.05, -3.4)
-    const enemyShieldGeo = new THREE.SphereGeometry(1.48, 36, 28)
-    const enemyInnerGeo = new THREE.SphereGeometry(1.40, 28, 24)
-    const enemyRimGeo = new THREE.SphereGeometry(1.52, 36, 28)
-    const enemyRingGeo = new THREE.RingGeometry(1.42, 1.54, 48)
+    // 2. Enemy (Voldemort) Full-Body Spherical Forcefield (Radius 2.40m enclosing Voldemort 100%)
+    const enemyShieldGeo = new THREE.SphereGeometry(2.40, 48, 36)
+    const enemyInnerGeo = new THREE.SphereGeometry(2.28, 36, 28)
+    const enemyRimGeo = new THREE.SphereGeometry(2.42, 48, 36)
+    const enemyRingGeo = new THREE.RingGeometry(2.36, 2.48, 64)
+    const enemyRing2Geo = new THREE.RingGeometry(2.34, 2.46, 64)
+
+    const enemyCenterY = -0.15
+    const eBase = new THREE.Vector3(this.opponentBasePos.x, enemyCenterY, this.opponentBasePos.z)
 
     const enemyMat = new THREE.MeshBasicMaterial({
       map: this.vfxTextures.shieldHex,
@@ -5479,7 +5495,8 @@ class HogwartsSinglePlayerGame {
       depthWrite: false,
     })
     this.enemyShieldMesh = new THREE.Mesh(enemyShieldGeo, enemyMat)
-    this.enemyShieldMesh.position.set(0.55, -0.05, -3.4)
+    this.enemyShieldMesh.position.copy(eBase)
+    this.enemyShieldMesh.renderOrder = 20
     this.scene.add(this.enemyShieldMesh)
 
     const enemyRimMat = new THREE.MeshBasicMaterial({
@@ -5491,24 +5508,9 @@ class HogwartsSinglePlayerGame {
       depthWrite: false,
     })
     this.enemyShieldRim = new THREE.Mesh(enemyRimGeo, enemyRimMat)
-    this.enemyShieldRim.position.set(0.55, -0.05, -3.4)
+    this.enemyShieldRim.position.copy(eBase)
+    this.enemyShieldRim.renderOrder = 22
     this.scene.add(this.enemyShieldRim)
-
-    const dirToHarry = new THREE.Vector3(-0.95 - 0.55, 0, 1.45 - (-3.4)).normalize()
-    const enemyFrontPos = new THREE.Vector3(0.55, -0.05, -3.4).add(dirToHarry.clone().multiplyScalar(1.47))
-    const enemyRippleMat = new THREE.MeshBasicMaterial({
-      map: this.vfxTextures.shieldRippleTarget,
-      color: 0x44ffaa,
-      transparent: true,
-      opacity: 0,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    })
-    this.enemyShieldRippleTarget = new THREE.Mesh(new THREE.PlaneGeometry(1.55, 1.55), enemyRippleMat)
-    this.enemyShieldRippleTarget.position.copy(enemyFrontPos)
-    this.enemyShieldRippleTarget.lookAt(new THREE.Vector3(-0.95, -0.05, 1.45))
-    this.scene.add(this.enemyShieldRippleTarget)
 
     const enemyInnerMat = new THREE.MeshBasicMaterial({
       color: 0x009944,
@@ -5519,7 +5521,8 @@ class HogwartsSinglePlayerGame {
       depthWrite: false,
     })
     this.enemyInnerShieldMesh = new THREE.Mesh(enemyInnerGeo, enemyInnerMat)
-    this.enemyInnerShieldMesh.position.set(0.55, -0.05, -3.4)
+    this.enemyInnerShieldMesh.position.copy(eBase)
+    this.enemyInnerShieldMesh.renderOrder = 18
     this.scene.add(this.enemyInnerShieldMesh)
 
     const enemyRingMat = new THREE.MeshBasicMaterial({
@@ -5533,11 +5536,28 @@ class HogwartsSinglePlayerGame {
     })
     this.enemyShieldRing = new THREE.Mesh(enemyRingGeo, enemyRingMat)
     this.enemyShieldRing.rotation.x = Math.PI / 2
-    this.enemyShieldRing.position.set(0.55, -0.05, -3.4)
+    this.enemyShieldRing.position.copy(eBase)
+    this.enemyShieldRing.renderOrder = 24
     this.scene.add(this.enemyShieldRing)
 
-    // Enemy Outer Runic Circle (diameter 3.2m)
-    const enemyRuneOuterGeo = new THREE.PlaneGeometry(3.2, 3.2)
+    const enemyRing2Mat = new THREE.MeshBasicMaterial({
+      map: this.vfxTextures.shockwave,
+      color: 0x22ffcc,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })
+    this.enemyShieldRing2 = new THREE.Mesh(enemyRing2Geo, enemyRing2Mat)
+    this.enemyShieldRing2.rotation.x = Math.PI / 2.35
+    this.enemyShieldRing2.rotation.y = -0.45
+    this.enemyShieldRing2.position.copy(eBase)
+    this.enemyShieldRing2.renderOrder = 24
+    this.scene.add(this.enemyShieldRing2)
+
+    // Enemy Outer Runic Circle (diameter 4.8m)
+    const enemyRuneOuterGeo = new THREE.PlaneGeometry(4.8, 4.8)
     const enemyRuneMat = new THREE.MeshBasicMaterial({
       map: this.vfxTextures.runeCircle,
       color: 0x00ff88,
@@ -5549,14 +5569,15 @@ class HogwartsSinglePlayerGame {
     })
     this.enemyRuneMesh = new THREE.Mesh(enemyRuneOuterGeo, enemyRuneMat)
     this.enemyRuneMesh.rotation.x = -Math.PI / 2
-    this.enemyRuneMesh.position.set(0.55, -0.835, -3.4)
+    this.enemyRuneMesh.position.set(this.opponentBasePos.x, -0.835, this.opponentBasePos.z)
+    this.enemyRuneMesh.renderOrder = 5
     this.scene.add(this.enemyRuneMesh)
 
-    // Enemy Inner Runic Star Ring (diameter 2.2m)
-    const enemyRuneInnerGeo = new THREE.PlaneGeometry(2.2, 2.2)
+    // Enemy Inner Runic Star Ring (diameter 3.2m)
+    const enemyRuneInnerGeo = new THREE.PlaneGeometry(3.2, 3.2)
     const enemyRuneInnerMat = new THREE.MeshBasicMaterial({
       map: this.vfxTextures.runeCircleInner,
-      color: 0x66ffbb,
+      color: 0x44ffaa,
       transparent: true,
       opacity: 0,
       side: THREE.DoubleSide,
@@ -5565,7 +5586,8 @@ class HogwartsSinglePlayerGame {
     })
     this.enemyRuneInnerMesh = new THREE.Mesh(enemyRuneInnerGeo, enemyRuneInnerMat)
     this.enemyRuneInnerMesh.rotation.x = -Math.PI / 2
-    this.enemyRuneInnerMesh.position.set(0.55, -0.834, -3.4)
+    this.enemyRuneInnerMesh.position.set(this.opponentBasePos.x, -0.834, this.opponentBasePos.z)
+    this.enemyRuneInnerMesh.renderOrder = 6
     this.scene.add(this.enemyRuneInnerMesh)
   }
 
@@ -10025,39 +10047,40 @@ private setupParallaxListeners() {
     if (this.playerShieldMesh && this.playerGroup) {
       const pX = this.playerGroup.position.x
       const pZ = this.playerGroup.position.z
-      this.playerShieldMesh.position.set(pX, -0.05, pZ)
-      if (this.playerShieldRim) this.playerShieldRim.position.set(pX, -0.05, pZ)
-      if (this.playerShieldRippleTarget) this.playerShieldRippleTarget.position.set(pX + 0.28, -0.05, pZ - 0.65)
-      if (this.playerInnerShieldMesh) this.playerInnerShieldMesh.position.set(pX, -0.05, pZ)
-      if (this.playerShieldRing) this.playerShieldRing.position.set(pX, -0.05, pZ)
+      const centerY = -0.20
+      this.playerShieldMesh.position.set(pX, centerY, pZ)
+      if (this.playerShieldRim) this.playerShieldRim.position.set(pX, centerY, pZ)
+      if (this.playerInnerShieldMesh) this.playerInnerShieldMesh.position.set(pX, centerY, pZ)
+      if (this.playerShieldRing) this.playerShieldRing.position.set(pX, centerY, pZ)
+      if (this.playerShieldRing2) this.playerShieldRing2.position.set(pX, centerY, pZ)
       if (this.playerRuneMesh) this.playerRuneMesh.position.set(pX, -0.835, pZ)
       if (this.playerRuneInnerMesh) this.playerRuneInnerMesh.position.set(pX, -0.834, pZ)
 
       const active = time < this.playerShieldActiveUntil
-      const targetOp = active ? 0.40 : 0
+      const targetOp = active ? 0.48 : 0
       const mat = this.playerShieldMesh.material as THREE.MeshBasicMaterial
       mat.opacity += (targetOp - mat.opacity) * 0.2
       this.playerShieldMesh.rotation.y += delta * 0.45
 
       if (this.playerShieldRim) {
         const rimMat = this.playerShieldRim.material as THREE.MeshBasicMaterial
-        rimMat.opacity += (targetOp * 0.65 - rimMat.opacity) * 0.2
+        rimMat.opacity += (targetOp * 0.70 - rimMat.opacity) * 0.2
         this.playerShieldRim.rotation.y += delta * 0.45
-      }
-      if (this.playerShieldRippleTarget) {
-        const ripMat = this.playerShieldRippleTarget.material as THREE.MeshBasicMaterial
-        ripMat.opacity += (targetOp * 0.70 - ripMat.opacity) * 0.2
-        this.playerShieldRippleTarget.rotation.z += delta * 1.5
       }
       if (this.playerInnerShieldMesh) {
         const inMat = this.playerInnerShieldMesh.material as THREE.MeshBasicMaterial
-        inMat.opacity += (targetOp * 0.08 - inMat.opacity) * 0.2
+        inMat.opacity += (targetOp * 0.12 - inMat.opacity) * 0.2
         this.playerInnerShieldMesh.rotation.y -= delta * 0.35
       }
       if (this.playerShieldRing) {
         const ringMat = this.playerShieldRing.material as THREE.MeshBasicMaterial
-        ringMat.opacity += (targetOp * 0.50 - ringMat.opacity) * 0.2
+        ringMat.opacity += (targetOp * 0.60 - ringMat.opacity) * 0.2
         this.playerShieldRing.rotation.z += delta * 1.2
+      }
+      if (this.playerShieldRing2) {
+        const ring2Mat = this.playerShieldRing2.material as THREE.MeshBasicMaterial
+        ring2Mat.opacity += (targetOp * 0.50 - ring2Mat.opacity) * 0.2
+        this.playerShieldRing2.rotation.z -= delta * 1.0
       }
       if (this.playerRuneMesh) {
         const rMat = this.playerRuneMesh.material as THREE.MeshBasicMaterial
@@ -10071,16 +10094,16 @@ private setupParallaxListeners() {
       }
 
       // If shield is active, spawn defensive ethereal motes rising around Harry
-      if (active && Math.random() < 0.6) {
+      if (active && Math.random() < 0.65) {
         const ang = Math.random() * Math.PI * 2
-        const rad = 0.5 + Math.random() * 0.7
+        const rad = 0.8 + Math.random() * 1.3
         this.spawnParticle(
           this.playerShieldMesh.position.x + Math.cos(ang) * rad,
           -0.75,
           this.playerShieldMesh.position.z + Math.sin(ang) * rad,
-          -Math.sin(ang) * 0.3,
+          -Math.sin(ang) * 0.25,
           1.2 + Math.random() * 1.5,
-          Math.cos(ang) * 0.3,
+          Math.cos(ang) * 0.25,
           0.35, 0.75, 1.0,
           0.12 + Math.random() * 0.08,
           0.6,
@@ -10089,14 +10112,16 @@ private setupParallaxListeners() {
         )
       }
     }
+
     if (this.enemyShieldMesh && this.opponentGroup) {
       const eX = this.opponentGroup.position.x
       const eZ = this.opponentGroup.position.z
-      this.enemyShieldMesh.position.set(eX, -0.05, eZ)
-      if (this.enemyShieldRim) this.enemyShieldRim.position.set(eX, -0.05, eZ)
-      if (this.enemyShieldRippleTarget) this.enemyShieldRippleTarget.position.set(eX - 0.28, -0.05, eZ + 0.65)
-      if (this.enemyInnerShieldMesh) this.enemyInnerShieldMesh.position.set(eX, -0.05, eZ)
-      if (this.enemyShieldRing) this.enemyShieldRing.position.set(eX, -0.05, eZ)
+      const centerY = -0.15
+      this.enemyShieldMesh.position.set(eX, centerY, eZ)
+      if (this.enemyShieldRim) this.enemyShieldRim.position.set(eX, centerY, eZ)
+      if (this.enemyInnerShieldMesh) this.enemyInnerShieldMesh.position.set(eX, centerY, eZ)
+      if (this.enemyShieldRing) this.enemyShieldRing.position.set(eX, centerY, eZ)
+      if (this.enemyShieldRing2) this.enemyShieldRing2.position.set(eX, centerY, eZ)
       if (this.enemyRuneMesh) this.enemyRuneMesh.position.set(eX, -0.835, eZ)
       if (this.enemyRuneInnerMesh) this.enemyRuneInnerMesh.position.set(eX, -0.834, eZ)
 
@@ -10111,11 +10136,6 @@ private setupParallaxListeners() {
         rimMat.opacity += (targetOp * 0.65 - rimMat.opacity) * 0.2
         this.enemyShieldRim.rotation.y -= delta * 0.45
       }
-      if (this.enemyShieldRippleTarget) {
-        const ripMat = this.enemyShieldRippleTarget.material as THREE.MeshBasicMaterial
-        ripMat.opacity += (targetOp * 0.70 - ripMat.opacity) * 0.2
-        this.enemyShieldRippleTarget.rotation.z += delta * 1.5
-      }
       if (this.enemyInnerShieldMesh) {
         const inMat = this.enemyInnerShieldMesh.material as THREE.MeshBasicMaterial
         inMat.opacity += (targetOp * 0.08 - inMat.opacity) * 0.2
@@ -10125,6 +10145,11 @@ private setupParallaxListeners() {
         const ringMat = this.enemyShieldRing.material as THREE.MeshBasicMaterial
         ringMat.opacity += (targetOp * 0.50 - ringMat.opacity) * 0.2
         this.enemyShieldRing.rotation.z -= delta * 1.2
+      }
+      if (this.enemyShieldRing2) {
+        const ring2Mat = this.enemyShieldRing2.material as THREE.MeshBasicMaterial
+        ring2Mat.opacity += (targetOp * 0.45 - ring2Mat.opacity) * 0.2
+        this.enemyShieldRing2.rotation.z -= delta * 1.0
       }
       if (this.enemyRuneMesh) {
         const rMat = this.enemyRuneMesh.material as THREE.MeshBasicMaterial

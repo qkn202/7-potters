@@ -133,12 +133,33 @@ function tick(room){if(room.status!=='playing')return;const l=levels[room.level]
   if(k.toss&&!p.tossHeld&&!p.tossCooldown){const q=ps.filter(q=>q!==p&&!q.dead&&Math.hypot(q.x-p.x,q.y-p.y)<85).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))[0];if(q){q.kickX=p.facing*11;q.vy=-12.5;q.ground=false;q.spin=45;p.kickX=-p.facing*3;p.tossCooldown=55;room.pranks++;}}p.tossHeld=!!k.toss;
   for(const[x,y,w,direction]of l.fans||[]){if(p.x+PW>x&&p.x<x+w&&p.y+PH>y&&p.y<570){p.kickX=Math.max(-9,Math.min(9,p.kickX+direction*.7));if(p.y>y)p.vy-=.85;}}
   for(const[a,b]of l.conveyors){if(p.ground&&p.x+PW>a&&p.x<b)p.kickX=Math.max(-7,Math.min(7,p.kickX+Math.sin(room.ticks/130)*.7));}
+  for(const q of ps){if(q!==p&&Math.abs(p.y+PH-q.y)<=4&&p.x+PW>q.x+3&&p.x<q.x+PW-3)p.x+=(q.vx+(q.kickX||0));}
+  for(const q of ps){if(q!==p&&Math.abs(p.y+PH-q.y)<=4&&p.x+PW>q.x+3&&p.x<q.x+PW-3)p.x+=(q.vx+(q.kickX||0))*0.7;}
   const dx=p.vx+p.kickX,oldX=p.x;p.x=Math.max(8,Math.min(l.width-PW-8,p.x+dx));
   for(const b of solids){if(b.slope)continue;if(overlap({x:p.x,y:p.y,w:PW,h:PH},b)&&(oldX+PW<=b.x+1||oldX>=b.x+b.w-1)){p.x=dx>0?b.x-PW:b.x+b.w;p.kickX=-p.kickX*.2;p.vx=0;}}
-  for(const q of ps){if(q===p||Math.abs(p.y-q.y)>PH-8||(room.key&&p.x>l.door[0]-120&&q.x>l.door[0]-120))continue;if(overlap({x:p.x,y:p.y,w:PW,h:PH},{x:q.x,y:q.y,w:PW,h:PH})){if((dx>0&&oldX<q.x)||(dx<0&&oldX>q.x))p.x=oldX;if(Math.abs(dx)>2)q.kickX=Math.max(-7,Math.min(7,(q.kickX||0)+Math.sign(dx)*.8));}}
+  for(const q of ps){
+    if(q===p||(room.key&&p.x>l.door[0]-120&&q.x>l.door[0]-120))continue;
+    if(p.y+PH<=q.y+2||q.y+PH<=p.y+2)continue;
+    if(overlap({x:p.x,y:p.y,w:PW,h:PH},{x:q.x,y:q.y,w:PW,h:PH})){
+      if((dx>0&&oldX<q.x)||(dx<0&&oldX>q.x))p.x=oldX;
+    }
+  }
   const oldY=p.y;p.vy=Math.min(15,p.vy+.62);p.y+=p.vy;p.ground=false;
   for(const b of solids){if(p.x+PW<=b.x||p.x>=b.x+b.w)continue;const y=top(b,p);if(p.vy>=0&&oldY+PH<=y+8&&p.y+PH>=y){p.y=y-PH;p.vy=0;p.ground=true;}else if(!b.slope&&p.vy<0&&oldY>=b.y+b.h&&p.y<b.y+b.h){p.y=b.y+b.h;p.vy=0;}}
-  for(const q of ps){if(q===p||(room.key&&p.x>l.door[0]-120&&q.x>l.door[0]-120))continue;if(p.x+PW>q.x+3&&p.x<q.x+PW-3&&p.vy>=0&&oldY+PH<=q.y+8&&p.y+PH>=q.y){p.y=q.y-PH;p.vy=0;p.ground=true;}}
+  for(const q of ps){
+    if(q===p||(room.key&&p.x>l.door[0]-120&&q.x>l.door[0]-120))continue;
+    if(p.x+PW>q.x+3&&p.x<q.x+PW-3){
+      if(p.vy>=0&&oldY+PH<=q.y+8&&p.y+PH>=q.y){
+        p.y=q.y-PH;
+        p.vy=0;
+        p.ground=true;
+      }else if(q.vy<0&&Math.abs(oldY+PH-q.y)<=16){
+        p.y=q.y-PH;
+        p.vy=q.vy;
+        p.ground=true;
+      }
+    }
+  }
   for(const[x,y,w]of l.springs||[]){if(p.ground&&p.x+PW>x&&p.x<x+w&&Math.abs(p.y+PH-y)<5){p.vy=-16;p.ground=false;p.spin=28;}}
   for(const b of obs.pumpkins){
     if(overlap({x:p.x,y:p.y,w:PW,h:PH},b)){

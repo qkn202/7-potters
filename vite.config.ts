@@ -1,3 +1,4 @@
+import { resolve } from 'path'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
@@ -8,5 +9,12 @@ export default defineConfig({
   },
   build: {
     target: 'es2022',
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        online: resolve(__dirname, 'online.html'),
+        single: resolve(__dirname, 'single.html'),
+      },
+    },
   },
 })

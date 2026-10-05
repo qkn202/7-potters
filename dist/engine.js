@@ -70,7 +70,8 @@ function tick(room){if(room.status!=='playing')return;const l=levels[room.level]
  const anyGrounded=ps.some(p=>p.ground&&p.y<580);
  for(const p of [...ps].sort((a,b)=>b.y-a.y)){
   p.invincible=Math.max(0,p.invincible-1);p.spin=Math.max(0,p.spin-1);p.tossCooldown=Math.max(0,p.tossCooldown-1);
-  p.dangling=!p.ground&&p.y>545&&p.y<=H+20&&anyGrounded;
+  p.dangling=!p.ground&&p.y>545&&anyGrounded;
+  if(p.dangling){p.y=Math.min(H+50,p.y);if(p.y>=H+50)p.vy=Math.min(0,p.vy);}
   for(const moving of solids.filter(b=>b.moving)){const prevY=moving.baseY+Math.sin((room.ticks-1)/90+moving.x)*moving.amp;if(p.ground&&Math.abs(p.y+PH-prevY)<4&&p.x+PW>moving.x&&p.x<moving.x+moving.w)p.y+=moving.y-prevY;}
   const k=p.keys||{},dir=(k.right?1:0)-(k.left?1:0),icy=(l.iceZones||[]).some(([a,b])=>p.x>a&&p.x<b)&&p.y>480;
   if(dir)p.facing=dir;p.vx=icy?p.vx*.96+dir*.4:p.vx*.65+dir*1.65;p.vx=Math.max(-5.5,Math.min(5.5,p.vx));p.kickX=(p.kickX||0)*.9;
@@ -92,21 +93,21 @@ function tick(room){if(room.status!=='playing')return;const l=levels[room.level]
  }
  for(const q of ps){
   if(!q.ground||q.y>=580){q.hauling=false;continue;}
-  const neighbors=ps.filter(o=>o.dangling&&Math.abs(ps.indexOf(o)-ps.indexOf(q))===1);
-  if(neighbors.length>0){
-   const avgX=neighbors.reduce((s,o)=>s+o.x,0)/neighbors.length;
+  const danglingList=ps.filter(o=>o.dangling);
+  if(danglingList.length>0){
+   const avgX=danglingList.reduce((s,o)=>s+o.x,0)/danglingList.length;
    const pullDir=Math.sign(avgX-q.x);
    q.kickX=Math.max(-5,Math.min(5,(q.kickX||0)+pullDir*0.35));
    const pullingAway=(q.keys?.left&&pullDir>0)||(q.keys?.right&&pullDir<0)||q.keys?.jump;
    q.hauling=!!pullingAway;
    if(q.hauling){
     q.kickX*=0.6;
-    neighbors.forEach(o=>{o.vy=Math.min(o.vy,-7.5);o.y=Math.max(520,o.y-3.2);});
+    danglingList.forEach(o=>{o.vy=Math.min(o.vy,-7.5);o.y=Math.max(520,o.y-3.2);});
    }
   }else{q.hauling=false;}
  }
  constrainRopes(room,solids.filter(b=>!b.slope));
- if(ps.some(p=>p.y>H+20)){room.teamRespawn=32;room.deaths++;room.runDeaths++;ps.forEach(p=>{p.dead=32;p.keys={};p.kickX=0;p.vx=0;p.vy=0;p.dangling=false;p.hauling=false;});return;}
+ if(ps.every(p=>p.y>H+20)){room.teamRespawn=32;room.deaths++;room.runDeaths++;ps.forEach(p=>{p.dead=32;p.keys={};p.kickX=0;p.vx=0;p.vy=0;p.dangling=false;p.hauling=false;});return;}
  // A checkpoint advances only after the whole team reaches a safe stretch of floor.
  for(const x of l.checkpoints){if(x>room.checkpoint&&ps.every(p=>p.x>=x&&p.y<580)){room.checkpoint=x;room.checkpointsPassed++;}}
  ps.forEach(p=>p.ready=room.key&&p.x>l.door[0]-95&&p.y+PH>l.door[1]-15);

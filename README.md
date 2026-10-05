@@ -22,7 +22,7 @@
 
 ### 2. Cơ chế phối hợp & Vật lý hài hước
 - **Dây xích đàn hồi (Elastic Rope Tether):** Dây bắt đầu căng ở 185px và giãn tối đa 300px. Khi một người nhảy lên, lực căng dây có thể kéo bổng người bên dưới vượt chướng ngại vật.
-- **Treo lơ lửng & Kéo bạn qua vực (Chained Together Dangling & Hauling):** Khi một gia tinh trượt chân rớt mép vực, dây xích sẽ giữ bạn lơ lửng. Đồng đội đứng vững trên nền đất có thể ấn di chuyển ngược chiều hoặc nhảy để kéo bạn lên bờ vực an toàn.
+- **Treo lơ lửng & Kéo bạn qua vực (Chained Together Dangling & Hauling):** Khi 1 hoặc nhiều gia tinh trượt chân rớt xuống vực, cả đội **KHÔNG** bị chết! Dây xích sẽ giữ các bạn lơ lửng bên dưới bờ vực. Đồng đội đứng vững trên nền đất có thể ấn di chuyển ngược chiều hoặc nhảy để kéo bổng cả nhóm lên bờ vực an toàn. Chỉ khi **TẤT CẢ** thành viên trong đội cùng lọt xuống vực thì cả đội mới hồi sinh tại cờ checkpoint gần nhất.
 - **Chống kẹt gia tinh (Collision Unblock):** Khi nhiều người dồn lại ở mép vực hoặc trạm cờ, người di chuyển rời xa đồng đội được giải phóng ngay lập tức, không bị kẹt chùm.
 - **Ném đồng đội (Teammate Toss):** Ấn phím ném (`X` hoặc `/`) để phóng bổng người bạn gần nhất bay về phía trước vượt qua vực sâu.
 - **Địa hình ma thuật phong phú:**

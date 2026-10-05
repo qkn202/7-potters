@@ -9081,18 +9081,60 @@ private setupParallaxListeners() {
     // 0. Initialize Multiplayer Deck Builder in Lobby
     this.deckManager.renderLobbyUI()
 
-    // 1. Single Player Button & Card
+    // 0b. Mode Page Navigation Switcher (2 Distinct Pages: Chơi Đơn vs Đấu Online)
+    const navBtnSingle = document.getElementById('nav-btn-single')
+    const navBtnMulti = document.getElementById('nav-btn-multiplayer')
+    const pageSingle = document.getElementById('card-mode-single')
+    const pageMulti = document.getElementById('card-mode-multiplayer')
+
+    const setPage = (page: 'single' | 'multiplayer', syncUrl: boolean = true) => {
+      if (page === 'single') {
+        navBtnSingle?.classList.add('active')
+        navBtnSingle?.setAttribute('aria-selected', 'true')
+        navBtnMulti?.classList.remove('active')
+        navBtnMulti?.setAttribute('aria-selected', 'false')
+        pageSingle?.classList.remove('hidden-page')
+        pageSingle?.classList.add('active-page')
+        pageMulti?.classList.add('hidden-page')
+        pageMulti?.classList.remove('active-page')
+        if (syncUrl) {
+          const url = new URL(window.location.href)
+          url.searchParams.set('mode', 'single')
+          window.history.replaceState(null, '', url.toString())
+        }
+      } else {
+        navBtnMulti?.classList.add('active')
+        navBtnMulti?.setAttribute('aria-selected', 'true')
+        navBtnSingle?.classList.remove('active')
+        navBtnSingle?.setAttribute('aria-selected', 'false')
+        pageMulti?.classList.remove('hidden-page')
+        pageMulti?.classList.add('active-page')
+        pageSingle?.classList.add('hidden-page')
+        pageSingle?.classList.remove('active-page')
+        if (syncUrl) {
+          const url = new URL(window.location.href)
+          url.searchParams.set('mode', 'online')
+          window.history.replaceState(null, '', url.toString())
+        }
+      }
+    }
+
+    navBtnSingle?.addEventListener('click', () => {
+      this.audio.playClick()
+      setPage('single')
+    })
+
+    navBtnMulti?.addEventListener('click', () => {
+      this.audio.playClick()
+      setPage('multiplayer')
+    })
+
+    // 1. Single Player Button
     const startSingle = () => {
       this.audio.playClick()
       this.startSinglePlayerMatch()
     }
     document.getElementById('btn-play-single')?.addEventListener('click', startSingle)
-    document.getElementById('card-mode-single')?.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement
-      if (target.id !== 'btn-play-single' && !target.closest('.character-select-section')) {
-        startSingle()
-      }
-    })
 
     // 2. Multiplayer Tabs (Host vs Join)
     const tabHost = document.getElementById('tab-host-btn')
@@ -9245,9 +9287,16 @@ private setupParallaxListeners() {
       if (text) text.textContent = `GÓC MÁY: ${this.cameraMode.toUpperCase()}`
     })
 
-    // 8. Auto-connect if URL has ?room=...
+    // 8. Auto-switch page and auto-connect if URL has ?mode=online or ?room=...
     const urlParams = new URLSearchParams(window.location.search)
+    const modeParam = urlParams.get('mode')
     const roomParam = urlParams.get('room')
+    if (modeParam === 'online' || roomParam) {
+      setPage('multiplayer', false)
+    } else {
+      setPage('single', false)
+    }
+
     if (roomParam) {
       tabJoin?.click()
       const input = document.getElementById('input-join-code') as HTMLInputElement
@@ -9508,7 +9557,8 @@ private setupParallaxListeners() {
       clearInterval(this.intermissionTimer)
       this.intermissionTimer = null
     }
-    if (this.gameMode === 'multiplayer') {
+    const wasMultiplayer = this.gameMode === 'multiplayer'
+    if (wasMultiplayer) {
       this.network.disconnect()
     }
     this.gameMode = 'menu'
@@ -9519,6 +9569,11 @@ private setupParallaxListeners() {
     document.getElementById('end-match-modal')?.classList.add('hidden')
     document.getElementById('clash-hud')?.classList.add('hidden')
     document.getElementById('main-menu-overlay')?.classList.remove('hidden')
+    if (wasMultiplayer) {
+      document.getElementById('nav-btn-multiplayer')?.click()
+    } else {
+      document.getElementById('nav-btn-single')?.click()
+    }
     this.deckManager.renderLobbyUI()
     this.deckManager.renderDockForSinglePlayer((spellKey) => this.castPlayerSpell(spellKey, 95))
     this.renderGauntletLadderPreview()

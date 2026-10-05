@@ -1554,23 +1554,143 @@ html, body {
   letter-spacing: 0.6px;
 }
 
-/* 2-Column Mode Choice Cards */
-.menu-modes-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+/* Mode Page Switcher (2 Distinct Pages: Chơi Đơn vs Đấu Online) */
+.menu-page-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 4px 0 10px 0;
+  padding: 4px;
+  background: rgba(12, 17, 29, 0.88);
+  border: 1.5px solid rgba(245, 207, 115, 0.35);
+  border-radius: 40px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 10;
+}
+
+.nav-page-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 22px;
+  border-radius: 32px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.nav-btn-icon {
+  font-size: 16px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+.nav-btn-title {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #94a3b8;
+  transition: color 0.2s ease;
+}
+
+.nav-btn-badge {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  transition: all 0.2s ease;
+}
+
+.nav-page-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-page-btn:hover .nav-btn-title {
+  color: #f8fafc;
+}
+
+/* Active Single Player Tab */
+.nav-page-btn.active#nav-btn-single {
+  background: linear-gradient(135deg, rgba(245, 207, 115, 0.24), rgba(212, 175, 55, 0.10));
+  border-color: #f5cf73;
+  box-shadow: 0 0 22px rgba(245, 207, 115, 0.4), inset 0 0 10px rgba(245, 207, 115, 0.18);
+}
+.nav-page-btn.active#nav-btn-single .nav-btn-title {
+  color: #fffa65;
+  text-shadow: 0 0 12px rgba(245, 207, 115, 0.7);
+}
+.nav-page-btn.active#nav-btn-single .nav-btn-badge {
+  background: rgba(245, 207, 115, 0.22);
+  color: #ffeaa7;
+  border-color: rgba(245, 207, 115, 0.5);
+}
+
+/* Active Multiplayer Tab */
+.nav-page-btn.active#nav-btn-multiplayer {
+  background: linear-gradient(135deg, rgba(112, 161, 255, 0.28), rgba(70, 130, 240, 0.12));
+  border-color: #70a1ff;
+  box-shadow: 0 0 22px rgba(112, 161, 255, 0.45), inset 0 0 10px rgba(112, 161, 255, 0.18);
+}
+.nav-page-btn.active#nav-btn-multiplayer .nav-btn-title {
+  color: #80bfff;
+  text-shadow: 0 0 12px rgba(112, 161, 255, 0.7);
+}
+.nav-page-btn.active#nav-btn-multiplayer .nav-btn-badge {
+  background: rgba(112, 161, 255, 0.22);
+  color: #a4cafe;
+  border-color: rgba(112, 161, 255, 0.5);
+}
+
+/* 2 Separate Pages Viewport */
+.menu-pages-viewport {
   width: 100%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mode-page-view.hidden-page {
+  display: none !important;
+}
+
+.mode-page-view.active-page {
+  display: flex !important;
+  animation: pageFadeIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .mode-card {
   position: relative;
-  border-radius: 16px;
-  padding: 12px 14px;
+  border-radius: 18px;
+  padding: 14px 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .mode-card-glow {
@@ -2030,14 +2150,19 @@ html, body {
 
 .deck-pool-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 5px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
   width: 100%;
   box-sizing: border-box;
 }
 
-.deck-pool-grid .pool-spell-card:last-child:nth-child(odd) {
-  grid-column: span 2;
+@media (max-width: 640px) {
+  .deck-pool-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .deck-pool-grid .pool-spell-card:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
 }
 
 .pool-spell-card {

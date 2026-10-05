@@ -42,10 +42,24 @@
         <p class="menu-game-desc">CLB Đấu Đũa Phép · Học Viện Hogwarts · 3D WebGPU & Realtime P2P</p>
       </header>
 
-      <!-- 2 Game Mode Choice Cards -->
-      <div class="menu-modes-row">
-        <!-- MODE 1: SINGLE PLAYER (CAMPAIGN AI) -->
-        <div class="mode-card single-player-card" id="card-mode-single">
+      <!-- 2 SEPARATE PAGE SWITCHER TABS -->
+      <nav class="menu-page-nav" role="tablist" aria-label="Chọn chế độ chơi">
+        <button id="nav-btn-single" class="nav-page-btn active" role="tab" aria-selected="true" aria-controls="card-mode-single">
+          <span class="nav-btn-icon">⚔️</span>
+          <span class="nav-btn-title">CHƠI ĐƠN</span>
+          <span class="nav-btn-badge">CHIẾN DỊCH 5 ẢI</span>
+        </button>
+        <button id="nav-btn-multiplayer" class="nav-page-btn" role="tab" aria-selected="false" aria-controls="card-mode-multiplayer">
+          <span class="nav-btn-icon">🌐</span>
+          <span class="nav-btn-title">ĐẤU ONLINE</span>
+          <span class="nav-btn-badge">2 NGƯỜI P2P</span>
+        </button>
+      </nav>
+
+      <!-- 2 SEPARATE FULL-PAGE SCREENS -->
+      <div class="menu-pages-viewport">
+        <!-- PAGE 1: SINGLE PLAYER (CAMPAIGN AI) -->
+        <div class="mode-card single-player-card mode-page-view active-page" id="card-mode-single" role="tabpanel">
           <div class="mode-card-glow"></div>
           <div class="mode-card-header">
             <span class="mode-pill-tag tag-single">CHƠI ĐƠN · CHIẾN DỊCH</span>
@@ -129,8 +143,8 @@
           </button>
         </div>
 
-        <!-- MODE 2: MULTIPLAYER ONLINE (REALTIME P2P) -->
-        <div class="mode-card multiplayer-card" id="card-mode-multiplayer">
+        <!-- PAGE 2: MULTIPLAYER ONLINE (REALTIME P2P) -->
+        <div class="mode-card multiplayer-card mode-page-view hidden-page" id="card-mode-multiplayer" role="tabpanel">
           <div class="mode-card-glow multi-glow"></div>
           <div class="mode-card-header">
             <span class="mode-pill-tag tag-multi">TRỰC TUYẾN · 2 NGƯỜI CHƠI</span>

@@ -25,3 +25,4 @@ screenshot_*.png
 test_hud_*.png
 test_*.png
 .tempmediaStorage/
+.vercel

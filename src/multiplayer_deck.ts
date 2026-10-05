@@ -21,7 +21,7 @@ export const CANONICAL_SPELL_METAS: Record<string, SpellMeta> = {
     color: '#f5cf73',
     hotkeySingle: '1',
     desc: 'Tước đũa phép đối thủ (1.8s)',
-    svg: `<svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none"><path d="M12 5 L22 13 L10 17 L21 27" stroke="#f5cf73" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="5" r="1.6" fill="#ffffff"/><circle cx="21" cy="27" r="1.6" fill="#f5cf73"/></svg>`
+    svg: `<svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none"><path d="M22 7 C16 3, 9 6, 9 12 C9 19, 23 14, 23 21 C23 27, 16 29, 9 25" stroke="#f5cf73" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="22" cy="7" r="1.6" fill="#ffffff"/><circle cx="9" cy="25" r="1.6" fill="#f5cf73"/></svg>`
   },
   protego: {
     key: 'protego',
@@ -109,7 +109,7 @@ export const CANONICAL_SPELL_METAS: Record<string, SpellMeta> = {
     color: '#2ed573',
     hotkeySingle: '9',
     desc: 'Tử quang kết liễu tối thượng',
-    svg: `<svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none"><path d="M11 6 L21 12 L11 18 L21 26" stroke="#2ed573" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="6" r="1.8" fill="#ffffff"/><circle cx="21" cy="26" r="1.8" fill="#2ed573"/></svg>`
+    svg: `<svg class="dock-rune-svg" viewBox="0 0 32 32" fill="none"><path d="M16 5 C9.5 5, 6 9.5, 6 15.5 C6 19.5, 8.5 21.5, 11 22.5 L11 26.5 C11 27.5, 21 27.5, 21 26.5 L21 22.5 C23.5 21.5, 26 19.5, 26 15.5 C26 9.5, 22.5 5, 16 5 Z" stroke="#2ed573" stroke-width="2.2" stroke-linejoin="round" fill="rgba(46, 213, 115, 0.15)"/><circle cx="12" cy="14" r="2.2" fill="#2ed573"/><circle cx="20" cy="14" r="2.2" fill="#2ed573"/><path d="M16 18 L15 20 L17 20 Z" fill="#2ed573"/><line x1="14" y1="24.5" x2="14" y2="27" stroke="#2ed573" stroke-width="1.5" stroke-linecap="round"/><line x1="18" y1="24.5" x2="18" y2="27" stroke="#2ed573" stroke-width="1.5" stroke-linecap="round"/></svg>`
   }
 }
 

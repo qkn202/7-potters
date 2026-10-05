@@ -686,7 +686,7 @@ const SPELL_DECK: Record<string, SpellGesture> = {
   expelliarmus: {
     name: 'expelliarmus',
     displayName: 'EXPELLIARMUS!',
-    symbol: '⚡',
+    symbol: '➰',
     damage: SPELL_DAMAGE.EXPELLIARMUS,
     manaCost: SPELL_MANA.EXPELLIARMUS,
     cooldown: SPELL_COOLDOWN.EXPELLIARMUS,
@@ -791,17 +791,20 @@ export const SPELL_RUNE_TEMPLATES: Record<string, SpellRuneTemplate> = {
   expelliarmus: {
     name: 'expelliarmus',
     displayName: 'EXPELLIARMUS!',
-    symbol: '⚡',
+    symbol: '➰',
     colorHex: '#f5cf73',
     keyName: '[1]',
-    instruction: 'Ấn Tia Sét: Zigzag 2 góc gập dứt khoát',
+    instruction: 'Ấn Chữ S Uốn Lượn: Vung đũa hình chữ S mềm mại (S)',
     points: [
-      { x: -0.22, y: -0.42 },
-      { x: 0.28, y: -0.06 },
-      { x: -0.18, y: 0.04 },
-      { x: 0.32, y: 0.44 }
+      { x: 0.18, y: -0.42 },
+      { x: -0.18, y: -0.36 },
+      { x: -0.22, y: -0.18 },
+      { x: 0.00, y: 0.00 },
+      { x: 0.22, y: 0.18 },
+      { x: 0.18, y: 0.36 },
+      { x: -0.18, y: 0.42 }
     ],
-    svgRune: `<svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none"><path d="M12 5 L22 13 L10 17 L21 27" stroke="#f5cf73" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="5" r="1.6" fill="#ffffff"/><circle cx="21" cy="27" r="1.6" fill="#f5cf73"/></svg>`,
+    svgRune: `<svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none"><path d="M22 7 C16 3, 9 6, 9 12 C9 19, 23 14, 23 21 C23 27, 16 29, 9 25" stroke="#f5cf73" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="22" cy="7" r="1.6" fill="#ffffff"/><circle cx="9" cy="25" r="1.6" fill="#f5cf73"/></svg>`,
   },
   protego: {
     name: 'protego',
@@ -841,15 +844,15 @@ export const SPELL_RUNE_TEMPLATES: Record<string, SpellRuneTemplate> = {
     symbol: '💀',
     colorHex: '#2ed573',
     keyName: '[9/K]',
-    instruction: 'Ấn Chết Chóc: Tia sét nhọn sắc 3 góc gập',
+    instruction: 'Ấn Tử Thần: Đầu lâu & tia chớp tử quang sắc nhọn (💀)',
     points: [
-      { x: -0.20, y: -0.44 },
-      { x: 0.28, y: -0.22 },
-      { x: -0.24, y: 0.02 },
-      { x: 0.22, y: 0.22 },
-      { x: -0.12, y: 0.46 }
+      { x: -0.18, y: -0.44 },
+      { x: 0.24, y: -0.22 },
+      { x: -0.22, y: 0.00 },
+      { x: 0.20, y: 0.22 },
+      { x: -0.10, y: 0.46 }
     ],
-    svgRune: `<svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none"><path d="M11 5 L22 11 L9 17 L23 22 L11 27" stroke="#2ed573" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="5" r="1.6" fill="#ffffff"/><circle cx="11" cy="27" r="1.6" fill="#2ed573"/></svg>`,
+    svgRune: `<svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none"><path d="M16 5 C9.5 5, 6 9.5, 6 15.5 C6 19.5, 8.5 21.5, 11 22.5 L11 26.5 C11 27.5, 21 27.5, 21 26.5 L21 22.5 C23.5 21.5, 26 19.5, 26 15.5 C26 9.5, 22.5 5, 16 5 Z" stroke="#2ed573" stroke-width="2.2" stroke-linejoin="round" fill="rgba(46, 213, 115, 0.15)"/><circle cx="12" cy="14" r="2.2" fill="#2ed573"/><circle cx="20" cy="14" r="2.2" fill="#2ed573"/><path d="M16 18 L15 20 L17 20 Z" fill="#2ed573"/><line x1="14" y1="24.5" x2="14" y2="27" stroke="#2ed573" stroke-width="1.5" stroke-linecap="round"/><line x1="18" y1="24.5" x2="18" y2="27" stroke="#2ed573" stroke-width="1.5" stroke-linecap="round"/></svg>`,
   },
   obliviate: {
     name: 'obliviate',
@@ -8483,20 +8486,27 @@ private setupParallaxListeners() {
 
     switch (targetSpell) {
       case 'expelliarmus': {
-        // ⚡ Lightning: 2-3 xTurns, open stroke, substantial height
-        if (a.isClosed) return { match: false, reason: 'Expelliarmus không khép kín, hãy vẽ hình tia sét ⚡' }
-        if (a.xTurns >= 2 && a.xTurns <= 3 && a.height > 35) {
-          const accuracy = Math.min(100, 85 + (a.xTurns === 2 ? 12 : 6))
+        // ➰ S-Curve / Disarming Flourish: open stroke, top-to-bottom flow with curve turns
+        if (a.isClosed) return { match: false, reason: 'Expelliarmus không khép kín, hãy vẽ hình chữ S uốn lượn ➰' }
+        const startsTop = a.start.y < a.minY + a.height * 0.50
+        const endsBottom = a.end.y > a.minY + a.height * 0.50
+        const hasCurves = (a.xTurns >= 1 || a.yTurns >= 1) && a.height > 35
+        if (startsTop && endsBottom && hasCurves) {
+          const accuracy = Math.min(100, 88 + (a.xTurns + a.yTurns) * 3)
           return { match: true, spell: 'expelliarmus', accuracy }
         }
-        return { match: false, reason: 'Cần vẽ tia sét zic-zắc 2 lần đổi chiều ⚡' }
+        // Fallback for legacy 2-turn stroke
+        if (a.xTurns >= 2 && a.height > 35) {
+          return { match: true, spell: 'expelliarmus', accuracy: 88 }
+        }
+        return { match: false, reason: 'Cần vẽ nét chữ S uốn lượn từ trên xuống để tước đũa ➰' }
       }
 
       case 'avadakedavra': {
         // 💀 Death curse: 3+ sharp jagged turns, aggressive
         if (a.isClosed) return { match: false, reason: 'Avada Kedavra không khép kín, hãy vẽ tia sét tử thần 💀' }
-        if ((a.xTurns >= 3 || (a.xTurns >= 2 && a.yTurns >= 2)) && a.height > 55) {
-          const accuracy = Math.min(100, 88 + a.xTurns * 3)
+        if ((a.xTurns >= 3 || (a.xTurns >= 2 && a.yTurns >= 2)) && a.height > 50) {
+          const accuracy = Math.min(100, 90 + a.xTurns * 3)
           return { match: true, spell: 'avadakedavra', accuracy }
         }
         return { match: false, reason: 'Cần vẽ tia chớp nhọn sắc 3 lần đổi chiều trở lên 💀' }
@@ -8690,9 +8700,9 @@ private setupParallaxListeners() {
     const iconEl = document.getElementById('prompt-spell-icon')
     if (iconEl) {
       iconEl.innerHTML = `<svg class="spell-rune-icon" viewBox="0 0 32 32" fill="none">
-        <path d="M12 5 L22 13 L10 17 L21 27" stroke="#f5cf73" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="12" cy="5" r="1.6" fill="#ffffff"/>
-        <circle cx="21" cy="27" r="1.6" fill="#f5cf73"/>
+        <path d="M22 7 C16 3, 9 6, 9 12 C9 19, 23 14, 23 21 C23 27, 16 29, 9 25" stroke="#f5cf73" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="22" cy="7" r="1.6" fill="#ffffff"/>
+        <circle cx="9" cy="25" r="1.6" fill="#f5cf73"/>
       </svg>`
     }
     const titleEl = document.getElementById('prompt-spell-name')
@@ -8703,7 +8713,7 @@ private setupParallaxListeners() {
     }
     const descEl = document.getElementById('prompt-gesture-instruction')
     if (descEl) {
-      descEl.textContent = 'Vẽ theo ký hiệu: ⚡ Sét · 🛡️ Vòm · 💫 Sóng · 🩸 Chém · 🔒 Đâm · 💥 Tam giác · 🌀 Vòng · 💀 Avada'
+      descEl.textContent = 'Vẽ theo ký hiệu: ➰ Chữ S · 🛡️ Vòm · 💫 Sóng · 🩸 Chém · 🔒 Đâm · 💥 Tam giác · 🌀 Vòng · 💀 Đầu lâu'
     }
     const manaEl = document.getElementById('prompt-spell-mana')
     if (manaEl) {

@@ -33,8 +33,8 @@ export interface OpenRoomInfo {
 export type NetworkEventHandler = (msg: NetworkMessage) => void
 
 // Shared Supabase project credentials (matching 7-Potters & Undercover Hogwarts)
-const SUPABASE_URL = 'https://fxucyrofcsuqtlkukcrx.supabase.co'
-const SUPABASE_ANON_KEY = 'sb_publishable_zEiG2Py5kDmGhkTgw0uWIA_We0rOCGu'
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://fxucyrofcsuqtlkukcrx.supabase.co'
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_zEiG2Py5kDmGhkTgw0uWIA_We0rOCGu'
 
 export class DuelNetwork {
   public isHost: boolean = false

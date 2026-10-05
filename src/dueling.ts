@@ -40,6 +40,15 @@ import {
 } from './vfx_spells'
 
 // --- Web Audio Synthesizer (Zero asset dependencies) ---
+// Helper function for Three.js texture color space compatibility
+function setTextureColorSpace(tex: THREE.CanvasTexture) {
+  if ('colorSpace' in tex) {
+    tex.colorSpace = THREE.SRGBColorSpace
+  } else if ('encoding' in tex) {
+    ;(tex as any).encoding = 3001
+  }
+}
+
 class MagicAudio {
   private ctx: AudioContext | null = null
   public isMuted = false
@@ -64,7 +73,7 @@ class MagicAudio {
       gain.connect(ctx.destination)
       osc.start()
       osc.stop(ctx.currentTime + 0.06)
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
   }
 
   private getContext(): AudioContext {
@@ -93,7 +102,7 @@ class MagicAudio {
       gain.connect(ctx.destination)
       osc.start()
       osc.stop(ctx.currentTime + 0.09)
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
   }
 
   playArmedSelect() {
@@ -113,7 +122,7 @@ class MagicAudio {
         osc.start(now + i * 0.035)
         osc.stop(now + i * 0.035 + 0.35)
       })
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
   }
 
   playDrawFizzle() {
@@ -131,7 +140,7 @@ class MagicAudio {
       gain.connect(ctx.destination)
       osc.start(now)
       osc.stop(now + 0.30)
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
   }
 
   playSpellCast(type: string) {
@@ -364,7 +373,7 @@ class MagicAudio {
         noiseGain.connect(ctx.destination)
         noise.start(now)
       }
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
   }
 
   playImpactBoom(_colorHex: number = 0xffffff, type: string = 'generic') {
@@ -426,7 +435,7 @@ class MagicAudio {
       filter.connect(noiseGain)
       noiseGain.connect(ctx.destination)
       noise.start(now)
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
   }
 
   playHitSound() {
@@ -448,7 +457,7 @@ class MagicAudio {
       gain.connect(ctx.destination)
       osc.start(now)
       osc.stop(now + 0.46)
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
   }
 
   playClashPulse() {
@@ -466,7 +475,7 @@ class MagicAudio {
       gain.connect(ctx.destination)
       osc.start(now)
       osc.stop(now + 0.23)
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
   }
 
   playFanfare() {
@@ -486,7 +495,7 @@ class MagicAudio {
         osc.start(now + idx * 0.12)
         osc.stop(now + idx * 0.12 + 0.45)
       })
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
   }
 
   playManaEmpty() {
@@ -504,7 +513,7 @@ class MagicAudio {
       gain.connect(ctx.destination)
       osc.start(now)
       osc.stop(now + 0.28)
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
   }
 
   playManaSurge() {
@@ -522,7 +531,39 @@ class MagicAudio {
       gain.connect(ctx.destination)
       osc.start(now)
       osc.stop(now + 0.34)
-    } catch { /* silent */ }
+    } catch (err) { console.warn('[MagicAudio] Error:', err) }
+  }
+
+  /**
+   * Clean up AudioContext to prevent memory leaks
+   */
+
+  /**
+   * Recursively dispose all geometries and materials in a THREE.Group
+   * to prevent memory leaks when swapping character models
+   */
+  private disposeGroup(group: THREE.Group | null) {
+    if (!group) return
+    group.traverse((obj) => {
+      if ((obj as THREE.Mesh).geometry) {
+        (obj as THREE.Mesh).geometry.dispose()
+      }
+      if ((obj as THREE.Mesh).material) {
+        const mat = (obj as THREE.Mesh).material
+        if (Array.isArray(mat)) {
+          mat.forEach(m => m.dispose())
+        } else {
+          mat.dispose()
+        }
+      }
+    })
+  }
+
+  public dispose() {
+    if (this.ctx) {
+      this.ctx.close().catch(() => {/* ignore close errors */})
+      this.ctx = null
+    }
   }
 }
 
@@ -1149,6 +1190,7 @@ class HogwartsSinglePlayerGame {
   private sparkPositions!: Float32Array
   private sparkVelocities!: Float32Array
   private candles: THREE.Group[] = []
+  private static readonly MAX_DISARMED_WANDS = 10  // Max disarmed wands to prevent unbounded growth
   private disarmedWands: Array<{ mesh: THREE.Object3D; vel: THREE.Vector3; rotVel: THREE.Vector3; life: number }> = []
 
   // Dynamic 3D Defense & Projectiles
@@ -2726,6 +2768,7 @@ class HogwartsSinglePlayerGame {
         if (this.opponentCharGLB && this.opponentGroup) {
           if (this.opponentLight && this.voldemortWandTip) this.voldemortWandTip.remove(this.opponentLight)
           if (this.dracoAuraSprite && this.voldemortWandTip) this.voldemortWandTip.remove(this.dracoAuraSprite)
+          this.disposeGroup(this.opponentCharGLB)
           this.opponentGroup.remove(this.opponentCharGLB)
         }
         this.opponentCharGLB = model
@@ -2747,6 +2790,7 @@ class HogwartsSinglePlayerGame {
         if (this.playerCharGLB && this.playerGroup) {
           if (this.wandLight && this.playerWandTip) this.playerWandTip.remove(this.wandLight)
           if (this.wandMuzzleSprite && this.playerWandTip) this.playerWandTip.remove(this.wandMuzzleSprite)
+          this.disposeGroup(this.playerCharGLB)
           this.playerGroup.remove(this.playerCharGLB)
         }
         this.playerCharGLB = model
@@ -3589,6 +3633,16 @@ class HogwartsSinglePlayerGame {
     this.scene.add(wandGroup)
 
     const dirZ = isOpponent ? 1.8 : -1.8
+    
+    // Cap disarmed wands to prevent unbounded array growth
+    if (this.disarmedWands.length >= HogwartsSinglePlayerGame.MAX_DISARMED_WANDS) {
+      const oldest = this.disarmedWands.shift()
+      if (oldest) {
+        this.scene.remove(oldest.mesh)
+        this.disposeGroup(oldest.mesh as THREE.Group)
+      }
+    }
+    
     this.disarmedWands.push({
       mesh: wandGroup,
       vel: new THREE.Vector3((Math.random() - 0.5) * 1.5, 5.4, dirZ),
@@ -6800,7 +6854,7 @@ class HogwartsSinglePlayerGame {
     this.showCombatNumber(`-${manaCost} MP`, window.innerWidth * 0.35, window.innerHeight * 0.48, 'mana')
     this.updateHpBars()
 
-    if (this.gameMode === 'multiplayer') {
+    if (this.gameMode === 'multiplayer' && this.network?.isConnected) {
       this.network.send({ type: 'cast', payload: { spell: spell.name, accuracy } })
     }
 
@@ -6809,7 +6863,7 @@ class HogwartsSinglePlayerGame {
       this.audio.playSpellCast('protego')
       this.playerShieldActiveUntil = (this.clock?.getElapsedTime() ?? 0) + 1.8
       this.showToast('PROTEGO ACTIVATED!', 'Khiên bảo vệ đã dựng! Sẵn sàng hóa giải đòn đánh')
-      if (this.gameMode === 'multiplayer') {
+      if (this.network?.isConnected) {
         this.network.send({ type: 'shield', payload: { activeUntil: this.playerShieldActiveUntil } })
       }
       return
@@ -6965,7 +7019,8 @@ class HogwartsSinglePlayerGame {
       const telegraphElem = document.getElementById('enemy-telegraph')
       if (telegraphElem) {
         telegraphElem.classList.remove('hidden')
-        document.getElementById('enemy-cast-text')!.textContent = `${opp.name} ĐANG NIỆM: ${this.enemyCurrentCast.displayName}!`
+        const enemyCastText = document.getElementById('enemy-cast-text')
+      if (enemyCastText) enemyCastText.textContent = `${opp.name} ĐANG NIỆM: ${this.enemyCurrentCast.displayName}!`
       }
     }
 
@@ -7921,8 +7976,8 @@ class HogwartsSinglePlayerGame {
       marker.style.left = `${this.clashProgress * 100}%`
     }
 
-    if (this.gameMode === 'multiplayer') {
-      this.network.send({ type: 'clash_mash', payload: { progress: this.clashProgress } })
+    if (this.network?.isConnected) {
+        this.network.send({ type: 'clash_mash', payload: { progress: this.clashProgress } })
     }
 
     // Player Wins Clash
@@ -7988,25 +8043,33 @@ class HogwartsSinglePlayerGame {
   private showToast(title: string, sub: string) {
     const toast = document.getElementById('gesture-toast')
     if (!toast) return
-    document.getElementById('toast-title')!.textContent = title
-    document.getElementById('toast-sub')!.textContent = sub
-    toast.classList.remove('hidden')
-    toast.style.animation = 'none'
-    void toast.offsetWidth
-    toast.style.animation = 'pulseGlow 1.8s infinite alternate ease-in-out'
-    setTimeout(() => toast.classList.add('hidden'), 2600)
+    const toastTitle = document.getElementById('toast-title')
+    const toastSub = document.getElementById('toast-sub')
+    if (toastTitle) toastTitle.textContent = title
+    if (toastSub) toastSub.textContent = sub
+    if (toast) {
+      toast.classList.remove('hidden')
+      toast.style.animation = 'none'
+      void toast.offsetWidth
+      toast.style.animation = 'pulseGlow 1.8s infinite alternate ease-in-out'
+      setTimeout(() => toast.classList.add('hidden'), 2600)
+    }
   }
 
   private showMatchBanner(title: string, sub: string) {
     const banner = document.getElementById('match-banner')
     if (!banner) return
-    document.getElementById('banner-title')!.textContent = title
-    document.getElementById('banner-sub')!.textContent = sub
-    banner.classList.remove('hidden')
-    banner.style.animation = 'none'
-    void banner.offsetWidth
-    banner.style.animation = 'bannerFade 3s ease-in-out forwards'
-    setTimeout(() => banner.classList.add('hidden'), 3100)
+    const bannerTitle = document.getElementById('banner-title')
+    const bannerSub = document.getElementById('banner-sub')
+    if (bannerTitle) bannerTitle.textContent = title
+    if (bannerSub) bannerSub.textContent = sub
+    if (banner) {
+      banner.classList.remove('hidden')
+      banner.style.animation = 'none'
+      void banner.offsetWidth
+      banner.style.animation = 'bannerFade 3s ease-in-out forwards'
+      setTimeout(() => banner.classList.add('hidden'), 3100)
+    }
   }
 
   private updateHpBars() {
@@ -8084,9 +8147,9 @@ class HogwartsSinglePlayerGame {
       }
     }
 
-    if (this.gameMode === 'multiplayer' && this.isHost) {
-      this.network.send({
-        type: 'damage_sync',
+    if (this.network?.isConnected && this.isHost) {
+        this.network.send({
+          type: 'damage_sync',
         payload: {
           playerHp: this.playerHp,
           enemyHp: this.enemyHp,
@@ -8107,13 +8170,13 @@ class HogwartsSinglePlayerGame {
     if (this.gameMode === 'multiplayer') {
       if (victory) {
         this.audio.playFanfare()
-        crest!.textContent = '🏆'
-        title!.textContent = 'CHIẾN THẮNG ONLINE!'
-        desc!.textContent = 'Bạn đã hạ gục đối thủ trong trận đấu tay đôi trực tuyến!'
+        if (crest) crest.textContent = '🏆'
+        if (title) title.textContent = 'CHIẾN THẮNG ONLINE!'
+        if (desc) desc.textContent = 'Bạn đã hạ gục đối thủ trong trận đấu tay đôi trực tuyến!'
       } else {
-        crest!.textContent = '💀'
-        title!.textContent = 'THẤT BẠI TRONG ĐẤU TRƯỜNG!'
-        desc!.textContent = 'Đối thủ đã giành chiến thắng trong trận đấu này!'
+        if (crest) crest.textContent = '💀'
+        if (title) title.textContent = 'THẤT BẠI TRONG ĐẤU TRƯỜNG!'
+        if (desc) desc.textContent = 'Đối thủ đã giành chiến thắng trong trận đấu này!'
       }
       const restartGauntletBtn = document.getElementById('btn-restart-gauntlet')
       if (restartGauntletBtn) restartGauntletBtn.classList.add('hidden')
@@ -8133,9 +8196,9 @@ class HogwartsSinglePlayerGame {
         } else {
           // Round 5: Grand Champion Victory!
           this.audio.playFanfare()
-          crest!.textContent = '👑'
-          title!.textContent = 'QUÁN QUÂN HOGWARTS TỐI THƯỢNG!'
-          desc!.textContent = `Xuất sắc! Bạn đã vượt qua toàn bộ 5 Ải ma thuật, đánh bại ${this.gauntletRoster.map(e => e.char.name.split(' ')[0]).join(', ')} và vinh danh Đệ Nhất Đấu Thủ Hogwarts!`
+          if (crest) crest.textContent = '👑'
+          if (title) title.textContent = 'QUÁN QUÂN HOGWARTS TỐI THƯỢNG!'
+          if (desc) desc.textContent = `Xuất sắc! Bạn đã vượt qua toàn bộ 5 Ải ma thuật, đánh bại ${this.gauntletRoster.map(e => e.char.name.split(' ')[0]).join(', ')} và vinh danh Đệ Nhất Đấu Thủ Hogwarts!`
           const restartBtn = document.getElementById('restart-match-btn')
           if (restartBtn) restartBtn.textContent = '🔄 CHINH PHỤC LẠI (5 ẢI MỚI)'
           const restartGauntletBtn = document.getElementById('btn-restart-gauntlet')
@@ -8143,10 +8206,10 @@ class HogwartsSinglePlayerGame {
         }
       } else {
         // Player defeated at current round
-        crest!.textContent = '💀'
+        if (crest) crest.textContent = '💀'
         const tierName = currentEntry ? currentEntry.tier.tierName : 'ải đấu'
-        title!.textContent = `THẤT BẠI TẠI ẢI ${this.currentRoundIndex + 1}/5!`
-        desc!.textContent = `Bạn đã trúng bùa chú của ${oppName} (${tierName}). Lời khuyên: ${currentEntry?.tier.advice || 'Hãy luyện tập thêm các bùa phản đòn!'}`
+        if (title) title.textContent = `THẤT BẠI TẠI ẢI ${this.currentRoundIndex + 1}/5!`
+        if (desc) desc.textContent = `Bạn đã trúng bùa chú của ${oppName} (${tierName}). Lời khuyên: ${currentEntry?.tier.advice || 'Hãy luyện tập thêm các bùa phản đòn!'}`
         const restartBtn = document.getElementById('restart-match-btn')
         if (restartBtn) restartBtn.textContent = `⚔️ ĐẤU LẠI ẢI ${this.currentRoundIndex + 1}`
         const restartGauntletBtn = document.getElementById('btn-restart-gauntlet')
@@ -8154,9 +8217,12 @@ class HogwartsSinglePlayerGame {
       }
     }
 
-    document.getElementById('stat-time')!.textContent = `${120 - this.matchTimer}s`
-    document.getElementById('stat-perfect')!.textContent = `${this.perfectCount}`
-    document.getElementById('stat-clash')!.textContent = `${this.clashesWon}`
+    const statTime = document.getElementById('stat-time')
+    const statPerfect = document.getElementById('stat-perfect')
+    const statClash = document.getElementById('stat-clash')
+    if (statTime) statTime.textContent = `${120 - this.matchTimer}s`
+    if (statPerfect) statPerfect.textContent = `${this.perfectCount}`
+    if (statClash) statClash.textContent = `${this.clashesWon}`
 
     modal?.classList.remove('hidden')
   }
@@ -9396,10 +9462,12 @@ private setupParallaxListeners() {
       hintText.innerHTML = '<strong>A/D</strong>: Né · <strong>S/Space</strong>: Cúi · Vẽ ký hiệu hoặc phím <strong>[1-4]</strong> (4 bùa đã chọn) · Bấm <strong>📖 Pháp Điển [G]</strong>'
     }
     this.resetMatch()
-    this.network.send({
-      type: 'loadout',
-      payload: { spells: this.selectedMultiplayerSpells }
-    })
+    if (this.network?.isConnected) {
+      this.network.send({
+        type: 'loadout',
+        payload: { spells: this.selectedMultiplayerSpells }
+      })
+    }
     this.showMatchBanner('TRẬN ĐẤU TRỰC TUYẾN!', `Phòng: ${roomCode} · Sẵn sàng thi thố!`)
   }
 
@@ -9525,8 +9593,8 @@ private setupParallaxListeners() {
     const clock = document.getElementById('duel-clock')
     if (clock) clock.textContent = '02:00'
 
-    if (this.gameMode === 'multiplayer') {
-      this.network.send({ type: 'rematch' })
+    if (this.network?.isConnected) {
+        this.network.send({ type: 'rematch' })
     }
 
     // Clean up any lingering projectiles
@@ -10124,6 +10192,7 @@ private setupParallaxListeners() {
       }
       if (w.life <= 0) {
         this.scene.remove(w.mesh)
+        this.disposeGroup(w.mesh as THREE.Group)
         this.disarmedWands.splice(i, 1)
       }
     }
@@ -10215,6 +10284,137 @@ private setupParallaxListeners() {
       this.renderer.render(this.scene, this.camera)
     }
   }
+
+  /**
+   * Clean up all resources - call when destroying the game instance
+   * Prevents memory leaks from textures, geometries, materials, and event listeners
+   */
+
+  /**
+   * Recursively dispose all geometries and materials in a THREE.Group
+   * to prevent memory leaks when swapping character models
+   */
+  private disposeGroup(group: THREE.Group | null) {
+    if (!group) return
+    group.traverse((obj) => {
+      if ((obj as THREE.Mesh).geometry) {
+        (obj as THREE.Mesh).geometry.dispose()
+      }
+      if ((obj as THREE.Mesh).material) {
+        const mat = (obj as THREE.Mesh).material
+        if (Array.isArray(mat)) {
+          mat.forEach(m => m.dispose())
+        } else {
+          mat.dispose()
+        }
+      }
+    })
+  }
+
+  public dispose() {
+    // Stop all timers
+    if (this.intermissionTimer) {
+      clearInterval(this.intermissionTimer)
+      this.intermissionTimer = null
+    }
+
+    // Dispose renderer and composer
+    if (this.composer) {
+      this.composer.dispose()
+    }
+    if (this.renderer) {
+      this.renderer.dispose()
+    }
+
+    // Dispose VFX textures
+    if (this.vfxTextures) {
+      const vfxTex = this.vfxTextures as any
+      const disposeTexture = (tex: THREE.Texture | undefined) => {
+        if (tex) {
+          tex.dispose()
+        }
+      }
+      disposeTexture(vfxTex.spark)
+      disposeTexture(vfxTex.corona)
+      disposeTexture(vfxTex.shockwave)
+      disposeTexture(vfxTex.shieldHex)
+      disposeTexture(vfxTex.explosion)
+      disposeTexture(vfxTex.beamTrail)
+      disposeTexture(vfxTex.laserBeam)
+      disposeTexture(vfxTex.flame)
+      disposeTexture(vfxTex.fireSpiral)
+      disposeTexture(vfxTex.smokePuff)
+      disposeTexture(vfxTex.anamorphicFlare)
+      disposeTexture(vfxTex.shieldRippleTarget)
+      disposeTexture(vfxTex.runeCircle)
+      disposeTexture(vfxTex.runeCircleInner)
+      disposeTexture(vfxTex.scorchDecal)
+      disposeTexture(vfxTex.celestialStar)
+      disposeTexture(vfxTex.skullMist)
+      disposeTexture(vfxTex.emeraldStarburst)
+      disposeTexture(vfxTex.darkSmoke)
+    }
+
+    // Dispose VFX8 textures
+    if (this.vfx8Textures) {
+      const vfx8 = this.vfx8Textures as any
+      Object.values(vfx8).forEach((tex: any) => {
+        if (tex && tex.dispose) {
+          tex.dispose()
+        }
+      })
+    }
+
+    // Dispose scene objects
+    if (this.scene) {
+      this.scene.traverse((obj) => {
+        if ((obj as THREE.Mesh).geometry) {
+          (obj as THREE.Mesh).geometry.dispose()
+        }
+        if ((obj as THREE.Mesh).material) {
+          const mat = (obj as THREE.Mesh).material
+          if (Array.isArray(mat)) {
+            mat.forEach(m => m.dispose())
+          } else {
+            mat.dispose()
+          }
+        }
+      })
+      // Clear the scene
+      while (this.scene.children.length > 0) {
+        this.scene.remove(this.scene.children[0])
+      }
+    }
+
+    // Remove event listeners
+    window.removeEventListener('keydown', this.handleKeyDown)
+    window.removeEventListener('keyup', this.handleKeyUp)
+    window.removeEventListener('mousemove', this.handleMouseMove)
+    window.removeEventListener('resize', this.handleResize)
+    window.removeEventListener('mouseup', this.handleMouseUp)
+    window.removeEventListener('touchend', this.handleTouchEnd)
+
+    // Disconnect network
+    if (this.network) {
+      this.network.disconnect()
+    }
+
+    // Dispose audio context
+    if (this.audio) {
+      this.audio.dispose()
+    }
+
+    console.log('[HogwartsDuel] All resources disposed')
+  }
+
+  // Placeholder references for event handlers (set in constructor)
+  private handleKeyDown: ((e: KeyboardEvent) => void) | null = null
+  private handleKeyUp: ((e: KeyboardEvent) => void) | null = null
+  private handleMouseMove: ((e: MouseEvent) => void) | null = null
+  private handleResize: (() => void) | null = null
+  private handleMouseUp: (() => void) | null = null
+  private handleTouchEnd: (() => void) | null = null
+
 }
 
 // Instantiate on DOM load
